@@ -2,6 +2,11 @@
   "name": "admin",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
+  "cli": {
+    "cache": {
+      "enabled": false
+    }
+  },
   "sourceRoot": "apps/admin/src",
   "prefix": "app",
   "generators": {
@@ -30,6 +35,11 @@
       },
       "configurations": {
         "production": {
+          "optimization": {
+            "fonts": {
+              "inline": false
+            }
+          },
           "budgets": [
             {
               "type": "initial",

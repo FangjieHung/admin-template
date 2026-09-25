@@ -2,6 +2,11 @@
   "name": "pos",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
+  "cli": {
+    "cache": {
+      "enabled": false
+    }
+  },
   "prefix": "app",
   "sourceRoot": "apps/pos/src",
   "tags": [],

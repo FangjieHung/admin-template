@@ -2,6 +2,11 @@
   "name": "affiliate",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
+  "cli": {
+    "cache": {
+      "enabled": false
+    }
+  },
   "prefix": "app",
   "sourceRoot": "apps/affiliate/src",
   "tags": [],
@@ -26,6 +31,11 @@
       },
       "configurations": {
         "production": {
+          "optimization": {
+            "fonts": {
+              "inline": false
+            }
+          },
           "budgets": [
             {
               "type": "initial",
