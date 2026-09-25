@@ -177,7 +177,7 @@ For more information on using the Angular CLI, including detailed command refere
 
 ## 雙軸主題系統
 
-本專案採用**質地（Paradigm）× 配色（Color-theme）**的兩軸主題架構。質地管造型（圓角、陰影、字體），配色管顏色。一套配色可搭配不同質地；同一質地可套用不同配色。目前提供 Material 質地與 Verdant / Midnight 兩套配色。
+本專案採用**質地（Paradigm）× 配色（Color-theme）**的兩軸主題架構。質地管造型（圓角、陰影、字體、背景紋理與元件密度），配色管顏色。一套配色可搭配不同質地；同一質地可套用不同配色。目前提供 Material、Linen、Grid、Soft UI、Clay、Editorial、Frosted 七種質地與 Verdant、Midnight、Sandstone、Azure、Cool Grey、Candy、Mist Ink、Glacier Blue 八套配色，Admin 設定頁可自由組合，共 56 種。Soft UI 以雙向陰影呈現浮雕，Clay 以四層陰影和環境光暈呈現立體軟陶，Editorial 以白色工作區、細邊線及炭黑重點呈現極簡風格，Frosted 則以霧面半透明面板、柔和邊緣光和上方環境光暈呈現金融儀表板風格；質地陰影會適應明暗配色。
 
 可用的 token 與 `ui-` class 契約見 `libs/theme-pack/src/lib/styles/CONTRACT.md`。
 
@@ -258,7 +258,7 @@ For more information on using the Angular CLI, including detailed command refere
 
 2. **依契約重寫 recipe**
    - 參考 `libs/theme-pack/src/lib/styles/CONTRACT.md` 的 class 名單
-   - 在各 recipe 檔中（`buttons.scss`、`card.scss`、`table.scss` 等）重新設計樣式
+   - 在 recipe 檔中重新設計樣式；可以依元件拆成 `buttons.scss`、`card.scss` 等，也可以合併在 `recipes.scss`
    - 可自由使用 CSS（包括 `backdrop-filter`、`inset` 陰影等），但顏色一定要綁 token
    - 新增或修改 `_tokens.scss` 裡的造型 token（圓角、陰影、字體等）
 

@@ -1,0 +1,33 @@
+// 質地軸只定義材質、形狀與字體；所有語意色來自目前配色。
+:root[data-paradigm='clay'] {
+  --mat-sys-corner-small: 16px;
+  --mat-sys-corner-medium: 20px;
+  --mat-sys-corner-large: 32px;
+  --mat-sys-corner-extra-large: 48px;
+  --mat-sys-corner-full: 999px;
+
+  --clay-ambient: light-dark(rgb(160 150 180 / 0.24), rgb(0 0 0 / 0.48));
+  --clay-highlight: light-dark(rgb(255 255 255 / 0.9), rgb(255 255 255 / 0.08));
+  --clay-rim: light-dark(rgb(255 255 255 / 0.8), rgb(255 255 255 / 0.06));
+  --clay-bounce: color-mix(in srgb, var(--mat-sys-primary) 8%, transparent);
+  --clay-drop: color-mix(in srgb, var(--mat-sys-primary) 22%, transparent);
+
+  --clay-shadow-small: 5px 7px 14px var(--clay-ambient), -4px -4px 12px var(--clay-highlight), inset 2px 2px 5px var(--clay-rim), inset -2px -2px 5px var(--clay-bounce);
+  --clay-shadow-card: 16px 16px 32px var(--clay-ambient), -10px -10px 24px var(--clay-highlight), inset 6px 6px 12px var(--clay-bounce), inset -6px -6px 12px var(--clay-rim);
+  --clay-shadow-card-hover: 22px 24px 40px var(--clay-ambient), -12px -12px 28px var(--clay-highlight), inset 6px 6px 12px var(--clay-bounce), inset -6px -6px 12px var(--clay-rim);
+  --clay-shadow-deep: 30px 30px 60px var(--clay-ambient), -30px -30px 60px var(--clay-highlight), inset 10px 10px 20px var(--clay-bounce), inset -10px -10px 20px var(--clay-rim);
+  --clay-shadow-button: 10px 12px 24px var(--clay-drop), -8px -8px 16px var(--clay-highlight), inset 4px 4px 8px var(--clay-rim), inset -4px -4px 8px var(--clay-bounce);
+  --clay-shadow-pressed: inset 8px 8px 16px var(--clay-ambient), inset -8px -8px 16px var(--clay-highlight), inset 2px 2px 5px var(--clay-bounce), inset -2px -2px 5px var(--clay-rim);
+
+  --mat-sys-level1: var(--clay-shadow-small);
+  --mat-sys-level2: var(--clay-shadow-card);
+  --mat-sys-level3: var(--clay-shadow-card-hover);
+  --mat-sys-level4: var(--clay-shadow-deep);
+
+  --font-zh: 'Noto Sans TC', system-ui, sans-serif;
+  --font-en: 'Nunito', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: var(--font-en), var(--font-zh);
+  --font-body: 'DM Sans', 'Inter', var(--font-zh);
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --mat-button-tonal-horizontal-padding: 1.25rem;
+}

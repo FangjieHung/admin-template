@@ -1,0 +1,72 @@
+// 暖沙：中性、溫暖的明亮配色；只提供顏色，不碰造型。
+:root[data-theme='sandstone'] {
+  --_sand-0: #fffefa;
+  --_sand-25: #fcfaf5;
+  --_sand-50: #f7f3ea;
+  --_sand-100: #efe8d9;
+  --_sand-200: #ded3be;
+  --_sand-300: #c8bba5;
+  --_sand-600: #655b4f;
+  --_sand-900: #29251f;
+  --_clay-100: #f4dfcf;
+  --_clay-600: #794727;
+  --_clay-800: #52331f;
+  --_sea-100: #dcebee;
+  --_sea-600: #365d67;
+  --_sea-800: #284750;
+
+  --mat-sys-primary: var(--_clay-600);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: var(--_clay-100);
+  --mat-sys-on-primary-container: var(--_clay-800);
+  --mat-sys-secondary: var(--_sea-600);
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: var(--_sea-100);
+  --mat-sys-on-secondary-container: var(--_sea-800);
+  --mat-sys-background: var(--_sand-50);
+  --mat-sys-surface: var(--_sand-0);
+  --mat-sys-surface-container-lowest: var(--_sand-0);
+  --mat-sys-surface-container-low: var(--_sand-25);
+  --mat-sys-surface-container: var(--_sand-25);
+  --mat-sys-surface-container-high: var(--_sand-50);
+  --mat-sys-surface-container-highest: var(--_sand-100);
+  --mat-sys-on-surface: var(--_sand-900);
+  --mat-sys-surface-variant: var(--_sand-100);
+  --mat-sys-on-surface-variant: var(--_sand-600);
+  --mat-sys-outline: #786c5e;
+  --mat-sys-outline-variant: var(--_sand-200);
+  --mat-sys-inverse-surface: var(--_sea-800);
+  --mat-sys-inverse-on-surface: #ffffff;
+  --mat-sys-error: #a13f34;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #fbe8e6;
+  --mat-sys-on-error-container: #8a3028;
+
+  --app-positive-bg: #e5f1e7;
+  --app-positive-fg: #285d36;
+  --app-positive-dot: #377849;
+  --app-info-bg: var(--_sea-100);
+  --app-info-fg: var(--_sea-800);
+  --app-info-dot: var(--_sea-600);
+  --app-neutral-bg: var(--_sand-100);
+  --app-neutral-fg: var(--_sand-600);
+  --app-neutral-dot: #786c5e;
+  --app-warning-bg: #f8ebcc;
+  --app-warning-fg: #765218;
+  --app-warning-dot: #936719;
+  --app-danger-bg: #fbe8e6;
+  --app-danger-fg: #8a3028;
+  --app-danger-dot: #a13f34;
+
+  --app-viz-1: var(--_clay-600);
+  --app-viz-2: var(--_sea-600);
+  --app-viz-3: #8a6c43;
+  --app-viz-4: #55784e;
+
+  --app-shell-bg: #303c3c;
+  --app-shell-on: #ffffff;
+  --app-shell-on-muted: #d6e1df;
+  --app-topbar-bg: color-mix(in srgb, var(--_sand-0) 86%, transparent);
+  --app-calendar-range-fill: color-mix(in srgb, var(--_clay-600) 18%, var(--_sand-50));
+  color-scheme: light;
+}

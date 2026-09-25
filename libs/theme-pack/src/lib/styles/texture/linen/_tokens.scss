@@ -1,0 +1,20 @@
+// 柔和紙感：造型 token，不定義配色。
+:root[data-paradigm='linen'] {
+  --mat-sys-corner-small: 4px;
+  --mat-sys-corner-medium: 8px;
+  --mat-sys-corner-large: 12px;
+  --mat-sys-corner-extra-large: 16px;
+  --mat-sys-corner-full: 999px;
+  --mat-sys-level1: 0 1px 2px rgba(20, 25, 30, 0.035);
+  --mat-sys-level2: 0 3px 10px rgba(20, 25, 30, 0.045);
+  --mat-sys-level3: 0 8px 24px rgba(20, 25, 30, 0.065);
+  --mat-sys-level4: 0 16px 40px rgba(20, 25, 30, 0.09);
+
+  --font-zh: 'Noto Sans TC', system-ui, sans-serif;
+  --font-en: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  --font-display: Georgia, 'Noto Serif TC', serif;
+  --font-body: 'Inter', var(--font-zh);
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --mat-button-tonal-horizontal-padding: 1rem;
+}

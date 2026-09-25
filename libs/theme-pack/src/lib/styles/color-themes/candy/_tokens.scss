@@ -1,0 +1,72 @@
+// 高彩度糖果色只提供語意色；與全部質地自由組合。
+:root[data-theme='candy'] {
+  --_canvas: #f4f1fa;
+  --_ink: #332f3a;
+  --_muted: #635f69;
+  --_violet: #7c3aed;
+  --_pink: #db2777;
+  --_sky: #0ea5e9;
+  --_green: #10b981;
+  --_amber: #f59e0b;
+
+  --mat-sys-primary: var(--_violet);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #e9dcfd;
+  --mat-sys-on-primary-container: #461c8d;
+  --mat-sys-secondary: #ac185e;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: #f9d8e8;
+  --mat-sys-on-secondary-container: #711044;
+  --mat-sys-background: var(--_canvas);
+  --mat-sys-surface: #ffffff;
+  --mat-sys-surface-container-lowest: #ffffff;
+  --mat-sys-surface-container-low: #fcfaff;
+  --mat-sys-surface-container: #f8f5fd;
+  --mat-sys-surface-container-high: #efebf5;
+  --mat-sys-surface-container-highest: #e5def0;
+  --mat-sys-on-surface: var(--_ink);
+  --mat-sys-surface-variant: #efebf5;
+  --mat-sys-on-surface-variant: var(--_muted);
+  --mat-sys-outline: #80768d;
+  --mat-sys-outline-variant: #d4cbe1;
+  --mat-sys-inverse-surface: #42364f;
+  --mat-sys-inverse-on-surface: #ffffff;
+  --mat-sys-error: #b42346;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #ffe0e8;
+  --mat-sys-on-error-container: #84203b;
+
+  --app-positive-bg: #d8f8e9;
+  --app-positive-fg: #126747;
+  --app-positive-dot: var(--_green);
+  --app-info-bg: #d9f2ff;
+  --app-info-fg: #075b81;
+  --app-info-dot: var(--_sky);
+  --app-neutral-bg: #e9e3f0;
+  --app-neutral-fg: #51475a;
+  --app-neutral-dot: #756b80;
+  --app-warning-bg: #fff0c9;
+  --app-warning-fg: #76500b;
+  --app-warning-dot: var(--_amber);
+  --app-danger-bg: #ffe0e8;
+  --app-danger-fg: #84203b;
+  --app-danger-dot: #d02d58;
+
+  --app-viz-1: var(--_violet);
+  --app-viz-2: var(--_pink);
+  --app-viz-3: #087aa9;
+  --app-viz-4: #12815c;
+
+  --app-shell-bg: #ede6f6;
+  --app-shell-on: var(--_ink);
+  --app-shell-on-muted: var(--_muted);
+  --app-topbar-bg: color-mix(in srgb, var(--_canvas) 80%, transparent);
+  --app-calendar-range-fill: color-mix(in srgb, var(--_violet) 18%, var(--_canvas));
+  color-scheme: light;
+}
+
+:root[data-theme='candy'] .brand-mark,
+:root[data-theme='candy'] .avatar {
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+}

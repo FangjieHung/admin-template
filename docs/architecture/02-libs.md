@@ -194,12 +194,12 @@ admin 的建單第四步（`/orders/new` 的「合約」步驟）與訂單詳情
 （`apps/admin/src/app/features/orders/data/provide-admin-order-form.ts`），官網日後接上時由它自己的字典提供。
 只依賴 `domain`、`contract-signing` 與 Angular／Material，不依賴任何 apps/\* 的程式碼。
 
-## libs/theme-pack — 雙軸主題系統（只有 admin 套用）
+## libs/theme-pack — 雙軸主題系統（Admin 開放切換）
 
 別名 `@car-rental/theme-pack`。質地（Paradigm，管造型：圓角/陰影/字體）×
-配色（Color-theme，管顏色）兩軸可自由組合，目前提供 Material 質地與 Verdant/Midnight
-兩套配色。booking 跟 affiliate **沒有套用**這套系統——它們是免登入的公開/合作夥伴頁面，
-定位是資訊型頁面，不需要換膚。
+配色（Color-theme，管顏色）兩軸可自由組合，目前提供 Material/Linen/Grid/Soft UI/Clay/Editorial/Frosted 質地與
+Verdant/Midnight/Sandstone/Azure/Cool Grey/Candy/Mist Ink/Glacier Blue 配色。Admin 載入完整 registry 並提供設定頁切換；
+booking 與 affiliate 雖引用 theme-pack 的樣式，但各自只編入一套固定配色，沒有開放執行期換膚。
 
 詳細設計、樣式規則（禁止寫死顏色、`.ui-*` class 契約等）、新增配色/質地的步驟，
 完整寫在根目錄 `README.md`「雙軸主題系統」一節，class 契約完整列表見

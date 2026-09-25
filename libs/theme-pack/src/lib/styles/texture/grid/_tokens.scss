@@ -1,0 +1,20 @@
+// 工作台細網格：緊湊但保留可讀字級與互動區域。
+:root[data-paradigm='grid'] {
+  --mat-sys-corner-small: 2px;
+  --mat-sys-corner-medium: 4px;
+  --mat-sys-corner-large: 6px;
+  --mat-sys-corner-extra-large: 8px;
+  --mat-sys-corner-full: 999px;
+  --mat-sys-level1: 0 1px 0 rgba(20, 25, 30, 0.08);
+  --mat-sys-level2: 0 2px 0 rgba(20, 25, 30, 0.1);
+  --mat-sys-level3: 0 4px 0 rgba(20, 25, 30, 0.12);
+  --mat-sys-level4: 0 6px 0 rgba(20, 25, 30, 0.14);
+
+  --font-zh: 'Noto Sans TC', system-ui, sans-serif;
+  --font-en: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-display: 'IBM Plex Mono', var(--font-zh);
+  --font-body: 'Inter', var(--font-zh);
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --mat-button-tonal-horizontal-padding: 0.875rem;
+}

@@ -1,0 +1,79 @@
+// 冰霧藍：取參考圖的高明度白藍底、深海軍藍操作色與克制狀態色。
+:root[data-theme='glacier-blue'] {
+  --_ice: #eef5fc;
+  --_white: #ffffff;
+  --_navy: #405a8b;
+  --_navy-deep: #283852;
+  --_ink: #29364c;
+  --_muted: #56647a;
+
+  --mat-sys-primary: var(--_navy);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #dce6f4;
+  --mat-sys-on-primary-container: #283f69;
+  --mat-sys-secondary: #4e6483;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: #e4ecf6;
+  --mat-sys-on-secondary-container: #314663;
+  --mat-sys-background: var(--_ice);
+  --mat-sys-surface: var(--_white);
+  --mat-sys-surface-container-lowest: var(--_white);
+  --mat-sys-surface-container-low: #fafdff;
+  --mat-sys-surface-container: #f5f9fe;
+  --mat-sys-surface-container-high: #eaf2fb;
+  --mat-sys-surface-container-highest: #dfeaf7;
+  --mat-sys-on-surface: var(--_ink);
+  --mat-sys-surface-variant: #eaf2fb;
+  --mat-sys-on-surface-variant: var(--_muted);
+  --mat-sys-outline: #75859c;
+  --mat-sys-outline-variant: #d8e3f0;
+  --mat-sys-inverse-surface: var(--_navy-deep);
+  --mat-sys-inverse-on-surface: #ffffff;
+  --mat-sys-error: #a6404b;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #f9e5e8;
+  --mat-sys-on-error-container: #822e37;
+
+  --app-positive-bg: #e4f4eb;
+  --app-positive-fg: #256642;
+  --app-positive-dot: #3b9b69;
+  --app-info-bg: #e3effb;
+  --app-info-fg: #28577f;
+  --app-info-dot: #4c7aa8;
+  --app-neutral-bg: #eaf0f7;
+  --app-neutral-fg: #42536a;
+  --app-neutral-dot: #71829a;
+  --app-warning-bg: #fbf0df;
+  --app-warning-fg: #765324;
+  --app-warning-dot: #b58342;
+  --app-danger-bg: #f9e5e8;
+  --app-danger-fg: #822e37;
+  --app-danger-dot: #a6404b;
+
+  --app-viz-1: var(--_navy);
+  --app-viz-2: #6886ac;
+  --app-viz-3: #3f8376;
+  --app-viz-4: #92749c;
+
+  --app-shell-bg: #f7fbff;
+  --app-shell-on: var(--_ink);
+  --app-shell-on-muted: var(--_muted);
+  --app-topbar-bg: color-mix(in srgb, var(--_white) 75%, transparent);
+  --app-calendar-range-fill: color-mix(in srgb, var(--_navy) 17%, var(--_ice));
+  color-scheme: light;
+}
+
+:root[data-theme='glacier-blue'] .brand-mark,
+:root[data-theme='glacier-blue'] .avatar {
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+}
+
+// 側欄在淺底時不用原有的白色半透明 selected layer。
+:root[data-theme='glacier-blue'] .app-sidenav :is(.nav-link, .nav-sublink, .nav-flyout-item):is(:hover, .active),
+:root[data-theme='glacier-blue'] .app-sidenav .user-card {
+  background: var(--mat-sys-surface-container-high);
+}
+:root[data-theme='glacier-blue'] .app-sidenav .nav-subgroup {
+  border-color: var(--mat-sys-outline-variant);
+}

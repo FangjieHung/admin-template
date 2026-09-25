@@ -1,0 +1,73 @@
+// Soft UI 的單色配色；色彩只透過語意 token 提供給所有質地。
+:root[data-theme='cool-grey'] {
+  --_clay: #e0e5ec;
+  --_ink: #3d4852;
+  // 原提案的 #6b7280 在 clay 上只有約 3.8:1；加深以符合一般文字 AA。
+  --_muted: #5d6773;
+  --_violet: #6c63ff;
+  // 白字在原 violet 上不到 4.5:1；主要實心按鈕使用較深的同色系。
+  --_violet-strong: #594fcf;
+  --_teal: #1f716d;
+
+  --mat-sys-primary: var(--_violet-strong);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #d4d0f7;
+  --mat-sys-on-primary-container: #2f287e;
+  --mat-sys-secondary: var(--_teal);
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: #c8e5e3;
+  --mat-sys-on-secondary-container: #175653;
+  --mat-sys-background: var(--_clay);
+  --mat-sys-surface: var(--_clay);
+  --mat-sys-surface-container-lowest: var(--_clay);
+  --mat-sys-surface-container-low: var(--_clay);
+  --mat-sys-surface-container: var(--_clay);
+  --mat-sys-surface-container-high: var(--_clay);
+  --mat-sys-surface-container-highest: #d3d9e2;
+  --mat-sys-on-surface: var(--_ink);
+  --mat-sys-surface-variant: var(--_clay);
+  --mat-sys-on-surface-variant: var(--_muted);
+  --mat-sys-outline: #738092;
+  --mat-sys-outline-variant: #a3b1c6;
+  --mat-sys-inverse-surface: #3d4852;
+  --mat-sys-inverse-on-surface: #ffffff;
+  --mat-sys-error: #a13f34;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #f2d7d5;
+  --mat-sys-on-error-container: #7b2b23;
+
+  --app-positive-bg: #c8e5e3;
+  --app-positive-fg: #175653;
+  --app-positive-dot: #1f716d;
+  --app-info-bg: #d4d0f7;
+  --app-info-fg: #2f287e;
+  --app-info-dot: var(--_violet-strong);
+  --app-neutral-bg: #d3d9e2;
+  --app-neutral-fg: var(--_ink);
+  --app-neutral-dot: var(--_muted);
+  --app-warning-bg: #f2e3c8;
+  --app-warning-fg: #71511b;
+  --app-warning-dot: #8b6524;
+  --app-danger-bg: #f2d7d5;
+  --app-danger-fg: #7b2b23;
+  --app-danger-dot: #a13f34;
+
+  --app-viz-1: var(--_violet-strong);
+  --app-viz-2: var(--_teal);
+  --app-viz-3: #9b5f55;
+  --app-viz-4: #785e94;
+
+  --app-shell-bg: var(--_clay);
+  --app-shell-on: var(--_ink);
+  --app-shell-on-muted: var(--_muted);
+  --app-topbar-bg: color-mix(in srgb, var(--_clay) 88%, transparent);
+  --app-calendar-range-fill: color-mix(in srgb, var(--_violet) 19%, var(--_clay));
+  color-scheme: light;
+}
+
+// 側欄文字在冷灰底是深色；品牌標記與頭像則在主色底上使用 on-primary。
+:root[data-theme='cool-grey'] .brand-mark,
+:root[data-theme='cool-grey'] .avatar {
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+}

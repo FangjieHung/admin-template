@@ -1,0 +1,28 @@
+// Soft UI 只控制造型；陰影依 color-scheme 在明暗配色間調整。
+:root[data-paradigm='soft-ui'] {
+  --mat-sys-corner-small: 12px;
+  --mat-sys-corner-medium: 16px;
+  --mat-sys-corner-large: 32px;
+  --mat-sys-corner-extra-large: 32px;
+  --mat-sys-corner-full: 999px;
+
+  --soft-shadow-dark: light-dark(rgb(163 177 198 / 0.62), rgb(0 0 0 / 0.46));
+  --soft-shadow-light: light-dark(rgb(255 255 255 / 0.6), rgb(145 164 197 / 0.16));
+  --soft-shadow-dark-hover: light-dark(rgb(163 177 198 / 0.7), rgb(0 0 0 / 0.56));
+  --soft-shadow-light-hover: light-dark(rgb(255 255 255 / 0.68), rgb(145 164 197 / 0.24));
+
+  --mat-sys-level1: 5px 5px 10px var(--soft-shadow-dark), -5px -5px 10px var(--soft-shadow-light);
+  --mat-sys-level2: 9px 9px 16px var(--soft-shadow-dark), -9px -9px 16px var(--soft-shadow-light);
+  --mat-sys-level3: 12px 12px 20px var(--soft-shadow-dark-hover), -12px -12px 20px var(--soft-shadow-light-hover);
+  --mat-sys-level4: 16px 16px 28px var(--soft-shadow-dark-hover), -16px -16px 28px var(--soft-shadow-light-hover);
+  --soft-inset: inset 6px 6px 10px var(--soft-shadow-dark), inset -6px -6px 10px var(--soft-shadow-light);
+  --soft-inset-deep: inset 10px 10px 20px var(--soft-shadow-dark-hover), inset -10px -10px 20px var(--soft-shadow-light-hover);
+  --soft-inset-small: inset 3px 3px 6px var(--soft-shadow-dark), inset -3px -3px 6px var(--soft-shadow-light);
+
+  --font-zh: 'Noto Sans TC', system-ui, sans-serif;
+  --font-en: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  --font-display: var(--font-en), var(--font-zh);
+  --font-body: 'DM Sans', 'Inter', var(--font-zh);
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --mat-button-tonal-horizontal-padding: 1rem;
+}

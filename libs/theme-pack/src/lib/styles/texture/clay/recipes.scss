@@ -1,0 +1,253 @@
+// 共用 ui-* 與 Material recipe；不調整頁面資訊結構。
+@keyframes clay-float {
+  50% { transform: translateY(-20px) rotate(2deg); }
+}
+
+@keyframes clay-float-delayed {
+  50% { transform: translateY(-15px) rotate(-2deg); }
+}
+
+:root[data-paradigm='clay'] {
+  body,
+  .app-shell,
+  .sidenav-container {
+    background: var(--mat-sys-background);
+  }
+
+  // 兩個純 CSS 圖層構成三處緩慢漂浮的環境光，無須改 template。
+  .content-area {
+    position: relative;
+    isolation: isolate;
+    background: transparent;
+  }
+  .content-area::before,
+  .content-area::after {
+    content: '';
+    position: fixed;
+    z-index: -1;
+    width: min(70vw, 740px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(52px);
+  }
+  .content-area::before {
+    top: -20vw;
+    left: -18vw;
+    background: radial-gradient(circle, color-mix(in srgb, var(--mat-sys-primary) 18%, transparent), transparent 65%);
+    animation: clay-float 8s ease-in-out infinite;
+  }
+  .content-area::after {
+    right: -22vw;
+    bottom: -20vw;
+    background:
+      radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--mat-sys-secondary) 14%, transparent), transparent 48%),
+      radial-gradient(circle at 75% 75%, color-mix(in srgb, var(--app-info-dot) 14%, transparent), transparent 48%);
+    animation: clay-float-delayed 10s ease-in-out -2s infinite;
+  }
+
+  .app-sidenav {
+    background: var(--app-shell-bg);
+    border: 0;
+    box-shadow: var(--clay-shadow-deep);
+  }
+  .brand-mark,
+  .avatar {
+    border-radius: var(--mat-sys-corner-medium);
+    box-shadow: var(--clay-shadow-button);
+  }
+  .user-card,
+  .nav-link.active,
+  .nav-sublink.active {
+    border-radius: var(--mat-sys-corner-medium);
+    box-shadow: var(--clay-shadow-pressed);
+  }
+
+  .ui-card,
+  .stat-card,
+  .ui-card--inverse {
+    border: 0;
+    border-radius: var(--mat-sys-corner-large);
+    box-shadow: var(--clay-shadow-card);
+  }
+  .ui-card,
+  .stat-card {
+    background: color-mix(in srgb, var(--mat-sys-surface) 78%, transparent);
+    color: var(--mat-sys-on-surface);
+    backdrop-filter: blur(20px);
+  }
+  .ui-card { overflow: hidden; }
+  .ui-card--inverse {
+    background: var(--mat-sys-inverse-surface);
+    color: var(--mat-sys-inverse-on-surface);
+    padding: 24px;
+  }
+  .ui-card--clickable,
+  .stat-card {
+    transition: transform 500ms ease-out, box-shadow 500ms ease-out;
+  }
+  @media (hover: hover) {
+    .ui-card--clickable:hover,
+    .stat-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--clay-shadow-card-hover);
+    }
+  }
+  .ui-card-header,
+  .ui-card-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .ui-card-header { justify-content: space-between; flex-wrap: wrap; }
+  .ui-card--clickable { cursor: pointer; }
+
+  .theme-pill,
+  .ui-nav-pill,
+  .ui-card-titleNav__item,
+  .mat-mdc-raised-button,
+  .mat-mdc-unelevated-button,
+  .mat-mdc-outlined-button,
+  .mat-mdc-icon-button {
+    min-height: 44px;
+    border-radius: var(--mat-sys-corner-medium);
+    box-shadow: var(--clay-shadow-button);
+    transition: transform 200ms ease-out, box-shadow 200ms ease-out, background-color 200ms ease-out;
+  }
+  .mat-mdc-icon-button { min-width: 44px; }
+  .theme-pill:not(.is-active),
+  .ui-nav-pill:not(.is-active),
+  .ui-card-titleNav__item:not(.is-active),
+  .mat-mdc-outlined-button,
+  .mat-mdc-icon-button {
+    background: color-mix(in srgb, var(--mat-sys-surface) 80%, transparent);
+    color: var(--mat-sys-on-surface);
+  }
+  .theme-pill.is-active,
+  .ui-nav-pill.is-active,
+  .ui-card-titleNav__item.is-active,
+  .mat-mdc-unelevated-button:not(:disabled),
+  .mat-mdc-raised-button:not(:disabled) {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--mat-sys-primary) 96%, var(--mat-sys-surface)), var(--mat-sys-primary));
+    color: var(--mat-sys-on-primary);
+  }
+  @media (hover: hover) {
+    :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-raised-button, .mat-mdc-unelevated-button, .mat-mdc-outlined-button, .mat-mdc-icon-button):not(:disabled):hover {
+      transform: translateY(-4px);
+      box-shadow: var(--clay-shadow-card-hover);
+    }
+  }
+  :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-raised-button, .mat-mdc-unelevated-button, .mat-mdc-outlined-button, .mat-mdc-icon-button):not(:disabled):active {
+    transform: scale(0.92);
+    box-shadow: var(--clay-shadow-pressed);
+  }
+  :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base, .nav-link, .nav-sublink, .nav-group-trigger):focus-visible {
+    outline: 3px solid var(--mat-sys-primary);
+    outline-offset: 3px;
+  }
+  .ui-nav-pill {
+    padding: 10px 18px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    --mat-form-field-filled-container-shape: var(--mat-sys-corner-medium);
+    background: var(--mat-sys-surface-container-high);
+    border-radius: var(--mat-sys-corner-medium);
+    box-shadow: var(--clay-shadow-pressed);
+    transition: background-color 200ms ease-out, box-shadow 200ms ease-out;
+  }
+  .mat-mdc-form-field:focus-within .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    background: var(--mat-sys-surface);
+    outline: 3px solid var(--mat-sys-primary);
+    outline-offset: 2px;
+  }
+  .mat-mdc-form-field {
+    --mat-form-field-filled-active-indicator-height: 0;
+    --mat-form-field-filled-focus-active-indicator-height: 0;
+  }
+  .mat-mdc-form-field-focus-overlay { border-radius: inherit; }
+  .ui-field-group { display: flex; align-items: stretch; gap: 0; }
+  .ui-field-group > *:not(:first-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  .ui-field-group > *:not(:last-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .mat-calendar,
+  .mat-datepicker-content {
+    --mat-datepicker-calendar-date-in-range-state-background-color: var(--app-calendar-range-fill);
+  }
+  .mat-mdc-dialog-surface,
+  .mat-datepicker-content,
+  .mat-mdc-menu-panel {
+    border: 0;
+    border-radius: var(--mat-sys-corner-large) !important;
+    box-shadow: var(--clay-shadow-deep) !important;
+  }
+  .mat-mdc-table {
+    background: transparent !important;
+    --mat-table-row-item-container-height: 56px;
+  }
+  .mat-mdc-snack-bar-container .mdc-snackbar__surface {
+    border-radius: var(--mat-sys-corner-medium) !important;
+    box-shadow: var(--clay-shadow-card);
+  }
+
+  .ui-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: var(--mat-sys-corner-full);
+    padding: 0.35rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: var(--clay-shadow-small);
+  }
+  .ui-chip__dot {
+    width: 0.375rem;
+    height: 0.375rem;
+    flex-shrink: 0;
+    border-radius: 50%;
+  }
+  @each $tone in positive, info, neutral, warning, danger {
+    .ui-chip--#{$tone} {
+      background: var(--app-#{$tone}-bg);
+      color: var(--app-#{$tone}-fg);
+      .ui-chip__dot { background: var(--app-#{$tone}-dot); }
+    }
+  }
+
+  :is(h1, h2, h3, h4, .section-title, .ui-text-display, .ui-text-title, .ui-text-subtitle, .stat-card__value) {
+    font-family: var(--font-display);
+  }
+  .ui-text-display { font-weight: 900; letter-spacing: -0.035em; line-height: 1.1; }
+  .ui-text-title { font-size: 1.75rem; font-weight: 900; letter-spacing: -0.025em; color: var(--mat-sys-on-surface); }
+  .ui-text-subtitle { margin: 0; font-size: 1.125rem; font-weight: 800; line-height: 1.5; color: var(--mat-sys-on-surface); }
+  .ui-text-caption { color: var(--mat-sys-on-surface-variant); font-weight: 700; }
+  .ui-card--inverse :is(.ui-text-subtitle, .ui-text-caption) { color: inherit; }
+
+  @media (max-width: 639px) {
+    .content-area::before,
+    .content-area::after { width: 80vw; filter: blur(36px); }
+    .ui-card,
+    .stat-card { border-radius: 24px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .content-area::before,
+    .content-area::after { animation: none; }
+    :is(.ui-card--clickable, .stat-card, .theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base, .mat-mdc-text-field-wrapper) {
+      transition-duration: 0.01ms;
+    }
+    :is(.ui-card--clickable, .stat-card, .theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base):hover,
+    :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base):active {
+      transform: none;
+    }
+  }
+}

@@ -1,0 +1,70 @@
+// 清亮藍：冷色、明快的營運配色；與任何質地組合。
+:root[data-theme='azure'] {
+  --_blue-0: #ffffff;
+  --_blue-25: #f9fcfe;
+  --_blue-50: #f3f8fc;
+  --_blue-100: #e6f1f9;
+  --_blue-200: #cedfeb;
+  --_blue-300: #b5ccdd;
+  --_blue-600: #1658a8;
+  --_blue-800: #163e70;
+  --_slate-600: #465969;
+  --_slate-900: #172a3a;
+  --_teal-100: #dceef1;
+  --_teal-700: #245d69;
+
+  --mat-sys-primary: var(--_blue-600);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #dbeafe;
+  --mat-sys-on-primary-container: var(--_blue-800);
+  --mat-sys-secondary: var(--_teal-700);
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: var(--_teal-100);
+  --mat-sys-on-secondary-container: #1d4b55;
+  --mat-sys-background: var(--_blue-50);
+  --mat-sys-surface: var(--_blue-0);
+  --mat-sys-surface-container-lowest: var(--_blue-0);
+  --mat-sys-surface-container-low: var(--_blue-25);
+  --mat-sys-surface-container: var(--_blue-25);
+  --mat-sys-surface-container-high: var(--_blue-100);
+  --mat-sys-surface-container-highest: var(--_blue-200);
+  --mat-sys-on-surface: var(--_slate-900);
+  --mat-sys-surface-variant: var(--_blue-100);
+  --mat-sys-on-surface-variant: var(--_slate-600);
+  --mat-sys-outline: #687d90;
+  --mat-sys-outline-variant: var(--_blue-200);
+  --mat-sys-inverse-surface: #18364e;
+  --mat-sys-inverse-on-surface: #ffffff;
+  --mat-sys-error: #ab3c39;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #fbe6e5;
+  --mat-sys-on-error-container: #912e2c;
+
+  --app-positive-bg: #e4f3e9;
+  --app-positive-fg: #285c39;
+  --app-positive-dot: #36774c;
+  --app-info-bg: var(--_teal-100);
+  --app-info-fg: #1d4b55;
+  --app-info-dot: var(--_teal-700);
+  --app-neutral-bg: var(--_blue-100);
+  --app-neutral-fg: var(--_slate-600);
+  --app-neutral-dot: #687d90;
+  --app-warning-bg: #fff0ce;
+  --app-warning-fg: #785315;
+  --app-warning-dot: #936719;
+  --app-danger-bg: #fbe6e5;
+  --app-danger-fg: #912e2c;
+  --app-danger-dot: #ab3c39;
+
+  --app-viz-1: var(--_blue-600);
+  --app-viz-2: var(--_teal-700);
+  --app-viz-3: #7b4b92;
+  --app-viz-4: #a2632a;
+
+  --app-shell-bg: #132b40;
+  --app-shell-on: #ffffff;
+  --app-shell-on-muted: #c1d3e1;
+  --app-topbar-bg: color-mix(in srgb, var(--_blue-0) 86%, transparent);
+  --app-calendar-range-fill: color-mix(in srgb, var(--_blue-600) 18%, var(--_blue-100));
+  color-scheme: light;
+}

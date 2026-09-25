@@ -1,0 +1,79 @@
+// 附圖取向：淡霧藍畫布、白色工作區與炭黑主色。
+:root[data-theme='mist-ink'] {
+  --_mist: #eaf2f9;
+  --_paper: #ffffff;
+  --_card: #fafafa;
+  --_ink: #2b2b30;
+  --_muted: #60656b;
+
+  --mat-sys-primary: var(--_ink);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #e8e8eb;
+  --mat-sys-on-primary-container: #242429;
+  --mat-sys-secondary: #484c53;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: #e9edf0;
+  --mat-sys-on-secondary-container: #30353b;
+  --mat-sys-background: var(--_mist);
+  --mat-sys-surface: var(--_paper);
+  --mat-sys-surface-container-lowest: var(--_paper);
+  --mat-sys-surface-container-low: var(--_card);
+  --mat-sys-surface-container: #f8f9fa;
+  --mat-sys-surface-container-high: #f3f5f6;
+  --mat-sys-surface-container-highest: #eceff1;
+  --mat-sys-on-surface: var(--_ink);
+  --mat-sys-surface-variant: #f3f5f6;
+  --mat-sys-on-surface-variant: var(--_muted);
+  --mat-sys-outline: #73787e;
+  --mat-sys-outline-variant: #eaeaea;
+  --mat-sys-inverse-surface: var(--_ink);
+  --mat-sys-inverse-on-surface: #ffffff;
+  --mat-sys-error: #a2383d;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #fdebeb;
+  --mat-sys-on-error-container: #882d31;
+
+  --app-positive-bg: #edf3ec;
+  --app-positive-fg: #346538;
+  --app-positive-dot: #4a7e4c;
+  --app-info-bg: #e1f3fe;
+  --app-info-fg: #1f6c9f;
+  --app-info-dot: #2e79a8;
+  --app-neutral-bg: #f0f1f2;
+  --app-neutral-fg: #50545a;
+  --app-neutral-dot: #73787e;
+  --app-warning-bg: #fbf3db;
+  --app-warning-fg: #805800;
+  --app-warning-dot: #9b6a07;
+  --app-danger-bg: #fdebec;
+  --app-danger-fg: #9f2f2d;
+  --app-danger-dot: #a2383d;
+
+  --app-viz-1: #2b2b30;
+  --app-viz-2: #5e646b;
+  --app-viz-3: #397196;
+  --app-viz-4: #4a7e4c;
+
+  --app-shell-bg: var(--_paper);
+  --app-shell-on: var(--_ink);
+  --app-shell-on-muted: var(--_muted);
+  --app-topbar-bg: color-mix(in srgb, var(--_paper) 94%, transparent);
+  --app-calendar-range-fill: color-mix(in srgb, var(--_ink) 10%, var(--_paper));
+  color-scheme: light;
+}
+
+// 原側欄品牌與頭像以 shell 文字色著色，在深色標記上須改用 on-primary。
+:root[data-theme='mist-ink'] .brand-mark,
+:root[data-theme='mist-ink'] .avatar {
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+}
+
+// 既有側欄以白色半透明層標示選取；白底配色改用實色階維持可辨識度。
+:root[data-theme='mist-ink'] .app-sidenav :is(.nav-link, .nav-sublink, .nav-flyout-item):is(:hover, .active),
+:root[data-theme='mist-ink'] .app-sidenav .user-card {
+  background: var(--mat-sys-surface-container-high);
+}
+:root[data-theme='mist-ink'] .app-sidenav .nav-subgroup {
+  border-color: var(--mat-sys-outline-variant);
+}
