@@ -41,5 +41,13 @@
         }
       </div>
     </div>
+
+    <!-- ticket 03：外觀浮動面板開關，狀態放在 AppearancePanelService，跟 app shell 掛的浮動面板同步。 -->
+    <div class="theme-row appearance-panel-toggle">
+      <mat-slide-toggle [checked]="appearancePanel.visible()" (change)="onAppearancePanelToggle($event)">
+        顯示外觀浮動面板
+      </mat-slide-toggle>
+      <p class="ui-text-caption">開啟後，每一頁角落會出現一顆按鈕，可即時切換質地與配色。</p>
+    </div>
   </div>
 </section>

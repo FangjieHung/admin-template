@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { COLOR_THEMES, ThemeService, texture } from '@car-rental/theme-pack';
+import { AppearancePanelService, COLOR_THEMES, ThemeService, texture } from '@car-rental/theme-pack';
 import { ZH_TW } from '../../../core/i18n/zh-tw';
 import { HeaderTitleSlot } from '../../../layout/header/header-title';
 import { SettingsPageComponent } from './settings-page.component';
@@ -90,5 +90,30 @@ describe('SettingsPageComponent', () => {
     expect(
       fixture.nativeElement.querySelector('[data-theme-id="cool-grey"]').getAttribute('aria-pressed'),
     ).toBe('true');
+  });
+
+  it('ticket 03：顯示「顯示外觀浮動面板」開關，切換會更新 AppearancePanelService', () => {
+    const fixture = TestBed.createComponent(SettingsPageComponent);
+    fixture.detectChanges();
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('顯示外觀浮動面板');
+
+    const panel = TestBed.inject(AppearancePanelService);
+    expect(panel.visible()).toBe(false);
+
+    const toggle = fixture.nativeElement.querySelector('mat-slide-toggle button') as HTMLButtonElement;
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(panel.visible()).toBe(true);
+  });
+
+  it('ticket 03：AppearancePanelService 已是開啟狀態時，設定頁載入就顯示開關為開', () => {
+    TestBed.inject(AppearancePanelService).setVisible(true);
+    const fixture = TestBed.createComponent(SettingsPageComponent);
+    fixture.detectChanges();
+
+    const toggle = fixture.nativeElement.querySelector('mat-slide-toggle button') as HTMLButtonElement;
+    expect(toggle.getAttribute('aria-checked')).toBe('true');
   });
 });

@@ -4,6 +4,7 @@ import { ConnectedPosition } from '@angular/cdk/overlay';
 import { MatSidenavContainer, MatSidenavModule } from '@angular/material/sidenav';
 import { Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
+import { FloatingAppearancePanelComponent } from '@car-rental/theme-pack';
 import { ZH_TW } from './core/i18n/zh-tw';
 import { SideNavComponent } from './layout/side-nav/side-nav.component';
 import { NavEntry, NavGroup, isNavGroup } from './layout/side-nav/nav-item.model';
@@ -20,6 +21,7 @@ import { isFillPageRoute } from './layout/fill-page';
     SideNavComponent,
     HeaderComponent,
     FooterComponent,
+    FloatingAppearancePanelComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',

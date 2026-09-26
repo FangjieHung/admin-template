@@ -1,0 +1,65 @@
+@if (panel.visible()) {
+  <button
+    #triggerBtn
+    type="button"
+    class="appearance-fab"
+    aria-haspopup="true"
+    aria-controls="appearance-floating-panel"
+    [attr.aria-expanded]="open"
+    aria-label="外觀"
+    (click)="toggleOpen()"
+  >
+    <span class="material-symbols-rounded" aria-hidden="true">palette</span>
+  </button>
+
+  @if (open) {
+    <section
+      #panelEl
+      id="appearance-floating-panel"
+      class="ui-card appearance-panel"
+      role="dialog"
+      aria-label="外觀"
+      cdkTrapFocus
+      cdkTrapFocusAutoCapture
+      (keydown)="onPanelKeydown($event)"
+    >
+      <p class="ui-text-caption">外觀</p>
+
+      <div class="theme-row">
+        <span class="theme-row__label">質地</span>
+        <div class="theme-row__options" role="group" aria-label="質地">
+          @for (option of texture; track option.id) {
+            <button
+              type="button"
+              class="theme-pill"
+              [class.is-active]="theme.paradigm() === option.id"
+              [attr.aria-pressed]="theme.paradigm() === option.id"
+              [attr.data-paradigm-id]="option.id"
+              (click)="onParadigm(option.id)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="theme-row">
+        <span class="theme-row__label">配色</span>
+        <div class="theme-row__options" role="group" aria-label="配色">
+          @for (option of colorThemes(); track option.id) {
+            <button
+              type="button"
+              class="theme-pill"
+              [class.is-active]="theme.theme() === option.id"
+              [attr.aria-pressed]="theme.theme() === option.id"
+              [attr.data-theme-id]="option.id"
+              (click)="onTheme(option.id)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+      </div>
+    </section>
+  }
+}
