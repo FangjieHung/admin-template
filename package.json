@@ -8,6 +8,7 @@
     "watch": "nx build admin --watch --configuration development",
     "test": "nx test admin",
     "lint:theme": "node scripts/lint-theme.mjs",
+    "contrast:theme": "node scripts/contrast-report.mjs",
     "deploy": "nx build admin --base-href /bbd-car-rental/ && npx angular-cli-ghpages --dir=dist/penghu-rental-admin/browser"
   },
   "private": true,
@@ -51,6 +52,7 @@
     "jsonc-eslint-parser": "^2.1.0",
     "ng-packagr": "^22.0.1",
     "nx": "23.1.0",
+    "playwright-core": "^1.63.0",
     "postcss": "^8.5.16",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.3.2",
