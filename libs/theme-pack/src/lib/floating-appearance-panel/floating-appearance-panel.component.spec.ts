@@ -4,6 +4,7 @@ import { COLOR_THEMES, texture } from '../theme/theme.token';
 import { ThemeService } from '../theme/theme.service';
 import { AppearancePanelService } from '../theme/appearance-panel.service';
 import { FloatingAppearancePanelComponent } from './floating-appearance-panel.component';
+import { POSITION_STORAGE_KEY } from './floating-appearance-panel.position';
 
 describe('FloatingAppearancePanelComponent', () => {
   beforeEach(() => {
@@ -119,5 +120,108 @@ describe('FloatingAppearancePanelComponent', () => {
     fixture.detectChanges();
 
     expect(el.querySelector('#appearance-floating-panel')).toBeNull();
+  });
+
+  describe('位置：拖曳／鍵盤移動的持久化與夾回', () => {
+    it('沒有存過位置時，預設位移量是 {0,0}（原生右下角 16px 內縮）', () => {
+      TestBed.inject(AppearancePanelService).setVisible(true);
+      const fixture = create();
+      expect((fixture.componentInstance as unknown as { offset: () => { x: number; y: number } }).offset()).toEqual(
+        { x: 0, y: 0 },
+      );
+    });
+
+    it('localStorage 存過合法位置時，初始化直接套用', () => {
+      localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify({ x: -100, y: -50 }));
+      TestBed.inject(AppearancePanelService).setVisible(true);
+      const fixture = create();
+      expect((fixture.componentInstance as unknown as { offset: () => { x: number; y: number } }).offset()).toEqual(
+        { x: -100, y: -50 },
+      );
+    });
+
+    it('localStorage 存的位置在目前視窗外，初始化時會被夾回視窗內', () => {
+      localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify({ x: -999999, y: 0 }));
+      TestBed.inject(AppearancePanelService).setVisible(true);
+      const fixture = create();
+      const offset = (fixture.componentInstance as unknown as { offset: () => { x: number; y: number } }).offset();
+      const left = window.innerWidth - 16 - 44 + offset.x;
+      expect(left).toBeGreaterThanOrEqual(0);
+    });
+
+    it('localStorage 存壞掉的 JSON，當作沒存過，退回預設位置', () => {
+      localStorage.setItem(POSITION_STORAGE_KEY, '{not json');
+      TestBed.inject(AppearancePanelService).setVisible(true);
+      const fixture = create();
+      expect((fixture.componentInstance as unknown as { offset: () => { x: number; y: number } }).offset()).toEqual(
+        { x: 0, y: 0 },
+      );
+    });
+
+    it('觸發按鈕聚焦時 Alt+方向鍵移動 16px 一步，並存進 localStorage', () => {
+      TestBed.inject(AppearancePanelService).setVisible(true);
+      const fixture = create();
+      const el = fixture.nativeElement as HTMLElement;
+      const btn = el.querySelector('.appearance-fab') as HTMLButtonElement;
+
+      btn.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', altKey: true, bubbles: true }));
+      fixture.detectChanges();
+
+      const offset = (fixture.componentInstance as unknown as { offset: () => { x: number; y: number } }).offset();
+      expect(offset).toEqual({ x: 16, y: 0 });
+      expect(JSON.parse(localStorage.getItem(POSITION_STORAGE_KEY) ?? '{}')).toEqual({ x: 16, y: 0 });
+    });
+
+    it('Shift+方向鍵也能移動（不只 Alt）', () => {
+      TestBed.inject(AppearancePanelService).setVisible(true);
+      const fixture = create();
+      const btn = (fixture.nativeElement as HTMLElement).querySelector('.appearance-fab') as HTMLButtonElement;
+
+      btn.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', shiftKey: true, bubbles: true }));
+      fixture.detectChanges();
+
+      expect((fixture.componentInstance as unknown as { offset: () => { x: number; y: number } }).offset()).toEqual({
+        x: 0,
+        y: -16,
+      });
+    });
+
+    it('沒按 Alt／Shift 的方向鍵不會移動按鈕（留給瀏覽器/其他行為）', () => {
+      TestBed.inject(AppearancePanelService).setVisible(true);
+      const fixture = create();
+      const btn = (fixture.nativeElement as HTMLElement).querySelector('.appearance-fab') as HTMLButtonElement;
+
+      btn.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+      fixture.detectChanges();
+
+      expect((fixture.componentInstance as unknown as { offset: () => { x: number; y: number } }).offset()).toEqual({
+        x: 0,
+        y: 0,
+      });
+    });
+
+    it('面板裡的「重設位置」清掉自訂位置，回到預設值', () => {
+      TestBed.inject(AppearancePanelService).setVisible(true);
+      const fixture = create();
+      const el = fixture.nativeElement as HTMLElement;
+      const btn = el.querySelector('.appearance-fab') as HTMLButtonElement;
+
+      btn.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', altKey: true, bubbles: true }));
+      fixture.detectChanges();
+      expect(localStorage.getItem(POSITION_STORAGE_KEY)).not.toBeNull();
+
+      btn.click();
+      fixture.detectChanges();
+      const resetBtn = el.querySelector('.reset-position-btn') as HTMLButtonElement;
+      expect(resetBtn).not.toBeNull();
+      resetBtn.click();
+      fixture.detectChanges();
+
+      expect(localStorage.getItem(POSITION_STORAGE_KEY)).toBeNull();
+      expect((fixture.componentInstance as unknown as { offset: () => { x: number; y: number } }).offset()).toEqual({
+        x: 0,
+        y: 0,
+      });
+    });
   });
 });

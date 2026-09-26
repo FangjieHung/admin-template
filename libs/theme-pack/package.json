@@ -2,6 +2,7 @@
   "name": "@car-rental/theme-pack",
   "version": "0.0.1",
   "peerDependencies": {
+    "@angular/cdk": "^22.0.4",
     "@angular/common": "^22.0.0",
     "@angular/core": "^22.0.0",
     "@angular/material": "^22.0.4"

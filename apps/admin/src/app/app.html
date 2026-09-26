@@ -37,4 +37,10 @@
       <app-footer />
     </mat-sidenav-content>
   </mat-sidenav-container>
+
+  <!-- ticket 03：外觀浮動面板，開關在 /settings（AppearancePanelService）。掛在殼層最外層、
+       position: fixed 浮動，跟目前路由無關，所以每一頁都在；可拖曳到任何不擋路的位置
+       （見 floating-appearance-panel.component.scss 開頭的走查記錄，說明為什麼不是釘死角落
+       也不是掛進頁首排版）。 -->
+  <lib-floating-appearance-panel />
 </div>

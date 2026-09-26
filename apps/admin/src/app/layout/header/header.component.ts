@@ -2,7 +2,6 @@ import { Component, computed, inject, input, output } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { FloatingAppearancePanelComponent } from '@car-rental/theme-pack';
 import { ZH_TW } from '../../core/i18n/zh-tw';
 import { HeaderToolbarSlot } from './header-toolbar-slot';
 import { HeaderTitleExtraSlot } from './header-title-extra-slot';
@@ -15,7 +14,7 @@ import { HeaderTitleData, HeaderTitleSlot } from './header-title';
  */
 @Component({
   selector: 'app-header',
-  imports: [NgTemplateOutlet, RouterLink, MatButtonModule, FloatingAppearancePanelComponent],
+  imports: [NgTemplateOutlet, RouterLink, MatButtonModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })

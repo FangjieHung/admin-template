@@ -1,18 +1,33 @@
+<!-- 拖曳邊界：涵蓋整個視窗、不接收任何互動，只給 cdkDragBoundary 量尺寸用。永遠存在
+     （不受 panel.visible() 影響）：ViewChild 要在按鈕的 cdkDrag 初始化前就已經可以取得參考。 -->
+<div #boundaryEl class="drag-boundary" aria-hidden="true"></div>
+
 @if (panel.visible()) {
   <button
     #triggerBtn
+    cdkDrag
+    [cdkDragBoundary]="boundaryEl"
+    [cdkDragFreeDragPosition]="offset()"
+    (cdkDragStarted)="onDragStarted($event)"
+    (cdkDragEnded)="onDragEnded($event)"
     type="button"
     class="appearance-fab"
     aria-haspopup="true"
     aria-controls="appearance-floating-panel"
-    [attr.aria-expanded]="open"
+    [attr.aria-expanded]="open()"
+    aria-describedby="appearance-fab-hint"
     aria-label="外觀"
-    (click)="toggleOpen()"
+    (click)="onTriggerClick()"
+    (keydown)="onTriggerKeydown($event)"
   >
     <span class="material-symbols-rounded" aria-hidden="true">palette</span>
   </button>
 
-  @if (open) {
+  <span id="appearance-fab-hint" class="visually-hidden">
+    可拖曳到畫面任何位置；聚焦時按 Alt+方向鍵或 Shift+方向鍵可移動位置
+  </span>
+
+  @if (open()) {
     <section
       #panelEl
       id="appearance-floating-panel"
@@ -22,6 +37,11 @@
       cdkTrapFocus
       cdkTrapFocusAutoCapture
       (keydown)="onPanelKeydown($event)"
+      [style.top.px]="anchor().top ?? null"
+      [style.bottom.px]="anchor().bottom ?? null"
+      [style.left.px]="anchor().left ?? null"
+      [style.right.px]="anchor().right ?? null"
+      [style.max-height.px]="anchor().maxHeight"
     >
       <p class="ui-text-caption">外觀</p>
 
@@ -60,6 +80,11 @@
           }
         </div>
       </div>
+
+      <button type="button" class="reset-position-btn" (click)="resetPosition()">
+        <span class="material-symbols-rounded" aria-hidden="true">restart_alt</span>
+        重設位置
+      </button>
     </section>
   }
 }
