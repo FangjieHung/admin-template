@@ -2,20 +2,23 @@
 :root[data-paradigm='grid'] {
   body,
   .sidenav-container {
+    // 28px 細格 + 每 5 格（140px）一條主格線；主格線只比細格線略深，維持低調（已決定 2026-09-26）。
     background-image:
       linear-gradient(color-mix(in srgb, var(--mat-sys-outline-variant) 35%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in srgb, var(--mat-sys-outline-variant) 35%, transparent) 1px, transparent 1px);
-    background-size: 28px 28px;
+      linear-gradient(90deg, color-mix(in srgb, var(--mat-sys-outline-variant) 35%, transparent) 1px, transparent 1px),
+      linear-gradient(color-mix(in srgb, var(--mat-sys-outline-variant) 55%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--mat-sys-outline-variant) 55%, transparent) 1px, transparent 1px);
+    background-size:
+      28px 28px,
+      28px 28px,
+      140px 140px,
+      140px 140px;
   }
 
   .theme-pill {
     border-radius: var(--mat-sys-corner-small);
     font-family: var(--font-body);
     box-shadow: var(--mat-sys-level1);
-  }
-  .theme-pill:focus-visible {
-    outline: 2px solid var(--mat-sys-primary);
-    outline-offset: 2px;
   }
 
   .ui-card {
@@ -42,9 +45,18 @@
   .ui-card-header {
     justify-content: space-between;
     flex-wrap: wrap;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+  .ui-card--inverse .ui-card-header {
+    border-bottom-color: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 24%, transparent);
   }
   .ui-card--clickable {
     cursor: pointer;
+  }
+  .ui-card--clickable:hover {
+    box-shadow: var(--mat-sys-level2);
   }
 
   .ui-nav-pill {
@@ -65,10 +77,23 @@
     background: var(--mat-sys-primary);
     color: var(--mat-sys-on-primary);
   }
-  .ui-nav-pill:focus-visible {
+
+  // 鍵盤焦點框：與 Material 質地涵蓋同一批元素（MDC 把 outline:none 寫在 0,1,0，
+  // 這裡的 :is(...):focus-visible 是 0,2,0，蓋得過）。只在鍵盤/程式化聚焦時觸發。
+  :is(
+      .theme-pill,
+      .ui-nav-pill,
+      .ui-card-titleNav__item,
+      .mat-mdc-button-base,
+      .ui-card--clickable,
+      .nav-link,
+      .nav-sublink,
+      .nav-group-trigger
+    ):focus-visible {
     outline: 2px solid var(--mat-sys-primary);
     outline-offset: 2px;
   }
+
   .mat-mdc-unelevated-button:active,
   .mat-mdc-raised-button:active,
   .mat-mdc-outlined-button:active,
@@ -79,8 +104,16 @@
   .mat-mdc-text-field-wrapper.mdc-text-field--filled {
     --app-field-shape: var(--mat-sys-corner-medium);
     --mat-form-field-filled-container-shape: var(--app-field-shape);
-    border-bottom-left-radius: var(--app-field-shape);
-    border-bottom-right-radius: var(--app-field-shape);
+    border: 1px solid var(--mat-sys-outline);
+    border-radius: var(--app-field-shape);
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--filled.mdc-text-field--focused {
+    border: 2px solid var(--mat-sys-primary);
+  }
+  // 數字輸入（金額、里程、天數）改用等寬字體，靠 input 原生屬性選取，不需碰共用元件檔。
+  input[type='number'].mat-mdc-input-element {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
   }
   .mat-mdc-form-field {
     --mat-form-field-filled-active-indicator-height: 0;
@@ -97,6 +130,7 @@
   .ui-field-group > *:not(:first-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+    border-left: 0;
   }
   .ui-field-group > *:not(:last-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled {
     border-top-right-radius: 0;
@@ -124,21 +158,76 @@
       border: 0;
     }
   }
+  .mat-datepicker-content {
+    border: 1px solid var(--mat-sys-outline);
+    border-radius: var(--mat-sys-corner-large) !important;
+    box-shadow: var(--mat-sys-level3) !important;
+  }
 
   .mat-mdc-dialog-surface {
+    border: 1px solid var(--mat-sys-outline);
     border-radius: var(--mat-sys-corner-extra-large) !important;
+    box-shadow: var(--mat-sys-level4) !important;
+  }
+  // 標題列與動作列各用 1px 內格線與內容分開。
+  .mat-mdc-dialog-title {
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+  .mat-mdc-dialog-actions {
+    border-top: 1px solid var(--mat-sys-outline-variant);
+  }
+  .mat-mdc-menu-panel {
+    border: 1px solid var(--mat-sys-outline);
+    border-radius: var(--mat-sys-corner-large) !important;
+    box-shadow: var(--mat-sys-level3) !important;
   }
   .mat-mdc-table {
     background: transparent !important;
     --mat-table-row-item-container-height: 44px;
     --mat-table-header-container-height: 48px;
+    border: 1px solid var(--mat-sys-outline);
+  }
+  // 表頭與內容之間用一條 outline 實線加強；列線、欄線用 outline-variant。
+  .mat-mdc-header-row {
+    border-bottom: 1px solid var(--mat-sys-outline);
+  }
+  .mat-mdc-row:not(:last-child) {
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
   }
   .mat-mdc-cell,
   .mat-mdc-header-cell {
     padding-inline: 12px;
+    border-right: 1px solid var(--mat-sys-outline-variant);
+  }
+  .mat-mdc-cell:last-child,
+  .mat-mdc-header-cell:last-child {
+    border-right: 0;
+  }
+  // 所有會被比較、加總、排序的數字欄（既有共用 class，見 data-table.component.scss 的 .dt-align-end）
+  // 一律改用等寬字體，配合既有的 tabular-nums 靠右對齊。
+  .dt-align-end {
+    font-family: var(--font-mono);
+  }
+
+  // Admin 實際用的表格是共用元件 libs/ui/data-table（.dt-table，原生 <table>），
+  // 不是 mat-mdc-table；欄線、外框、表頭/內容分隔線要另外補在這裡（不改共用元件檔）。
+  .dt-table {
+    border: 1px solid var(--mat-sys-outline);
+  }
+  .dt-table thead tr {
+    border-bottom: 1px solid var(--mat-sys-outline);
+  }
+  .dt-table th,
+  .dt-table td {
+    border-right: 1px solid var(--mat-sys-outline-variant);
+  }
+  .dt-table th:last-child,
+  .dt-table td:last-child {
+    border-right: 0;
   }
   .mat-mdc-snack-bar-container .mdc-snackbar__surface {
     border-radius: var(--mat-sys-corner-medium) !important;
+    border: 1px solid var(--mat-sys-outline);
   }
 
   .ui-chip {
@@ -161,6 +250,7 @@
     .ui-chip--#{$tone} {
       background: var(--app-#{$tone}-bg);
       color: var(--app-#{$tone}-fg);
+      border: 1px solid color-mix(in srgb, var(--app-#{$tone}-fg) 40%, transparent);
       .ui-chip__dot {
         background: var(--app-#{$tone}-dot);
       }

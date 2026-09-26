@@ -1,6 +1,6 @@
 # Grid 網格質地準則
 
-> 模板與術語見 [`../README.md`](../README.md)。本文件描述**目標樣子**；「現況 → 目標」欄標示尚未實作的差異（改版見 ticket 05–07）。
+> 模板與術語見 [`../README.md`](../README.md)。ticket 06（2026-09-26）已依本文件改版；下表「現況 → 目標」欄已全部完成，保留紀錄供追溯。
 
 ## 一句話個性
 
@@ -13,21 +13,21 @@
 | 項目 | Token | 目標值 | 用在 | 現況 → 目標 |
 | --- | --- | --- | --- | --- |
 | 圓角 small | `--mat-sys-corner-small` | 2px | 按鈕、輸入框、徽章、導覽膠囊 | — |
-| 圓角 medium | `--mat-sys-corner-medium` | 2px | 輸入框、snackbar | 4px → 2px |
-| 圓角 large | `--mat-sys-corner-large` | 0 | 卡片、面板、選單 | 6px → 0 |
-| 圓角 extra-large | `--mat-sys-corner-extra-large` | 0 | 對話框 | 8px → 0 |
-| 圓角 full | `--mat-sys-corner-full` | 2px | Material 預設為膠囊的元件（按鈕、toggle） | 999px → 2px（不做膠囊）；頭像、狀態點仍用正圓 |
-| 陰影 level1 | `--mat-sys-level1` | `2px 2px 0 0`（0 模糊） | 卡片 | 現況 `0 1px 0` 8%（只往下、幾乎看不見）→ 右下 2px 實心偏移 |
-| 陰影 level2 | `--mat-sys-level2` | `3px 3px 0 0` | 可點卡片 hover、按鈕 hover | `0 2px 0` → 3px 偏移 |
-| 陰影 level3 | `--mat-sys-level3` | `4px 4px 0 0` | 選單、日期選擇器 | `0 4px 0` → 4px 偏移 |
-| 陰影 level4 | `--mat-sys-level4` | `6px 6px 0 0` | 對話框 | `0 6px 0` → 6px 偏移 |
-| 邊線 | `--mat-sys-outline` | 1px 實線，明顯可見 | 卡片、對話框、選單、表格外框、欄位 | 卡片已是 `outline`；對話框、選單、欄位現況無框 → 補上 |
-| 內格線 | `--mat-sys-outline-variant` | 1px | 表格列線與欄線、卡片內分區 | 表格現況無欄線 → 加欄線 |
+| 圓角 medium | `--mat-sys-corner-medium` | 2px | 輸入框、snackbar | 已完成（4px → 2px） |
+| 圓角 large | `--mat-sys-corner-large` | 0 | 卡片、面板、選單 | 已完成（6px → 0） |
+| 圓角 extra-large | `--mat-sys-corner-extra-large` | 0 | 對話框 | 已完成（8px → 0） |
+| 圓角 full | `--mat-sys-corner-full` | 2px | Material 預設為膠囊的元件（按鈕、toggle） | 已完成（999px → 2px，不做膠囊）；頭像、狀態點等硬編碼 `border-radius: 50%`／`999px` 的元件不受影響，仍是正圓 |
+| 陰影 level1 | `--mat-sys-level1` | `2px 2px 0 0 var(--mat-sys-outline)`（0 模糊） | 卡片 | 已完成 |
+| 陰影 level2 | `--mat-sys-level2` | `3px 3px 0 0 var(--mat-sys-outline)` | 可點卡片 hover、按鈕 hover | 已完成（`.ui-card--clickable:hover` 已補 level2） |
+| 陰影 level3 | `--mat-sys-level3` | `4px 4px 0 0 var(--mat-sys-outline)` | 選單、日期選擇器 | 已完成 |
+| 陰影 level4 | `--mat-sys-level4` | `6px 6px 0 0 var(--mat-sys-outline)` | 對話框 | 已完成 |
+| 邊線 | `--mat-sys-outline` | 1px 實線，明顯可見 | 卡片、對話框、選單、日期選擇器、表格外框、表單欄位 | 已完成：對話框／選單／日期選擇器／欄位補上 1px outline；欄位 focus 時改 2px `--mat-sys-primary` |
+| 內格線 | `--mat-sys-outline-variant` | 1px | 表格列線與欄線、卡片內分區、對話框標題列/動作列分隔 | 已完成。Admin 實際表格是共用元件 `libs/ui/data-table`（`.dt-table` 原生 `<table>`，非 `mat-mdc-table`），欄線／外框／表頭分隔線是在 grid `recipes.scss` 用 `.dt-table` 選擇器加的，未動共用元件檔 |
 | 字體 display | `--font-display` | IBM Plex Mono ＋ Noto Sans TC | 頁面大標、大數字 | — |
 | 字體 body | `--font-body` | Inter ＋ Noto Sans TC | 內文、表單 | — |
-| 字體 mono | `--font-mono` | IBM Plex Mono | **所有數字資料**：金額、日期、時間、數量、訂單編號、車牌 | 現況只有大數字用等寬數字 → 表格數字欄、統計、日期全部改用 mono ＋ `tabular-nums` |
+| 字體 mono | `--font-mono` | IBM Plex Mono | **所有數字資料**：金額、日期、時間、數量、訂單編號、車牌 | 已完成表格數字欄（既有共用 class `.dt-align-end`）與數字輸入（`input[type='number']`）；統計大數字沿用既有 `.ui-text-display`。其餘散落在個別頁面元件（非共用 class）內、自行寫死 `tabular-nums` 的數字文字（例如 order-form 的金額欄）不在本 ticket 範圍內，未改字體，見下方「已知限制」 |
 | 視覺密度 | `--mat-table-row-item-container-height` 等 | 表格列高 44px、表頭 48px、儲存格左右 12px | 表格 | —（互動目標仍維持 ≥ 44px） |
-| 背景紋理 | 作用在 `body`、`.sidenav-container` | 28px 細格，每 5 格（140px）一條較深的主格線，像方格紙 | 只在頁面底層 | 現況只有單一 28px 細格 → 加主格線 |
+| 背景紋理 | 作用在 `body`、`.sidenav-container` | 28px 細格，每 5 格（140px）一條較深的主格線，像方格紙 | 只在頁面底層 | 已完成：疊加 140px 主格線圖層，透明度比細格線高（55% vs 35%），低調不干擾閱讀 |
 
 ## 層次表現
 
@@ -68,3 +68,9 @@ hover 的回饋是「影子多推出去一格」，按下時影子歸零、元�
 
 - 硬邊陰影顏色用 `--mat-sys-outline`（藍圖感，暗色配色下也不刺眼），不用 `--mat-sys-on-surface`。
 - 保留每 140px 的主格線，但只比細格線略深，維持低調，不可干擾閱讀。
+
+## 已知限制（ticket 06 實作紀錄，2026-09-26）
+
+- **表格數字 mono 化的實作範圍**：本質地包只管樣式，不能改共用元件或 feature 頁面的 template。表格數字欄靠既有共用 class `.dt-align-end`（`libs/ui/data-table`）與 `input[type='number']` 屬性選擇器掛上 `--font-mono`；統計大數字沿用既有 `.ui-text-display`。但 order-form（`order-pricing-section`、`order-payment-drafts-section` 等）金額欄位是各元件自己在 `.scss` 內寫死 `font-variant-numeric: tabular-nums`，沒有共用 class 可掛勾，本 ticket 未改字體。若要全面覆蓋，需要在那些元件的 template 補一個共用的 `.ui-numeric`／`.dt-align-end` 之類的 hook（跨 feature 檔案，超出本 ticket scope，建議另開 ticket）。
+- **對話框／選單／欄位邊框**：既有 `.mat-mdc-dialog-surface`、`.mat-mdc-menu-panel`、`.mat-datepicker-content`、`.mat-mdc-text-field-wrapper.mdc-text-field--filled` 都補了 `1px solid var(--mat-sys-outline)`；欄位群組（`.ui-field-group`）為避免相鄰欄位雙線，中間欄位改 `border-left: 0`，原本的裝飾用 `::before` 分隔線保留。
+- **表格欄線只加在儲存格右側**（`border-right`，最後一欄歸零），未在 `<tr>` 加左右外框，外框由 `.dt-table` 本身的 `border: 1px solid outline` 提供。
