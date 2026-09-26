@@ -34,6 +34,15 @@ Google 風的親切工作台：大圓角、白色卡片輕輕浮在畫布上，�
 
 像 Figma 裡同一個白色 frame 套不同的 drop-shadow effect style：換的是 effect，不是 fill。
 
+## 鍵盤焦點
+
+用鍵盤 Tab 逛頁面時，游標停在哪個按鈕、哪張可點卡片上，一定要看得出來——這是無障礙的基本盤，不是加分項。
+
+- 焦點框固定用 `outline: 2px solid var(--mat-sys-primary)`、`outline-offset: 2px`，只在 `:focus-visible` 時畫（鍵盤／程式化聚焦才出現，滑鼠點擊不出現）。
+- 涵蓋按鈕（`.mat-mdc-button-base`，含 flat／stroked／text／icon 各變體）、導覽膠囊（`.ui-nav-pill`、`.theme-pill`）、側欄與次選單項（`.nav-link`、`.nav-sublink`、`.nav-group-trigger`）、卡片內的分頁式標籤（`.ui-card-titleNav__item`）、可點卡片（`.ui-card--clickable`）。
+- 不要自己挑顏色或加陰影模擬——`--mat-sys-primary` 對白色卡片、畫布、深色 hero 卡三種底色都量過 ≥ 3:1，換了配色軸也不用重調。
+- Material 元件（`.mdc-button` 等）執行期會自帶 `outline: none`，蓋掉全域樣式；這條規則要維持在 `[data-paradigm='material']` 底下的複合選擇器（`:is(...):focus-visible`），specificity 才壓得過。
+
 ## 新增頁面規則
 
 - **卡片**：用 `.ui-card`（白底、hairline 邊、22px 圓角、level1）。可點的加 `.ui-card--clickable`。重點數字卡用 `.ui-card--inverse`（無邊無影）。卡片內再分區用 16px 以上的間距，不再套一層卡片。

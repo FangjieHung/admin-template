@@ -28,6 +28,22 @@
   .ui-nav-pill:active {
     transform: scale(0.97);
   }
+
+  /* 鍵盤焦點框：MDC 元件把 outline:none 寫在 0,1,0，這裡要 ≥ 0,1,1 才蓋得過。
+     只在 :focus-visible 觸發（鍵盤/程式化聚焦才畫，滑鼠點擊不畫），顏色用語意 token。 */
+  :is(
+      .theme-pill,
+      .ui-nav-pill,
+      .ui-card-titleNav__item,
+      .mat-mdc-button-base,
+      .ui-card--clickable,
+      .nav-link,
+      .nav-sublink,
+      .nav-group-trigger
+    ):focus-visible {
+    outline: 2px solid var(--mat-sys-primary);
+    outline-offset: 2px;
+  }
 }
 
 .mdc-icon-button.mat-mdc-icon-button,
