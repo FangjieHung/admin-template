@@ -4,7 +4,12 @@ import { ConnectedPosition } from '@angular/cdk/overlay';
 import { MatSidenavContainer, MatSidenavModule } from '@angular/material/sidenav';
 import { Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
-import { FloatingAppearancePanelComponent } from '@car-rental/theme-pack';
+import { AppearancePanelService } from '@car-rental/theme-pack';
+// ticket 14：面板元件單獨走這條深路徑（不經過 barrel），讓 @defer 能把它與
+// @angular/cdk/drag-drop 拆進獨立 chunk——barrel（index.ts）同時匯出 AppearancePanelService，
+// 若跟它共用同一個 import 語句／模組，AppearancePanelService 的 eager 使用會拖著整個 barrel
+// （含面板元件）一起被主 bundle 靜態引入，defer 就無法把它轉成動態 import。
+import { FloatingAppearancePanelComponent } from '@car-rental/theme-pack/floating-appearance-panel';
 import { ZH_TW } from './core/i18n/zh-tw';
 import { SideNavComponent } from './layout/side-nav/side-nav.component';
 import { NavEntry, NavGroup, isNavGroup } from './layout/side-nav/nav-item.model';
@@ -103,6 +108,8 @@ export class App implements OnInit {
 
   private readonly breakpointObserver = inject(BreakpointObserver);
   private readonly router = inject(Router);
+  // ticket 14：面板開關的 signal 讓 app.html 的 @defer 決定要不要載入面板本身（含拖曳模組）。
+  protected readonly appearancePanel = inject(AppearancePanelService);
 
   ngOnInit(): void {
     this.breakpointObserver.observe(['(max-width: 900px)']).subscribe((result) => {

@@ -8,6 +8,9 @@
     "skipLibCheck": true,
     "paths": {
       "@car-rental/theme-pack": ["./libs/theme-pack/src/index.ts"],
+      "@car-rental/theme-pack/floating-appearance-panel": [
+        "./libs/theme-pack/src/lib/floating-appearance-panel/floating-appearance-panel.component.ts"
+      ],
       "@car-rental/domain": ["./libs/domain/src/index.ts"],
       "@car-rental/booking-flow": ["./libs/booking-flow/src/index.ts"],
       "@car-rental/ui": ["./libs/ui/src/index.ts"],
