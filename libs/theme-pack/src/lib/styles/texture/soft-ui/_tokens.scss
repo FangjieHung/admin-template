@@ -6,10 +6,27 @@
   --mat-sys-corner-extra-large: 32px;
   --mat-sys-corner-full: 999px;
 
-  --soft-shadow-dark: light-dark(rgb(163 177 198 / 0.62), rgb(0 0 0 / 0.46));
-  --soft-shadow-light: light-dark(rgb(255 255 255 / 0.6), rgb(145 164 197 / 0.16));
-  --soft-shadow-dark-hover: light-dark(rgb(163 177 198 / 0.7), rgb(0 0 0 / 0.56));
-  --soft-shadow-light-hover: light-dark(rgb(255 255 255 / 0.68), rgb(145 164 197 / 0.24));
+  // 亮／暗兩道陰影從當前配色的語意 token 調出（而不是寫死的冷灰藍），讓浮雕陰影
+  // 跟著配色走：暗影用 --mat-sys-on-surface（配色自己的深色文字色，跟著色相走），
+  // 亮影用 surface-container-lowest/highest（配色自己的最亮／次亮面）；深色配色下
+  // 找不到比 background 更暗的面，暗影退回中性黑（Material 本身的陰影色 token 預設
+  // 也是純黑，跨配色一致），亮影改用 highest 面維持「有一點材質感」而非死白。
+  --soft-shadow-dark: light-dark(
+    color-mix(in srgb, var(--mat-sys-on-surface) 62%, transparent),
+    color-mix(in srgb, black 46%, transparent)
+  );
+  --soft-shadow-light: light-dark(
+    color-mix(in srgb, var(--mat-sys-surface-container-lowest) 60%, transparent),
+    color-mix(in srgb, var(--mat-sys-surface-container-highest) 16%, transparent)
+  );
+  --soft-shadow-dark-hover: light-dark(
+    color-mix(in srgb, var(--mat-sys-on-surface) 70%, transparent),
+    color-mix(in srgb, black 56%, transparent)
+  );
+  --soft-shadow-light-hover: light-dark(
+    color-mix(in srgb, var(--mat-sys-surface-container-lowest) 68%, transparent),
+    color-mix(in srgb, var(--mat-sys-surface-container-highest) 24%, transparent)
+  );
 
   --mat-sys-level1: 5px 5px 10px var(--soft-shadow-dark), -5px -5px 10px var(--soft-shadow-light);
   --mat-sys-level2: 9px 9px 16px var(--soft-shadow-dark), -9px -9px 16px var(--soft-shadow-light);

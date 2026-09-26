@@ -71,9 +71,10 @@
 
 見 [`theme.token.ts`](../../../theme/theme.token.ts) 中 `TEXTURE_COMPATIBILITY['soft-ui']` 的 `compatibleThemeIds` 與 `defaultThemeId`（唯一來源，此處不列清單）。目前是暫定版：排除 Sandstone 與 Verdant、預設 Cool Grey，定案見 ticket 09。
 
-## 已知問題（2026-09-26 依現況盤點，未修）
+## 已知問題（2026-09-26 依現況盤點；2026-09-26 ticket 13 更新狀態）
 
-- **陰影色寫死**：`--soft-shadow-*` 是固定的冷灰藍 `rgb(163 177 198 …)`／白色，沒有從語意 token 調出，違反 [`../README.md`](../README.md)「陰影顏色也要由語意 token 調出」。暖色或亮綠配色上陰影會發灰、顯髒——這正是目前排除 Sandstone、Verdant 的原因。
-- **`.ui-card--inverse` 不是反白**：recipe 把它設成與一般卡片相同的 `--mat-sys-background` 底、`--mat-sys-on-surface` 字、level2 凸起；[`CONTRACT.md`](../../CONTRACT.md) 定義它是「深色 hero 卡、無邊框無陰影」。在 Soft UI 下重點數字卡失去強調。
-- **表格 recipe 打不到 Admin 的表格**：列高 52px 與列線寫在 `.mat-mdc-table`／`.mat-mdc-row`，但 Admin 的表格是共用元件 `libs/ui/data-table`（`.dt-table` 原生 `<table>`），Admin 模板裡沒有 `mat-table`，所以這兩條規則目前沒有作用。
-- **可點卡片沒有鍵盤焦點框**：`:focus-visible` 規則未包含 `.ui-card--clickable`。
+- **陰影色寫死（已解決）**：`--soft-shadow-*` 改用 `color-mix(in srgb, var(--mat-sys-on-surface) …%, transparent)` 調暗影、`color-mix(in srgb, var(--mat-sys-surface-container-lowest/-highest) …%, transparent)` 調亮影，深色配色（暗影方向找不到比 background 更暗的面）退回中性黑，理由與做法見 `_tokens.scss` 註解。實測 Verdant、Midnight、Sandstone、Candy 下浮雕陰影都跟著配色調性走，不再是單一冷灰藍。Sandstone／Verdant 目前仍在相容清單外（ticket 09 才決定是否重新開放），但截圖比對此次修復前後，色偏已明顯改善，不再發灰顯髒。
+- **`.ui-card--inverse` 不是反白（已解決）**：改成獨立規則，`--mat-sys-inverse-surface` 底、`--mat-sys-inverse-on-surface` 字、`box-shadow: none`，符合 [`CONTRACT.md`](../../CONTRACT.md)「深色 hero 卡、無邊框無陰影」。目前 Admin 模板尚未有頁面使用這個 class，以合成節點驗證規則本身正確。
+- **表格 recipe 打不到 Admin 的表格（已解決）**：新增 `.dt-table` 規則（表格透明、列高改用 `padding-block: 1rem !important`、列間線改用 `color-mix(in srgb, var(--mat-sys-outline) 22%, transparent) !important`）。`!important` 是必要的——共用元件 `libs/ui/data-table` 的樣式是 Angular 執行期注入的 `<style>`，跟這裡的全域規則特異度打平時，依插入順序有時會晚於全域樣式而贏過 cascade，量測到未加 `!important` 時列高被打回原本的 12px。保留 `.mat-mdc-table`／`.mat-mdc-row` 規則以防未來真的用到 `mat-table`。
+- **可點卡片沒有鍵盤焦點框（已解決）**：`:focus-visible` 規則加入 `.ui-card--clickable`，套用 `libs/theme-pack/src/lib/styles/texture/material/buttons.scss` 同一組 outline 寫法。
+- **側欄文字對比（ticket 13 新發現並修復）**：Soft UI 把 `.app-sidenav` 底色換成跟畫布同色（`--mat-sys-background`）後，配色包預設給深色側欄用的白字 token（`--app-shell-on`／`-muted`）沒有跟著換，導致品牌名、導覽項目、使用者卡文字在淺色底板上幾乎看不見。修法：在 soft-ui 範圍內把品牌名／使用者卡姓名改綁 `--mat-sys-on-surface`、導覽項目與說明文字改綁 `--mat-sys-on-surface-variant`（含 hover 狀態），全部 `!important`（同樣是為了蓋過元件執行期插入的樣式，不能賭插入順序）。已用 WCAG 對比比對 8 種配色，全數 ≥ 4.5:1（最低為 Cool Grey 的導覽項目 4.54:1）。

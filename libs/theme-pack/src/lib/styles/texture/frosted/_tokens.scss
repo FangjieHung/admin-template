@@ -6,9 +6,20 @@
   --mat-sys-corner-extra-large: 32px;
   --mat-sys-corner-full: 999px;
 
-  --frost-shadow: light-dark(rgb(54 78 116 / 0.12), rgb(0 0 0 / 0.32));
-  --frost-shadow-hover: light-dark(rgb(54 78 116 / 0.18), rgb(0 0 0 / 0.42));
-  --frost-highlight: light-dark(rgb(255 255 255 / 0.92), rgb(185 205 240 / 0.12));
+  // 陰影／頂部亮邊從語意 token 調出，理由同 Soft UI／Clay：暗側用 on-surface，深色
+  // 配色退回中性黑；亮側用 surface-container-lowest/highest 取代死白／寫死的淡藍。
+  --frost-shadow: light-dark(
+    color-mix(in srgb, var(--mat-sys-on-surface) 12%, transparent),
+    color-mix(in srgb, black 32%, transparent)
+  );
+  --frost-shadow-hover: light-dark(
+    color-mix(in srgb, var(--mat-sys-on-surface) 18%, transparent),
+    color-mix(in srgb, black 42%, transparent)
+  );
+  --frost-highlight: light-dark(
+    color-mix(in srgb, var(--mat-sys-surface-container-lowest) 92%, transparent),
+    color-mix(in srgb, var(--mat-sys-surface-container-highest) 12%, transparent)
+  );
   --frost-border: color-mix(in srgb, var(--mat-sys-outline-variant) 45%, var(--mat-sys-surface));
   --frost-panel: color-mix(in srgb, var(--mat-sys-surface) 88%, transparent);
   --frost-well: inset 0 2px 9px var(--frost-shadow), inset 0 1px 2px var(--frost-highlight);

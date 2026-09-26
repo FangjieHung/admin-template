@@ -6,9 +6,21 @@
   --mat-sys-corner-extra-large: 48px;
   --mat-sys-corner-full: 999px;
 
-  --clay-ambient: light-dark(rgb(160 150 180 / 0.24), rgb(0 0 0 / 0.48));
-  --clay-highlight: light-dark(rgb(255 255 255 / 0.9), rgb(255 255 255 / 0.08));
-  --clay-rim: light-dark(rgb(255 255 255 / 0.8), rgb(255 255 255 / 0.06));
+  // 環境陰影／高光從語意 token 調出，理由同 Soft UI：暗側用 on-surface（跟著配色的
+  // 深色調走），深色配色找不到比 background 更暗的面時退回中性黑；亮側用
+  // surface-container-lowest/highest 取代死白，讓黏土的反光也帶一點配色材質感。
+  --clay-ambient: light-dark(
+    color-mix(in srgb, var(--mat-sys-on-surface) 24%, transparent),
+    color-mix(in srgb, black 48%, transparent)
+  );
+  --clay-highlight: light-dark(
+    color-mix(in srgb, var(--mat-sys-surface-container-lowest) 90%, transparent),
+    color-mix(in srgb, var(--mat-sys-surface-container-highest) 8%, transparent)
+  );
+  --clay-rim: light-dark(
+    color-mix(in srgb, var(--mat-sys-surface-container-lowest) 80%, transparent),
+    color-mix(in srgb, var(--mat-sys-surface-container-highest) 6%, transparent)
+  );
   --clay-bounce: color-mix(in srgb, var(--mat-sys-primary) 8%, transparent);
   --clay-drop: color-mix(in srgb, var(--mat-sys-primary) 22%, transparent);
 

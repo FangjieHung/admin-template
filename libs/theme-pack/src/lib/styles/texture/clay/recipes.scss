@@ -64,20 +64,23 @@
   }
 
   .ui-card,
-  .stat-card,
-  .ui-card--inverse {
+  .stat-card {
     border: 0;
     border-radius: var(--mat-sys-corner-large);
     box-shadow: var(--clay-shadow-card);
-  }
-  .ui-card,
-  .stat-card {
     background: color-mix(in srgb, var(--mat-sys-surface) 78%, transparent);
     color: var(--mat-sys-on-surface);
+    // 背景模糊是 Frosted 的主要手段，在 Clay 上只當卡片的輔助效果（見準則已知問題），
+    // 保留現況、不對新元件擴大使用。
     backdrop-filter: blur(20px);
   }
   .ui-card { overflow: hidden; }
+  // CONTRACT.md：反白卡是「深色 hero 卡、無邊框無陰影」；黏土其他造型（漸層背景、
+  // 圓角）保留，但不能再套一層 clay-shadow-card。
   .ui-card--inverse {
+    border: 0;
+    border-radius: var(--mat-sys-corner-large);
+    box-shadow: none;
     background: var(--mat-sys-inverse-surface);
     color: var(--mat-sys-inverse-on-surface);
     padding: 24px;
@@ -141,7 +144,7 @@
     transform: scale(0.92);
     box-shadow: var(--clay-shadow-pressed);
   }
-  :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base, .nav-link, .nav-sublink, .nav-group-trigger):focus-visible {
+  :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base, .ui-card--clickable, .nav-link, .nav-sublink, .nav-group-trigger):focus-visible {
     outline: 3px solid var(--mat-sys-primary);
     outline-offset: 3px;
   }
@@ -186,12 +189,23 @@
   .mat-datepicker-content,
   .mat-mdc-menu-panel {
     border: 0;
-    border-radius: var(--mat-sys-corner-large) !important;
+    border-radius: var(--mat-sys-corner-extra-large) !important;
     box-shadow: var(--clay-shadow-deep) !important;
   }
   .mat-mdc-table {
     background: transparent !important;
     --mat-table-row-item-container-height: 56px;
+  }
+  // Admin 實際用的表格是共用元件 libs/ui/data-table（.dt-table，原生 <table>），不是
+  // mat-mdc-table；列高放寬到 56px 的目標值，不加欄線（不改共用元件檔）。
+  .dt-table {
+    background: transparent;
+  }
+  // 共用元件的 .dt-table th/td 樣式跟全域規則同特異度時依插入順序晚的贏，這裡要
+  // !important 才蓋得過（同檔案 dialog/snackbar 圓角已經是這個做法）。
+  .dt-table th,
+  .dt-table td {
+    padding-block: 1.125rem !important;
   }
   .mat-mdc-snack-bar-container .mdc-snackbar__surface {
     border-radius: var(--mat-sys-corner-medium) !important;
@@ -235,8 +249,9 @@
   @media (max-width: 639px) {
     .content-area::before,
     .content-area::after { width: 80vw; filter: blur(36px); }
+    // 手機收斂圓角，但仍從 corner-large token 算出來（32px 的 75%），不寫死字面值。
     .ui-card,
-    .stat-card { border-radius: 24px; }
+    .stat-card { border-radius: calc(var(--mat-sys-corner-large) * 0.75); }
   }
 
   @media (prefers-reduced-motion: reduce) {

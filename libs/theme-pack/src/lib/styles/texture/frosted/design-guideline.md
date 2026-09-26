@@ -73,10 +73,11 @@
 
 見 [`theme.token.ts`](../../../theme/theme.token.ts) 中 `TEXTURE_COMPATIBILITY.frosted` 的 `compatibleThemeIds` 與 `defaultThemeId`（唯一來源，此處不列清單；暫定版，定案見 ticket 09）。
 
-## 已知問題（2026-09-26 依現況盤點，未修）
+## 已知問題（2026-09-26 依現況盤點；2026-09-26 ticket 13 更新狀態）
 
-- **陰影色寫死**：`--frost-shadow`、`--frost-shadow-hover` 是固定的藍灰 `rgb(54 78 116 …)`，`--frost-highlight` 是固定的白／淡藍，沒有從語意 token 調出，違反 [`../README.md`](../README.md) 的陰影顏色規則；暖色配色下陰影會偏冷。
-- **對話框沒用 extra-large 圓角**：`--mat-sys-corner-extra-large: 32px` 已定義，但對話框、選單、日期選擇器都用 `--mat-sys-corner-large`（24px）。
-- **`.ui-card--inverse` 有框有影**：[`CONTRACT.md`](../../CONTRACT.md) 定義反白卡「無邊框無陰影」，Frosted 給它霧邊與 level2。
-- **表格 recipe 打不到 Admin 的表格**：列高 54px 寫在 `.mat-mdc-table`，Admin 的表格是 `libs/ui/data-table` 的 `.dt-table`，目前沒有作用。
-- **焦點框缺口**：`:focus-visible` 規則未包含 `.ui-card--clickable` 與 `.nav-flyout-item`（後者在 Frosted 與 `side-nav.component.scss` 都只有 hover／active 樣式，鍵盤聚焦時只剩瀏覽器預設外框）。
+- **陰影色寫死（已解決）**：`--frost-shadow`、`--frost-shadow-hover` 改用 `color-mix(in srgb, var(--mat-sys-on-surface) …%, transparent)`（暗側，深色配色退回中性黑）；`--frost-highlight` 改用 `color-mix(in srgb, var(--mat-sys-surface-container-lowest/-highest) …%, transparent)`（亮側），理由與做法同 Soft UI／Clay，見 `_tokens.scss` 註解。
+- **對話框沒用 extra-large 圓角（已解決）**：對話框、選單、日期選擇器改用 `--mat-sys-corner-extra-large`（32px）。
+- **`.ui-card--inverse` 有框有影（已解決）**：改成 `border: 0; box-shadow: none;`，保留漸層背景與圓角，符合 [`CONTRACT.md`](../../CONTRACT.md)「無邊框無陰影」。
+- **表格 recipe 打不到 Admin 的表格（已解決）**：新增 `.dt-table` 規則，表格透明、列高改用 `padding-block: 1.0625rem !important`（≈17px，對應 54px 列高目標），表頭不加不透明底色。`!important` 原因同 Soft UI／Clay。
+- **焦點框缺口（已解決）**：`:focus-visible` 規則加入 `.ui-card--clickable` 與 `.nav-flyout-item`。
+- **側欄收合選單對比（ticket 13 新發現並修復）**：`.nav-flyout` 背景換成 `--frost-panel`（跟隨配色的淺色玻璃）後，文字仍沿用 `side-nav.component.scss` 給深色側欄用的 `--app-shell-on`／`-muted`，在淺色配色（如 Verdant、Sandstone）下收合選單裡的項目幾乎看不見；主側欄本身背景仍是 `--app-shell-bg`（深色）沒有這個問題。修法：`.nav-flyout`／`.nav-flyout-item` 改綁 `--mat-sys-on-surface`／`-variant`（含 hover／active），全部 `!important`（原因同上）。實測 Frosted × Verdant 收合選單文字對比 5.56:1，通過 4.5:1 門檻；截圖見 `reports/13/frosted_verdant_flyout.png`。

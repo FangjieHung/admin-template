@@ -11,6 +11,7 @@
   .app-sidenav {
     border: 0;
     box-shadow: var(--mat-sys-level2);
+    color: var(--mat-sys-on-surface) !important;
   }
   .brand-mark,
   .avatar {
@@ -20,12 +21,36 @@
   .nav-link.active,
   .nav-sublink.active {
     background: var(--mat-sys-background);
+    color: var(--mat-sys-on-surface) !important;
     box-shadow: var(--soft-inset-small);
+  }
+  // 側欄背景換成跟畫布同色（見上）之後，字色要跟著換成 on-surface 系列 token；
+  // 配色包預設把 --app-shell-on/-muted 設成給深色側欄用的白字，套在淺色底板上會
+  // 完全看不見（品牌名、導覽項目、使用者卡都受影響）。side-nav.component.scss 的規則
+  // 跟這裡同特異度時，依元件執行期插入 <style> 的時機不同、有時會晚於全域樣式插入而
+  // 贏過 cascade（同檔案其他地方蓋 dialog/snackbar 圓角已經是用 !important 處理同一件
+  // 事），這裡的顏色一定要看得見，不能賭插入順序，所以也加 !important。
+  .brand-copy .brand-name,
+  .user-card strong {
+    color: var(--mat-sys-on-surface) !important;
+  }
+  .brand-copy p,
+  .nav-link,
+  .nav-sublink,
+  .user-card p {
+    color: var(--mat-sys-on-surface-variant) !important;
+  }
+  .nav-link:hover,
+  .nav-sublink:hover {
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 8%, transparent) !important;
+    color: var(--mat-sys-on-surface) !important;
+  }
+  .nav-subgroup {
+    border-color: color-mix(in srgb, var(--mat-sys-on-surface) 16%, transparent);
   }
 
   .ui-card,
-  .stat-card,
-  .ui-card--inverse {
+  .stat-card {
     background: var(--mat-sys-background);
     color: var(--mat-sys-on-surface);
     border: 0;
@@ -35,7 +60,14 @@
   .ui-card {
     overflow: hidden;
   }
+  // CONTRACT.md：反白卡是「深色 hero 卡、無邊框無陰影」；不能和一般卡片共用同一底色與
+  // 陰影規則（那樣就只是同色卡片，看不出「反白」）。
   .ui-card--inverse {
+    background: var(--mat-sys-inverse-surface);
+    color: var(--mat-sys-inverse-on-surface);
+    border: 0;
+    border-radius: var(--mat-sys-corner-large);
+    box-shadow: none;
     padding: 24px;
   }
   .ui-card--clickable,
@@ -105,7 +137,7 @@
   .ui-card-titleNav__item.is-active {
     box-shadow: var(--soft-inset-small);
   }
-  :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base, .nav-link, .nav-sublink, .nav-group-trigger):focus-visible {
+  :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base, .ui-card--clickable, .nav-link, .nav-sublink, .nav-group-trigger):focus-visible {
     outline: 2px solid var(--mat-sys-primary);
     outline-offset: 2px;
   }
@@ -179,6 +211,21 @@
   }
   .mat-mdc-row {
     box-shadow: inset 0 -1px color-mix(in srgb, var(--mat-sys-outline) 22%, transparent);
+  }
+  // Admin 實際用的表格是共用元件 libs/ui/data-table（.dt-table，原生 <table>），不是
+  // mat-mdc-table；表格透明、列間只留一條極淡的線，不加凸起效果（不改共用元件檔）。
+  .dt-table {
+    background: transparent;
+  }
+  // 共用元件的 .dt-table th/td/tr 樣式是元件執行期注入的內聯 style，跟全域規則同特異度時
+  // 依插入順序晚的贏，這裡一定要加 !important 才蓋得過（同一份檔案其他地方的 dialog/
+  // snackbar 圓角已經是這個做法）。
+  .dt-table th,
+  .dt-table td {
+    padding-block: 1rem !important;
+  }
+  .dt-table tbody tr {
+    border-bottom-color: color-mix(in srgb, var(--mat-sys-outline) 22%, transparent) !important;
   }
   .mat-mdc-snack-bar-container .mdc-snackbar__surface {
     border-radius: var(--mat-sys-corner-medium) !important;

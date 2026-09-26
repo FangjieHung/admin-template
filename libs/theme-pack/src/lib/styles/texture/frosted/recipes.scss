@@ -25,17 +25,31 @@
     color: var(--app-shell-on);
   }
   .nav-subgroup { border-color: color-mix(in srgb, var(--app-shell-on) 14%, transparent); }
+  // 圓角改由 side-nav.component.scss 直接吃 --mat-sys-corner-large（ticket 12），
+  // 這裡不用再重複寫一次。
   .user-card {
     background: color-mix(in srgb, var(--app-shell-on) 6%, var(--app-shell-bg));
     border: 1px solid var(--frost-border);
-    border-radius: var(--mat-sys-corner-large);
   }
   .nav-flyout {
     background: var(--frost-panel);
     border: 1px solid var(--frost-border);
-    border-radius: var(--mat-sys-corner-large);
     box-shadow: var(--mat-sys-level3);
     backdrop-filter: blur(20px);
+    // nav-flyout 疊在 frost-panel（跟隨配色的淺色玻璃）上，不是側欄本體的深色 shell，
+    // 前景要換成 on-surface 系列 token，否則收合選單的文字看不見。side-nav.component.scss
+    // 的規則跟這裡同特異度時，依元件執行期插入 <style> 的時機不同、有時會晚於全域樣式
+    // 贏過 cascade，不能賭插入順序，所以加 !important（同檔案 dialog/snackbar 圓角已經
+    // 是這個做法）。
+    color: var(--mat-sys-on-surface) !important;
+  }
+  .nav-flyout-item {
+    color: var(--mat-sys-on-surface-variant) !important;
+  }
+  .nav-flyout-item.active,
+  .nav-flyout-item:hover {
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 9%, transparent) !important;
+    color: var(--mat-sys-on-surface) !important;
   }
 
   .ui-card,
@@ -48,13 +62,15 @@
     backdrop-filter: blur(20px) saturate(1.08);
   }
   .ui-card { overflow: hidden; }
+  // CONTRACT.md：反白卡是「深色 hero 卡、無邊框無陰影」；霧玻璃的漸層與圓角保留，
+  // 但不能再套霧邊與陰影（那兩個是「玻璃感」的手段，反白卡本來就不透明）。
   .ui-card--inverse {
     background: linear-gradient(145deg, color-mix(in srgb, var(--mat-sys-inverse-surface) 88%, var(--mat-sys-surface)), var(--mat-sys-inverse-surface));
     color: var(--mat-sys-inverse-on-surface);
-    border: 1px solid var(--frost-border);
+    border: 0;
     border-radius: var(--mat-sys-corner-large);
     padding: 24px;
-    box-shadow: var(--mat-sys-level2);
+    box-shadow: none;
   }
   .ui-card--clickable,
   .stat-card { transition: transform 220ms ease-out, box-shadow 220ms ease-out; }
@@ -108,7 +124,7 @@
     transform: scale(0.98);
     box-shadow: var(--frost-well);
   }
-  :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base, .nav-link, .nav-sublink, .nav-group-trigger):focus-visible {
+  :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base, .ui-card--clickable, .nav-link, .nav-sublink, .nav-group-trigger, .nav-flyout-item):focus-visible {
     outline: 2px solid var(--mat-sys-primary);
     outline-offset: 3px;
   }
@@ -149,13 +165,24 @@
   .mat-mdc-menu-panel {
     background: var(--frost-panel);
     border: 1px solid var(--frost-border);
-    border-radius: var(--mat-sys-corner-large) !important;
+    border-radius: var(--mat-sys-corner-extra-large) !important;
     box-shadow: var(--mat-sys-level4) !important;
     backdrop-filter: blur(20px);
   }
   .mat-mdc-table {
     background: transparent !important;
     --mat-table-row-item-container-height: 54px;
+  }
+  // Admin 實際用的表格是共用元件 libs/ui/data-table（.dt-table，原生 <table>），不是
+  // mat-mdc-table；表格透明讓卡片玻璃透上來，表頭不加不透明底色（不改共用元件檔）。
+  .dt-table {
+    background: transparent;
+  }
+  // 共用元件的 .dt-table th/td 樣式跟全域規則同特異度時依插入順序晚的贏，這裡要
+  // !important 才蓋得過（同檔案 dialog/snackbar 圓角已經是這個做法）。
+  .dt-table th,
+  .dt-table td {
+    padding-block: 1.0625rem !important;
   }
   .mat-mdc-snack-bar-container .mdc-snackbar__surface {
     border-radius: var(--mat-sys-corner-medium) !important;

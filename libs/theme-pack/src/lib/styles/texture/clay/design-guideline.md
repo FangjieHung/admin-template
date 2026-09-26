@@ -74,12 +74,12 @@
 
 見 [`theme.token.ts`](../../../theme/theme.token.ts) 中 `TEXTURE_COMPATIBILITY.clay` 的 `compatibleThemeIds` 與 `defaultThemeId`（唯一來源，此處不列清單；暫定版，定案見 ticket 09）。
 
-## 已知問題（2026-09-26 依現況盤點，未修）
+## 已知問題（2026-09-26 依現況盤點；2026-09-26 ticket 13 更新狀態）
 
-- **陰影色部分寫死**：`--clay-ambient`、`--clay-highlight`、`--clay-rim` 是固定的 `rgb(…)`（淡紫灰／白），沒有從語意 token 調出，違反 [`../README.md`](../README.md) 的陰影顏色規則。
-- **對話框沒用 extra-large 圓角**：`_tokens.scss` 定義 `--mat-sys-corner-extra-large: 48px`，但 recipe 的對話框、選單、日期選擇器都用 `--mat-sys-corner-large`（32px），48px 在 Admin 上實際沒有用到。
-- **手機卡片圓角寫死**：≤ 639px 時卡片 `border-radius: 24px` 是字面值，不走 token。
-- **`.ui-card--inverse` 有陰影**：[`CONTRACT.md`](../../CONTRACT.md) 定義反白卡「無邊框無陰影」，Clay 給它 `--clay-shadow-card`。
-- **卡片用了背景模糊**：`.ui-card` 有 `backdrop-filter: blur(20px)`，這是 Frosted 的主要手段；在 Clay 上是輔助效果，新元件不要再擴大使用。
-- **表格 recipe 打不到 Admin 的表格**：列高 56px 寫在 `.mat-mdc-table`，Admin 的表格是 `libs/ui/data-table` 的 `.dt-table`，目前沒有作用。
-- **可點卡片沒有鍵盤焦點框**：`:focus-visible` 規則未包含 `.ui-card--clickable`。
+- **陰影色部分寫死（已解決）**：`--clay-ambient`、`--clay-highlight`、`--clay-rim` 改用 `color-mix(in srgb, var(--mat-sys-on-surface) …%, transparent)`（暗側）與 `color-mix(in srgb, var(--mat-sys-surface-container-lowest/-highest) …%, transparent)`（亮側）調出，深色配色的暗側退回中性黑，理由同 Soft UI，見 `_tokens.scss` 註解。`--clay-bounce`／`--clay-drop`（按鈕投影）本來就已經綁 `--mat-sys-primary`，不受影響。
+- **對話框沒用 extra-large 圓角（已解決）**：對話框、選單、日期選擇器改用 `--mat-sys-corner-extra-large`（48px），實測 `getComputedStyle` 回傳 48px。
+- **手機卡片圓角寫死（已解決）**：改成 `border-radius: calc(var(--mat-sys-corner-large) * 0.75)`，數值不變（32px × 0.75 = 24px）但改用 token 推導，corner-large 之後若調整會跟著變。
+- **`.ui-card--inverse` 有陰影（已解決）**：拆成獨立規則，`box-shadow: none`，其餘（`--mat-sys-inverse-surface` 底、圓角）不變，符合 [`CONTRACT.md`](../../CONTRACT.md)。
+- **卡片用了背景模糊（維持現況，不是缺陷）**：`.ui-card` 仍保留 `backdrop-filter: blur(20px)`。準則本來就只是提醒「輔助效果、新元件不要擴大使用」，不是要移除既有效果；拿掉會改變 Clay 卡片目前的視覺個性，此次不動。
+- **表格 recipe 打不到 Admin 的表格（已解決）**：新增 `.dt-table` 規則，列高改用 `padding-block: 1.125rem !important`（≈18px，對應 56px 列高目標）。`!important` 是必要的，原因與 Soft UI 相同（共用元件的樣式是元件執行期插入，跟全域規則同特異度時插入順序不保證）。不加欄線，符合「列高寬鬆、不加欄線」的準則。
+- **可點卡片沒有鍵盤焦點框（已解決）**：`:focus-visible` 規則加入 `.ui-card--clickable`。
