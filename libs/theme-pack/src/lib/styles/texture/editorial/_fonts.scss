@@ -1,0 +1,3 @@
+// Admin 只載入字型 CSS；瀏覽器在實際使用 Editorial 時才下載字型檔。
+// 中文不下載襯線字檔（政策：不下載 CJK 襯線），只載入英文襯線 Lora；中文襯線靠系統內建（Songti TC 等），沒有則退回無襯線。
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap');

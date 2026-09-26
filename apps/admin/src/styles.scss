@@ -1,4 +1,5 @@
 @use 'theme-pack/src/lib/styles/texture/clay/fonts';
+@use 'theme-pack/src/lib/styles/texture/editorial/fonts' as editorial-fonts;
 @use 'tailwindcss';
 @use 'assets/style/tailwind-base';
 @use '@angular/material' as mat;

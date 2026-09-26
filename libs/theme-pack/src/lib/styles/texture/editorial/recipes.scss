@@ -37,10 +37,15 @@
     box-shadow: var(--mat-sys-level3);
   }
 
+  // 頁面大標下方一條深色強調線（報頭下的粗線），跟著整條 topbar 的寬度延伸。
+  .topbar {
+    border-bottom: 2px solid var(--mat-sys-on-surface);
+    padding-bottom: 1.25rem;
+  }
   .topbar-heading h1 {
     font-family: var(--font-display);
-    font-weight: 800;
-    letter-spacing: -0.035em;
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
   .ui-card,
   .stat-card {
@@ -152,13 +157,43 @@
   .mat-mdc-menu-panel {
     background: var(--mat-sys-surface);
     border: 1px solid var(--mat-sys-outline-variant);
-    border-radius: var(--mat-sys-corner-large) !important;
     box-shadow: var(--mat-sys-level4) !important;
+  }
+  // 對話框對應「圓角 extra-large」；選單／日期選擇器對應「圓角 large」（見準則造型規格表）。
+  .mat-mdc-dialog-surface {
+    border-radius: var(--mat-sys-corner-extra-large) !important;
+  }
+  .mat-datepicker-content,
+  .mat-mdc-menu-panel {
+    border-radius: var(--mat-sys-corner-large) !important;
+  }
+  // Material 質地在 [data-paradigm='material'] 下用 !important 鎖對話框圓角（0-2-0）；
+  // 這裡用同一份 data-paradigm 屬性但多一層 .cdk-overlay-pane（0-3-0）保證覆寫得掉，即使兩份規則同時載入。
+  .cdk-overlay-pane .mat-mdc-dialog-surface {
+    border-radius: var(--mat-sys-corner-extra-large) !important;
   }
   .mat-mdc-table {
     background: transparent !important;
     --mat-table-row-item-container-height: 52px;
     --mat-table-header-container-height: 48px;
+  }
+  // 表頭：小字 caption 樣式＋下方一條深色強調線；資料列之間 1px 髮絲線，不加欄線。
+  .mat-mdc-header-row {
+    border-bottom: 2px solid var(--mat-sys-on-surface) !important;
+  }
+  .mat-mdc-header-cell {
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--mat-sys-on-surface-variant);
+  }
+  .mat-mdc-row {
+    border-bottom: 1px solid var(--mat-sys-outline-variant) !important;
+  }
+  .mat-mdc-row:last-child {
+    border-bottom: 0 !important;
   }
   .mat-mdc-snack-bar-container .mdc-snackbar__surface {
     border-radius: var(--mat-sys-corner-medium) !important;
@@ -169,7 +204,8 @@
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
-    border-radius: var(--mat-sys-corner-full);
+    // 「圓角 small」用於 chip／徽章：2px 小方籤，不做膠囊。
+    border-radius: var(--mat-sys-corner-small);
     padding: 0.32rem 0.7rem;
     font-size: 0.75rem;
     font-weight: 700;
@@ -190,11 +226,25 @@
     }
   }
 
-  .ui-text-display { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.045em; line-height: 1.05; }
-  .ui-text-title { font-family: var(--font-display); font-size: 1.75rem; font-weight: 800; letter-spacing: -0.035em; color: var(--mat-sys-on-surface); }
-  .ui-text-subtitle { margin: 0; font-family: var(--font-body); font-size: 1.0625rem; font-weight: 700; line-height: 1.5; color: var(--mat-sys-on-surface); }
+  // 襯線用在頁面大標、卡片／表單標題、對話框標題、大數字（design-guideline.md「已決定」）。
+  .ui-text-display { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; }
+  .ui-text-title { font-family: var(--font-display); font-size: 1.75rem; font-weight: 700; letter-spacing: -0.01em; color: var(--mat-sys-on-surface); }
+  .ui-text-subtitle { margin: 0; font-family: var(--font-display); font-size: 1.125rem; font-weight: 600; line-height: 1.5; color: var(--mat-sys-on-surface); }
   .ui-text-caption { color: var(--mat-sys-on-surface-variant); font-size: 0.8rem; letter-spacing: 0.02em; }
   .ui-card--inverse :is(.ui-text-subtitle, .ui-text-caption) { color: inherit; }
+
+  // 對話框標題：襯線字，標題下方一條髮絲線與內容分開。
+  [mat-dialog-title] {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    padding-bottom: 1rem !important;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+  // 動作列上方一條髮絲線，跟內容區隔開。
+  [mat-dialog-actions] {
+    border-top: 1px solid var(--mat-sys-outline-variant);
+  }
 
   @media (prefers-reduced-motion: reduce) {
     :is(.ui-card--clickable, .stat-card, .theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base) {

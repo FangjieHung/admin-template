@@ -12,16 +12,16 @@
 
 | 項目 | Token | 目標值 | 用在 | 現況 → 目標 |
 | --- | --- | --- | --- | --- |
-| 圓角 small | `--mat-sys-corner-small` | 2px | chip／徽章、checkbox | 4px → 2px |
-| 圓角 medium | `--mat-sys-corner-medium` | 2px | 按鈕、輸入框、導覽項目、snackbar | 6px → 2px |
-| 圓角 large | `--mat-sys-corner-large` | 0 | 卡片、面板、選單、日期選擇器、側欄使用者卡 | 12px → 0 |
-| 圓角 extra-large | `--mat-sys-corner-extra-large` | 0 | 對話框 | 12px → 0 |
-| 圓角 full | `--mat-sys-corner-full` | 2px | Material 預設為膠囊的元件 | 999px → 2px（現況徽章是膠囊 → 改 2px 小方籤）；頭像、狀態點仍用正圓 |
-| 陰影 level1–3 | `--mat-sys-level1` … `-level3` | `none` | — | 現況 2.5–4% 淡陰影，且卡片、按鈕 hover 會出現 level2 → 全部移除 |
-| 陰影 level4 | `--mat-sys-level4` | `none` | 對話框、選單 | 現況 `0 8px 24px` 4% → 移除，改由髮絲框＋遮罩界定 |
-| 邊線（髮絲線） | `--mat-sys-outline-variant` | 1px | 區塊分隔線、對話框與選單外框、表格列線 | — |
-| 強調線 | `--mat-sys-on-surface` | 1px（大標下方可 2px） | 頁面大標下方、表頭下方 | 新增 |
-| 字體 display | `--font-display` | 襯線：英文用一套輕量網頁襯線字（額外載入）；中文用系統內建襯線（macOS 宋體-繁），沒有則退回無襯線，不下載中文襯線字檔 | 頁面大標、卡片標題、大數字 | Helvetica Neue（無襯線）→ 襯線；字型需額外載入（見待決問題） |
+| 圓角 small | `--mat-sys-corner-small` | 2px | chip／徽章、checkbox | 已於 ticket 07 實作 |
+| 圓角 medium | `--mat-sys-corner-medium` | 2px | 按鈕、輸入框、導覽項目、snackbar | 已於 ticket 07 實作 |
+| 圓角 large | `--mat-sys-corner-large` | 0 | 卡片、面板、選單、日期選擇器、側欄使用者卡 | 已於 ticket 07 實作 |
+| 圓角 extra-large | `--mat-sys-corner-extra-large` | 0 | 對話框 | 已於 ticket 07 實作 |
+| 圓角 full | `--mat-sys-corner-full` | 2px | Material 預設為膠囊的元件 | 已於 ticket 07 實作（`.ui-chip` 改用 corner-small）；頭像、狀態點仍用正圓（未經 corner token，維持 `border-radius: 50%`） |
+| 陰影 level1–3 | `--mat-sys-level1` … `-level3` | `none` | — | 已於 ticket 07 實作 |
+| 陰影 level4 | `--mat-sys-level4` | `none` | 對話框、選單 | 已於 ticket 07 實作，改由髮絲框＋遮罩界定 |
+| 邊線（髮絲線） | `--mat-sys-outline-variant` | 1px | 區塊分隔線、對話框與選單外框、表格列線 | 已於 ticket 07 實作（對話框標題下、動作列上、表格列間） |
+| 強調線 | `--mat-sys-on-surface` | 1px（大標下方可 2px） | 頁面大標下方、表頭下方 | 已於 ticket 07 實作：`.topbar` 底線 2px、`.mat-mdc-header-row` 底線 2px |
+| 字體 display | `--font-display` | 襯線：英文載入 **Lora**（Google Fonts，400/500/600/700，見 `_fonts.scss`）；中文用系統內建襯線（`"Songti TC"`），沒有則退回 `--font-zh`（Noto Sans TC 等無襯線），不下載中文襯線字檔 | 頁面大標（`.topbar-heading h1`）、卡片／表單標題（`.ui-text-subtitle`）、對話框標題（`[mat-dialog-title]`）、大數字（`.ui-text-display`） | 已於 ticket 07 實作 |
 | 字體 body | `--font-body` | Helvetica Neue ＋ Noto Sans TC | 內文、表格、表單、按鈕 | — |
 | 字體 mono | `--font-mono` | IBM Plex Mono | 代碼類資料 | — |
 | 視覺密度 | `--mat-table-row-item-container-height` | 表格列高 52px；內文行高 1.6 | 表格、內文 | — |
@@ -67,3 +67,13 @@
 - 襯線字型：英文載入一套輕量網頁襯線字；中文不下載字檔，用系統襯線（`"Songti TC"` 等），沒有時退回無襯線。代價：Windows 上中文大標可能是無襯線。
 - 襯線使用範圍維持本文件所寫：頁面大標、卡片標題、對話框標題、大數字。
 - 側欄照同一規則：導覽項目 2px、使用者卡直角。
+
+## 實作紀錄（ticket 07，2026-09-26）
+
+- 英文襯線最終選用 **Lora**（Google Fonts，`wght@400;500;600;700`），透過 `editorial/_fonts.scss` 用 `@import url(...)` 載入 CSS，仿照 `clay/_fonts.scss` 的作法；在 `apps/admin/src/styles.scss` 與 clay 字型並列 `@use`。中文沿用系統襯線 `"Songti TC"`，退回鏈為 `--font-zh`（Noto Sans TC/sans-serif），不下載任何 CJK 襯線檔。字重只到 700：原本 `.ui-text-display`／`.ui-text-title`／`.topbar-heading h1` 的 `font-weight: 800` 一併降為 700，避免瀏覽器對未載入字重做假粗體。
+- 對話框圓角除了 `.mat-mdc-dialog-surface { border-radius: var(--mat-sys-corner-extra-large) !important }`，另外加了 `.cdk-overlay-pane .mat-mdc-dialog-surface` 的同值覆寫（specificity 0-4-0）作為保險，防止 Material 質地那份 `[data-paradigm='material'] .mat-mdc-dialog-surface`（0-2-0 + !important）規則同時載入時搶贏。
+- 修正圓角 token 對應：對話框改用 `--mat-sys-corner-extra-large`、選單／日期選擇器改用 `--mat-sys-corner-large`（原本兩者共用 `-large`，與造型規格表不符，但目標值都是 0，視覺上無差異）。
+- 新增「強調線」：`.topbar` 加 `border-bottom: 2px solid var(--mat-sys-on-surface)`；`.mat-mdc-header-row` 同樣加 2px 底線；`.mat-mdc-row` 之間 1px `--mat-sys-outline-variant` 髮絲線（最後一列不畫）。
+- 對話框標題／動作列髮絲線改用屬性選擇器 `[mat-dialog-title]`／`[mat-dialog-actions]`，對所有既有對話框元件生效，不需逐一改各對話框的自訂 class。
+- `.ui-chip` 圓角改用 `--mat-sys-corner-small`（而非原本的 `--mat-sys-corner-full`），對齊造型規格表「small = chip／徽章」；數值結果相同（2px），但語意對應正確。
+- 未動：`.avatar`、`.ui-chip__dot` 沒有套用 corner token，維持既有 `border-radius: 50%`（頭像／狀態點仍正圓，未受 `corner-full` 由 999px 改 2px 影響）。

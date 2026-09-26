@@ -1,20 +1,21 @@
-// 編輯式極簡質地：平面、細線、小圓角；色彩由配色軸提供。
+// 編輯式極簡質地：完全平面、方正，靠襯線大標、字級對比、留白與髮絲線分層；色彩由配色軸提供。
 :root[data-paradigm='editorial'] {
-  --mat-sys-corner-small: 4px;
-  --mat-sys-corner-medium: 6px;
-  --mat-sys-corner-large: 12px;
-  --mat-sys-corner-extra-large: 12px;
-  --mat-sys-corner-full: 999px;
+  --mat-sys-corner-small: 2px;
+  --mat-sys-corner-medium: 2px;
+  --mat-sys-corner-large: 0;
+  --mat-sys-corner-extra-large: 0;
+  --mat-sys-corner-full: 2px;
 
-  --mat-sys-level1: 0 1px 2px light-dark(rgb(20 20 24 / 0.025), rgb(0 0 0 / 0.025));
-  --mat-sys-level2: 0 2px 8px light-dark(rgb(20 20 24 / 0.035), rgb(0 0 0 / 0.035));
-  --mat-sys-level3: 0 4px 12px light-dark(rgb(20 20 24 / 0.04), rgb(0 0 0 / 0.04));
-  --mat-sys-level4: 0 8px 24px light-dark(rgb(20 20 24 / 0.04), rgb(0 0 0 / 0.04));
+  --mat-sys-level1: none;
+  --mat-sys-level2: none;
+  --mat-sys-level3: none;
+  --mat-sys-level4: none;
 
   --font-zh: 'Noto Sans TC', system-ui, sans-serif;
-  --font-en: 'Helvetica Neue', 'SF Pro Display', system-ui, sans-serif;
-  --font-display: var(--font-en), var(--font-zh);
-  --font-body: var(--font-en), var(--font-zh);
+  // 英文襯線：額外載入的輕量網頁字（Lora，見 _fonts.scss）；中文襯線只用系統內建（未安裝則退回 --font-zh 的無襯線）。
+  --font-en: 'Lora', 'Songti TC', var(--font-zh), serif;
+  --font-display: var(--font-en);
+  --font-body: 'Helvetica Neue', 'SF Pro Display', system-ui, var(--font-zh), sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
   --mat-button-tonal-horizontal-padding: 1rem;
 }
