@@ -27,7 +27,7 @@
     <div class="theme-row">
       <span class="theme-row__label">配色</span>
       <div class="theme-row__options" role="group" aria-label="配色">
-        @for (option of colorThemes; track option.id) {
+        @for (option of colorThemes(); track option.id) {
           <button
             type="button"
             class="theme-pill"

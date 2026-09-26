@@ -64,4 +64,31 @@ describe('SettingsPageComponent', () => {
         .getAttribute('aria-pressed'),
     ).toBe('true');
   });
+
+  it('ADR 0007：選 Soft UI 後，配色列只顯示相容配色，Sandstone／Verdant 被隱藏', () => {
+    const fixture = TestBed.createComponent(SettingsPageComponent);
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('[data-paradigm-id="soft-ui"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-theme-id="sandstone"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-theme-id="verdant"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-theme-id="cool-grey"]')).not.toBeNull();
+  });
+
+  it('ADR 0007：從 Soft UI × Sandstone 的已存組合重新載入，變成 Soft UI 的預設配色', () => {
+    localStorage.setItem('cr.paradigm', 'soft-ui');
+    localStorage.setItem('cr.theme', 'sandstone');
+
+    const theme = TestBed.inject(ThemeService);
+    theme.init();
+    const fixture = TestBed.createComponent(SettingsPageComponent);
+    fixture.detectChanges();
+
+    expect(theme.theme()).toBe('cool-grey');
+    expect(
+      fixture.nativeElement.querySelector('[data-theme-id="cool-grey"]').getAttribute('aria-pressed'),
+    ).toBe('true');
+  });
 });
