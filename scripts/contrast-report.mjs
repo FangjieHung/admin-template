@@ -17,8 +17,9 @@
 //   - screenshots/<texture>__<color>.png   56 張代表畫面截圖（screenshot wall）
 //
 // 量測方法：見 scripts/contrast-lib.mjs 開頭的 alpha compositing 說明。
-// 量測畫面：目前固定用 /dashboard（同時涵蓋月曆），因為它一頁內就有全部 6 種 pair
-// （頁面底色文字、卡片底色文字、次要文字、狀態徽章/chip、focus 外框、主要按鈕），
+// 量測畫面：目前固定用 /dashboard（同時涵蓋月曆＋側欄），因為它一頁內就有全部內容區
+// pair（頁面底色文字、卡片底色文字、次要文字、狀態徽章/chip、focus 外框、主要按鈕）
+// 加上側欄 pair（品牌名稱/副標、選中與未選中選單文字、使用者名稱/狀態、收合箭頭圖示），
 // 可在單一畫面把 56 組合跑完；尚未擴充到 orders 列表頁/order-create/dialog 做交叉驗證，
 // 這點在報告最後的「已知限制」列出。
 
@@ -124,6 +125,59 @@ const PAIRS = [
     label: '主要按鈕文字 on 按鈕底色',
     selector: '.dashboard-new-order',
     kind: 'normal',
+  },
+  // 側欄(side-nav) pairs：Soft UI 曾出現側欄底色被畫亮、文字卻維持白色的真實回歸
+  // （側欄底色來自質地 recipe，文字色來自配色 token，兩邊各自獨立設定，容易脫鉤）。
+  // 7 種質地都要覆蓋到，因此併入主 PAIRS 清單，56 格全跑。
+  {
+    key: 'sidenav_brand_name',
+    label: '側欄品牌名稱 on 側欄底色',
+    selector: '.brand-copy .brand-name',
+    kind: 'normal',
+  },
+  {
+    key: 'sidenav_brand_subtitle',
+    label: '側欄品牌副標 on 側欄底色',
+    selector: '.brand-copy p:not(.brand-name)',
+    kind: 'normal',
+  },
+  {
+    key: 'sidenav_nav_active_label',
+    label: '側欄選單項目(選中) 文字 on 底色',
+    // 規格原給 `.nav-link.active span:last-child`：但選單群組按鈕(nav-group-trigger)
+    // 也帶 .nav-link class，且未收合時有 3 個 span(icon/label/caret)，
+    // span:last-child 在該情境會選到 caret 圖示而非文字 label。改用
+    // `> span:not(.material-symbols-rounded)` 精準鎖定純文字 label span
+    // （icon 與 caret 皆帶 material-symbols-rounded class），/dashboard 本身是
+    // 非群組的一般連結，此差異不影響「選中」這格量到的元素。
+    selector: '.nav-link.active > span:not(.material-symbols-rounded)',
+    kind: 'normal',
+  },
+  {
+    key: 'sidenav_nav_idle_label',
+    label: '側欄選單項目(未選中) 文字 on 底色',
+    // 同上原因，改用 `> span:not(.material-symbols-rounded)`；DOM 首個符合的未選中
+    // .nav-link 是群組觸發按鈕(如「商品」)，測到的是它的文字 label，而非展開箭頭。
+    selector: '.nav-link:not(.active) > span:not(.material-symbols-rounded)',
+    kind: 'normal',
+  },
+  {
+    key: 'sidenav_user_name',
+    label: '側欄使用者名稱 on 底色',
+    selector: '.user-card strong',
+    kind: 'normal',
+  },
+  {
+    key: 'sidenav_user_status',
+    label: '側欄使用者狀態文字 on 底色',
+    selector: '.user-card p',
+    kind: 'normal',
+  },
+  {
+    key: 'sidenav_collapse_chevron',
+    label: '側欄收合箭頭圖示 on 底色',
+    selector: '.collapse-toggle .material-symbols-rounded',
+    kind: 'ui', // icon，門檻 3:1
   },
 ];
 
