@@ -11,9 +11,8 @@
     box-shadow: none;
   }
   .nav-subgroup { border-color: color-mix(in srgb, var(--app-shell-on) 12%, transparent); }
-  .nav-link,
-  .nav-sublink,
-  .nav-flyout-item { border-radius: var(--mat-sys-corner-medium); }
+  // 導覽項目／子項目／flyout 項目的圓角已改由 side-nav.component.scss 直接吃
+  // var(--mat-sys-corner-medium)，此質地不需再覆寫（ticket 12）。
   :is(.nav-link, .nav-sublink, .nav-flyout-item):hover,
   :is(.nav-link, .nav-sublink, .nav-flyout-item).active {
     background: color-mix(in srgb, var(--app-shell-on) 7%, var(--app-shell-bg));
@@ -22,7 +21,7 @@
   }
   .user-card {
     border: 1px solid color-mix(in srgb, var(--app-shell-on) 10%, var(--app-shell-bg));
-    border-radius: var(--mat-sys-corner-large);
+    // border-radius 已由 side-nav.component.scss 吃 --mat-sys-corner-large，同值不重複覆寫。
     background: color-mix(in srgb, var(--app-shell-on) 4%, var(--app-shell-bg));
   }
   .brand-mark,
@@ -33,7 +32,7 @@
   .brand-mark { border-radius: var(--mat-sys-corner-medium); }
   .nav-flyout {
     border: 1px solid var(--mat-sys-outline-variant);
-    border-radius: var(--mat-sys-corner-large);
+    // border-radius 已由 side-nav.component.scss 吃 --mat-sys-corner-large，同值不重複覆寫。
     box-shadow: var(--mat-sys-level3);
   }
 

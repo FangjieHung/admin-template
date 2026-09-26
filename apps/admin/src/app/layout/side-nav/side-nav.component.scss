@@ -88,7 +88,9 @@
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  border-radius: 14px;
+  // 導覽項目（含群組觸發器，套同一個 class）跟隨質地的 corner-medium token，
+  // 不要在這裡寫死像素值——每個質地各自在 _tokens.scss 定義 corner-medium。
+  border-radius: var(--mat-sys-corner-medium);
   color: var(--app-shell-on-muted);
   text-decoration: none;
   transition:
@@ -149,7 +151,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  border-radius: 12px;
+  border-radius: var(--mat-sys-corner-medium);
   color: var(--app-shell-on-muted);
   text-decoration: none;
   transition:
@@ -169,7 +171,8 @@
   gap: 4px;
   min-width: 200px;
   padding: 8px;
-  border-radius: 14px;
+  // 收合時彈出的選單容器，跟卡片/選單同一階：corner-large。
+  border-radius: var(--mat-sys-corner-large);
   background: var(--app-shell-bg);
   color: var(--app-shell-on);
   box-shadow: var(--mat-sys-level4);
@@ -180,7 +183,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: var(--mat-sys-corner-medium);
   color: var(--app-shell-on-muted);
   text-decoration: none;
   transition:
@@ -208,7 +211,8 @@
   align-items: center;
   gap: 12px;
   padding: 14px;
-  border-radius: 16px;
+  // 使用者卡跟卡片/面板同一階：corner-large。
+  border-radius: var(--mat-sys-corner-large);
   background: rgba(255, 255, 255, 0.08);
 }
 
