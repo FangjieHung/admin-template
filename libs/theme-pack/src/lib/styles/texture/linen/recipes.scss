@@ -2,18 +2,35 @@
 :root[data-paradigm='linen'] {
   body,
   .sidenav-container {
-    background-image: repeating-linear-gradient(
-      0deg,
-      color-mix(in srgb, var(--mat-sys-outline-variant) 13%, transparent) 0 1px,
-      transparent 1px 6px
-    );
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        color-mix(in srgb, var(--mat-sys-outline-variant) 20%, transparent) 0 1px,
+        transparent 1px 6px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--mat-sys-outline-variant) 20%, transparent) 0 1px,
+        transparent 1px 6px
+      );
   }
 
   .theme-pill {
     border-radius: var(--mat-sys-corner-medium);
     box-shadow: var(--mat-sys-level1);
   }
-  .theme-pill:focus-visible {
+  /* 鍵盤焦點框：MDC 元件把 outline:none 寫在 0,1,0，這裡要 ≥ 0,1,1 才蓋得過。
+     只在 :focus-visible 觸發，顏色用語意 token。與 Material 質地涵蓋同一組元素。 */
+  :is(
+      .theme-pill,
+      .ui-nav-pill,
+      .ui-card-titleNav__item,
+      .mat-mdc-button-base,
+      .ui-card--clickable,
+      .nav-link,
+      .nav-sublink,
+      .nav-group-trigger
+    ):focus-visible {
     outline: 2px solid var(--mat-sys-primary);
     outline-offset: 2px;
   }
@@ -66,10 +83,6 @@
     background: var(--mat-sys-primary);
     color: var(--mat-sys-on-primary);
   }
-  .ui-nav-pill:focus-visible {
-    outline: 2px solid var(--mat-sys-primary);
-    outline-offset: 2px;
-  }
   .mat-mdc-unelevated-button:active,
   .mat-mdc-raised-button:active,
   .mat-mdc-outlined-button:active,
@@ -89,6 +102,10 @@
   }
   .mat-mdc-form-field-focus-overlay {
     border-radius: inherit;
+  }
+  .mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    outline: 2px solid var(--mat-sys-primary);
+    outline-offset: -2px;
   }
   .ui-field-group {
     display: flex;
@@ -126,11 +143,25 @@
     }
   }
 
-  .mat-mdc-dialog-surface {
+  .mat-mdc-dialog-surface,
+  .mat-datepicker-content,
+  .mat-mdc-menu-panel {
+    background: var(--mat-sys-surface);
+    border: 1px solid var(--mat-sys-outline-variant);
     border-radius: var(--mat-sys-corner-extra-large) !important;
   }
   .mat-mdc-table {
     background: transparent !important;
+    --mat-table-row-item-container-height: 52px;
+  }
+  .mat-mdc-header-row {
+    background: var(--mat-sys-surface-container);
+  }
+  .mat-mdc-row {
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+  .mat-mdc-row:hover {
+    background: var(--mat-sys-surface-container-low);
   }
   .mat-mdc-snack-bar-container .mdc-snackbar__surface {
     border-radius: var(--mat-sys-corner-medium) !important;

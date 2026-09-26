@@ -1,6 +1,6 @@
 # Linen 紙感質地準則
 
-> 模板與術語見 [`../README.md`](../README.md)。本文件描述**目標樣子**；「現況 → 目標」欄標示尚未實作的差異（改版見 ticket 05–07）。
+> 模板與術語見 [`../README.md`](../README.md)。本文件描述**目標樣子**。ticket 05（2026-09-26）已依本文件改版，「現況 → 目標」欄已全數落地，僅保留紀錄。
 
 ## 一句話個性
 
@@ -14,16 +14,16 @@
 | --- | --- | --- | --- | --- |
 | 圓角 small | `--mat-sys-corner-small` | 4px | 狀態徽章、導覽膠囊、checkbox | — |
 | 圓角 medium | `--mat-sys-corner-medium` | 8px | 輸入框、按鈕、snackbar | — |
-| 圓角 large | `--mat-sys-corner-large` | 8px | 卡片、面板、選單 | 12px → 8px |
-| 圓角 extra-large | `--mat-sys-corner-extra-large` | 8px | 對話框 | 16px → 8px |
-| 圓角 full | `--mat-sys-corner-full` | 8px | Material 預設為膠囊的元件（按鈕、toggle 等） | 999px → 8px（現況 Material 按鈕是膠囊形；本質地不做膠囊）；頭像、狀態點仍用正圓 |
-| 陰影 level1–4 | `--mat-sys-level1` … `-level4` | 全部 `none` | — | 現況有 3.5–9% 的淡陰影 → 全部移除 |
-| 邊線 | `--mat-sys-outline-variant` | 1px，淡 | 卡片、對話框、選單、表格列線 | 對話框、選單現況無框 → 補 1px 淡框（沒有陰影時要靠它和遮罩分出邊界） |
-| 字體 display | `--font-display` | 無襯線（與 body 同字族，靠字重與字級區分） | 頁面大標、大數字 | Georgia 襯線 → 無襯線（襯線保留給 Editorial） |
+| 圓角 large | `--mat-sys-corner-large` | 8px | 卡片、面板、選單 | 已改為 8px |
+| 圓角 extra-large | `--mat-sys-corner-extra-large` | 8px | 對話框 | 已改為 8px |
+| 圓角 full | `--mat-sys-corner-full` | 8px | Material 預設為膠囊的元件（按鈕、toggle 等） | 已改為 8px（本質地不做膠囊）；頭像、狀態點仍用正圓（硬寫 999px，不吃此 token） |
+| 陰影 level1–4 | `--mat-sys-level1` … `-level4` | 全部 `none` | — | 已全部改為 `none` |
+| 邊線 | `--mat-sys-outline-variant` | 1px，淡 | 卡片、對話框、選單、表格列線 | 對話框、選單、datepicker 已補 1px 淡框 |
+| 字體 display | `--font-display` | 無襯線（與 body 同字族，靠字重與字級區分） | 頁面大標、大數字 | 已改為 `var(--font-body)`（無襯線） |
 | 字體 body | `--font-body` | Inter ＋ Noto Sans TC | 內文、小節標、表格、表單 | — |
 | 字體 mono | `--font-mono` | IBM Plex Mono | 代碼類資料 | — |
 | 視覺密度 | Material 預設 | 表格列高 52px | 表格、表單 | — |
-| 背景紋理 | 作用在 `body`、`.sidenav-container` | 橫＋直兩向細線交織成布紋，線色 `--mat-sys-outline-variant` 約 20% 起調；一眼看得出是布，但文字對比仍 ≥ 4.5:1 | 只在頁面底層，卡片等表面維持實色 | 現況只有橫線、13%，幾乎看不見 → 加直線、加深到明顯可見 |
+| 背景紋理 | 作用在 `body`、`.sidenav-container` | 橫＋直兩向細線交織成布紋，線色 `--mat-sys-outline-variant` 約 20% 起調；一眼看得出是布，但文字對比仍 ≥ 4.5:1 | 只在頁面底層，卡片等表面維持實色 | 已加直線、加深到 20% |
 
 ## 層次表現
 
@@ -45,7 +45,7 @@
 
 - **卡片**：`.ui-card`，`--mat-sys-surface` 底、1px 淡框、8px 圓角、無陰影。卡片內要分區時用 `--mat-sys-surface-container-low` 的色塊，不要再畫一張有框的卡片。可點卡片 hover 改變底色（往 `-container-low` 走一階），不浮起。
 - **表格**：表頭列用 `--mat-sys-surface-container` 底色；資料列之間 1px 淡線；hover 列用 `--mat-sys-surface-container-low`。不加欄線。
-- **表單**：filled 欄位 8px 圓角、底色 `--mat-sys-surface-container-high`、無底線；聚焦時 2px `--mat-sys-primary` 外框（現況沿用 Material 預設底色、無聚焦外框 → 目標如上）。相連欄位用 `.ui-field-group`，接縫用淡線。
+- **表單**：filled 欄位 8px 圓角、底色 `--mat-sys-surface-container-high`、無底線；聚焦時 2px `--mat-sys-primary` 外框（已實作）。相連欄位用 `.ui-field-group`，接縫用淡線。
 - **空狀態**：在卡片內放一塊 `--mat-sys-surface-container-low` 的色塊，裡面置中圖示＋一行標題＋一行說明＋按鈕。色塊本身就是視覺焦點，不另加框或插畫陰影。
 - **對話框**：8px 圓角、`--mat-sys-surface` 底、1px 淡框、無陰影；遮罩維持預設。對話框內的次要區塊用 `-container-low`。
 - **chip／徽章**：`.ui-chip--{tone}`，4px 圓角的小方籤（不是膠囊），顏色來自 `--app-{tone}-bg/fg`。
