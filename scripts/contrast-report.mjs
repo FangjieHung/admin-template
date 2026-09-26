@@ -24,7 +24,7 @@
 
 import { chromium } from 'playwright-core';
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   contrastForTextOnStack,
@@ -44,7 +44,7 @@ const args = Object.fromEntries(
 );
 const BASE_URL = args['base-url'] || 'http://localhost:5231';
 const OUT_DIR = args['out']
-  ? join(process.cwd(), args['out'])
+  ? resolve(args['out'])
   : join(REPO_ROOT, '.scratch/theme-compat-panel/reports');
 const SCREENSHOT_DIR = join(OUT_DIR, 'screenshots');
 const CHROME_PATH =
