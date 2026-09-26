@@ -1,15 +1,35 @@
-// z-index 選 500：低於 CDK overlay（mat-dialog 等）的 1000，dialog 開啟時一定蓋過這個面板；
-// 高於一般頁面內容與 sticky 操作列（訂單建立頁的 footer 是 2，行動版 toolbar-actions 是 10）。
-// 固定在視窗右上角（而非右下角）：admin 有些頁面在視窗底部有 sticky 操作列（建單頁的
-// .order-create__footer、page-toolbar 的 .toolbar-actions），釘在頂角天生就不會疊到它們，
-// 不必再去量測每一頁的底部留白。
+// z-index 選 500：低於 CDK overlay（mat-dialog 等）的 1000，dialog 開啟時一定蓋過這個面板。
+//
+// 走查記錄（coordinator 要求，17 條路徑 × 1280／390 兩個寬度）：一開始把觸發按鈕做成
+// position: fixed 釘在視窗角落，四個角落都實測撞到東西——
+//   - 右上角：桌機寬度下跟每個列表頁頁首的主要操作鈕（「新增訂單」「新增車輛」…）重疊；
+//     手機寬度下這顆主要操作鈕會搬到底部固定列（page-toolbar 的 .toolbar-actions），但頁首
+//     右上角還留著搜尋圖示鈕（.search__toggle，不屬於 .toolbar-actions，不會搬走），一樣重疊。
+//   - 右下角：手機寬度下跟 .toolbar-actions 固定列本身、建單頁的 sticky footer、
+//     dashboard 月曆檢視鋪滿到視窗底的日期格都會疊到，没有一個安全偏移量能同時閃開三種。
+// 這個 app 的頁首（page-toolbar）本來就會依寬度把不同東西搬進搜尋鈕／操作列，四個角落沒有
+// 一個是「所有頁面、所有寬度」都保證空的。真正可靠的做法不是再猜一個新角落，而是讓這顆按鈕
+// 本身變成頁首 flex 排版裡的一個正常項目（改掛在 app-header 的 .topbar，見
+// apps/admin/src/app/layout/header/header.component.html）——用 flexbox 本身避免重疊，
+// 跟頁首其他內容一起換行，而不是疊在任何東西上面。
 $panel-z: 500;
 
+// 元件的宿主自己是這個按鈕在版面上的容器：加入頁首的 flex 排版時，宿主本身就是那個 flex item
+// （不能用 display: contents，否則按鈕跟面板會各自變成頁首的 flex item，面板就抓不到「相對於
+// 按鈕」的定位基準）；面板開啟時用 position: absolute 貼著它的左下角展開。
+:host {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+// 開關關閉時 @if 讓宿主整個沒有子節點；這裡讓它不吃 .topbar 的 flex gap，
+// 不然開關關閉時頁首會莫名多一截空隙。
+:host(:empty) {
+  display: none;
+}
+
 .appearance-fab {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: $panel-z;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -37,16 +57,20 @@ $panel-z: 500;
 }
 
 .appearance-panel {
-  position: fixed;
-  top: 68px;
-  right: 16px;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
   z-index: $panel-z;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   width: 280px;
-  // 390px 寬驗收：面板本身不可比 viewport 減掉左右留白還寬。
+  // 390px 寬驗收：面板本身不可比 viewport 減掉左右留白還寬（宿主貼著頁首右緣，
+  // 面板往左展開，這個上限確保它不會超出視窗左邊）。
   max-width: calc(100vw - 32px);
+  // 矮視窗、或頁首因為換行變高時，面板自己能捲動，不把版面往下推。
+  max-height: min(70vh, 480px);
+  overflow-y: auto;
   padding: 0.875rem 1rem 1rem;
   box-shadow: var(--mat-sys-level3);
 }
@@ -96,11 +120,4 @@ $panel-z: 500;
 .theme-pill.is-active {
   background: var(--mat-sys-primary);
   color: var(--mat-sys-on-primary);
-}
-
-@media (max-width: 374px) {
-  .appearance-panel {
-    width: auto;
-    left: 16px;
-  }
 }

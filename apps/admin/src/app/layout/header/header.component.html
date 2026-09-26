@@ -33,4 +33,11 @@
       <ng-container [ngTemplateOutlet]="toolbar" />
     </div>
   }
+
+  <!-- ticket 03：外觀浮動面板，開關在 /settings（AppearancePanelService）。掛在頁首自己的
+       flex 排版裡（不是 position: fixed 釘死在視窗角落）——這個 app 的頁首依寬度會把不同東西
+       （新增按鈕、搜尋圖示、底部固定操作列）搬到各個角落，四個角落沒有一個能保證永遠淨空
+       （見 floating-appearance-panel.component.scss 開頭的走查記錄）；讓它變成頁首的一個
+       flex item，跟其他內容一起換行，由 flexbox 保證不疊在任何東西上面。 -->
+  <lib-floating-appearance-panel />
 </header>

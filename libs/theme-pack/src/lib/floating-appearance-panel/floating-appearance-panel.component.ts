@@ -4,9 +4,11 @@ import { AppearancePanelService } from '../theme/appearance-panel.service';
 import { ThemeService } from '../theme/theme.service';
 import { texture } from '../theme/theme.token';
 
-// ticket 03（外觀浮動面板）：開關在設定頁（AppearancePanelService.visible），開啟後這個元件
-// 掛在 app shell 裡，每一頁角落都有一顆常駐按鈕。質地／配色的過濾邏輯全部重用 ThemeService，
-// 這裡不重抄相容配色清單（ADR 0007）。
+// ticket 03（外觀浮動面板）：開關在設定頁（AppearancePanelService.visible），開啟後每一頁都有
+// 一顆常駐按鈕。宿主 app 決定掛在哪裡（car-rental admin 掛在頁首 app-header 的 .topbar 裡，見
+// header.component.html 上方的說明；不是 position: fixed 釘死在視窗角落——那個做法在這個 app
+// 的頁面設計下沒有一個角落是永遠淨空的，見 floating-appearance-panel.component.scss 開頭的
+// 走查記錄）。質地／配色的過濾邏輯全部重用 ThemeService，這裡不重抄相容配色清單（ADR 0007）。
 // 樣式只用語意 token（--mat-sys-*）與 .ui-card（見 CONTRACT.md），質地換了外觀跟著換，
 // 不寫死任何色碼。
 @Component({
