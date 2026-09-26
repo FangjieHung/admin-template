@@ -3,7 +3,11 @@
   --_clay: #e0e5ec;
   --_ink: #3d4852;
   // 原提案的 #6b7280 在 clay 上只有約 3.8:1；加深以符合一般文字 AA。
-  --_muted: #5d6773;
+  // ticket 15：#5d6773 在純 clay 上有 4.54:1，剛好卡在門檻邊緣；Editorial/Frosted
+  // 質地的側欄使用者卡底色是 color-mix(app-shell-on 4~6%, app-shell-bg)——往 clay 裡
+  // 摻一點深色前景會把底色壓暗，跟深色文字的距離變近、對比反而下降到 4.28/4.15:1。
+  // 再加深一階讓最壞情況（6% 混色）仍有 ~5:1 margin，不影響冷灰整體明度定位。
+  --_muted: #525b66;
   --_violet: #6c63ff;
   // 白字在原 violet 上不到 4.5:1；主要實心按鈕使用較深的同色系。
   --_violet-strong: #594fcf;

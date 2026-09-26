@@ -112,6 +112,12 @@
   .mat-mdc-icon-button {
     background: var(--mat-sys-background);
   }
+  // ticket 15：側欄收合箭頭在其他質地改吃 --app-shell-on-muted（側欄自己的深色 shell
+  // 前景），但 Soft UI 把它畫成浮在「頁面底色」上的淺色圓鈕（見上方 background 覆寫），
+  // 不是側欄本體的深色 shell，因此要明講繼續用 surface token，不要被側欄那份覆寫帶走。
+  .collapse-toggle {
+    --mat-icon-button-icon-color: var(--mat-sys-on-surface-variant);
+  }
   .theme-pill:hover,
   .ui-nav-pill:hover,
   .ui-card-titleNav__item:hover,

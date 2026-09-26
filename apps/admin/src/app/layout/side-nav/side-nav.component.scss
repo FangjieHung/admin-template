@@ -26,6 +26,14 @@
 .collapse-toggle {
   margin-left: auto;
   flex-shrink: 0;
+  // ticket 15：mat-icon-button 預設吃 --mat-icon-button-icon-color 的 fallback
+  // --mat-sys-on-surface-variant——那是「頁面淺底」用的 token，放在側欄自己的深色
+  // shell 底色上，Material/Linen/Grid/Editorial × Sandstone/Azure 只有 1.72~2:1。
+  // 側欄的圖示要跟其他側欄前景一樣，吃側欄自己的 token 組（--app-shell-on-muted），
+  // 直接改這顆元件變數，不用跟 Material 全域規則搶 `color` 屬性的層疊順位。
+  // Soft UI 把它改成淺色浮起圓鈕、疊在頁面底色上，需要繼續用 surface token，
+  // 已在 texture/soft-ui/recipes.scss 針對 .collapse-toggle 另外蓋回去。
+  --mat-icon-button-icon-color: var(--app-shell-on-muted);
 }
 
 .collapsed .collapse-toggle {
