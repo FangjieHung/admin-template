@@ -237,6 +237,15 @@ async function measureCombo(page, texture, color) {
     { p: texture.id, t: color.id },
   );
   await page.reload({ waitUntil: 'networkidle', timeout: 20000 });
+  // ThemeService.init() 會把不相容的組合校正成預設配色（ADR 0007）；
+  // 報告要量「所有」56 格，所以載入後直接蓋回要量的屬性。
+  await page.evaluate(
+    ({ p, t }) => {
+      document.documentElement.dataset['paradigm'] = p;
+      document.documentElement.dataset['theme'] = t;
+    },
+    { p: texture.id, t: color.id },
+  );
   await page.waitForTimeout(600); // 讓 texture 的進場動畫/字型穩定
 
   const results = {};
