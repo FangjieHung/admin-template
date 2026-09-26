@@ -19,7 +19,7 @@
 | 圓角 full | `--mat-sys-corner-full` | 8px | Material 預設為膠囊的元件（按鈕、toggle 等） | 999px → 8px（現況 Material 按鈕是膠囊形；本質地不做膠囊）；頭像、狀態點仍用正圓 |
 | 陰影 level1–4 | `--mat-sys-level1` … `-level4` | 全部 `none` | — | 現況有 3.5–9% 的淡陰影 → 全部移除 |
 | 邊線 | `--mat-sys-outline-variant` | 1px，淡 | 卡片、對話框、選單、表格列線 | 對話框、選單現況無框 → 補 1px 淡框（沒有陰影時要靠它和遮罩分出邊界） |
-| 字體 display | `--font-display` | Georgia ＋ Noto Serif TC（襯線） | 頁面大標、大數字 | —（見文末待決問題） |
+| 字體 display | `--font-display` | 無襯線（與 body 同字族，靠字重與字級區分） | 頁面大標、大數字 | Georgia 襯線 → 無襯線（襯線保留給 Editorial） |
 | 字體 body | `--font-body` | Inter ＋ Noto Sans TC | 內文、小節標、表格、表單 | — |
 | 字體 mono | `--font-mono` | IBM Plex Mono | 代碼類資料 | — |
 | 視覺密度 | Material 預設 | 表格列高 52px | 表格、表單 | — |
@@ -68,6 +68,6 @@
 
 見 [`theme.token.ts`](../../../theme/theme.token.ts) 中 `linen` 的 `compatibleThemes` 與 `defaultTheme`（唯一來源，此處不列清單）。
 
-## 待決問題（審核時請決定）
+## 已決定（2026-09-26 審核）
 
-- 大標用襯線字體：Editorial 目標也改為襯線大標，兩者會共用「襯線」這個特徵。要保留 Linen 的 Georgia，還是改回無襯線，讓襯線成為 Editorial 專屬？另外 Noto Serif TC 目前**沒有載入**，中文大標實際顯示的是系統襯線字（macOS 為宋體類），在 Windows 上可能不同。
+- 大標改回無襯線。襯線是 Editorial 的專屬辨識特徵；Linen 的紙感靠色塊落差與織紋表現。

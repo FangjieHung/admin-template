@@ -21,7 +21,7 @@
 | 陰影 level4 | `--mat-sys-level4` | `none` | 對話框、選單 | 現況 `0 8px 24px` 4% → 移除，改由髮絲框＋遮罩界定 |
 | 邊線（髮絲線） | `--mat-sys-outline-variant` | 1px | 區塊分隔線、對話框與選單外框、表格列線 | — |
 | 強調線 | `--mat-sys-on-surface` | 1px（大標下方可 2px） | 頁面大標下方、表頭下方 | 新增 |
-| 字體 display | `--font-display` | 襯線：英文襯線字＋ Noto Serif TC | 頁面大標、卡片標題、大數字 | Helvetica Neue（無襯線）→ 襯線；字型需額外載入（見待決問題） |
+| 字體 display | `--font-display` | 襯線：英文用一套輕量網頁襯線字（額外載入）；中文用系統內建襯線（macOS 宋體-繁），沒有則退回無襯線，不下載中文襯線字檔 | 頁面大標、卡片標題、大數字 | Helvetica Neue（無襯線）→ 襯線；字型需額外載入（見待決問題） |
 | 字體 body | `--font-body` | Helvetica Neue ＋ Noto Sans TC | 內文、表格、表單、按鈕 | — |
 | 字體 mono | `--font-mono` | IBM Plex Mono | 代碼類資料 | — |
 | 視覺密度 | `--mat-table-row-item-container-height` | 表格列高 52px；內文行高 1.6 | 表格、內文 | — |
@@ -62,8 +62,8 @@
 
 見 [`theme.token.ts`](../../../theme/theme.token.ts) 中 `editorial` 的 `compatibleThemes` 與 `defaultTheme`（唯一來源，此處不列清單）。
 
-## 待決問題（審核時請決定）
+## 已決定（2026-09-26 審核）
 
-- 襯線字型的選擇與成本：中文用 Noto Serif TC，英文可選 Source Serif 4、Playfair Display 或直接用系統 Georgia。前兩者需要像 Clay 一樣額外載入 Google Fonts（`editorial/_fonts.scss`），中文襯線字檔較大、首次切換會有換字閃動。
-- 襯線要只用在頁面大標，還是卡片標題、對話框標題也用？本文件目前寫「大標、卡片標題、對話框標題、大數字」。
-- 側欄（`.app-sidenav`）的導覽項目現況 6px 圓角，目標依 medium 改 2px；使用者卡改直角。是否同意側欄也照這個規則？
+- 襯線字型：英文載入一套輕量網頁襯線字；中文不下載字檔，用系統襯線（`"Songti TC"` 等），沒有時退回無襯線。代價：Windows 上中文大標可能是無襯線。
+- 襯線使用範圍維持本文件所寫：頁面大標、卡片標題、對話框標題、大數字。
+- 側欄照同一規則：導覽項目 2px、使用者卡直角。

@@ -64,7 +64,7 @@ hover 的回饋是「影子多推出去一格」，按下時影子歸零、元�
 
 見 [`theme.token.ts`](../../../theme/theme.token.ts) 中 `grid` 的 `compatibleThemes` 與 `defaultTheme`（唯一來源，此處不列清單）。
 
-## 待決問題（審核時請決定）
+## 已決定（2026-09-26 審核）
 
-- 硬邊陰影的顏色：用 `--mat-sys-outline`（中性灰、各配色都穩定）還是 `--mat-sys-on-surface`（接近黑、藍圖感更強但較搶眼）？
-- 背景主格線（每 140px）是否需要；若覺得太吵可只保留細格。
+- 硬邊陰影顏色用 `--mat-sys-outline`（藍圖感，暗色配色下也不刺眼），不用 `--mat-sys-on-surface`。
+- 保留每 140px 的主格線，但只比細格線略深，維持低調，不可干擾閱讀。
