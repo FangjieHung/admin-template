@@ -22,7 +22,9 @@
 // 加上側欄 pair（品牌名稱/副標、選中與未選中選單文字、使用者名稱/狀態、收合箭頭圖示），
 // 可在單一畫面把 56 組合跑完；尚未擴充到 orders 列表頁/order-create/dialog 做交叉驗證，
 // 這點在報告最後的「已知限制」列出。
-// 例外：輸入欄位邊界（input_border_on_surface）另外到建單頁、訂單列表、優惠券對話框量（FIELD_PAGES）。
+// 例外：輸入欄位邊界（input_border_on_surface）另外到建單頁、訂單列表、優惠券對話框量（FIELD_PAGES）；
+// 第四批的欄位狀態（field_hover_border／field_focus_indicator／field_error_border）與原生勾選框、單選鈕
+// （check_*）也在那些畫面量，見 measureStatePairs。
 
 import { chromium } from 'playwright-core';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -38,6 +40,9 @@ import {
   passes,
   parseInsetRing,
   fieldBoundaryContrast,
+  layerContrast,
+  bestFocusIndicator,
+  choiceControlContrast,
 } from './contrast-lib.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -198,6 +203,51 @@ const PAIRS = [
     label: '輸入框邊界（底線／邊框／細框）on 欄位外側底色',
     kind: 'ui',
     page: 'fields',
+  },
+  // ticket: 語意用途變數 batch 4（原生勾選框與狀態對比）。全部是 UI 門檻 3:1，量法沿用「取真正構成邊界的那條線」。
+  // 欄位三種狀態：
+  {
+    key: 'field_hover_border',
+    label: '欄位滑過時的邊界 on 欄位外側底色',
+    kind: 'ui',
+    page: 'states',
+  },
+  {
+    key: 'field_focus_indicator',
+    label: '欄位鍵盤焦點指示（主色底線／outline／焦點邊框）on 欄位外側底色',
+    kind: 'ui',
+    page: 'states',
+  },
+  {
+    key: 'field_error_border',
+    label: '欄位錯誤狀態的邊界 on 欄位外側底色',
+    kind: 'ui',
+    page: 'states',
+  },
+  // 原生勾選框／單選鈕（libs/ui data-table、派車「可用車輛」單選）：
+  {
+    key: 'check_unchecked_border',
+    label: '勾選框／單選鈕未勾選外框 on 外側底色',
+    kind: 'ui',
+    page: 'states',
+  },
+  {
+    key: 'check_checked_fill',
+    label: '勾選框／單選鈕勾選底 on 外側底色',
+    kind: 'ui',
+    page: 'states',
+  },
+  {
+    key: 'check_mark',
+    label: '勾號／橫線／圓點 on 勾選底',
+    kind: 'ui',
+    page: 'states',
+  },
+  {
+    key: 'check_focus_ring',
+    label: '勾選框鍵盤焦點框 on 外側底色',
+    kind: 'ui',
+    page: 'states',
   },
 ];
 
@@ -570,6 +620,266 @@ async function measureOtherPages(page, texture, color, results) {
   return results;
 }
 
+// ---- 第四批：欄位狀態（滑過／鍵盤焦點／錯誤）與原生勾選框、單選鈕 ----
+// 量法沿用 batch 3「取真正構成邊界的那條線」：滑過、錯誤用 boundaryOf（outlined → 邊框 → inset 細框 → 底線 → 填色）；
+// 焦點用 bestFocusIndicator（outline、MDC 主色底線 ::after、以及和靜止時不同的邊框／細框／outlined 外框，取對比最高者）。
+// 轉場一律凍結，量的是終點狀態；焦點一律真的送 Tab。
+
+const FREEZE_CSS = '*,*::before,*::after{transition:none!important;animation:none!important}';
+
+// 在頁面內安裝量測小工具（每次換頁後呼叫）。
+async function installProbe(page) {
+  await page.addStyleTag({ content: FREEZE_CSS });
+  await page.evaluate(() => {
+    const layersOf = (node) => { const l = []; while (node) { l.push(getComputedStyle(node).backgroundColor); node = node.parentElement; } return l.reverse(); };
+    const visible = (el) => { const r = el.getBoundingClientRect(); return r.width > 4 && r.height > 4 && getComputedStyle(el).visibility !== 'hidden'; };
+    const outlineOf = (el) => { if (!el) return null; const cs = getComputedStyle(el); return cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0 ? cs.outlineColor : null; };
+    window.__crProbe = {
+      // 幫 root 內每個可見、非停用欄位（MDC wrapper 與 page-toolbar 搜尋膠囊）編號，回傳個數。
+      tag(rootSel) {
+        const root = document.querySelector(rootSel) || document.body;
+        let n = 0;
+        for (const el of root.querySelectorAll('.mat-mdc-text-field-wrapper, .search')) {
+          if (!visible(el) || el.classList.contains('mdc-text-field--disabled')) continue;
+          el.dataset.crField = String(n++);
+        }
+        return n;
+      },
+      field(i) {
+        const w = document.querySelector(`[data-cr-field="${i}"]`);
+        if (!w) return null;
+        const cs = getComputedStyle(w);
+        const isSearch = w.classList.contains('search');
+        const ff = isSearch ? null : w.closest('.mat-mdc-form-field');
+        const rec = {
+          label: isSearch ? 'page-toolbar .search' : (ff?.querySelector('mat-label')?.textContent || '').trim().slice(0, 20),
+          fill: cs.backgroundColor, outer: layersOf(w.parentElement), boxShadow: cs.boxShadow,
+          focused: isSearch ? w.matches(':focus-within') : !!ff?.classList.contains('mat-focused'),
+          invalid: w.classList.contains('mdc-text-field--invalid'),
+          borderWidth: cs.borderTopWidth,
+          outlines: [outlineOf(w), outlineOf(ff), outlineOf(document.activeElement && w.contains(document.activeElement) ? document.activeElement : null)].filter(Boolean),
+        };
+        if (w.classList.contains('mdc-text-field--outlined')) {
+          const n = ff.querySelector('.mdc-notched-outline__leading');
+          if (n) { rec.outlinedFg = getComputedStyle(n).borderTopColor; rec.outlinedWidth = getComputedStyle(n).borderTopWidth; }
+        }
+        if (cs.borderTopStyle !== 'none' && parseFloat(cs.borderTopWidth) > 0) rec.borderFg = cs.borderTopColor;
+        const rip = w.querySelector('.mdc-line-ripple');
+        const rb = rip && getComputedStyle(rip, '::before');
+        if (rb && rb.borderBottomStyle !== 'none' && parseFloat(rb.borderBottomWidth) > 0) rec.underlineFg = rb.borderBottomColor;
+        const ra = rip && getComputedStyle(rip, '::after');
+        if (ra && ra.borderBottomStyle !== 'none' && parseFloat(ra.borderBottomWidth) > 0 && parseFloat(ra.opacity) > 0 && !/scaleX\(0\)|matrix\(0,/.test(ra.transform)) rec.underlineActiveFg = ra.borderBottomColor;
+        return rec;
+      },
+      center(i) { const r = document.querySelector(`[data-cr-field="${i}"]`).getBoundingClientRect(); return { x: r.x + Math.min(r.width / 2, 60), y: r.y + r.height / 2 }; },
+      fieldOfActive() { const a = document.activeElement; const w = a && a.closest('[data-cr-field]'); return w ? Number(w.dataset.crField) : -1; },
+      controls(sel) {
+        return [...document.querySelectorAll(sel)].filter(visible).map((el) => {
+          const cs = getComputedStyle(el);
+          const b = getComputedStyle(el, '::before');
+          return {
+            type: el.type, checked: el.checked, indeterminate: !!el.indeterminate, disabled: el.disabled,
+            appearance: cs.appearance, border: cs.borderTopColor, bg: cs.backgroundColor,
+            markBg: b.backgroundColor, markBorder: parseFloat(b.borderRightWidth) > 0 ? b.borderRightColor : null,
+            outer: layersOf(el.parentElement), outline: outlineOf(el), focusVisible: el.matches(':focus-visible'),
+          };
+        });
+      },
+    };
+  });
+}
+
+async function tabTo(page, predicate, arg, max = 90) {
+  for (let i = 0; i < max; i++) {
+    await page.keyboard.press('Tab');
+    if (await page.evaluate(predicate, arg)) return true;
+  }
+  return false;
+}
+
+const TRANSPARENT = /^rgba\(0,\s*0,\s*0,\s*0\)$|^transparent$/;
+
+function focusCandidates(rec, rest) {
+  const c = rec.outlines.map((fg) => ({ method: 'outline', fg }));
+  if (rec.underlineActiveFg) c.push({ method: 'underline', fg: rec.underlineActiveFg });
+  if (rec.outlinedFg && (!rest || rec.outlinedFg !== rest.outlinedFg || rec.outlinedWidth !== rest.outlinedWidth)) c.push({ method: 'outlined', fg: rec.outlinedFg });
+  if (rec.borderFg && (!rest || rec.borderFg !== rest.borderFg || rec.borderWidth !== rest.borderWidth)) c.push({ method: 'border', fg: rec.borderFg });
+  const ring = parseInsetRing(rec.boxShadow);
+  if (ring && (!rest || rec.boxShadow !== rest.boxShadow)) c.push({ method: 'ring', fg: ring.color });
+  return c;
+}
+
+async function measureStatePairs(page, texture, color, results) {
+  const keys = PAIRS.filter((p) => p.page === 'states').map((p) => p.key);
+  if (!keys.length) return results;
+  const items = Object.fromEntries(keys.map((k) => [k, []]));
+  const setCombo = async () => {
+    await page.evaluate(({ p, t }) => { document.documentElement.dataset['paradigm'] = p; document.documentElement.dataset['theme'] = t; }, { p: texture.id, t: color.id });
+    await page.waitForTimeout(400);
+  };
+  const hoverAll = async (pageKey, n) => {
+    for (let i = 0; i < n; i++) {
+      const rest = await page.evaluate((i) => window.__crProbe.field(i), i);
+      if (!rest || rest.focused) continue;
+      const pt = await page.evaluate((i) => window.__crProbe.center(i), i);
+      await page.mouse.move(pt.x, pt.y);
+      await page.waitForTimeout(40);
+      const rec = await page.evaluate((i) => window.__crProbe.field(i), i);
+      const b = boundaryOf(rec);
+      const r = fieldBoundaryContrast({ method: b.method, fg: b.fg, fill: rec.fill, outer: rec.outer });
+      items.field_hover_border.push({ page: pageKey, label: rec.label, method: b.method, fg: b.fg, ratio: r.vsOuter, effectiveBg: r.outerBg, compositedFg: r.lineRgb });
+    }
+    await page.mouse.move(1, 899);
+  };
+  const focusField = async (pageKey, i, restRec) => {
+    const rec = await page.evaluate((i) => window.__crProbe.field(i), i);
+    const best = bestFocusIndicator(focusCandidates(rec, restRec), { fill: rec.fill, outer: rec.outer, rest: boundaryOf(restRec) });
+    if (best) items.field_focus_indicator.push({ page: pageKey, label: rec.label, method: best.method, fg: best.fg, ratio: best.vsOuter, vsRest: best.vsRest, effectiveBg: best.outerBg, compositedFg: best.lineRgb });
+    else items.field_focus_indicator.push({ page: pageKey, label: rec.label, method: 'none', fg: null, ratio: 1, vsRest: 1 });
+  };
+  const measureChecks = async (pageKey, sel) => {
+    const list = await page.evaluate((s) => window.__crProbe.controls(s), sel);
+    for (const c of list) {
+      if (c.appearance !== 'none' || c.disabled) continue; // 原生外觀讀不到計算樣式；停用不受 3:1 約束
+      const on = c.checked || (c.type === 'checkbox' && c.indeterminate);
+      if (!on) {
+        const r = choiceControlContrast({ outer: c.outer, bg: c.bg, border: c.border });
+        items.check_unchecked_border.push({ page: pageKey, label: `${c.type} 未勾選`, fg: c.border, ratio: r.border });
+      } else {
+        const mark = c.markBg && !TRANSPARENT.test(c.markBg) ? c.markBg : c.markBorder;
+        const r = choiceControlContrast({ outer: c.outer, fill: c.bg, mark });
+        const state = c.indeterminate ? '半選' : '勾選';
+        items.check_checked_fill.push({ page: pageKey, label: `${c.type} ${state}`, fg: c.bg, ratio: r.fill });
+        if (mark) items.check_mark.push({ page: pageKey, label: `${c.type} ${state}記號`, fg: mark, ratio: r.mark });
+      }
+    }
+  };
+
+  // 1. 建單頁：欄位滑過、第一個欄位鍵盤焦點；可用車輛單選（選租期後出現，選一台）。
+  await page.goto(`${BASE_URL}/orders/new`, { waitUntil: 'networkidle', timeout: 20000 });
+  await setCombo();
+  await installProbe(page);
+  let n = await page.evaluate(() => window.__crProbe.tag('body'));
+  await hoverAll('create', n);
+  {
+    const rest0 = await page.evaluate(() => window.__crProbe.field(0));
+    await page.evaluate(() => document.body.focus());
+    const ok = await tabTo(page, () => window.__crProbe.fieldOfActive() === 0);
+    if (ok) await focusField('create', 0, rest0);
+    await page.evaluate(() => document.activeElement?.blur());
+  }
+  await page.click('lib-dual-month-range-picker input');
+  await page.waitForTimeout(300);
+  await page.click('button[aria-label="October 5, 2026"]');
+  await page.click('button[aria-label="October 8, 2026"]');
+  await page.waitForTimeout(300);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  if (await page.locator('.avl__radio').count()) {
+    await page.mouse.move(1, 899);
+    await measureChecks('create', '.avl__radio');
+    await page.locator('.avl__radio').nth(1).click();
+    await page.waitForTimeout(150);
+    await page.evaluate(() => document.activeElement?.blur());
+    await page.mouse.move(1, 899);
+    await measureChecks('create', '.avl__radio:checked');
+  }
+
+  // 2. 訂單列表：篩選列欄位滑過；data-table 勾選框（未勾選 → 勾第一列，表頭變半選）；勾選框鍵盤焦點框。
+  await page.goto(`${BASE_URL}/orders`, { waitUntil: 'networkidle', timeout: 20000 });
+  await setCombo();
+  await installProbe(page);
+  await page.click('.search__toggle');
+  await page.fill('.search__input', 'A');
+  await page.evaluate(() => document.activeElement?.blur());
+  n = await page.evaluate(() => window.__crProbe.tag('body'));
+  await hoverAll('list', n);
+  await measureChecks('list', '.dt-selection-checkbox');
+  if (await page.locator('tbody .dt-selection-checkbox').count()) {
+    await page.locator('tbody .dt-selection-checkbox').first().click();
+    await page.waitForTimeout(150); // zoneless：等表頭的 [indeterminate] 綁定更新
+    await page.evaluate(() => document.activeElement?.blur());
+    await page.mouse.move(1, 899);
+    await measureChecks('list', '.dt-selection-checkbox:checked, .dt-selection-checkbox:indeterminate');
+    await page.evaluate(() => document.body.focus());
+    const ok = await tabTo(page, () => !!document.activeElement?.matches('.dt-selection-checkbox'));
+    if (ok) {
+      const [c] = await page.evaluate(() => window.__crProbe.controls('.dt-selection-checkbox:focus'));
+      if (c?.outline) {
+        const r = layerContrast(c.outline, c.outer);
+        items.check_focus_ring.push({ page: 'list', label: `checkbox focus（:focus-visible=${c.focusVisible}）`, fg: c.outline, ratio: r.ratio });
+      } else {
+        items.check_focus_ring.push({ page: 'list', label: 'checkbox focus：沒有 outline', fg: null, ratio: 1 });
+      }
+    }
+  }
+
+  // 3. 優惠券對話框：欄位滑過、Tab 到下一欄的焦點、必填欄位清空後離開的錯誤狀態。
+  await page.goto(`${BASE_URL}/coupons`, { waitUntil: 'networkidle', timeout: 20000 });
+  await setCombo();
+  await installProbe(page);
+  await page.locator('app-page-toolbar [mat-flat-button]').first().click();
+  await page.waitForSelector('.mat-mdc-dialog-surface');
+  await page.waitForTimeout(300);
+  n = await page.evaluate(() => window.__crProbe.tag('.mat-mdc-dialog-surface'));
+  const rests = [];
+  for (let i = 0; i < n; i++) rests.push(await page.evaluate((i) => window.__crProbe.field(i), i));
+  await hoverAll('dialog', n);
+  {
+    const start = await page.evaluate(() => window.__crProbe.fieldOfActive());
+    const ok = await tabTo(page, (s) => { const k = window.__crProbe.fieldOfActive(); return k >= 0 && k !== s; }, start, 10);
+    if (ok) {
+      const k = await page.evaluate(() => window.__crProbe.fieldOfActive());
+      await focusField('dialog', k, rests[k]?.focused ? { ...rests[k], outlines: [] } : rests[k]);
+    }
+  }
+  {
+    const input = page.locator('.mat-mdc-dialog-surface [data-cr-field="0"] input').first();
+    if (await input.count()) {
+      await input.click();
+      await page.keyboard.type('X');
+      await page.keyboard.press('Backspace');
+      await page.keyboard.press('Tab');
+      await page.mouse.move(1, 899);
+      await page.waitForTimeout(100);
+      const rec = await page.evaluate(() => window.__crProbe.field(0));
+      if (rec?.invalid) {
+        const b = boundaryOf(rec);
+        const r = fieldBoundaryContrast({ method: b.method, fg: b.fg, fill: rec.fill, outer: rec.outer });
+        items.field_error_border.push({ page: 'dialog', label: rec.label, method: b.method, fg: b.fg, ratio: r.vsOuter, effectiveBg: r.outerBg, compositedFg: r.lineRgb });
+      }
+    }
+  }
+  await page.keyboard.press('Escape');
+
+  for (const key of keys) {
+    const pair = PAIRS.find((p) => p.key === key);
+    const list = items[key];
+    if (!list.length) {
+      results[key] = { skipped: true, reason: '畫面上找不到可量的狀態（原生外觀或流程沒走到）' };
+      continue;
+    }
+    const worst = list.reduce((a, b) => (b.ratio < a.ratio ? b : a));
+    const extra = key === 'field_focus_indicator'
+      ? `；焦點指示對靜止邊界的差異：${list.map((x) => `${x.page}「${x.label}」${x.method} ${x.vsRest ? x.vsRest.toFixed(2) : '-'}`).join('、')}`
+      : '';
+    results[key] = {
+      label: pair.label,
+      kind: pair.kind,
+      threshold: THRESHOLD_LARGE_TEXT, // ui 門檻 3:1
+      ratio: Number(worst.ratio.toFixed(2)),
+      pass: passes(worst.ratio, pair.kind),
+      textColor: worst.fg,
+      compositedFg: worst.compositedFg,
+      effectiveBg: worst.effectiveBg,
+      samples: list.length,
+      vsRest: key === 'field_focus_indicator' ? Number(Math.min(...list.map((x) => x.vsRest ?? 99)).toFixed(2)) : undefined,
+      note: `最低：${worst.page}「${worst.label}」${worst.method ? `（${worst.method}）` : ''}；共 ${list.length} 個樣本` + extra,
+    };
+  }
+  return results;
+}
+
 function worstPair(results) {
   let worst = null;
   for (const [key, r] of Object.entries(results)) {
@@ -604,6 +914,7 @@ async function main() {
       const shotName = `${texture.id}__${color.id}.png`;
       await page.screenshot({ path: join(SCREENSHOT_DIR, shotName) });
       await measureOtherPages(page, texture, color, results);
+      await measureStatePairs(page, texture, color, results);
       const fails = cellFails(results);
       matrix.push({
         texture: texture.id,
@@ -667,7 +978,8 @@ function renderMarkdown(matrix) {
   lines.push('- 量測畫面固定為 `/dashboard`（含月曆），尚未擴充到訂單列表、order-create 表單、dialog 做交叉驗證。');
   lines.push('- alpha compositing 只合成純色數值，不模擬 `backdrop-filter: blur()` 的取樣效果；背景若非純色/低頻漸層，合成結果為近似值。');
   lines.push('- focus 外框量測固定用「新增訂單」主要按鈕；若不同質地對 outlined 按鈕/連結有不同 focus 樣式，未逐一覆蓋。');
-  lines.push('- `input_border_on_surface`：量建單頁、訂單列表（展開搜尋＋篩選列）、優惠券新增對話框上所有可見、非停用、非 focus 的欄位，取最低值；每欄依序取 outlined 外框 → wrapper 邊框 → inset 細框 → Material 底線（疊在填色上）→ 填色，對欄位外側底色（見 note）。不含 hover／focus／錯誤狀態。');
+  lines.push('- `input_border_on_surface`：量建單頁、訂單列表（展開搜尋＋篩選列）、優惠券新增對話框上所有可見、非停用、非 focus 的欄位，取最低值；每欄依序取 outlined 外框 → wrapper 邊框 → inset 細框 → Material 底線（疊在填色上）→ 填色，對欄位外側底色（見 note）。滑過／焦點／錯誤另見下一條。');
+  lines.push('- 第四批的狀態 pair：`field_hover_border`（建單頁、訂單列表、優惠券對話框每個欄位逐一滑過）、`field_focus_indicator`（真的送 Tab：建單頁第一個欄位、對話框 Tab 到下一欄；outline、MDC 主色底線與「和靜止時不同」的邊框／細框／outlined 外框中取對比最高者，另記錄它對靜止邊界的比值，不設門檻）、`field_error_border`（對話框必填欄位輸入後清空、Tab 離開）、`check_*`（data-table 勾選框與派車可用車輛單選：未勾選外框、勾選／半選底、記號對勾選底、Tab 到勾選框的焦點框）。轉場凍結、量終點狀態；原生外觀（appearance 不是 none）的控制項略過。');
   lines.push('- `selection_text`／`selection_text_sidenav`：直接用計算後的變數值合成，不實際拖曳選取文字。');
   return lines.join('\n');
 }

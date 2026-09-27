@@ -9,6 +9,9 @@ import {
   passes,
   parseInsetRing,
   fieldBoundaryContrast,
+  layerContrast,
+  bestFocusIndicator,
+  choiceControlContrast,
 } from './contrast-lib.mjs';
 
 describe('parseColor', () => {
@@ -145,5 +148,51 @@ describe('fieldBoundaryContrast', () => {
   it('只有填色（沒有線）：fg = 填色，退化成填色對外側底色', () => {
     const r = fieldBoundaryContrast({ method: 'fill', fg: 'rgb(255, 255, 255)', fill: 'rgb(255, 255, 255)', outer });
     expect(r.vsOuter).toBeCloseTo(1, 5);
+  });
+});
+
+describe('layerContrast（第四批）', () => {
+  it('半透明前景先疊在底色上再比', () => {
+    const r = layerContrast('rgba(0, 0, 0, 0.5)', ['rgb(255, 255, 255)']);
+    expect(r.fg.r).toBeCloseTo(127.5, 1);
+    expect(r.ratio).toBeCloseTo(3.95, 1);
+  });
+});
+
+describe('bestFocusIndicator（第四批）', () => {
+  const field = { fill: 'rgb(240, 240, 240)', outer: ['rgb(255, 255, 255)'], rest: { method: 'underline', fg: 'rgb(118, 118, 118)' } };
+  it('多個候選取對外側底色最高者，並算它與靜止邊界的差異', () => {
+    const r = bestFocusIndicator([
+      { method: 'underline', fg: 'rgb(200, 200, 200)' },
+      { method: 'outline', fg: 'rgb(0, 0, 255)' },
+    ], field);
+    expect(r.method).toBe('outline');
+    expect(r.vsOuter).toBeGreaterThan(8);
+    expect(r.vsRest).toBeGreaterThan(1);
+  });
+  it('沒有任何候選 → null', () => {
+    expect(bestFocusIndicator([null, { method: 'outline', fg: null }], field)).toBeNull();
+  });
+  it('底線疊在填色上：填色與外側同色時等同直接比', () => {
+    const r = bestFocusIndicator([{ method: 'underline', fg: 'rgb(0, 0, 0)' }], { fill: 'rgb(255, 255, 255)', outer: ['rgb(255, 255, 255)'] });
+    expect(r.vsOuter).toBeCloseTo(21, 0);
+    expect(r.vsRest).toBeUndefined();
+  });
+});
+
+describe('choiceControlContrast（第四批）', () => {
+  it('外框畫在控制項底色上、勾選底對外側、記號對勾選底', () => {
+    const r = choiceControlContrast({ outer: ['rgb(255, 255, 255)'], bg: 'rgb(255, 255, 255)', border: 'rgb(118, 118, 118)', fill: 'rgb(0, 0, 0)', mark: 'rgb(255, 255, 255)' });
+    expect(r.border).toBeCloseTo(4.54, 1);
+    expect(r.fill).toBeCloseTo(21, 0);
+    expect(r.mark).toBeCloseTo(21, 0);
+  });
+  it('半透明外框疊在控制項底色（而不是外側）上', () => {
+    const r = choiceControlContrast({ outer: ['rgb(255, 255, 255)'], bg: 'rgb(0, 0, 0)', border: 'rgba(255, 255, 255, 0)' });
+    expect(r.border).toBeCloseTo(21, 0);
+  });
+  it('只給外框時不算 fill／mark', () => {
+    const r = choiceControlContrast({ outer: ['rgb(255, 255, 255)'], border: 'rgb(0, 0, 0)' });
+    expect(Object.keys(r)).toEqual(['border']);
   });
 });

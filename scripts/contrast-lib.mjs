@@ -147,3 +147,62 @@ export function fieldBoundaryContrast(f) {
   const vsFill = contrastRatio(lineOnFill, fillBg);
   return { vsOuter, vsFill, outerBg, lineRgb: f.method === 'underline' ? lineOnFill : lineOnOuter };
 }
+
+// ---- 欄位狀態與原生勾選框（ADR 0008「原生勾選框與狀態對比」，第四批）----
+
+/**
+ * 前景（可能半透明）疊在底色堆疊上，跟底色本身比。
+ * @param {string} fgStr
+ * @param {string[]} layersOuterToInner
+ */
+export function layerContrast(fgStr, layersOuterToInner) {
+  const bg = effectiveBackground(layersOuterToInner.map(parseColor));
+  const fg = effectiveBackground([...layersOuterToInner, fgStr].map(parseColor));
+  return { ratio: contrastRatio(fg, bg), bg, fg };
+}
+
+/**
+ * 焦點中的欄位可能同時有好幾種指示（outline、MDC 主色底線、outlined 粗外框、邊框換色、inset 細框）。
+ * 使用者只要看得到其中一個就能辨識焦點，所以取「對欄位外側底色對比最高」的那一個。
+ * 另外回傳它和靜止時邊界（rest）的差異比值（只記錄、不設門檻）。
+ * @param {{method: string, fg: string}[]} candidates
+ * @param {{fill: string, outer: string[], rest?: {method: string, fg: string}}} field
+ */
+export function bestFocusIndicator(candidates, field) {
+  let best = null;
+  for (const c of candidates) {
+    if (!c || !c.fg) continue;
+    const r = fieldBoundaryContrast({ method: c.method, fg: c.fg, fill: field.fill, outer: field.outer });
+    if (!best || r.vsOuter > best.vsOuter) best = { ...c, vsOuter: r.vsOuter, lineRgb: r.lineRgb, outerBg: r.outerBg };
+  }
+  if (!best) return null;
+  if (field.rest) {
+    const rest = fieldBoundaryContrast({ method: field.rest.method, fg: field.rest.fg, fill: field.fill, outer: field.outer });
+    best.vsRest = contrastRatio(best.lineRgb, rest.lineRgb);
+  }
+  return best;
+}
+
+/**
+ * 原生勾選框／單選鈕的三個對比（門檻都是 3:1）：
+ * - border：未勾選的外框（畫在控制項自己的底色上）對外側底色；
+ * - fill：勾選底對外側底色；
+ * - mark：勾號／橫線／圓點對勾選底。
+ * 各欄位可省略（只算給了的）。
+ * @param {{outer: string[], bg?: string, border?: string, fill?: string, mark?: string}} c
+ */
+export function choiceControlContrast(c) {
+  const out = {};
+  const outer = c.outer.map(parseColor);
+  const outerBg = effectiveBackground(outer);
+  if (c.border) {
+    const line = effectiveBackground([...outer, parseColor(c.bg || 'transparent'), parseColor(c.border)]);
+    out.border = contrastRatio(line, outerBg);
+  }
+  if (c.fill) {
+    const fillRgb = effectiveBackground([...outer, parseColor(c.fill)]);
+    out.fill = contrastRatio(fillRgb, outerBg);
+    if (c.mark) out.mark = contrastRatio(effectiveBackground([...outer, parseColor(c.fill), parseColor(c.mark)]), fillRgb);
+  }
+  return out;
+}
