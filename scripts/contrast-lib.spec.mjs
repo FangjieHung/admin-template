@@ -7,6 +7,8 @@ import {
   contrastRatio,
   contrastForTextOnStack,
   passes,
+  parseInsetRing,
+  fieldBoundaryContrast,
 } from './contrast-lib.mjs';
 
 describe('parseColor', () => {
@@ -110,5 +112,38 @@ describe('passes', () => {
   it('大字/UI 邊界門檻 3:1', () => {
     expect(passes(3, 'large')).toBe(true);
     expect(passes(2.99, 'ui')).toBe(false);
+  });
+});
+
+describe('parseInsetRing（欄位細框）', () => {
+  it('抓到 spread-only 的 inset 細框，忽略後面的模糊陰影', () => {
+    const bs = 'rgb(128, 118, 141) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0.5) 6px 6px 10px 0px inset';
+    expect(parseInsetRing(bs)).toEqual({ color: 'rgb(128, 118, 141)', width: 1 });
+  });
+  it('color(srgb …) 也可以', () => {
+    expect(parseInsetRing('color(srgb 0.5 0.5 0.4) 0px 0px 0px 1px inset')).toEqual({ color: 'color(srgb 0.5 0.5 0.4)', width: 1 });
+  });
+  it('只有模糊的 inset 陰影、或外陰影 → null', () => {
+    expect(parseInsetRing('rgba(0, 0, 0, 0.5) 6px 6px 10px 0px inset')).toBeNull();
+    expect(parseInsetRing('rgb(0, 0, 0) 0px 0px 0px 1px')).toBeNull();
+    expect(parseInsetRing('none')).toBeNull();
+  });
+});
+
+describe('fieldBoundaryContrast', () => {
+  const outer = ['rgb(255, 255, 255)'];
+  it('邊框：線色直接對外側底色', () => {
+    const r = fieldBoundaryContrast({ method: 'border', fg: 'rgb(0, 0, 0)', fill: 'rgb(255, 255, 255)', outer });
+    expect(r.vsOuter).toBeCloseTo(21, 5);
+  });
+  it('底線：線色疊在填色上（半透明線會混到填色）', () => {
+    const r = fieldBoundaryContrast({ method: 'underline', fg: 'rgba(0, 0, 0, 0.5)', fill: 'rgb(0, 0, 0)', outer });
+    // 半透明黑疊在黑填色上仍是黑 → 對白底 21:1
+    expect(r.vsOuter).toBeCloseTo(21, 5);
+    expect(r.vsFill).toBeCloseTo(1, 5);
+  });
+  it('只有填色（沒有線）：fg = 填色，退化成填色對外側底色', () => {
+    const r = fieldBoundaryContrast({ method: 'fill', fg: 'rgb(255, 255, 255)', fill: 'rgb(255, 255, 255)', outer });
+    expect(r.vsOuter).toBeCloseTo(1, 5);
   });
 });

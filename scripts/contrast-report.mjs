@@ -22,6 +22,7 @@
 // 加上側欄 pair（品牌名稱/副標、選中與未選中選單文字、使用者名稱/狀態、收合箭頭圖示），
 // 可在單一畫面把 56 組合跑完；尚未擴充到 orders 列表頁/order-create/dialog 做交叉驗證，
 // 這點在報告最後的「已知限制」列出。
+// 例外：輸入欄位邊界（input_border_on_surface）另外到建單頁、訂單列表、優惠券對話框量（FIELD_PAGES）。
 
 import { chromium } from 'playwright-core';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -35,6 +36,8 @@ import {
   THRESHOLD_NORMAL_TEXT,
   THRESHOLD_LARGE_TEXT,
   passes,
+  parseInsetRing,
+  fieldBoundaryContrast,
 } from './contrast-lib.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -182,19 +185,46 @@ const PAIRS = [
     selector: '.collapse-toggle .material-symbols-rounded',
     kind: 'ui', // icon，門檻 3:1
   },
-  // ticket: 語意用途變數（batch 1）新增、batch 2 修正：輸入框邊界對所在底色，3:1（UI 邊界門檻）。
-  // /dashboard 沒有 filled 輸入框（batch 1 因此 56 格全部 skip），改到建單頁 /orders/new 量。
-  // 各質地畫「輸入框邊界」的手段不同，依序取第一個存在的：
-  //   1. wrapper 自己的 border（frosted 等）→ 對父層底色；
-  //   2. Material 的底線（.mdc-line-ripple::before 的 border-bottom）→ 對欄位填色；
-  //   3. 都沒有（clay、soft-ui 以填色／內陰影區隔）→ 欄位填色對父層底色。
+  // ticket: 語意用途變數（batch 1）新增、batch 2 修正、batch 3（欄位邊界）擴充：輸入欄位的可見邊界
+  // 對欄位外側底色，3:1（UI 邊界門檻）。量 FIELD_PAGES 三個畫面上「所有可見、非停用、非 focus」的欄位，
+  // 取最低值。每個欄位取「真的構成邊界的那條線」，依序判斷：
+  //   1. outlined 欄位 → notched outline 的邊框色；
+  //   2. wrapper 自己的 border（grid／editorial／frosted）；
+  //   3. wrapper 的 spread-only inset 細框（soft-ui／clay、page-toolbar 搜尋膠囊）；
+  //   4. MDC 底線（.mdc-line-ripple::before 的 border-bottom，material／linen）——線疊在填色上；
+  //   5. 都沒有 → 欄位填色對外側底色（改前 material／linen／clay／soft-ui 的狀況）。
   {
     key: 'input_border_on_surface',
-    label: '輸入框邊界（邊框／底線／填色）on 所在底色',
-    selector: '.mat-mdc-text-field-wrapper.mdc-text-field--filled',
+    label: '輸入框邊界（底線／邊框／細框）on 欄位外側底色',
     kind: 'ui',
-    page: '/orders/new',
-    borderPair: true,
+    page: 'fields',
+  },
+];
+
+// 欄位邊界量測的畫面：建單頁、訂單列表（展開搜尋膠囊＋篩選列）、優惠券新增對話框。
+const FIELD_PAGES = [
+  { key: 'create', path: '/orders/new', root: 'body' },
+  {
+    key: 'list',
+    path: '/orders',
+    root: 'body',
+    setup: async (page) => {
+      // 展開搜尋膠囊後輸入一個字再移開焦點：有內容時 blur 不會收合，才量得到靜止狀態的膠囊邊界。
+      await page.click('.search__toggle');
+      await page.fill('.search__input', 'A');
+      await page.evaluate(() => document.activeElement?.blur());
+      await page.waitForTimeout(300);
+    },
+  },
+  {
+    key: 'dialog',
+    path: '/coupons',
+    root: '.mat-mdc-dialog-surface',
+    setup: async (page) => {
+      await page.locator('app-page-toolbar [mat-flat-button]').first().click();
+      await page.waitForSelector('.mat-mdc-dialog-surface');
+      await page.waitForTimeout(600);
+    },
   },
 ];
 
@@ -255,32 +285,49 @@ async function focusViaKeyboard(page, selector) {
   return false;
 }
 
-// ticket: 語意用途變數（batch 1）新增、batch 2 改成三段式（見 PAIRS 的 input_border_on_surface）。
-// 回傳 { method, fg, bgLayers }：fg 是邊界本身的顏色（可能半透明，由 contrastOfLayer 合成）。
-async function extractBorderPairData(page, selector) {
-  return page.evaluate((sel) => {
-    const el = document.querySelector(sel);
-    if (!el) return null;
-    const cs = getComputedStyle(el);
-    const parentLayers = [];
-    let node = el.parentElement;
-    while (node) {
-      parentLayers.push(getComputedStyle(node).backgroundColor);
-      node = node.parentElement;
-    }
-    parentLayers.reverse();
-    if (cs.borderTopStyle !== 'none' && parseFloat(cs.borderTopWidth) > 0) {
-      return { method: 'border', fg: cs.borderTopColor, bgLayers: parentLayers };
-    }
-    const ripple = el.querySelector('.mdc-line-ripple');
-    if (ripple) {
-      const rb = getComputedStyle(ripple, '::before');
-      if (rb.borderBottomStyle !== 'none' && parseFloat(rb.borderBottomWidth) > 0) {
-        return { method: 'underline', fg: rb.borderBottomColor, bgLayers: [...parentLayers, cs.backgroundColor] };
+// ticket: 語意用途變數 batch 3（欄位邊界）：列出 root 內每個可見欄位的邊界線色、填色與外側底色堆疊。
+// inset 細框在 node 端用 parseInsetRing 解析（回傳原始 box-shadow 字串）。
+async function extractFieldBoundaries(page, rootSel) {
+  return page.evaluate((rootSel) => {
+    const root = document.querySelector(rootSel) || document.body;
+    const layersOf = (node) => { const l = []; while (node) { l.push(getComputedStyle(node).backgroundColor); node = node.parentElement; } return l.reverse(); };
+    const visible = (el) => { const r = el.getBoundingClientRect(); return r.width > 4 && r.height > 4 && getComputedStyle(el).visibility !== 'hidden'; };
+    const out = [];
+    for (const w of root.querySelectorAll('.mat-mdc-text-field-wrapper')) {
+      if (!visible(w) || w.classList.contains('mdc-text-field--disabled')) continue;
+      const ff = w.closest('.mat-mdc-form-field');
+      if (ff?.classList.contains('mat-focused')) continue; // 只量靜止狀態
+      const cs = getComputedStyle(w);
+      const label = (ff?.querySelector('mat-label')?.textContent || '').trim().slice(0, 20);
+      const rec = { label, fill: cs.backgroundColor, outer: layersOf(w.parentElement), boxShadow: cs.boxShadow };
+      if (w.classList.contains('mdc-text-field--outlined')) {
+        const n = ff.querySelector('.mdc-notched-outline__leading');
+        rec.outlinedFg = n ? getComputedStyle(n).borderTopColor : null;
       }
+      if (cs.borderTopStyle !== 'none' && parseFloat(cs.borderTopWidth) > 0) rec.borderFg = cs.borderTopColor;
+      const rip = w.querySelector('.mdc-line-ripple');
+      const rb = rip && getComputedStyle(rip, '::before');
+      if (rb && rb.borderBottomStyle !== 'none' && parseFloat(rb.borderBottomWidth) > 0) rec.underlineFg = rb.borderBottomColor;
+      out.push(rec);
     }
-    return { method: 'fill', fg: cs.backgroundColor, bgLayers: parentLayers };
-  }, selector);
+    for (const s of root.querySelectorAll('.search')) {
+      if (!visible(s) || s.matches(':focus-within')) continue;
+      const cs = getComputedStyle(s);
+      const rec = { label: 'page-toolbar .search', fill: cs.backgroundColor, outer: layersOf(s.parentElement), boxShadow: cs.boxShadow };
+      if (cs.borderTopStyle !== 'none' && parseFloat(cs.borderTopWidth) > 0) rec.borderFg = cs.borderTopColor;
+      out.push(rec);
+    }
+    return out;
+  }, rootSel);
+}
+
+function boundaryOf(rec) {
+  if (rec.outlinedFg) return { method: 'outlined', fg: rec.outlinedFg };
+  if (rec.borderFg) return { method: 'border', fg: rec.borderFg };
+  const ring = parseInsetRing(rec.boxShadow);
+  if (ring) return { method: 'ring', fg: ring.color };
+  if (rec.underlineFg) return { method: 'underline', fg: rec.underlineFg };
+  return { method: 'fill', fg: rec.fill };
 }
 
 // 前景可能半透明（邊框 color-mix、填色 80%、側欄選取底 28%）：先把前景疊到底色堆疊上，
@@ -473,12 +520,14 @@ async function measureCombo(page, texture, color) {
   return results;
 }
 
-// 其他頁面的 pair（batch 2：輸入框邊界改到 /orders/new）。在儀表板截圖之後才呼叫，
-// 截圖牆維持儀表板畫面。
+// 欄位邊界（batch 3 起量 FIELD_PAGES 三個畫面）。在儀表板截圖之後才呼叫，截圖牆維持儀表板畫面。
 async function measureOtherPages(page, texture, color, results) {
-  const otherPages = [...new Set(PAIRS.filter((p) => p.page).map((p) => p.page))];
-  for (const path of otherPages) {
-    await page.goto(`${BASE_URL}${path}`, { waitUntil: 'networkidle', timeout: 20000 });
+  const pair = PAIRS.find((p) => p.page === 'fields');
+  if (!pair) return results;
+  const perPage = [];
+  let worst = null;
+  for (const fp of FIELD_PAGES) {
+    await page.goto(`${BASE_URL}${fp.path}`, { waitUntil: 'networkidle', timeout: 20000 });
     await page.evaluate(
       ({ p, t }) => {
         document.documentElement.dataset['paradigm'] = p;
@@ -487,27 +536,37 @@ async function measureOtherPages(page, texture, color, results) {
       { p: texture.id, t: color.id },
     );
     await page.waitForTimeout(600);
-    for (const pair of PAIRS.filter((p) => p.page === path)) {
-      const bd = await extractBorderPairData(page, pair.selector);
-      if (!bd) {
-        results[pair.key] = { skipped: true, reason: `selector not found on ${path}` };
-        continue;
-      }
-      const { ratio, effectiveBg, fgRgb } = contrastOfLayer(bd.fg, bd.bgLayers);
-      results[pair.key] = {
-        label: pair.label,
-        kind: pair.kind,
-        threshold: THRESHOLD_LARGE_TEXT, // ui 門檻 3:1
-        ratio: Number(ratio.toFixed(2)),
-        pass: passes(ratio, pair.kind),
-        textColor: bd.fg,
-        compositedFg: fgRgb,
-        effectiveBg,
-        note: `${path}；量測方式：${bd.method}`,
-      };
+    if (fp.setup) await fp.setup(page);
+    await page.mouse.move(1, 899); // 避免 hover 狀態
+    const recs = await extractFieldBoundaries(page, fp.root);
+    let pageWorst = null;
+    const methods = new Set();
+    for (const rec of recs) {
+      const b = boundaryOf(rec);
+      methods.add(b.method);
+      const r = fieldBoundaryContrast({ method: b.method, fg: b.fg, fill: rec.fill, outer: rec.outer });
+      const item = { page: fp.key, label: rec.label, method: b.method, fg: b.fg, ratio: r.vsOuter, vsFill: r.vsFill, effectiveBg: r.outerBg, compositedFg: r.lineRgb };
+      if (!pageWorst || item.ratio < pageWorst.ratio) pageWorst = item;
     }
+    perPage.push({ page: fp.key, count: recs.length, methods: [...methods], min: pageWorst ? Number(pageWorst.ratio.toFixed(2)) : null });
+    if (pageWorst && (!worst || pageWorst.ratio < worst.ratio)) worst = pageWorst;
   }
-
+  if (!worst) {
+    results[pair.key] = { skipped: true, reason: 'FIELD_PAGES 上找不到可見欄位' };
+    return results;
+  }
+  results[pair.key] = {
+    label: pair.label,
+    kind: pair.kind,
+    threshold: THRESHOLD_LARGE_TEXT, // ui 門檻 3:1
+    ratio: Number(worst.ratio.toFixed(2)),
+    pass: passes(worst.ratio, pair.kind),
+    textColor: worst.fg,
+    compositedFg: worst.compositedFg,
+    effectiveBg: worst.effectiveBg,
+    perPage,
+    note: `最低：${worst.page}「${worst.label}」（${worst.method}）；` + perPage.map((p) => `${p.page} ${p.count} 欄 ${p.methods.join('/')} 最低 ${p.min}`).join('；'),
+  };
   return results;
 }
 
@@ -608,7 +667,7 @@ function renderMarkdown(matrix) {
   lines.push('- 量測畫面固定為 `/dashboard`（含月曆），尚未擴充到訂單列表、order-create 表單、dialog 做交叉驗證。');
   lines.push('- alpha compositing 只合成純色數值，不模擬 `backdrop-filter: blur()` 的取樣效果；背景若非純色/低頻漸層，合成結果為近似值。');
   lines.push('- focus 外框量測固定用「新增訂單」主要按鈕；若不同質地對 outlined 按鈕/連結有不同 focus 樣式，未逐一覆蓋。');
-  lines.push('- `input_border_on_surface`：在 `/orders/new` 量第一個 filled 輸入框；依序取 wrapper 邊框 → Material 底線 → 欄位填色對父層底色（見 note 的「量測方式」）。只量靜止狀態，不含 hover／focus。');
+  lines.push('- `input_border_on_surface`：量建單頁、訂單列表（展開搜尋＋篩選列）、優惠券新增對話框上所有可見、非停用、非 focus 的欄位，取最低值；每欄依序取 outlined 外框 → wrapper 邊框 → inset 細框 → Material 底線（疊在填色上）→ 填色，對欄位外側底色（見 note）。不含 hover／focus／錯誤狀態。');
   lines.push('- `selection_text`／`selection_text_sidenav`：直接用計算後的變數值合成，不實際拖曳選取文字。');
   return lines.join('\n');
 }

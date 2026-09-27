@@ -83,3 +83,37 @@ describe('lint-theme', () => {
     expect(roots[0].endsWith(join('admin', 'src'))).toBe(true);
   });
 });
+
+describe('lint-theme：欄位邊界（batch 3）', () => {
+  it('欄位選擇器底下用 outline-variant 當邊框色 → exit 1', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lt-'));
+    writeFileSync(join(dir, 'x.scss'), "[data-paradigm='e'] {\n  .mat-mdc-text-field-wrapper.mdc-text-field--filled {\n    border: 1px solid var(--mat-sys-outline-variant);\n  }\n}\n");
+    const r = run(dir);
+    expect(r.code).toBe(1);
+    expect(r.out).toContain('欄位邊界');
+  });
+
+  it('原生 input 的 border-color 用 outline → exit 1', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lt-'));
+    writeFileSync(join(dir, 'x.scss'), '.form input {\n  border-color: var(--mat-sys-outline);\n}\n');
+    expect(run(dir).code).toBe(1);
+  });
+
+  it('--app-field-border／error／disabled／focus 主色 → exit 0', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lt-'));
+    writeFileSync(join(dir, 'x.scss'), [
+      '.mat-mdc-text-field-wrapper { border: 1px solid var(--app-field-border); }',
+      '.mat-mdc-text-field-wrapper.mdc-text-field--invalid { border-color: var(--mat-sys-error); }',
+      '.mat-mdc-text-field-wrapper.mdc-text-field--disabled { border-color: var(--app-disabled-bg); }',
+      '.mat-mdc-text-field-wrapper.mdc-text-field--focused { border: 2px solid var(--mat-sys-primary); }',
+      '.mat-mdc-form-field { --mat-form-field-filled-active-indicator-color: var(--app-field-border); }',
+    ].join('\n'));
+    expect(run(dir).code).toBe(0);
+  });
+
+  it('非欄位選擇器（卡片）用 outline-variant 邊框 → 不受這條規則影響', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lt-'));
+    writeFileSync(join(dir, 'x.scss'), '.ui-card {\n  border: 1px solid var(--mat-sys-outline-variant);\n}\n');
+    expect(run(dir).code).toBe(0);
+  });
+});

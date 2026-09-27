@@ -103,3 +103,47 @@ export function passes(ratio, kind) {
     kind === 'large' || kind === 'ui' ? THRESHOLD_LARGE_TEXT : THRESHOLD_NORMAL_TEXT;
   return ratio >= threshold;
 }
+
+// ---- 欄位邊界（ADR 0008「欄位邊界」，第三批）----
+
+const COLOR_TOKEN = /rgba?\([^)]*\)|color\([^)]*\)/;
+
+/**
+ * 從 computed box-shadow 字串裡找出「只有 spread 的 inset 細框」（`inset 0 0 0 Npx COLOR`，
+ * 瀏覽器序列化成 `COLOR 0px 0px 0px Npx inset`）。找不到回傳 null。
+ * soft-ui／clay 的欄位邊界、page-toolbar 的搜尋膠囊用這種形式畫。
+ */
+export function parseInsetRing(boxShadow) {
+  if (!boxShadow || boxShadow === 'none') return null;
+  for (const part of boxShadow.split(/,(?![^(]*\))/)) {
+    const s = part.trim();
+    if (!/\binset\b/.test(s)) continue;
+    const color = (s.match(COLOR_TOKEN) || [])[0];
+    if (!color) continue;
+    const nums = s.replace(COLOR_TOKEN, '').replace(/\binset\b/, '').trim().split(/\s+/).map(parseFloat);
+    if (nums.length === 4 && nums[0] === 0 && nums[1] === 0 && nums[2] === 0 && nums[3] > 0) {
+      return { color, width: nums[3] };
+    }
+  }
+  return null;
+}
+
+/**
+ * 欄位邊界對比：邊界線（可能半透明）對「欄位外側底色」。
+ * - method 'underline'：底線畫在欄位填色之上，線色先疊在填色上再跟外側底色比。
+ * - 其他（border／ring／outlined／fill）：線色直接疊在外側底色上比。
+ * 另外回傳 vsFill（線疊在填色上 vs 填色），供參考；判定只看 vsOuter。
+ * @param {{method: string, fg: string, fill: string, outer: string[]}} f outer 為由外而內的底色堆疊
+ */
+export function fieldBoundaryContrast(f) {
+  const outer = f.outer.map(parseColor);
+  const fill = parseColor(f.fill || 'transparent');
+  const fg = parseColor(f.fg);
+  const outerBg = effectiveBackground(outer);
+  const fillBg = effectiveBackground([...outer, fill]);
+  const lineOnFill = effectiveBackground([...outer, fill, fg]);
+  const lineOnOuter = effectiveBackground([...outer, fg]);
+  const vsOuter = contrastRatio(f.method === 'underline' ? lineOnFill : lineOnOuter, outerBg);
+  const vsFill = contrastRatio(lineOnFill, fillBg);
+  return { vsOuter, vsFill, outerBg, lineRgb: f.method === 'underline' ? lineOnFill : lineOnOuter };
+}
