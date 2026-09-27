@@ -2,7 +2,7 @@ import { Component, computed, inject, input, output } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { ZH_TW } from '../../core/i18n/zh-tw';
+import { ZH_TW_SHELL } from '../../core/i18n/zh-tw-shell';
 import { HeaderToolbarSlot } from './header-toolbar-slot';
 import { HeaderTitleExtraSlot } from './header-title-extra-slot';
 import { HeaderTitleData, HeaderTitleSlot } from './header-title';
@@ -19,7 +19,7 @@ import { HeaderTitleData, HeaderTitleSlot } from './header-title';
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
-  protected readonly t = ZH_TW;
+  protected readonly t = ZH_TW_SHELL;
 
   readonly defaultTitle = input.required<HeaderTitleData>();
   readonly menuToggle = output<void>();

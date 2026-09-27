@@ -10,7 +10,7 @@ import { AppearancePanelService } from '@car-rental/theme-pack';
 // 若跟它共用同一個 import 語句／模組，AppearancePanelService 的 eager 使用會拖著整個 barrel
 // （含面板元件）一起被主 bundle 靜態引入，defer 就無法把它轉成動態 import。
 import { FloatingAppearancePanelComponent } from '@car-rental/theme-pack/floating-appearance-panel';
-import { ZH_TW } from './core/i18n/zh-tw';
+import { ZH_TW_SHELL } from './core/i18n/zh-tw-shell';
 import { SideNavComponent } from './layout/side-nav/side-nav.component';
 import { NavEntry, NavGroup, isNavGroup } from './layout/side-nav/nav-item.model';
 import { HeaderComponent } from './layout/header/header.component';
@@ -32,7 +32,7 @@ import { isFillPageRoute } from './layout/fill-page';
   styleUrl: './app.scss',
 })
 export class App implements OnInit {
-  protected readonly t = ZH_TW;
+  protected readonly t = ZH_TW_SHELL;
 
   protected readonly navItems: NavEntry[] = [
     { route: '/dashboard', label: this.t.nav.dashboard, icon: 'dashboard' },

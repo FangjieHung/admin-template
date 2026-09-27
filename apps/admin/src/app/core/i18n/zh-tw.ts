@@ -24,32 +24,15 @@ import {
   COMMISSION_TYPE_OPTIONS,
   PAYOUT_STATUS_OPTIONS,
 } from '@car-rental/domain';
+import { ZH_TW_SHELL } from './zh-tw-shell';
 
 export const ZH_TW = {
-  app: { title: '澎湖租車後台' },
+  app: ZH_TW_SHELL.app,
   // /login 頁首標題（找不到選單對應時的頁面覆寫，見 2.1）。
   loginPage: {
     title: '登入',
   },
-  nav: {
-    dashboard: '總覽',
-    // 4.5：「商品管理」是電商用語，改叫它實際管的東西。
-    productGroup: '車輛與配件',
-    vehicles: '車輛清單',
-    // 4.5：「訂單管理」改成側欄群組（訂單列表、會員）；新增訂單、訂單詳情、會員頁的麵包屑也用這個字。
-    orders: '訂單管理',
-    orderList: '訂單列表',
-    members: '會員',
-    maintenance: '保養管理',
-    pricingGroup: '定價管理',
-    pricing: '定價規則',
-    pricingCalendar: '假日及旺季',
-    addOns: '配件清單',
-    coupons: '優惠券設定',
-    partnerGroup: '合作通路',
-    partners: '通路管理',
-    commission: '退佣帳單',
-  },
+  nav: ZH_TW_SHELL.nav,
   common: {
     create: '新增',
     edit: '編輯',
@@ -60,7 +43,7 @@ export const ZH_TW = {
     actions: '操作',
     empty: '目前沒有資料',
     deleteConfirm: '確定要刪除嗎？',
-    storageReset: '本機資料格式異常，已重設為示範資料',
+    storageReset: ZH_TW_SHELL.storageReset,
     search: '搜尋',
     all: '全部',
     clearFilters: '清除篩選',
@@ -965,14 +948,5 @@ export const ZH_TW = {
     unquoted: '未報價',
     unquotedNotice: '{count} 筆訂單沒有報價紀錄，未計入退佣',
   },
-  layout: {
-    subtitle: '管理中心',
-    navAriaLabel: '主導覽',
-    adminUser: '管理員',
-    loggedIn: '已登入',
-    copyright: '版權所有',
-    // 2.1：頁首麵包屑／返回（各頁的標題文字仍各自放在對應頁面的 i18n 區塊）。
-    breadcrumbAriaLabel: '麵包屑',
-    back: '返回',
-  },
+  layout: ZH_TW_SHELL.layout,
 } as const;

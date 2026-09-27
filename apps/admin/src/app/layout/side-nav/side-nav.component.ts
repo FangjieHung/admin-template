@@ -5,7 +5,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
-import { ZH_TW } from '../../core/i18n/zh-tw';
+import { ZH_TW_SHELL } from '../../core/i18n/zh-tw-shell';
 import { NavEntry, NavGroup, NavLeaf, isNavGroup } from './nav-item.model';
 
 @Component({
@@ -21,7 +21,7 @@ import { NavEntry, NavGroup, NavLeaf, isNavGroup } from './nav-item.model';
   styleUrl: './side-nav.component.scss',
 })
 export class SideNavComponent {
-  protected readonly t = ZH_TW;
+  protected readonly t = ZH_TW_SHELL;
   protected readonly isNavGroup = isNavGroup;
   protected readonly auth = inject(AuthService);
 
