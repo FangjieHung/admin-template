@@ -53,7 +53,8 @@
     border-radius: var(--mat-sys-corner-large) var(--mat-sys-corner-large) 0 0;
     // iOS home indicator 會蓋住貼底內容；repo 尚無 safe-area 先例，此為首例。
     padding-bottom: max(12px, env(safe-area-inset-bottom));
-    animation: dual-calendar-slide-up 0.2s ease-out;
+    // 進場動畫時長／easing 吃語意變數（0.2s → base；ease-out → standard），reduced-motion 時 base 歸零，下方另有 animation: none。
+    animation: dual-calendar-slide-up var(--app-motion-base) var(--app-ease-standard);
   }
 }
 

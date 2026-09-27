@@ -106,7 +106,8 @@
   overflow-y: auto;
   border-radius: var(--mat-sys-corner-large) var(--mat-sys-corner-large) 0 0;
   z-index: var(--app-z-drawer);
-  animation: responsive-panel-slide-up 0.2s ease-out;
+  // 進場動畫時長／easing 吃語意變數（0.2s → base；ease-out → standard）；reduced-motion 時 base 歸零、不再滑入。
+  animation: responsive-panel-slide-up var(--app-motion-base) var(--app-ease-standard);
 }
 
 .responsive-panel__backdrop {

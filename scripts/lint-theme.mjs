@@ -10,9 +10,11 @@ const EXTS = ['.ts', '.scss', '.html'];
 const RGB_FN = /\brgba?\(/;
 const OUTLINE_RAW_PRIMARY = /outline\s*:[^;]*var\(\s*--mat-sys-primary\s*\)/;
 const ZINDEX_BIG = /z-index\s*:\s*(-?\d+)/;
-// transition 宣告（含多行值）裡寫死的時長／延遲：非 0 的數字接 ms 或 s。`0s`／`0ms` 允許（不是時長刻度）。
-const TRANSITION_START = /(^|[\s{;])transition(-duration|-delay)?\s*:/;
-const HARD_TIME = /(?<![\w.-])(?!0+(?:\.0+)?m?s\b)\d*\.?\d+m?s\b/;
+// transition／animation 宣告（含多行值）裡寫死的時長／延遲：非 0 的數字接 ms 或 s。`0s`／`0ms` 允許（不是時長刻度）。
+// animation 於 2026-09-28 納入：進場動畫用 --app-motion-fast/-base/-slow，無限循環的裝飾動畫用 --app-motion-loop。
+const TRANSITION_START = /(^|[\s{;])(transition|animation)(-duration|-delay)?\s*:/;
+// 負的延遲（`-2s`，讓循環動畫錯開起跑）也算寫死；`-` 前面必須不是識別字字元，避免誤判 `slide-2s` 這類名稱。
+const HARD_TIME = /(?<![\w.-])-?(?!0+(?:\.0+)?m?s\b)\d*\.?\d+m?s\b/;
 
 // ---- batch 3（欄位邊界）----
 // 選擇器是輸入欄位時，邊框／底線／外框顏色只能用這幾種用途變數：
@@ -172,7 +174,7 @@ export function runLint(scanRoots) {
         if (inTransition) {
           const code = line.replace(/\/\/.*$/, '');
           if (HARD_TIME.test(code)) {
-            violations.push(`${f}:${i + 1}: [transition 寫死時長，改用 --app-motion-fast/-base/-slow] ${trimmed}`);
+            violations.push(`${f}:${i + 1}: [transition／animation 寫死時長，改用 --app-motion-fast/-base/-slow（循環動畫用 --app-motion-loop）] ${trimmed}`);
           }
           if (code.includes(';') || code.includes('}')) inTransition = false;
         }

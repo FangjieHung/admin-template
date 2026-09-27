@@ -35,7 +35,8 @@
     top: -20vw;
     left: -18vw;
     background: radial-gradient(circle, color-mix(in srgb, var(--mat-sys-primary) 18%, transparent), transparent 65%);
-    animation: clay-float 8s ease-in-out infinite;
+    // 循環的裝飾動畫：時長是節奏，吃 --app-motion-loop（8s），不套 fast/base/slow；easing 維持 ease-in-out 的來回感。
+    animation: clay-float var(--app-motion-loop) ease-in-out infinite;
   }
   .content-area::after {
     right: -22vw;
@@ -43,7 +44,8 @@
     background:
       radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--mat-sys-secondary) 14%, transparent), transparent 48%),
       radial-gradient(circle at 75% 75%, color-mix(in srgb, var(--app-info-dot) 14%, transparent), transparent 48%);
-    animation: clay-float-delayed 10s ease-in-out -2s infinite;
+    // 10s、-2s 起跑 = loop 的 1.25 倍／-0.25 倍（兩顆光暈錯開，不同步漂浮）。
+    animation: clay-float-delayed calc(var(--app-motion-loop) * 1.25) ease-in-out calc(var(--app-motion-loop) * -0.25) infinite;
   }
 
   .app-sidenav {

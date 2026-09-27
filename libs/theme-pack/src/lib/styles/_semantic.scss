@@ -76,6 +76,10 @@
   --app-motion-base: 200ms;
   --app-motion-slow: 400ms;
   --app-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  // 關鍵影格動畫（2026-09-28 收尾）：一次性的進場動畫（抽屜、月曆面板從底部滑入）跟 transition 一樣吃上面 3 檔；
+  // 無限循環、「時長本身就是節奏」的裝飾動畫另用 --app-motion-loop，不硬塞進三檔。預設值 = 目前唯一的循環動畫
+  // （clay 背景光暈漂浮 8s；另一顆 10s、-2s 起跑以它的 1.25 倍／-0.25 倍換算，值不變）。
+  --app-motion-loop: 8s;
 
   // ---- 選取文字 ----
   // 第二批套用：component.scss 的全域 ::selection（深色側欄內另用 shell 色）。
@@ -84,11 +88,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  // 使用者要求減少動態時，所有吃這 3 檔的 transition（含 page-toolbar 以 base 換算的延遲）一起歸零，
-  // 各元件／質地不必再各寫一份 `transition: none`。
+  // 使用者要求減少動態時，所有吃這 3 檔的 transition 與進場動畫（含 page-toolbar 以 base 換算的延遲）一起歸零，
+  // 各元件／質地不必再各寫一份 `transition: none`。循環動畫的時長也歸零（0s 的無限循環等於停在起點）；
+  // 用到循環動畫的 recipe 另外寫 `animation: none` 明確停掉（見 clay recipes），這裡的 0s 是保底。
   :root {
     --app-motion-fast: 0ms;
     --app-motion-base: 0ms;
     --app-motion-slow: 0ms;
+    --app-motion-loop: 0s;
   }
 }

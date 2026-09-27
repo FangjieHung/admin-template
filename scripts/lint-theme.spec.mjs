@@ -57,11 +57,25 @@ describe('lint-theme', () => {
     expect(r.out).toContain('c.scss:1');
   });
 
+  it('animation 寫死時長（簡寫、多行、duration、delay）→ exit 1', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lt-'));
+    writeFileSync(join(dir, 'a.scss'), '.x { animation: spin 0.2s ease-out; }');
+    writeFileSync(join(dir, 'b.scss'), '.y {\n  animation:\n    float var(--app-motion-loop) ease-in-out -2s infinite;\n}');
+    writeFileSync(join(dir, 'c.scss'), '.z { animation-duration: 8s; }\n.w { animation-delay: 150ms; }\n.v { animation: none; }');
+    const r = run(dir);
+    expect(r.code).toBe(1);
+    expect(r.out).toContain('a.scss:1');
+    expect(r.out).toContain('b.scss:3');
+    expect(r.out).toContain('c.scss:1');
+    expect(r.out).toContain('c.scss:2');
+    expect(r.out).not.toContain('c.scss:3');
+  });
+
   it('transition 用 --app-motion-*、0s 延遲、calc 比例 → exit 0；_tokens.scss 可寫時長', () => {
     const dir = mkdtempSync(join(tmpdir(), 'lt-'));
     writeFileSync(
       join(dir, 'ok.scss'),
-      '.x {\n  transition:\n    grid-template-rows var(--app-motion-base) var(--app-ease-standard),\n    flex-basis 0s linear 0s;\n}\n.y { transition: width var(--app-motion-base) ease calc(var(--app-motion-base) * 0.45); }\n.z { animation: spin 200ms linear; }',
+      '.x {\n  transition:\n    grid-template-rows var(--app-motion-base) var(--app-ease-standard),\n    flex-basis 0s linear 0s;\n}\n.y { transition: width var(--app-motion-base) ease calc(var(--app-motion-base) * 0.45); }\n.z { animation: spin var(--app-motion-loop) linear infinite; }\n.w { animation: slide var(--app-motion-base) var(--app-ease-standard) calc(var(--app-motion-loop) * -0.25); }',
     );
     mkdirSync(join(dir, 'frosted'), { recursive: true });
     writeFileSync(join(dir, 'frosted', '_tokens.scss'), ':root { --x: 1; transition: color 200ms; }');
