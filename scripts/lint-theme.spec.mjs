@@ -117,3 +117,73 @@ describe('lint-theme：欄位邊界（batch 3）', () => {
     expect(run(dir).code).toBe(0);
   });
 });
+
+describe('lint-theme：原生勾選框、單選鈕（batch 4）', () => {
+  it('勾選框選擇器底下寫死具名色／rgb()／hsl() → exit 1', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lt-'));
+    writeFileSync(join(dir, 'x.scss'), [
+      "input[type='checkbox'] {",
+      '  &:checked { background: white; }',
+      '  &::before { border-color: hsl(0 0% 100%); }',
+      '}',
+      "label > input[type='radio']:checked { color: black; }",
+    ].join('\n'));
+    const r = run(dir);
+    expect(r.code).toBe(1);
+    expect(r.out).toContain('x.scss:2');
+    expect(r.out).toContain('x.scss:3');
+    expect(r.out).toContain('x.scss:5');
+    expect(r.out).toContain('勾選框');
+  });
+
+  it('變數 fallback 寫死色也擋', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lt-'));
+    writeFileSync(join(dir, 'x.scss'), "input:where([type='checkbox']) { background: var(--mat-sys-surface, white); }");
+    expect(run(dir).code).toBe(1);
+  });
+
+  it('只用變數、currentColor、transparent、陰影數值與 forced-colors 系統色 → exit 0', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lt-'));
+    writeFileSync(join(dir, 'x.scss'), [
+      "input:where([type='checkbox'], [type='radio']) {",
+      '  border: 2px solid var(--app-field-border);',
+      '  background: var(--mat-sys-surface);',
+      '  color: var(--mat-sys-on-primary);',
+      '  box-shadow: inset 2px 2px 3px var(--clay-ambient), inset -1px -1px 2px var(--clay-highlight);',
+      '  &::before { border-right: 2px solid; background: currentColor; }',
+      '  &:disabled { border-color: transparent; background: color-mix(in srgb, var(--mat-sys-on-surface) 38%, transparent); }',
+      '  @media (forced-colors: active) { border-color: CanvasText; }',
+      '}',
+    ].join('\n'));
+    expect(run(dir).code).toBe(0);
+  });
+
+  it('mat-checkbox／mat-radio 的顏色 token 指向寫死色或非用途變數 → exit 1；指向 --app-*／--mat-sys-* → exit 0', () => {
+    const bad = mkdtempSync(join(tmpdir(), 'lt-'));
+    writeFileSync(join(bad, 'x.scss'), '.foo { --mat-checkbox-selected-icon-color: purple; }\n.bar { --mat-radio-unselected-icon-color: var(--primary-shade); }');
+    const r = run(bad);
+    expect(r.code).toBe(1);
+    expect(r.out).toContain('x.scss:1');
+    expect(r.out).toContain('x.scss:2');
+    const ok = mkdtempSync(join(tmpdir(), 'lt-'));
+    writeFileSync(join(ok, 'x.scss'), '.mat-mdc-checkbox { --mat-checkbox-unselected-icon-color: var(--app-field-border); --mat-checkbox-state-layer-size: 32px; }');
+    expect(run(ok).code).toBe(0);
+  });
+
+  it('accent-color 寫死具名色 → exit 1', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lt-'));
+    writeFileSync(join(dir, 'x.scss'), '.avl__radio { accent-color: teal; }');
+    expect(run(dir).code).toBe(1);
+  });
+
+  it('非勾選框選擇器（卡片）用具名色不受這條規則影響（由其他規則管）', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lt-'));
+    writeFileSync(join(dir, 'x.scss'), '.ui-card { color: inherit; background: transparent; }');
+    expect(run(dir).code).toBe(0);
+  });
+
+  it('預設掃描範圍包含 libs/ui、libs/booking-flow、libs/contract-signing', async () => {
+    const { SHARED_UI_LIBS } = await import('./lint-theme.mjs');
+    expect(SHARED_UI_LIBS).toEqual(expect.arrayContaining(['libs/ui/src', 'libs/booking-flow/src', 'libs/contract-signing/src']));
+  });
+});

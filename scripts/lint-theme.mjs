@@ -29,6 +29,43 @@ export function badFieldBorderValue(value) {
   return vars.find((v) => !FIELD_BORDER_OK.test(v.replace(/\s*,[^)]*\)/, ')'))) || null;
 }
 
+// ---- batch 4（原生勾選框、單選鈕）----
+// 選擇器是勾選框／單選鈕（原生 [type=checkbox|radio]、mat-checkbox、mat-radio）時，顏色相關宣告不得寫死顏色：
+// 值裡只能有 var(--x)（fallback 也要符合）、color-mix()/calc()/min()/max()、長度數字、線條／陰影關鍵字、
+// transparent／currentColor 與高對比模式的系統色（CanvasText 等）。hex 由既有規則擋；這條多擋 rgb()/hsl()/oklch()
+// 之類的色彩函式與具名色（white、black、red…），因為 appearance: none 之後瀏覽器不再幫忙配色，寫死就不會跟配色走。
+// 另外 --mat-checkbox-*color／--mat-radio-*color（MDC token）只能指向 --app-*／--mat-sys-*，不分選擇器；
+// accent-color 也只能用變數（第四批前原生控制項靠它上色）。
+const CHOICE_SELECTOR = /\[type=['"]?(checkbox|radio)\b|\.mat-mdc-checkbox\b|\.mat-mdc-radio-button\b|\.mdc-checkbox\b|\.mdc-radio\b/;
+const CHOICE_COLOR_DECL = /^\s*(background(-color)?|color|border(-top|-right|-bottom|-left)?(-color)?|outline(-color)?|box-shadow|fill|stroke|accent-color)\s*:\s*([^;{]*)/;
+const MDC_CHOICE_TOKEN_DECL = /^\s*(--mat-(checkbox|radio)-[\w-]*color)\s*:\s*([^;]*)/;
+const ACCENT_DECL = /^\s*accent-color\s*:\s*([^;]*)/;
+const COLOR_FN = /\b(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(/i;
+const CHOICE_OK_WORDS = new Set([
+  'none', 'solid', 'dashed', 'dotted', 'double', 'inset', 'transparent', 'currentcolor', 'inherit', 'initial', 'unset', 'revert',
+  'auto', 'color-mix', 'in', 'srgb', 'calc', 'min', 'max',
+  // forced-colors 的系統色：跟著使用者的高對比設定走，不算寫死
+  'canvas', 'canvastext', 'highlight', 'highlighttext', 'graytext', 'buttontext', 'buttonface', 'buttonborder', 'field', 'fieldtext', 'linktext', 'accentcolor', 'accentcolortext',
+]);
+
+// 回傳值裡第一個「寫死的顏色」片段；全部是變數／關鍵字就回傳 null。
+export function hardcodedChoiceColor(value) {
+  const fn = value.match(COLOR_FN);
+  if (fn) return fn[0];
+  // 拿掉 var(--x) 本身（保留 fallback 讓它也被檢查），再拿掉數字與單位
+  const rest = value
+    .replace(/var\(\s*--[\w-]+\s*,?/g, ' ')
+    .replace(/#[0-9a-fA-F]{3,8}\b/g, (m) => ` ${m.replace('#', 'HEX_')} `)
+    .replace(/-?\d*\.?\d+(px|rem|em|%|deg|ms|s)?\b/g, ' ');
+  const words = rest.match(/[A-Za-z_][\w-]*/g) || [];
+  return words.find((w) => !CHOICE_OK_WORDS.has(w.toLowerCase())) || null;
+}
+
+// MDC 勾選框／單選鈕 token 只能指向用途變數或系統 token。
+export function badChoiceTokenValue(value) {
+  return /^var\(\s*--(app|mat-sys)-[\w-]+\s*\)$/.test(value.trim()) ? null : value.trim();
+}
+
 // rgba(／rgb( 允許清單：逐條列出「檔案 → 允許的行內容片段 → 為什麼允許」。
 // 不在這份清單裡的 rgb(/rgba( 一律視為寫死色，擋。
 const RGB_ALLOWLIST = [
@@ -95,16 +132,36 @@ export function runLint(scanRoots) {
 
       if (checkFieldBorder) {
         const code = line.replace(/\/\/.*$/, '').replace(/\/\*.*?\*\//g, '');
-        const inField = selStack.some((x) => FIELD_SELECTOR.test(x));
-        const m = inField && code.match(FIELD_BORDER_DECL);
-        if (m) {
-          const bad = badFieldBorderValue(m[5]);
-          if (bad) violations.push(`${f}:${i + 1}: [欄位邊界顏色要用 --app-field-border（錯誤 --mat-sys-error、停用 --app-disabled-*），不要用 ${bad}] ${trimmed}`);
-        }
+        // 宣告在遇到 `;` 或 `}` 時才判斷（單行規則 `x { a: b; }` 與跨行的值都算得到），選擇器堆疊是當下的。
+        const checkDecl = (decl) => {
+          const text = decl.trim();
+          if (!text.includes(':')) return;
+          const at = `${f}:${i + 1}:`;
+          const inField = selStack.some((x) => FIELD_SELECTOR.test(x));
+          const m = inField && text.match(FIELD_BORDER_DECL);
+          if (m) {
+            const bad = badFieldBorderValue(m[5]);
+            if (bad) violations.push(`${at} [欄位邊界顏色要用 --app-field-border（錯誤 --mat-sys-error、停用 --app-disabled-*），不要用 ${bad}] ${trimmed}`);
+          }
+          const inChoice = selStack.some((x) => CHOICE_SELECTOR.test(x));
+          const cm = inChoice && text.match(CHOICE_COLOR_DECL);
+          if (cm) {
+            const bad = hardcodedChoiceColor(cm[6]);
+            if (bad) violations.push(`${at} [勾選框／單選鈕的顏色要用 --app-*／--mat-sys-* 變數，不要寫死 ${bad}] ${trimmed}`);
+          }
+          const tm = text.match(MDC_CHOICE_TOKEN_DECL);
+          if (tm && badChoiceTokenValue(tm[3])) {
+            violations.push(`${at} [mat-checkbox／mat-radio 的顏色 token 只能指向 --app-*／--mat-sys-*] ${trimmed}`);
+          }
+          const am = !inChoice && text.match(ACCENT_DECL);
+          if (am && hardcodedChoiceColor(am[1])) {
+            violations.push(`${at} [accent-color 要用變數] ${trimmed}`);
+          }
+        };
         for (const ch of code) {
           if (ch === '{') { selStack.push(pendingSel.trim()); pendingSel = ''; }
-          else if (ch === '}') { selStack.pop(); pendingSel = ''; }
-          else if (ch === ';') pendingSel = '';
+          else if (ch === '}') { checkDecl(pendingSel); selStack.pop(); pendingSel = ''; }
+          else if (ch === ';') { checkDecl(pendingSel); pendingSel = ''; }
           else pendingSel += ch;
         }
         pendingSel += ' ';
@@ -141,12 +198,17 @@ export function runLint(scanRoots) {
   return violations;
 }
 
-// 直接執行時：掃 libs/theme-pack + 所有有套主題的 app（或 CLI 指定的路徑）
+// 預設掃描範圍：theme-pack、所有有套主題的 app，加上 app 會載入、有自己元件樣式的共用 lib
+// （第四批納入 libs/ui、libs/booking-flow、libs/contract-signing；納入時的既有違規已逐一改成變數）。
+export const SHARED_UI_LIBS = ['libs/ui/src', 'libs/booking-flow/src', 'libs/contract-signing/src'];
+const DEFAULT_ROOTS = ['libs/theme-pack/src', ...SHARED_UI_LIBS, ...collectThemedAppRoots('apps')];
+
+// 直接執行時：掃預設範圍（或 CLI 指定的路徑）
 if (import.meta.url === `file://${process.argv[1]}`) {
   const cliRoots = process.argv.slice(2);
   const scanRoots = cliRoots.length
     ? cliRoots
-    : ['libs/theme-pack/src', ...collectThemedAppRoots('apps')];
+    : DEFAULT_ROOTS;
   const violations = runLint(scanRoots);
   if (violations.length) {
     console.log('lint:theme 發現寫死色/底層色（請改綁 --mat-sys-* 或 --app-*）：');

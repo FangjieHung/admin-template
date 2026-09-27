@@ -108,10 +108,12 @@
   }
 }
 
-// 桌機維持原本的透明 backdrop（僅用來接點擊關閉）；手機比照 bottom sheet 壓暗背景。
+// 桌機維持原本的透明 backdrop（僅用來接點擊關閉）；手機比照 bottom sheet 壓暗背景，
+// 與對話框同一個遮罩變數（第四批把 libs/ui 納入 lint:theme 時由黑色 40% 改用 --app-scrim）。
 ::ng-deep .dual-calendar-backdrop {
   @media (max-width: 767px) {
-    background: rgb(0 0 0 / 40%);
+    background: var(--app-scrim);
+    backdrop-filter: blur(var(--app-scrim-blur));
   }
 }
 

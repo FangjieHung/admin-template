@@ -102,7 +102,7 @@
     gap: 16px;
     padding: 16px;
     cursor: pointer;
-    background: var(--mat-sys-surface-container-lowest, #fff);
+    background: var(--mat-sys-surface-container-lowest);
     border: 1px solid var(--mat-sys-outline-variant);
     border-radius: var(--mat-sys-corner-medium, 12px);
     transition:
@@ -231,8 +231,8 @@
     margin-top: 2px;
     padding: 2px 8px;
     border-radius: var(--mat-sys-corner-small);
-    background: var(--app-positive-bg, #e6f4ea);
-    color: var(--app-positive-fg, #1e7b40);
+    background: var(--app-positive-bg);
+    color: var(--app-positive-fg);
     font-size: 0.75rem;
     font-weight: 600;
     white-space: nowrap;

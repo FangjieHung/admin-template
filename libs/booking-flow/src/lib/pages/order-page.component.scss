@@ -32,10 +32,10 @@
       inset: auto 0 0 0;
       max-height: 40vh;
       overflow-y: auto;
-      z-index: 20;
-      background: var(--mat-sys-surface-container-highest, #fff);
-      border-top: 1px solid var(--mat-sys-outline-variant, rgba(0, 0, 0, 0.12));
-      box-shadow: var(--mat-sys-level2, 0 -2px 8px rgba(0, 0, 0, 0.12));
+      z-index: var(--app-z-sticky);
+      background: var(--mat-sys-surface-container-highest);
+      border-top: 1px solid var(--mat-sys-outline-variant);
+      box-shadow: var(--mat-sys-level2);
       // 底部留白（含 safe-area）改由卡片內黏底的「應付總計」承擔，
       // 這裡留 0 才不會在總計下方多出一條捲不掉的空白。
       padding: 0 1rem 0;

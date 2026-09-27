@@ -63,8 +63,9 @@
     font-size: 0.7rem;
     padding: 2px 6px;
     border-radius: var(--mat-sys-corner-small);
-    background: rgba(0, 0, 0, 0.6);
-    color: #fff;
+    // 照片上的小標籤：深色半透明底＋反白字，改用 inverse 色組（Verdant 的 inverse-surface 是近黑的墨綠）。
+    background: color-mix(in srgb, var(--mat-sys-inverse-surface) 80%, transparent);
+    color: var(--mat-sys-inverse-on-surface);
   }
 
   &__placeholder {
