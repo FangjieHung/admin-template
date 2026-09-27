@@ -2,7 +2,7 @@ import { Repository } from './repository';
 
 export class LocalStorageRepository<T extends { id: string }> implements Repository<T> {
   constructor(
-    private readonly key: string,
+    protected readonly key: string,
     private readonly seed: () => T[],
     private readonly onReset?: () => void,
     private readonly normalize?: (item: unknown) => T,
@@ -47,7 +47,8 @@ export class LocalStorageRepository<T extends { id: string }> implements Reposit
     localStorage.setItem(this.key, JSON.stringify(items));
   }
 
-  private reset(notify: boolean): T[] {
+  /** 沒有資料（notify=false）或內容損壞（notify=true）時換成種子資料；子類別可改成非同步重設。 */
+  protected reset(notify: boolean): T[] {
     const items = this.seed();
     this.replaceAll(items);
     if (notify) this.onReset?.();
