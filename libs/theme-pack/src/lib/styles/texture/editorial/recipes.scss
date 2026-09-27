@@ -15,7 +15,8 @@
   // var(--mat-sys-corner-medium)，此質地不需再覆寫（ticket 12）。
   :is(.nav-link, .nav-sublink, .nav-flyout-item):hover,
   :is(.nav-link, .nav-sublink, .nav-flyout-item).active {
-    background: color-mix(in srgb, var(--app-shell-on) 7%, var(--app-shell-bg));
+    // 濃度 7% 由 editorial/_tokens.scss 的 --app-shell-hover 提供（第二批收編）。
+    background: var(--app-shell-hover);
     color: var(--app-shell-on);
     transform: none;
   }
@@ -64,7 +65,7 @@
     box-shadow: none;
   }
   .ui-card--clickable,
-  .stat-card { transition: box-shadow 200ms ease, border-color 200ms ease; }
+  .stat-card { transition: box-shadow var(--app-motion-base) var(--app-ease-standard), border-color var(--app-motion-base) var(--app-ease-standard); }
   @media (hover: hover) {
     .ui-card--clickable:hover,
     .stat-card:hover {
@@ -87,7 +88,7 @@
     min-height: 44px;
     border-radius: var(--mat-sys-corner-medium);
     box-shadow: none;
-    transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+    transition: background-color var(--app-motion-fast) var(--app-ease-standard), color var(--app-motion-fast) var(--app-ease-standard), transform var(--app-motion-fast) var(--app-ease-standard);
   }
   .mat-mdc-icon-button { min-width: 44px; }
   .theme-pill:not(.is-active),
@@ -246,9 +247,15 @@
     border-top: 1px solid var(--mat-sys-outline-variant);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    :is(.ui-card--clickable, .stat-card, .theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base) {
-      transition-duration: 0.01ms;
-    }
+  // 停用狀態（ADR 0008 第二批）：平面按鈕／膠囊停用時改淡底淡字（本質地本來就沒有陰影）。
+  // 統一吃 --app-disabled-*、拿掉陰影，Material 質地維持 Material 原生停用樣式。
+  // `.mat-mdc-button-disabled` 是 Angular Material 對停用按鈕加的 class（含 disabledInteractive）。
+  :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-raised-button, .mat-mdc-unelevated-button, .mat-mdc-outlined-button):is(:disabled, .is-disabled, [aria-disabled='true'], .mat-mdc-button-disabled) {
+    color: var(--app-disabled-fg);
+    background: var(--app-disabled-bg);
+    box-shadow: none;
+    cursor: not-allowed;
   }
+
+  // prefers-reduced-motion：transition 時長取自 --app-motion-*，由 _semantic.scss 在 reduce 時歸零。
 }

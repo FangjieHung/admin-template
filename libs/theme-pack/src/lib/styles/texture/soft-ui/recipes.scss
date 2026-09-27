@@ -72,7 +72,7 @@
   }
   .ui-card--clickable,
   .stat-card {
-    transition: transform 300ms ease-out, box-shadow 300ms ease-out;
+    transition: transform var(--app-motion-slow) var(--app-ease-standard), box-shadow var(--app-motion-slow) var(--app-ease-standard);
   }
   .ui-card--clickable:hover,
   .stat-card:hover {
@@ -103,7 +103,7 @@
     border: 0;
     border-radius: var(--mat-sys-corner-medium);
     box-shadow: var(--mat-sys-level1);
-    transition: transform 300ms ease-out, box-shadow 300ms ease-out, background-color 300ms ease-out;
+    transition: transform var(--app-motion-slow) var(--app-ease-standard), box-shadow var(--app-motion-slow) var(--app-ease-standard), background-color var(--app-motion-slow) var(--app-ease-standard);
   }
   .theme-pill:not(.is-active),
   .ui-nav-pill:not(.is-active),
@@ -164,7 +164,7 @@
     background: var(--mat-sys-background);
     border-radius: var(--mat-sys-corner-medium);
     box-shadow: var(--soft-inset);
-    transition: box-shadow 300ms ease-out;
+    transition: box-shadow var(--app-motion-slow) var(--app-ease-standard);
   }
   .mat-mdc-form-field:focus-within .mat-mdc-text-field-wrapper.mdc-text-field--filled {
     box-shadow: var(--soft-inset-deep);
@@ -295,9 +295,23 @@
     color: inherit;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    :is(.ui-card--clickable, .stat-card, .theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base, .mat-mdc-text-field-wrapper) {
-      transition-duration: 0.01ms;
-    }
+  // 本質地把側欄畫成頁面底色＋ on-surface 文字（不是深色 shell），側欄內的選取文字回到全站預設，
+  // 不用 component.scss 為深色側欄準備的 shell 選取色（白字配淺底會只剩 1.05:1）。
+  .app-sidenav::selection,
+  .app-sidenav ::selection {
+    background: var(--app-selection-bg);
+    color: var(--app-selection-fg);
   }
+
+  // 停用狀態（ADR 0008 第二批）：浮雕按鈕／膠囊停用時不能還浮著——去掉凸起陰影、改淡底淡字。
+  // 統一吃 --app-disabled-*、拿掉陰影，Material 質地維持 Material 原生停用樣式。
+  // `.mat-mdc-button-disabled` 是 Angular Material 對停用按鈕加的 class（含 disabledInteractive）。
+  :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-raised-button, .mat-mdc-unelevated-button, .mat-mdc-outlined-button, .mat-mdc-icon-button):is(:disabled, .is-disabled, [aria-disabled='true'], .mat-mdc-button-disabled) {
+    color: var(--app-disabled-fg);
+    background: var(--app-disabled-bg);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  // prefers-reduced-motion：transition 時長取自 --app-motion-*，由 _semantic.scss 在 reduce 時歸零。
 }

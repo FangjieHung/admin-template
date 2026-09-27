@@ -21,7 +21,8 @@
   .avatar { border-radius: var(--mat-sys-corner-full); box-shadow: var(--mat-sys-level1); }
   :is(.nav-link, .nav-sublink, .nav-flyout-item).active,
   :is(.nav-link, .nav-sublink, .nav-flyout-item):hover {
-    background: color-mix(in srgb, var(--app-shell-on) 9%, var(--app-shell-bg));
+    // 濃度 9% 由 frosted/_tokens.scss 的 --app-shell-hover 提供（第二批收編）。
+    background: var(--app-shell-hover);
     color: var(--app-shell-on);
   }
   .nav-subgroup { border-color: color-mix(in srgb, var(--app-shell-on) 14%, transparent); }
@@ -73,7 +74,7 @@
     box-shadow: none;
   }
   .ui-card--clickable,
-  .stat-card { transition: transform 220ms ease-out, box-shadow 220ms ease-out; }
+  .stat-card { transition: transform var(--app-motion-base) var(--app-ease-standard), box-shadow var(--app-motion-base) var(--app-ease-standard); }
   @media (hover: hover) {
     .ui-card--clickable:hover,
     .stat-card:hover { transform: translateY(-2px); box-shadow: var(--mat-sys-level3); }
@@ -93,7 +94,7 @@
     min-height: 44px;
     border-radius: var(--mat-sys-corner-full);
     box-shadow: var(--mat-sys-level1);
-    transition: transform 180ms ease-out, box-shadow 180ms ease-out, background-color 180ms ease-out;
+    transition: transform var(--app-motion-base) var(--app-ease-standard), box-shadow var(--app-motion-base) var(--app-ease-standard), background-color var(--app-motion-base) var(--app-ease-standard);
   }
   .mat-mdc-icon-button { min-width: 44px; }
   .theme-pill:not(.is-active),
@@ -223,10 +224,34 @@
   .ui-text-caption { font-size: 0.8rem; color: var(--mat-sys-on-surface-variant); }
   .ui-card--inverse :is(.ui-text-subtitle, .ui-text-caption) { color: inherit; }
 
-  @media (prefers-reduced-motion: reduce) {
-    :is(.ui-card--clickable, .stat-card, .theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base) {
-      transition-duration: 0.01ms;
+  // 停用狀態（ADR 0008 第二批）：玻璃按鈕停用時去掉浮起陰影與主色底。
+  // 統一吃 --app-disabled-*、拿掉陰影，Material 質地維持 Material 原生停用樣式。
+  // `.mat-mdc-button-disabled` 是 Angular Material 對停用按鈕加的 class（含 disabledInteractive）。
+  :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-raised-button, .mat-mdc-unelevated-button, .mat-mdc-outlined-button, .mat-mdc-icon-button):is(:disabled, .is-disabled, [aria-disabled='true'], .mat-mdc-button-disabled) {
+    color: var(--app-disabled-fg);
+    background: var(--app-disabled-bg);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  // 使用者要求減少透明度：所有 backdrop-filter 關掉、半透明底改實色（--frost-panel 在 _tokens.scss
+  // 的同名 media query 改成 surface；遮罩霧化 --app-scrim-blur 也在那裡歸零）。
+  @media (prefers-reduced-transparency: reduce) {
+    .app-sidenav,
+    .nav-flyout,
+    .ui-card,
+    .stat-card,
+    .mat-mdc-dialog-surface,
+    .mat-datepicker-content,
+    .mat-mdc-menu-panel {
+      backdrop-filter: none;
     }
+    .app-sidenav { background: var(--app-shell-bg); }
+    .mat-mdc-text-field-wrapper.mdc-text-field--filled { background: var(--mat-sys-surface-container-high); }
+  }
+
+  // transition 時長由 _semantic.scss 的 --app-motion-* 在 reduce 時歸零；這裡只保留「不要位移」。
+  @media (prefers-reduced-motion: reduce) {
     :is(.ui-card--clickable, .stat-card, .theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base):hover {
       transform: none;
     }

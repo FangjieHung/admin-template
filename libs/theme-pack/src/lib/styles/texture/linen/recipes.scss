@@ -73,7 +73,7 @@
     font-weight: 600;
     color: var(--mat-sys-on-surface-variant);
     white-space: nowrap;
-    transition: background 160ms ease, color 160ms ease;
+    transition: background var(--app-motion-fast) var(--app-ease-standard), color var(--app-motion-fast) var(--app-ease-standard);
   }
   .ui-nav-pill:hover {
     background: var(--mat-sys-surface-container-high);

@@ -22,3 +22,26 @@ body {
   height: 100%;
   min-height: 100%;
 }
+
+// ---- 語意用途變數的全域套用（ADR 0008 第二批）----
+
+// 遮罩：CDK 的 `.cdk-overlay-dark-backdrop`（mat-dialog 等）改吃 --app-scrim／--app-scrim-blur。
+// CDK 的 overlay 樣式在執行期才插入 <head>、排在全域樣式之後，同權重（0-1-0）會輸，
+// 多一層 `.cdk-overlay-container`（0-2-0）蓋過它，不用 !important。
+.cdk-overlay-container .cdk-overlay-dark-backdrop {
+  background: var(--app-scrim);
+  backdrop-filter: blur(var(--app-scrim-blur));
+}
+
+// 選取文字：跟著配色的 primary-container。深色側欄（shell）另用 shell 前景 28% 混 shell 底色，
+// 淺色的 primary-container 放在深色側欄上會像一塊亮斑。混的對象用 --app-shell-bg 而不是 transparent：
+// Frosted 的側欄是 92% 半透明，疊出來會比 shell 底色亮，Sandstone 等白字配色會掉到 4.5:1 以下。
+::selection {
+  background: var(--app-selection-bg);
+  color: var(--app-selection-fg);
+}
+.app-sidenav::selection,
+.app-sidenav ::selection {
+  background: color-mix(in srgb, var(--app-shell-on) 28%, var(--app-shell-bg));
+  color: var(--app-shell-on);
+}

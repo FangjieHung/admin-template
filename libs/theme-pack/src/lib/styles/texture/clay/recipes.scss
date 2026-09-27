@@ -87,7 +87,7 @@
   }
   .ui-card--clickable,
   .stat-card {
-    transition: transform 500ms ease-out, box-shadow 500ms ease-out;
+    transition: transform var(--app-motion-slow) var(--app-ease-standard), box-shadow var(--app-motion-slow) var(--app-ease-standard);
   }
   @media (hover: hover) {
     .ui-card--clickable:hover,
@@ -115,7 +115,7 @@
     min-height: 44px;
     border-radius: var(--mat-sys-corner-medium);
     box-shadow: var(--clay-shadow-button);
-    transition: transform 200ms ease-out, box-shadow 200ms ease-out, background-color 200ms ease-out;
+    transition: transform var(--app-motion-base) var(--app-ease-standard), box-shadow var(--app-motion-base) var(--app-ease-standard), background-color var(--app-motion-base) var(--app-ease-standard);
   }
   .mat-mdc-icon-button { min-width: 44px; }
   .theme-pill:not(.is-active),
@@ -161,7 +161,7 @@
     background: var(--mat-sys-surface-container-high);
     border-radius: var(--mat-sys-corner-medium);
     box-shadow: var(--clay-shadow-pressed);
-    transition: background-color 200ms ease-out, box-shadow 200ms ease-out;
+    transition: background-color var(--app-motion-base) var(--app-ease-standard), box-shadow var(--app-motion-base) var(--app-ease-standard);
   }
   .mat-mdc-form-field:focus-within .mat-mdc-text-field-wrapper.mdc-text-field--filled {
     --app-focus-ring-width: 3px;
@@ -257,12 +257,20 @@
     .stat-card { border-radius: calc(var(--mat-sys-corner-large) * 0.75); }
   }
 
+  // 停用狀態（ADR 0008 第二批）：軟陶按鈕停用時不能保留立體陰影與主色漸層。
+  // 統一吃 --app-disabled-*、拿掉陰影，Material 質地維持 Material 原生停用樣式。
+  // `.mat-mdc-button-disabled` 是 Angular Material 對停用按鈕加的 class（含 disabledInteractive）。
+  :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-raised-button, .mat-mdc-unelevated-button, .mat-mdc-outlined-button, .mat-mdc-icon-button):is(:disabled, .is-disabled, [aria-disabled='true'], .mat-mdc-button-disabled) {
+    color: var(--app-disabled-fg);
+    background: var(--app-disabled-bg);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .content-area::before,
     .content-area::after { animation: none; }
-    :is(.ui-card--clickable, .stat-card, .theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base, .mat-mdc-text-field-wrapper) {
-      transition-duration: 0.01ms;
-    }
+    // transition 時長由 _semantic.scss 的 --app-motion-* 在 reduce 時歸零；這裡只保留關掉漂浮動畫與位移。
     :is(.ui-card--clickable, .stat-card, .theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base):hover,
     :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base):active {
       transform: none;

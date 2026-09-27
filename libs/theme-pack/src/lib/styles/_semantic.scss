@@ -7,8 +7,8 @@
 // 同一個變數不可以同時在質地層與配色層定義（兩者權重相同，會變成看載入順序決定）；
 // 兩者都要改同一個變數時改用組合層。
 //
-// 本檔只放「預設值」，且第一批（畫面不變）要求每個變數的預設值必須等於改動前
-// 全站最常見的既有寫死值／既有 color-mix 運算式，質地層再依各自現值覆寫成例外。
+// 本檔只放「預設值」。第一批（畫面不變）時每個預設值都等於改動前全站最常見的既有寫死值／
+// color-mix 運算式；第二批（會改變畫面）起遮罩、陰影色調等改成跟著配色走，決定記錄在 ADR 0008。
 :root {
   // ---- 焦點框 ----
   // 全站 22 處 `outline: Npx solid var(--mat-sys-primary)` 中，2px/2px 是最常見的組合；
@@ -29,22 +29,23 @@
   --app-state-selected: color-mix(in srgb, var(--mat-sys-on-surface) 16%, transparent);
 
   // ---- Material 陰影色調 ----
-  // material 質地層覆寫成現值 rgb(35 34 32)；其餘質地各自有自訂陰影 token，不套用此變數。
+  // 只有 material 質地的 --mat-sys-level* 讀它（其餘質地各自有陰影 token）。預設跟著配色的墨色；
+  // 深色配色（Midnight）在配色層改成近黑，見 color-themes/midnight/_tokens.scss。
   --app-shadow-tint: var(--mat-sys-on-surface);
 
   // ---- 深色側欄（shell）疊加 ----
-  // 第二批才會把 side-nav.component.scss 裡寫死的 rgba(255,255,255,N) 換成這組變數；
-  // 這裡先定義預設值＝現有 side-nav 用的量，第一批尚未套用到 side-nav 本身。
+  // side-nav.component.scss 的捲軸、子選單細線、滑過／目前項目、使用者卡底色（第二批套用）。
+  // editorial（7%）、frosted（9%）在質地層覆寫 --app-shell-hover。
   --app-shell-hairline: color-mix(in srgb, var(--app-shell-on) 16%, transparent);
   --app-shell-scrollbar: color-mix(in srgb, var(--app-shell-on) 24%, transparent);
   --app-shell-hover: color-mix(in srgb, var(--app-shell-on) 12%, transparent);
   --app-shell-subtle: color-mix(in srgb, var(--app-shell-on) 8%, transparent);
 
   // ---- 遮罩（dialog／drawer 背板）----
-  // 現況：全站沒有任何地方覆寫 CDK overlay 背板色，一律吃 Angular Material 內建預設；
-  // 這裡先定義變數但不套用到任何選擇器（沒被使用就不影響畫面，符合第一批「畫面不變」）。
-  // 套用時機留給第二批：屆時要先實測 `.cdk-overlay-dark-backdrop` 的目前計算值當預設。
-  --app-scrim: rgba(0, 0, 0, 0.32);
+  // 第二批起套用到 CDK `.cdk-overlay-dark-backdrop`（component.scss）與 libs/ui responsive-panel 的抽屜背板。
+  // 取 inverse-surface（淺色配色裡是帶配色色相的深色）45%，取代 Material 的純黑 32%。
+  // inverse-surface 是淺色的配色（目前只有 Midnight）在配色層覆寫成近黑；Frosted 在質地層加 6px 霧化。
+  --app-scrim: color-mix(in srgb, var(--mat-sys-inverse-surface) 45%, transparent);
   --app-scrim-blur: 0px;
 
   // ---- 跨元件圖層順序 ----
@@ -53,25 +54,30 @@
   --app-z-drawer: 101; // responsive-panel 的展開面板；backdrop 用 --app-z-drawer - 1（100）。
   --app-z-floating: 500; // 外觀浮動面板／按鈕（floating-appearance-panel）。
 
-  // ---- 停用狀態（定義但第一批不套用，見計畫第 2 節）----
+  // ---- 停用狀態 ----
+  // 第二批套用到 soft-ui／clay／frosted／editorial 自訂造型的按鈕與膠囊；material 等維持 Material 原生。
   --app-disabled-fg: color-mix(in srgb, var(--mat-sys-on-surface) 38%, transparent);
   --app-disabled-bg: color-mix(in srgb, var(--mat-sys-on-surface) 12%, transparent);
   --app-disabled-opacity: 0.38;
 
-  // ---- 轉場時長（定義但第一批不套用）----
+  // ---- 轉場時長 ----
+  // 第二批起全站元件 scss 的 transition 一律用這 3 檔（lint:theme 擋寫死的 ms/s）：
+  // 原值 ≤160ms → fast、180–220ms → base、≥300ms → slow；ease／ease-out／ease-in-out → --app-ease-standard，
+  // 特殊 cubic-bezier 保留。Angular Material 元件自己的動畫不在範圍內。
   --app-motion-fast: 150ms;
   --app-motion-base: 200ms;
   --app-motion-slow: 400ms;
   --app-ease-standard: cubic-bezier(0.2, 0, 0, 1);
 
-  // ---- 選取文字（定義但第一批不套用）----
+  // ---- 選取文字 ----
+  // 第二批套用：component.scss 的全域 ::selection（深色側欄內另用 shell 色）。
   --app-selection-bg: var(--mat-sys-primary-container);
   --app-selection-fg: var(--mat-sys-on-primary-container);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  // 第一批只定義，不套用（無任何規則讀取這三個變數），故此區塊本身不影響畫面；
-  // 第二批把 transition 收斂成這 3 檔變數後，這裡會讓它們在使用者要求下全部歸零。
+  // 使用者要求減少動態時，所有吃這 3 檔的 transition（含 page-toolbar 以 base 換算的延遲）一起歸零，
+  // 各元件／質地不必再各寫一份 `transition: none`。
   :root {
     --app-motion-fast: 0ms;
     --app-motion-base: 0ms;

@@ -7,10 +7,9 @@
   --mat-sys-corner-extra-large: 28px; // 原 --radius-xl
   --mat-sys-corner-full: 999px; // 原 --radius-pill
 
-  // 陰影色調：material 質地固定用暖灰 rgb(35 34 32)（原 rgba(35,34,32,N) 寫死值），
-  // 不隨配色調整（第二批才會處理成跟配色走）。用 color-mix 對 --app-shadow-tint 取 alpha，
-  // color-mix(in srgb, C N%, transparent) 在數學上等於 rgba(C, N%)，計算後顏色與原寫死值相同。
-  --app-shadow-tint: rgb(35 34 32);
+  // 陰影色調：第二批起不在質地層指定，吃第 1 層預設 var(--mat-sys-on-surface)——淺色配色的
+  // 陰影帶該配色墨色的色相。深色配色（Midnight）在配色層把 --app-shadow-tint 設成近黑，
+  // 並在 _combos.scss（material × midnight）放大透明度。color-mix(C N%, transparent) = C 的 N% 不透明度。
   --mat-sys-level1: 0 1px 2px color-mix(in srgb, var(--app-shadow-tint) 4%, transparent);
   --mat-sys-level2: 0 2px 8px color-mix(in srgb, var(--app-shadow-tint) 5%, transparent);
   --mat-sys-level3: 0 8px 24px color-mix(in srgb, var(--app-shadow-tint) 7%, transparent);

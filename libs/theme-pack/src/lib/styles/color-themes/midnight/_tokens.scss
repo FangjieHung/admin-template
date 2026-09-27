@@ -77,5 +77,13 @@
   // 改用 blue-400 疊上去；深色需要比淺色更高的混色比例才看得出來。
   --app-calendar-range-fill: color-mix(in srgb, var(--_blue-400) 30%, var(--_ink-600));
 
+  // 語意用途變數（ADR 0008 第 2 層：配色）。Midnight 是唯一的深色配色（background 相對亮度 0.008）：
+  // - 陰影色調：預設的 on-surface 在這裡是淺色，淺色陰影在深底上會變成「發光」，改用比背景更深的近黑。
+  //   Material 質地的陰影透明度另在 _combos.scss（material × midnight）放大，否則深底上看不到。
+  // - 遮罩：預設取 inverse-surface 45%，本配色的 inverse-surface 是淺色（slate-100），會把畫面刷白，
+  //   改用同一個近黑 45%。
+  --app-shadow-tint: color-mix(in srgb, var(--mat-sys-background) 30%, black);
+  --app-scrim: color-mix(in srgb, color-mix(in srgb, var(--mat-sys-background) 30%, black) 45%, transparent);
+
   color-scheme: dark;
 }

@@ -4,7 +4,15 @@
 // 只有某一格「質地 × 配色」需要例外（質地層與配色層都想改同一個變數）時才在這裡加規則。
 // 分層規則見 `_semantic.scss` 開頭註解與 `docs/adr/0008-semantic-token-layers.md`。
 //
-// 目前為空：第一批（畫面不變）盤點下來，尚未發現需要組合層才能維持現況計算後樣式的案例——
-// 各質地現有的 color-mix／寫死值全部可以收在質地層（`texture/*/_tokens.scss`）表達。
-// 第二批處理「深色側欄 rgba、陰影跟配色走、遮罩跟配色走」時，若出現质地與配色互相衝突的格，
-// 才會在這裡補上規則。
+// 第二批（2026-09-27）加入第一條：material × midnight 的陰影透明度。
+
+// Material 質地的陰影透明度（4/5/7/10%）是為淺底設計的；Midnight 的陰影色調已在配色層改成近黑，
+// 但同樣的透明度在 #0e1626 深底上幾乎看不見，卡片會失去層次。放大 4 倍（16/20/28/40%），
+// 接近 Material 深色主題的陰影濃度。--mat-sys-level* 由 material 質地層定義、深色與否由配色決定，
+// 兩軸都有份，所以放組合層（ADR 0008 決策 3）。
+:root[data-paradigm='material'][data-theme='midnight'] {
+  --mat-sys-level1: 0 1px 2px color-mix(in srgb, var(--app-shadow-tint) 16%, transparent);
+  --mat-sys-level2: 0 2px 8px color-mix(in srgb, var(--app-shadow-tint) 20%, transparent);
+  --mat-sys-level3: 0 8px 24px color-mix(in srgb, var(--app-shadow-tint) 28%, transparent);
+  --mat-sys-level4: 0 16px 40px color-mix(in srgb, var(--app-shadow-tint) 40%, transparent);
+}

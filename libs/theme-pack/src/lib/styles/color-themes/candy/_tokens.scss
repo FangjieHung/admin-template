@@ -58,6 +58,9 @@
   --app-viz-4: #12815c;
 
   --app-shell-bg: #ede6f6;
+  // 使用者卡淡底（ADR 0008 第二批）：預設 shell-on 8% 會讓卡片上的次要文字只剩 4.46:1，
+  // 本配色的淺色側欄降到 6%（4.62:1）。
+  --app-shell-subtle: color-mix(in srgb, var(--app-shell-on) 6%, transparent);
   --app-shell-on: var(--_ink);
   --app-shell-on-muted: var(--_muted);
   --app-topbar-bg: color-mix(in srgb, var(--_canvas) 80%, transparent);
