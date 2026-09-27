@@ -179,6 +179,16 @@ const PAIRS = [
     selector: '.collapse-toggle .material-symbols-rounded',
     kind: 'ui', // icon，門檻 3:1
   },
+  // ticket: 語意用途變數（batch 1）新增：輸入框邊框對所在底色，3:1（UI 邊界門檻）。
+  // 選 filled 文字欄位的 wrapper；找不到（該頁該質地沒有可見的 mat-form-field）就標記 skipped，
+  // 不讓整格失敗——已知限制見報告末段。
+  {
+    key: 'input_border_on_surface',
+    label: '輸入框邊框 on 所在底色',
+    selector: '.mat-mdc-text-field-wrapper.mdc-text-field--filled',
+    kind: 'ui',
+    borderPair: true, // 特殊處理：量 border-color 對父層底色，不是 color 對 bgLayers
+  },
 ];
 
 // focus 外框：另外處理（需要先 focus 才量得到）
@@ -236,6 +246,48 @@ async function focusViaKeyboard(page, selector) {
     if (hit) return true;
   }
   return false;
+}
+
+// ticket: 語意用途變數（batch 1）新增。border-color 對「相鄰底色」（父層合成色，
+// 與 extractFocusOutline 的 adjacentBgLayers 邏輯一致：邊框畫在元素邊界，視覺上鄰接的是
+// 父層的底色堆疊，不是元素自己的 fill）。
+async function extractBorderPairData(page, selector) {
+  return page.evaluate((sel) => {
+    const el = document.querySelector(sel);
+    if (!el) return null;
+    const cs = getComputedStyle(el);
+    if (cs.borderStyle === 'none' || parseFloat(cs.borderTopWidth) === 0) return { noBorder: true };
+    const layers = [];
+    let node = el.parentElement;
+    while (node) {
+      layers.push(getComputedStyle(node).backgroundColor);
+      node = node.parentElement;
+    }
+    layers.reverse();
+    return { borderColor: cs.borderTopColor, bgLayers: layers };
+  }, selector);
+}
+
+// ticket: 語意用途變數（batch 1）新增。選取文字 --app-selection-fg / --app-selection-bg
+// 對比：計畫要求「直接從計算後的變數值算，不需要真的選取」，故直接讀 :root 上兩個
+// custom property 的計算值，當成純色 pair 交給既有的 contrastForTextOnStack。
+async function extractSelectionColors(page) {
+  return page.evaluate(() => {
+    // getComputedStyle().getPropertyValue('--x') 對 custom property 只做 var() 代換，
+    // 不會像一般屬性一樣正規化成 rgb()（可能拿到 #hex 或色名）。借一個隱藏元素把值指派給
+    // 一般顏色屬性（color/background-color），逼瀏覽器正規化，parseColor 才吃得下去。
+    const probe = document.createElement('div');
+    probe.style.position = 'fixed';
+    probe.style.opacity = '0';
+    probe.style.pointerEvents = 'none';
+    probe.style.color = 'var(--app-selection-fg)';
+    probe.style.backgroundColor = 'var(--app-selection-bg)';
+    document.body.appendChild(probe);
+    const cs = getComputedStyle(probe);
+    const result = { fg: cs.color, bg: cs.backgroundColor };
+    probe.remove();
+    return result;
+  });
 }
 
 async function extractFocusOutline(page, selector) {
@@ -304,6 +356,28 @@ async function measureCombo(page, texture, color) {
 
   const results = {};
   for (const pair of PAIRS) {
+    if (pair.borderPair) {
+      const bd = await extractBorderPairData(page, pair.selector);
+      if (!bd) {
+        results[pair.key] = { skipped: true, reason: 'selector not found' };
+        continue;
+      }
+      if (bd.noBorder) {
+        results[pair.key] = { skipped: true, reason: '該質地此元素目前無邊框（border-style: none 或寬度 0）' };
+        continue;
+      }
+      const { ratio, effectiveBg } = contrastForTextOnStack(bd.borderColor, bd.bgLayers);
+      results[pair.key] = {
+        label: pair.label,
+        kind: pair.kind,
+        threshold: THRESHOLD_LARGE_TEXT, // ui 門檻 3:1
+        ratio: Number(ratio.toFixed(2)),
+        pass: passes(ratio, pair.kind),
+        textColor: bd.borderColor,
+        effectiveBg,
+      };
+      continue;
+    }
     const data = await extractPairData(page, pair.selector);
     if (!data) {
       results[pair.key] = { skipped: true, reason: 'selector not found' };
@@ -367,6 +441,24 @@ async function measureCombo(page, texture, color) {
       skipped: true,
       reason: focus?.focusVisible === false ? ':focus-visible 未觸發' : 'no visible outline/box-shadow on focus',
     };
+  }
+
+  // ticket: 語意用途變數（batch 1）新增：選取文字 --app-selection-fg / --app-selection-bg，4.5:1。
+  const sel = await extractSelectionColors(page);
+  if (sel?.fg && sel?.bg) {
+    const { ratio, effectiveBg } = contrastForTextOnStack(sel.fg, [sel.bg]);
+    results['selection_text'] = {
+      label: '選取文字 --app-selection-fg on --app-selection-bg',
+      kind: 'normal',
+      threshold: THRESHOLD_NORMAL_TEXT,
+      ratio: Number(ratio.toFixed(2)),
+      pass: passes(ratio, 'normal'),
+      textColor: sel.fg,
+      effectiveBg,
+      note: '第一批未套用到任何選取樣式，純粹先驗證變數的計算後對比；第二批才會實際套用。',
+    };
+  } else {
+    results['selection_text'] = { skipped: true, reason: '讀不到 --app-selection-fg/-bg 的計算值' };
   }
 
   // 移開 focus，避免殘留影響下一次截圖
@@ -471,6 +563,8 @@ function renderMarkdown(matrix) {
   lines.push('- 量測畫面固定為 `/dashboard`（含月曆），尚未擴充到訂單列表、order-create 表單、dialog 做交叉驗證。');
   lines.push('- alpha compositing 只合成純色數值，不模擬 `backdrop-filter: blur()` 的取樣效果；背景若非純色/低頻漸層，合成結果為近似值。');
   lines.push('- focus 外框量測固定用「新增訂單」主要按鈕；若不同質地對 outlined 按鈕/連結有不同 focus 樣式，未逐一覆蓋。');
+  lines.push('- `input_border_on_surface`：/dashboard 若該質地當前沒有可見的 `.mat-mdc-text-field-wrapper.mdc-text-field--filled`，該格標記略過，不計入不合格。');
+  lines.push('- `selection_text`：第一批 `--app-selection-fg/-bg` 尚未套用到任何實際選取樣式，這裡只驗證變數本身的計算後對比是否達標，供第二批套用前先確認。');
   return lines.join('\n');
 }
 
