@@ -100,11 +100,14 @@
 
 .avl__radio {
   grid-area: radio;
-  width: 1.125rem;
-  height: 1.125rem;
   margin: 0;
-  accent-color: var(--mat-sys-primary);
   cursor: pointer;
+
+  // 外觀由 theme-pack 的 _choice-controls.scss 統一重畫；鍵盤焦點框畫在整列上（見上方 :has），
+  // 單選鈕自己不再畫一圈，避免雙框（ADR 0008 決策 4 的實例覆寫）。
+  &:focus-visible {
+    outline: none;
+  }
 }
 
 .avl__vehicle {

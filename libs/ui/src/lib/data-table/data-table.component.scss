@@ -51,11 +51,9 @@
   padding-left: 1rem !important;
 }
 
+// 勾選框外觀（尺寸、邊框、勾選底、焦點框）由 theme-pack 的 _choice-controls.scss 統一重畫，這裡只管位置。
 .dt-selection-checkbox {
-  width: 1rem;
-  height: 1rem;
   margin: 0;
-  accent-color: var(--mat-sys-primary);
   cursor: pointer;
 }
 
@@ -67,11 +65,6 @@
   width: 2.75rem;
   height: 2.75rem;
   cursor: pointer;
-}
-
-.dt-selection-checkbox:focus-visible {
-  outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
-  outline-offset: var(--app-focus-ring-offset);
 }
 
 .dt-table tbody tr {

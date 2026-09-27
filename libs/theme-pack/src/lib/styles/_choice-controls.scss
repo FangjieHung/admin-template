@@ -1,0 +1,148 @@
+// src/styles/_choice-controls.scss
+// 原生勾選框、單選鈕（ADR 0008「原生勾選框與狀態對比」，第四批，2026-09-27）。
+//
+// 為什麼要重畫：第三批之前這些控制項只有 `accent-color`，未勾選的外框是瀏覽器寫死的灰、
+// 不跟配色走（深色 Midnight 上是一圈淺灰框、Candy 上是中性灰），也不吃 `--app-*` 的狀態變數。
+// 現在用 `appearance: none` 重畫外觀，但保留原生 <input>：鍵盤（Tab、Space、方向鍵）、
+// 表單值、螢幕閱讀器的角色與狀態都不變。
+//
+// 範圍：所有原生 `input[type=checkbox|radio]`（libs/ui data-table 的列選取與全選、派車「可用車輛」
+// 列表、booking-flow 保險方案），排除 Angular Material 自己的 native control（MDC 用透明的原生
+// input 當點擊熱區，改它的尺寸會縮小熱區）。mat-checkbox／mat-radio 的外觀改由下方的 MDC token
+// 指向同一組變數。
+//
+// 權重：`input:where(...)` 只有 0-0-1，元件 scss（emulated 後 0-2-0）要就地調整時可以直接蓋過
+// （例如派車列表的單選鈕把焦點框交給整列），質地 recipe 用 `[data-paradigm='x']` 前綴即可加上
+// 形狀或陰影。
+//
+// 顏色對照（對比掃描 check_* pair，門檻 3:1）：
+//   未勾選外框   --app-field-border（與欄位邊界同一個變數）；底 --mat-sys-surface
+//   滑過         外框 --mat-sys-on-surface（與欄位滑過一致；不用 --app-state-hover 光暈：
+//                18px 的方塊外圍一圈 8% 疊色幾乎看不見，還會跟列的滑過底色疊在一起）
+//   勾選／半選   底與外框 --mat-sys-primary，勾號／橫線／圓點 --mat-sys-on-primary
+//   焦點         outline --app-focus-ring（寬度、距離 --app-focus-ring-width／-offset）
+//   錯誤         外框 --mat-sys-error（aria-invalid 或 Angular 的 ng-invalid + ng-touched）
+//   停用         外框、勾選底 --app-disabled-fg，勾號 --mat-sys-surface，cursor: not-allowed
+input:where([type='checkbox'], [type='radio']):not(:where(.mdc-checkbox__native-control, .mdc-radio__native-control)) {
+  appearance: none;
+  display: inline-grid;
+  place-content: center;
+  flex: none;
+  box-sizing: border-box;
+  // 至少 18px（與 mat-checkbox 的方塊同大）；點擊熱區由外層 <label> 提供，不因此縮小。
+  width: max(18px, 1.125rem);
+  height: max(18px, 1.125rem);
+  margin: 0;
+  border: 2px solid var(--app-field-border);
+  // 只取 corner-small 的一小部分：Grid／Editorial（2px）維持方角，其他質地是 4px 小圓角。
+  border-radius: min(4px, var(--mat-sys-corner-small));
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-primary);
+  vertical-align: middle;
+  cursor: pointer;
+  transition:
+    background-color var(--app-motion-fast) var(--app-ease-standard),
+    border-color var(--app-motion-fast) var(--app-ease-standard);
+
+  &::before {
+    content: '';
+    display: block;
+  }
+
+  &[type='radio'] {
+    border-radius: 50%;
+  }
+
+  // 勾選／半選：主色底，記號用 on-primary（記號顏色取自 color，::before 以 currentColor 畫）。
+  &:checked,
+  &[type='checkbox']:indeterminate {
+    border-color: var(--mat-sys-primary);
+    background: var(--mat-sys-primary);
+  }
+
+  // 勾號：右、下兩條邊旋轉 45°（不用 SVG data URI，顏色才能跟著變數走）。
+  &[type='checkbox']:checked:not(:indeterminate)::before {
+    width: 5px;
+    height: 10px;
+    border-right: 2px solid;
+    border-bottom: 2px solid;
+    transform: translateY(-1px) rotate(45deg);
+  }
+
+  // 半選（全選框在部分選取時）：一條橫線。
+  &[type='checkbox']:indeterminate::before {
+    width: 10px;
+    height: 2px;
+    background: currentColor;
+  }
+
+  // 單選鈕：主色底上一顆 on-primary 圓點。
+  &[type='radio']:checked::before {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  // 滑過：控制項本身或包住它的 <label>（整列可點的清單、表格選取格）都算。
+  &:not(:checked, :disabled, [type='checkbox']:indeterminate):hover,
+  label:hover > &:not(:checked, :disabled, [type='checkbox']:indeterminate) {
+    border-color: var(--mat-sys-on-surface);
+  }
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+
+  &:is([aria-invalid='true'], .ng-invalid.ng-touched):not(:checked, :disabled) {
+    border-color: var(--mat-sys-error);
+  }
+
+  &:disabled {
+    border-color: var(--app-disabled-fg);
+    background: transparent;
+    cursor: not-allowed;
+  }
+  &:disabled:is(:checked, [type='checkbox']:indeterminate) {
+    border-color: transparent;
+    background: var(--app-disabled-fg);
+    color: var(--mat-sys-surface);
+  }
+}
+
+// 高對比模式：退回瀏覽器原生外觀（系統色、系統的勾號），不依賴會被強制換色的背景色。
+@media (forced-colors: active) {
+  input:where([type='checkbox'], [type='radio']):not(:where(.mdc-checkbox__native-control, .mdc-radio__native-control)) {
+    appearance: auto;
+
+    &::before {
+      content: none;
+    }
+  }
+}
+
+// mat-checkbox／mat-radio：MDC token 指向同一組變數，兩種外觀一致
+// （MDC 的單選鈕是「主色外圈＋主色圓點」、不填底，形狀維持 Material 原樣，只統一顏色）。
+.mat-mdc-checkbox {
+  --mat-checkbox-unselected-icon-color: var(--app-field-border);
+  --mat-checkbox-unselected-hover-icon-color: var(--mat-sys-on-surface);
+  --mat-checkbox-unselected-focus-icon-color: var(--mat-sys-on-surface);
+  --mat-checkbox-selected-icon-color: var(--mat-sys-primary);
+  --mat-checkbox-selected-hover-icon-color: var(--mat-sys-primary);
+  --mat-checkbox-selected-focus-icon-color: var(--mat-sys-primary);
+  --mat-checkbox-selected-checkmark-color: var(--mat-sys-on-primary);
+  --mat-checkbox-disabled-unselected-icon-color: var(--app-disabled-fg);
+  --mat-checkbox-disabled-selected-icon-color: var(--app-disabled-fg);
+  --mat-checkbox-disabled-selected-checkmark-color: var(--mat-sys-surface);
+}
+.mat-mdc-radio-button {
+  --mat-radio-unselected-icon-color: var(--app-field-border);
+  --mat-radio-unselected-hover-icon-color: var(--mat-sys-on-surface);
+  --mat-radio-unselected-focus-icon-color: var(--mat-sys-on-surface);
+  --mat-radio-unselected-pressed-icon-color: var(--mat-sys-on-surface);
+  --mat-radio-selected-icon-color: var(--mat-sys-primary);
+  --mat-radio-selected-hover-icon-color: var(--mat-sys-primary);
+  --mat-radio-selected-focus-icon-color: var(--mat-sys-primary);
+  --mat-radio-selected-pressed-icon-color: var(--mat-sys-primary);
+}
