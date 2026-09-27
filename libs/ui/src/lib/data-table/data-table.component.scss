@@ -22,33 +22,54 @@
   margin-left: 1rem;
 }
 
+// ---- 可被質地覆寫的外觀（ADR 0008「遺留項目收尾」）----
+// 質地 recipe 只在 `.dt-table` 上設下列變數，不直接覆寫屬性：元件樣式經 Angular 封裝後每段選擇器都多一個
+// `[_ngcontent-*]`（`.dt-table tbody tr` 是 0-4-2），全域 recipe（`:root[data-paradigm] .dt-table tbody tr`，0-3-2）
+// 蓋不過，以前只能加 !important。變數沒設時用 var() 的 fallback，= 元件原值：
+//   --dt-frame               表格外框（border 簡寫）         預設 0 solid（無外框）
+//   --dt-head-border-color   表頭與內容的分隔線顏色           預設 outline-variant
+//   --dt-row-border-color    列與列之間的分隔線顏色           預設 outline-variant
+//   --dt-col-divider         欄線（儲存格右側 border 簡寫）   預設 0 solid（無欄線），最後一欄永遠沒有
+//   --dt-cell-padding-block  儲存格上下留白（決定列高）       預設 0.75rem；手機卡片版 0.3125rem
+//   --dt-header-bg           表頭列底色                       預設 transparent
+//   --dt-row-hover-bg        可點列滑過／按下時的底色         預設 surface-container-high
+// 手機卡片版的外框仍是 outline-variant 四邊，只有下緣吃 --dt-row-border-color（照舊：以前 !important 的
+// border-bottom-color 也蓋到了卡片下緣）。
 .dt-table {
   width: 100%;
   font-size: 0.875rem;
+  border: var(--dt-frame, 0 solid);
 }
 
 .dt-table thead tr {
   text-align: left;
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  border-bottom: 1px solid var(--dt-head-border-color, var(--mat-sys-outline-variant));
+  background: var(--dt-header-bg, transparent);
 }
 
 .dt-table th {
   color: var(--mat-sys-on-surface-variant);
   font-weight: 500;
-  padding: 0.75rem 1rem;
+  padding: var(--dt-cell-padding-block, 0.75rem) 1rem;
 }
 
 .dt-table td {
-  padding: 0.75rem 1rem;
+  padding: var(--dt-cell-padding-block, 0.75rem) 1rem;
   color: inherit;
 }
 
-.dt-selection-head,
-.dt-selection-cell {
+.dt-table th:not(:last-child),
+.dt-table td:not(:last-child) {
+  border-right: var(--dt-col-divider, 0 solid);
+}
+
+// 左右留白比一般儲存格窄／寬：前面加 .dt-table 讓權重（0-4-0）高過 `.dt-table th/td`（0-3-1），不用 !important。
+.dt-table .dt-selection-head,
+.dt-table .dt-selection-cell {
   width: 3rem;
   min-width: 3rem;
-  padding-right: 0.5rem !important;
-  padding-left: 1rem !important;
+  padding-right: 0.5rem;
+  padding-left: 1rem;
 }
 
 // 勾選框外觀（尺寸、邊框、勾選底、焦點框）由 theme-pack 的 _choice-controls.scss 統一重畫，這裡只管位置。
@@ -68,27 +89,27 @@
 }
 
 .dt-table tbody tr {
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  border-bottom: 1px solid var(--dt-row-border-color, var(--mat-sys-outline-variant));
 }
 
 .dt-table tbody tr:last-child {
   border-bottom: 0;
 }
 
-// rowClickable 為 true 時整列可點擊導航；hover 底色沿用 .ui-nav-pill / app-tab 既有的
-// --mat-sys-surface-container-high token，與其他可點擊 pill/nav 元件維持一致觀感。
+// rowClickable 為 true 時整列可點擊導航；hover 底色預設沿用 .ui-nav-pill / app-tab 既有的
+// --mat-sys-surface-container-high token，與其他可點擊 pill/nav 元件維持一致觀感（質地可用 --dt-row-hover-bg 換）。
 .dt-row--clickable {
   cursor: pointer;
 
   &:hover {
-    background: var(--mat-sys-surface-container-high);
+    background: var(--dt-row-hover-bg, var(--mat-sys-surface-container-high));
   }
 
   // 按下：在 hover 底色上再疊一層語意「按下」狀態層（ADR 0008 第二批）。
   &:active {
     background:
       linear-gradient(var(--app-state-pressed), var(--app-state-pressed)),
-      var(--mat-sys-surface-container-high);
+      var(--dt-row-hover-bg, var(--mat-sys-surface-container-high));
   }
 
   &:focus-visible {
@@ -174,6 +195,7 @@
     // 的提醒底色靠繼承生效，設了會把它們蓋掉。
     .dt-table tbody tr {
       border: 1px solid var(--mat-sys-outline-variant);
+      border-bottom-color: var(--dt-row-border-color, var(--mat-sys-outline-variant));
       border-radius: var(--mat-sys-corner-medium, 12px);
       padding: 0.75rem 0.875rem;
       margin-bottom: 0.625rem;
@@ -190,7 +212,7 @@
       flex-wrap: wrap;
       align-items: baseline;
       gap: 0.25rem 0.75rem;
-      padding: 0.3125rem 0;
+      padding: var(--dt-cell-padding-block, 0.3125rem) 0;
       text-align: left; // 手機版一律靠左，覆蓋 dt-align-end
     }
 
@@ -199,7 +221,7 @@
       align-items: center;
       width: 100%;
       min-width: 0;
-      padding: 0 0 0.5rem !important;
+      padding: 0 0 0.5rem; // 權重已高過上面所有儲存格規則，不需 !important
     }
 
     .dt-table td.dt-selection-cell::before {

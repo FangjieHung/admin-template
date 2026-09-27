@@ -178,15 +178,10 @@
     --mat-table-row-item-container-height: 54px;
   }
   // Admin 實際用的表格是共用元件 libs/ui/data-table（.dt-table，原生 <table>），不是
-  // mat-mdc-table；表格透明讓卡片玻璃透上來，表頭不加不透明底色（不改共用元件檔）。
+  // mat-mdc-table；表格透明讓卡片玻璃透上來（元件本來就不設底色），表頭不加不透明底色。
+  // 只設元件暴露的外觀變數（見 data-table.component.scss 開頭），不覆寫屬性、不用 !important。
   .dt-table {
-    background: transparent;
-  }
-  // 共用元件的 .dt-table th/td 樣式跟全域規則同特異度時依插入順序晚的贏，這裡要
-  // !important 才蓋得過（同檔案 dialog/snackbar 圓角已經是這個做法）。
-  .dt-table th,
-  .dt-table td {
-    padding-block: 1.0625rem !important;
+    --dt-cell-padding-block: 1.0625rem;
   }
   .mat-mdc-snack-bar-container .mdc-snackbar__surface {
     border-radius: var(--mat-sys-corner-medium) !important;

@@ -228,19 +228,11 @@
     box-shadow: inset 0 -1px color-mix(in srgb, var(--mat-sys-outline) 22%, transparent);
   }
   // Admin 實際用的表格是共用元件 libs/ui/data-table（.dt-table，原生 <table>），不是
-  // mat-mdc-table；表格透明、列間只留一條極淡的線，不加凸起效果（不改共用元件檔）。
+  // mat-mdc-table；表格透明（元件本來就不設底色）、列間只留一條極淡的線，不加凸起效果。
+  // 只設元件暴露的外觀變數（見 data-table.component.scss 開頭），不覆寫屬性、不用 !important。
   .dt-table {
-    background: transparent;
-  }
-  // 共用元件的 .dt-table th/td/tr 樣式是元件執行期注入的內聯 style，跟全域規則同特異度時
-  // 依插入順序晚的贏，這裡一定要加 !important 才蓋得過（同一份檔案其他地方的 dialog/
-  // snackbar 圓角已經是這個做法）。
-  .dt-table th,
-  .dt-table td {
-    padding-block: 1rem !important;
-  }
-  .dt-table tbody tr {
-    border-bottom-color: color-mix(in srgb, var(--mat-sys-outline) 22%, transparent) !important;
+    --dt-cell-padding-block: 1rem;
+    --dt-row-border-color: color-mix(in srgb, var(--mat-sys-outline) 22%, transparent);
   }
   .mat-mdc-snack-bar-container .mdc-snackbar__surface {
     border-radius: var(--mat-sys-corner-medium) !important;
