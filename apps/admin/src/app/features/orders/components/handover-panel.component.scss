@@ -38,7 +38,7 @@
 .handover-panel__warnings {
   padding: 0.75rem;
   border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: 0.5rem;
+  border-radius: var(--mat-sys-corner-small);
 
   h4 {
     margin: 0 0 0.375rem;
@@ -107,7 +107,7 @@
   gap: 0.5rem;
   padding: 0.75rem;
   border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: 0.5rem;
+  border-radius: var(--mat-sys-corner-small);
 
   legend {
     padding: 0 0.25rem;
@@ -136,7 +136,7 @@
 .handover-panel__partial-failure {
   padding: 0.75rem;
   border: 1px solid var(--app-danger-fg);
-  border-radius: 0.5rem;
+  border-radius: var(--mat-sys-corner-small);
   font-size: 0.8125rem;
 
   p {
@@ -152,7 +152,7 @@
 .handover-panel__record-summary {
   padding: 0.75rem;
   border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: 0.5rem;
+  border-radius: var(--mat-sys-corner-small);
 
   h4 {
     margin: 0 0 0.375rem;
@@ -182,7 +182,7 @@
 .handover-panel__reminders {
   padding: 0.75rem;
   border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: 0.5rem;
+  border-radius: var(--mat-sys-corner-small);
 
   h4 {
     margin: 0 0 0.375rem;
@@ -205,7 +205,7 @@
 .handover-panel__charges-preview {
   padding: 0.75rem;
   border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: 0.5rem;
+  border-radius: var(--mat-sys-corner-small);
 
   h4 {
     margin: 0 0 0.375rem;

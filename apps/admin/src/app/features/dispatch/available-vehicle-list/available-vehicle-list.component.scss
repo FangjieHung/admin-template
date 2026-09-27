@@ -72,8 +72,8 @@
   text-align: start;
   cursor: pointer;
   transition:
-    background-color 120ms ease,
-    border-color 120ms ease;
+    background-color var(--app-motion-fast) var(--app-ease-standard),
+    border-color var(--app-motion-fast) var(--app-ease-standard);
 
   &:hover {
     background: var(--mat-sys-surface-container-low);

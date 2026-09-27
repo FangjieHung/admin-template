@@ -91,6 +91,13 @@
     background: var(--mat-sys-surface-container-high);
   }
 
+  // 按下：在 hover 底色上再疊一層語意「按下」狀態層（ADR 0008 第二批）。
+  &:active {
+    background:
+      linear-gradient(var(--app-state-pressed), var(--app-state-pressed)),
+      var(--mat-sys-surface-container-high);
+  }
+
   &:focus-visible {
     --app-focus-ring-offset: -2px;
     outline: var(--app-focus-ring-width) solid var(--app-focus-ring);

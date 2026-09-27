@@ -130,7 +130,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
+  border-radius: var(--mat-sys-corner-small);
 
   .material-symbols-rounded {
     font-size: 18px;

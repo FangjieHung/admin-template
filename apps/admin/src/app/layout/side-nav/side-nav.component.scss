@@ -45,7 +45,7 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 14px;
+  border-radius: var(--mat-sys-corner-medium);
   background: linear-gradient(
     135deg,
     color-mix(in srgb, var(--mat-sys-primary) 78%, white),
@@ -79,7 +79,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.24) transparent;
+  scrollbar-color: var(--app-shell-scrollbar) transparent;
 }
 
 .nav-list::-webkit-scrollbar {
@@ -87,7 +87,7 @@
 }
 
 .nav-list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.24);
+  background: var(--app-shell-scrollbar);
   border-radius: 999px;
 }
 
@@ -102,14 +102,14 @@
   color: var(--app-shell-on-muted);
   text-decoration: none;
   transition:
-    background 180ms ease,
-    color 180ms ease,
-    transform 180ms ease;
+    background var(--app-motion-base) var(--app-ease-standard),
+    color var(--app-motion-base) var(--app-ease-standard),
+    transform var(--app-motion-base) var(--app-ease-standard);
 }
 
 .nav-link:hover,
 .nav-link.active {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--app-shell-hover);
   color: var(--app-shell-on);
   transform: translateX(2px);
 }
@@ -138,7 +138,7 @@
   font-size: 20px;
   width: 20px;
   height: 20px;
-  transition: transform 180ms ease;
+  transition: transform var(--app-motion-base) var(--app-ease-standard);
 }
 
 .nav-group-caret.open {
@@ -151,7 +151,7 @@
   gap: 2px;
   margin: 2px 0 2px 26px;
   padding-left: 14px;
-  border-left: 1px solid rgba(255, 255, 255, 0.16);
+  border-left: 1px solid var(--app-shell-hairline);
 }
 
 .nav-sublink {
@@ -163,13 +163,13 @@
   color: var(--app-shell-on-muted);
   text-decoration: none;
   transition:
-    background 180ms ease,
-    color 180ms ease;
+    background var(--app-motion-base) var(--app-ease-standard),
+    color var(--app-motion-base) var(--app-ease-standard);
 }
 
 .nav-sublink:hover,
 .nav-sublink.active {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--app-shell-hover);
   color: var(--app-shell-on);
 }
 
@@ -195,13 +195,13 @@
   color: var(--app-shell-on-muted);
   text-decoration: none;
   transition:
-    background 180ms ease,
-    color 180ms ease;
+    background var(--app-motion-base) var(--app-ease-standard),
+    color var(--app-motion-base) var(--app-ease-standard);
 }
 
 .nav-flyout-item:hover,
 .nav-flyout-item.active {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--app-shell-hover);
   color: var(--app-shell-on);
 }
 
@@ -221,7 +221,7 @@
   padding: 14px;
   // 使用者卡跟卡片/面板同一階：corner-large。
   border-radius: var(--mat-sys-corner-large);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--app-shell-subtle);
 }
 
 .collapsed .user-card {

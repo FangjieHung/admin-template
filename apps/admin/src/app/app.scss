@@ -57,8 +57,8 @@
 // 並沿用 Material 原本的 transform 曲線，讓行動版滑入滑出動畫維持一致。
 .sidenav-container .app-sidenav {
   transition:
-    width 200ms ease,
-    transform 400ms cubic-bezier(0.25, 0.8, 0.25, 1);
+    width var(--app-motion-base) var(--app-ease-standard),
+    transform var(--app-motion-slow) cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .app-sidenav.collapsed {
@@ -100,7 +100,7 @@
   align-items: center;
   gap: 0.5rem;
   border: 0;
-  border-radius: 2rem;
+  border-radius: var(--mat-sys-corner-extra-large);
   padding: 0.5rem 0.75rem;
   background: transparent;
   color: var(--mat-sys-on-surface-variant);
@@ -109,9 +109,9 @@
   white-space: nowrap;
   cursor: pointer;
   transition:
-    background-color 180ms ease,
-    color 180ms ease,
-    box-shadow 180ms ease;
+    background-color var(--app-motion-base) var(--app-ease-standard),
+    color var(--app-motion-base) var(--app-ease-standard),
+    box-shadow var(--app-motion-base) var(--app-ease-standard);
 
   .material-symbols-rounded {
     font-size: 1.25rem;
@@ -127,8 +127,13 @@
     outline-offset: var(--app-focus-ring-offset);
   }
 
+  // 按下／目前項目用語意狀態疊加層（ADR 0008 第二批）：疊在卡片底色上，跟著配色的墨色走。
+  &:active:not(.is-active) {
+    background: var(--app-state-pressed);
+  }
+
   &.is-active {
-    background: var(--mat-sys-surface-container-highest);
+    background: var(--app-state-selected);
     color: var(--mat-sys-on-surface);
     box-shadow: var(--mat-sys-level1);
   }
@@ -151,7 +156,7 @@
 }
 
 .stat-card {
-  border-radius: 1rem;
+  border-radius: var(--mat-sys-corner-medium);
   padding: 1rem 1.1rem;
   background: var(--mat-sys-surface);
   border: 1px solid var(--mat-sys-outline-variant);

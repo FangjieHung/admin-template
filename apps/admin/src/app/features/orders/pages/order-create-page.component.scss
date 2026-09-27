@@ -199,7 +199,7 @@ $scroll-shadow-size: 18px;
         margin-inline: calc(-1 * #{$content-pad-inline});
         pointer-events: none;
         opacity: 0;
-        transition: opacity 180ms ease-out;
+        transition: opacity var(--app-motion-base) var(--app-ease-standard);
       }
 
       // 上緣：自然位置拉到容器最頂（抵銷上方 padding），淨佔高 0。

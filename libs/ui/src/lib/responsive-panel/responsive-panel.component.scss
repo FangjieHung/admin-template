@@ -112,7 +112,9 @@
 .responsive-panel__backdrop {
   position: fixed;
   inset: 0;
-  background: rgb(0 0 0 / 40%);
+  // 與對話框遮罩同一組語意變數（libs/theme-pack/src/lib/styles/_semantic.scss）。
+  background: var(--app-scrim);
+  backdrop-filter: blur(var(--app-scrim-blur));
   // 永遠比 --app-z-drawer 低 1，維持「面板蓋過背板」的疊放關係，值不變（101-1=100）。
   z-index: calc(var(--app-z-drawer) - 1);
 }

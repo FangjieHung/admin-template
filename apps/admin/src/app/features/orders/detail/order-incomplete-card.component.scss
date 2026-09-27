@@ -54,7 +54,7 @@
   width: 100%;
   min-height: 2.75rem;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: var(--mat-sys-corner-small);
   padding: 0.5rem 0.25rem;
   font: inherit;
   font-size: 0.875rem;

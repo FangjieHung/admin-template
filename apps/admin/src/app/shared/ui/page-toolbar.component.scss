@@ -39,8 +39,8 @@
   display: grid;
   grid-template-rows: 0fr;
   transition:
-    grid-template-rows 220ms ease,
-    flex-basis 0s linear 220ms;
+    grid-template-rows var(--app-motion-base) var(--app-ease-standard),
+    flex-basis 0s linear var(--app-motion-base);
 
   @variant md {
     display: contents;
@@ -51,7 +51,7 @@
   flex-basis: 100%;
   grid-template-rows: 1fr;
   transition:
-    grid-template-rows 220ms ease,
+    grid-template-rows var(--app-motion-base) var(--app-ease-standard),
     flex-basis 0s linear 0s;
 
   @variant md {
@@ -86,11 +86,13 @@
 
   background: var(--mat-sys-surface-variant);
   overflow: hidden;
-  transition: width 220ms ease 90ms;
+  // 延遲 = base 的 45%（原 220ms 動畫配 90ms 延遲的比例），跟著 --app-motion-base 一起縮放，
+  // prefers-reduced-motion 時一併歸零。
+  transition: width var(--app-motion-base) var(--app-ease-standard) calc(var(--app-motion-base) * 0.45);
 
   @variant md {
     margin-left: 0;
-    transition: width 200ms ease;
+    transition: width var(--app-motion-base) var(--app-ease-standard);
   }
 }
 
@@ -159,13 +161,8 @@
   color: var(--mat-sys-on-surface-variant);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .search,
-  .search-row,
-  .search-row--expanded {
-    transition: none;
-  }
-}
+// prefers-reduced-motion：上面的時長與延遲全部取自 --app-motion-*，由 _semantic.scss 在
+// reduce 時歸零，不必再各自寫一份 `transition: none`。
 
 /* 第一列最右：主要操作（新增等） */
 .toolbar-actions {
