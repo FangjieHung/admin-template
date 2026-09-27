@@ -21,7 +21,7 @@ export {
   seedOperatorRecoveryCases,
   seedAuditEntries,
   seedPrepTasks,
-} from '@car-rental/domain';
+} from '@car-rental/domain/repositories';
 
 import { MaintenanceRecord } from '../models';
 import { isoAt } from '../date-utils';

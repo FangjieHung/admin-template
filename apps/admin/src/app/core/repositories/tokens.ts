@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { Repository } from '@car-rental/domain';
+import { Repository } from '@car-rental/domain/repositories';
 import { MaintenanceRecord } from '../models';
 
 export {
@@ -25,7 +25,7 @@ export {
   OPERATOR_RECOVERY_CASE_REPO,
   AUDIT_ENTRY_REPO,
   PREP_TASK_REPO,
-} from '@car-rental/domain';
+} from '@car-rental/domain/repositories';
 export const MAINTENANCE_REPO = new InjectionToken<Repository<MaintenanceRecord>>(
   'MAINTENANCE_REPO',
 );

@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -107,6 +108,9 @@ function stripPhoneSeparators(value: string): string {
   styleUrls: ['../../../app.scss', './orders-page.component.scss'],
   providers: [
     { provide: DUAL_MONTH_RANGE_PICKER_LABELS, useValue: RANGE_PICKER_LABELS },
+    // 月曆（DateAdapter）只有這個元件裡的雙月日期選擇器用到：在這裡提供，不放 app.config 的根層——
+    // 根層一 import @angular/material/core，整個 barrel（option、pseudo-checkbox…）就被併進 Initial bundle。
+    provideNativeDateAdapter(),
     // 篩選列在頁首：自訂區間的日期欄位與其他篩選一樣不保留錯誤訊息的空間（見 filter-select）。
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { subscriptSizing: 'dynamic' } },
   ],

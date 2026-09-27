@@ -1,12 +1,11 @@
 import {
   ApplicationConfig,
   inject,
+  Injector,
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { provideNativeDateAdapter } from '@angular/material/core';
 
 import { routes } from './app.routes';
 import {
@@ -34,7 +33,6 @@ import {
   AUDIT_ENTRY_REPO,
   PREP_TASK_REPO,
 } from './core/repositories/tokens';
-import { LocalStorageRepository } from './core/repositories/local-storage-repository';
 import {
   seedVehicles,
   seedMembers,
@@ -60,9 +58,15 @@ import {
   seedAuditEntries,
   seedPrepTasks,
 } from './core/repositories/seed-data';
-import { ZH_TW } from './core/i18n/zh-tw';
+import { ZH_TW_SHELL } from './core/i18n/zh-tw-shell';
 import { ThemeService } from '@car-rental/theme-pack';
-import { normalizeRentalOrder, normalizeVehicle } from '@car-rental/domain';
+// 殼層（Initial bundle）只從 repositories 子路徑取用，不經過 @car-rental/domain 的 barrel：
+// barrel 一旦被主 bundle 靜態引入，各頁面用到的 domain 模組（報價、取消、交車檢核…）都會被併進主 bundle。
+import {
+  LocalStorageRepository,
+  normalizeRentalOrder,
+  normalizeVehicle,
+} from '@car-rental/domain/repositories';
 import { DocumentAssetGateway } from './core/services/document-asset.gateway';
 import { SIGNATURE_ASSET_STORE } from '@car-rental/contract-signing';
 import { IndexedDbDocumentAssetGateway } from './core/services/indexed-db-document-asset.gateway';
@@ -73,15 +77,23 @@ import { MockDriverEligibilityGateway } from './core/services/mock-driver-eligib
 import { ReminderGateway } from './core/services/reminder.gateway';
 import { MockReminderGateway } from './core/services/mock-reminder.gateway';
 
-function notifyStorageReset(snackBar: MatSnackBar): () => void {
-  return () => snackBar.open(ZH_TW.common.storageReset, undefined, { duration: 4000 });
+/**
+ * 本機資料格式異常、重設為示範資料時的提示。MatSnackBar（連同它的 overlay 元件）只在真的要顯示時才載入：
+ * 這個提示極少出現，不值得讓每次開站的 Initial bundle 都帶著它（各頁面自己用到 snack-bar 時也共用同一個 chunk）。
+ */
+function notifyStorageReset(injector: Injector): () => void {
+  return () =>
+    void import('@angular/material/snack-bar').then(({ MatSnackBar }) =>
+      injector
+        .get(MatSnackBar)
+        .open(ZH_TW_SHELL.storageReset, undefined, { duration: 4000 }),
+    );
 }
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideNativeDateAdapter(),
     provideAppInitializer(() => inject(ThemeService).init()),
     {
       provide: VEHICLE_REPO,
@@ -90,7 +102,7 @@ export const appConfig: ApplicationConfig = {
         new LocalStorageRepository(
           'cr.vehicles',
           seedVehicles,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
           normalizeVehicle,
         ),
     },
@@ -100,7 +112,7 @@ export const appConfig: ApplicationConfig = {
         new LocalStorageRepository(
           'cr.members',
           seedMembers,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
         ),
     },
     {
@@ -113,7 +125,7 @@ export const appConfig: ApplicationConfig = {
         return new LocalStorageRepository(
           'cr.bookings',
           seedOrders,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
           (item) => normalizeRentalOrder(item, (vehicleId) => vehicleRepo.getById(vehicleId)?.category),
         );
       },
@@ -124,7 +136,7 @@ export const appConfig: ApplicationConfig = {
         new LocalStorageRepository(
           'cr.maintenance',
           seedMaintenanceRecords,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
         ),
     },
     {
@@ -133,7 +145,7 @@ export const appConfig: ApplicationConfig = {
         new LocalStorageRepository(
           'cr.pricingPlans',
           seedPricingPlans,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
         ),
     },
     {
@@ -142,39 +154,39 @@ export const appConfig: ApplicationConfig = {
         new LocalStorageRepository(
           'cr.seasonCalendar',
           seedSeasonCalendar,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
         ),
     },
     {
       provide: ADDON_REPO,
       useFactory: () =>
-        new LocalStorageRepository('cr.addOns', seedAddOns, notifyStorageReset(inject(MatSnackBar))),
+        new LocalStorageRepository('cr.addOns', seedAddOns, notifyStorageReset(inject(Injector))),
     },
     {
       provide: COUPON_REPO,
       useFactory: () =>
-        new LocalStorageRepository('cr.coupons', seedCoupons, notifyStorageReset(inject(MatSnackBar))),
+        new LocalStorageRepository('cr.coupons', seedCoupons, notifyStorageReset(inject(Injector))),
     },
     {
       provide: PARTNER_REPO,
       useFactory: () =>
-        new LocalStorageRepository('cr.partners', seedPartners, notifyStorageReset(inject(MatSnackBar))),
+        new LocalStorageRepository('cr.partners', seedPartners, notifyStorageReset(inject(Injector))),
     },
     {
       provide: PAYOUT_REPO,
       useFactory: () =>
-        new LocalStorageRepository('cr.payouts', seedPayouts, notifyStorageReset(inject(MatSnackBar))),
+        new LocalStorageRepository('cr.payouts', seedPayouts, notifyStorageReset(inject(Injector))),
     },
     // --- Task 7：租務作業工作流 repository ---
     {
       provide: PAYMENT_REPO,
       useFactory: () =>
-        new LocalStorageRepository('cr.payments', seedPayments, notifyStorageReset(inject(MatSnackBar))),
+        new LocalStorageRepository('cr.payments', seedPayments, notifyStorageReset(inject(Injector))),
     },
     {
       provide: REFUND_REPO,
       useFactory: () =>
-        new LocalStorageRepository('cr.refunds', seedRefunds, notifyStorageReset(inject(MatSnackBar))),
+        new LocalStorageRepository('cr.refunds', seedRefunds, notifyStorageReset(inject(Injector))),
     },
     {
       provide: CHARGE_ADJUSTMENT_REPO,
@@ -182,7 +194,7 @@ export const appConfig: ApplicationConfig = {
         new LocalStorageRepository(
           'cr.chargeAdjustments',
           seedChargeAdjustments,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
         ),
     },
     {
@@ -191,7 +203,7 @@ export const appConfig: ApplicationConfig = {
         new LocalStorageRepository(
           'cr.identityDocuments',
           seedIdentityDocuments,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
         ),
     },
     {
@@ -200,7 +212,7 @@ export const appConfig: ApplicationConfig = {
         new LocalStorageRepository(
           'cr.driverCredentials',
           seedDriverCredentials,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
         ),
     },
     {
@@ -209,7 +221,7 @@ export const appConfig: ApplicationConfig = {
         new LocalStorageRepository(
           'cr.contractVersions',
           seedContractVersions,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
         ),
     },
     {
@@ -218,7 +230,7 @@ export const appConfig: ApplicationConfig = {
         new LocalStorageRepository(
           'cr.handoverRecords',
           seedHandoverRecords,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
         ),
     },
     {
@@ -227,7 +239,7 @@ export const appConfig: ApplicationConfig = {
         new LocalStorageRepository(
           'cr.cancellationCases',
           seedCancellationCases,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
         ),
     },
     {
@@ -236,7 +248,7 @@ export const appConfig: ApplicationConfig = {
         new LocalStorageRepository(
           'cr.customerCreditLedger',
           seedCustomerCreditLedger,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
         ),
     },
     {
@@ -245,7 +257,7 @@ export const appConfig: ApplicationConfig = {
         new LocalStorageRepository(
           'cr.reminderStatuses',
           seedReminderStatuses,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
         ),
     },
     {
@@ -254,7 +266,7 @@ export const appConfig: ApplicationConfig = {
         new LocalStorageRepository(
           'cr.operatorRecoveryCases',
           seedOperatorRecoveryCases,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
         ),
     },
     {
@@ -263,7 +275,7 @@ export const appConfig: ApplicationConfig = {
         new LocalStorageRepository(
           'cr.auditEntries',
           seedAuditEntries,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
         ),
     },
     // 4.3：整備待辦（還車後自動列入，「整備完成」結案；不影響車輛狀態與可用數）。
@@ -273,7 +285,7 @@ export const appConfig: ApplicationConfig = {
         new LocalStorageRepository(
           'cr.prepTasks',
           seedPrepTasks,
-          notifyStorageReset(inject(MatSnackBar)),
+          notifyStorageReset(inject(Injector)),
         ),
     },
     // --- Task 7：外部服務 adapter（開發期一律使用安全的本機模擬實作） ---

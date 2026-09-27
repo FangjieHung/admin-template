@@ -1,5 +1,6 @@
 import { Component, computed, effect, inject, input, linkedSignal, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import {
@@ -62,7 +63,12 @@ function sameDay(a: Date | null, b: Date | null): boolean {
   ],
   templateUrl: './order-rental-section.component.html',
   styleUrls: ['./order-section.scss', './order-rental-section.component.scss'],
-  providers: [{ provide: DUAL_MONTH_RANGE_PICKER_LABELS, useValue: RANGE_PICKER_LABELS }],
+  providers: [
+    { provide: DUAL_MONTH_RANGE_PICKER_LABELS, useValue: RANGE_PICKER_LABELS },
+    // 月曆（DateAdapter）只有這個元件裡的雙月日期選擇器用到：在這裡提供，不放 app.config 的根層——
+    // 根層一 import @angular/material/core，整個 barrel（option、pseudo-checkbox…）就被併進 Initial bundle。
+    provideNativeDateAdapter(),
+  ],
 })
 export class OrderRentalSectionComponent {
   protected readonly t = t;
