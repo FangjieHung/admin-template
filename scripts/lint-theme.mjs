@@ -10,22 +10,16 @@ const EXTS = ['.ts', '.scss', '.html'];
 const RGB_FN = /\brgba?\(/;
 const OUTLINE_RAW_PRIMARY = /outline\s*:[^;]*var\(\s*--mat-sys-primary\s*\)/;
 const ZINDEX_BIG = /z-index\s*:\s*(-?\d+)/;
+// transition 宣告（含多行值）裡寫死的時長／延遲：非 0 的數字接 ms 或 s。`0s`／`0ms` 允許（不是時長刻度）。
+const TRANSITION_START = /(^|[\s{;])transition(-duration|-delay)?\s*:/;
+const HARD_TIME = /(?<![\w.-])(?!0+(?:\.0+)?m?s\b)\d*\.?\d+m?s\b/;
 
 // rgba(／rgb( 允許清單：逐條列出「檔案 → 允許的行內容片段 → 為什麼允許」。
 // 不在這份清單裡的 rgb(/rgba( 一律視為寫死色，擋。
 const RGB_ALLOWLIST = [
-  // _semantic.scss：語意變數的「預設值」本身就是要收編既有寫死色的地方，
-  // 這裡的 rgb()/rgba() 是唯一合法出處（第 1 層 :root 預設）。
-  { file: '_semantic.scss', match: /--app-scrim:\s*rgba\(0,\s*0,\s*0,\s*0\.32\)/, why: '--app-scrim 第 1 層預設值＝Material 對話框背板現值' },
-  // material 質地：陰影色調的「色」本身（--app-shadow-tint），透明度改用 color-mix 表達，
-  // 這裡的 rgb() 是唯一的顏色來源，不是又一處寫死的 rgba(35,34,32,N)。
-  { file: 'material/_tokens.scss', match: /--app-shadow-tint:\s*rgb\(35 34 32\)/, why: '--app-shadow-tint 質地層現值，取代原本 4 處 rgba(35,34,32,N)' },
-  // side-nav 深色側欄 7 處半透明白：第二批（會改變畫面）才收編成 --app-shell-*，
-  // 第一批範圍是「畫面不變」，先列進允許清單，第二批移除。
-  { file: 'side-nav.component.scss', match: /rgba\(255,\s*255,\s*255,\s*0\.24\)/, why: '捲軸／hairline，第二批移除（改 --app-shell-scrollbar／--app-shell-hairline）' },
-  { file: 'side-nav.component.scss', match: /rgba\(255,\s*255,\s*255,\s*0\.12\)/, why: 'hover 底色，第二批移除（改 --app-shell-hover）' },
-  { file: 'side-nav.component.scss', match: /rgba\(255,\s*255,\s*255,\s*0\.16\)/, why: '左邊框，第二批移除（改 --app-shell-hairline）' },
-  { file: 'side-nav.component.scss', match: /rgba\(255,\s*255,\s*255,\s*0\.08\)/, why: '淡底，第二批移除（改 --app-shell-subtle）' },
+  // 第二批（2026-09-27）清空：_semantic.scss 的 --app-scrim 改成 color-mix(inverse-surface)、
+  // material 質地的 --app-shadow-tint 改吃配色、side-nav 7 處半透明白改用 --app-shell-*。
+  // 真的需要新增例外時，逐條列在這裡：{ file, match, why }。
 ];
 
 export function collectThemedAppRoots(appsDir = 'apps') {
@@ -73,9 +67,23 @@ export function runLint(scanRoots) {
   for (const f of files) {
     const skipHexPalette = isAllowed(f);
     const isScssOrCss = f.endsWith('.scss');
+    // 變數定義檔（_semantic.scss、各質地／配色 _tokens.scss）可以寫時長數值，其餘元件 scss 不行。
+    const checkMotion = isScssOrCss && basename(f) !== '_semantic.scss' && basename(f) !== '_tokens.scss';
+    let inTransition = false;
     readFileSync(f, 'utf8').split('\n').forEach((line, i) => {
       const trimmed = line.trim();
       if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) return; // 註解不算
+
+      if (checkMotion) {
+        if (TRANSITION_START.test(line)) inTransition = true;
+        if (inTransition) {
+          const code = line.replace(/\/\/.*$/, '');
+          if (HARD_TIME.test(code)) {
+            violations.push(`${f}:${i + 1}: [transition 寫死時長，改用 --app-motion-fast/-base/-slow] ${trimmed}`);
+          }
+          if (code.includes(';') || code.includes('}')) inTransition = false;
+        }
+      }
 
       if (!skipHexPalette && (HEX.test(line) || PALETTE.test(line))) {
         violations.push(`${f}:${i + 1}: ${line.trim()}`);

@@ -45,6 +45,29 @@ describe('lint-theme', () => {
     expect(r.out).toContain('single.scss');
   });
 
+  it('transition 寫死時長（含多行值、延遲）→ exit 1', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lt-'));
+    writeFileSync(join(dir, 'a.scss'), '.x { transition: color 200ms ease; }');
+    writeFileSync(join(dir, 'b.scss'), '.y {\n  transition:\n    width var(--app-motion-base) ease,\n    opacity 0.15s linear;\n}');
+    writeFileSync(join(dir, 'c.scss'), '.z { transition-delay: 90ms; }');
+    const r = run(dir);
+    expect(r.code).toBe(1);
+    expect(r.out).toContain('a.scss:1');
+    expect(r.out).toContain('b.scss:4');
+    expect(r.out).toContain('c.scss:1');
+  });
+
+  it('transition 用 --app-motion-*、0s 延遲、calc 比例 → exit 0；_tokens.scss 可寫時長', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lt-'));
+    writeFileSync(
+      join(dir, 'ok.scss'),
+      '.x {\n  transition:\n    grid-template-rows var(--app-motion-base) var(--app-ease-standard),\n    flex-basis 0s linear 0s;\n}\n.y { transition: width var(--app-motion-base) ease calc(var(--app-motion-base) * 0.45); }\n.z { animation: spin 200ms linear; }',
+    );
+    mkdirSync(join(dir, 'frosted'), { recursive: true });
+    writeFileSync(join(dir, 'frosted', '_tokens.scss'), ':root { --x: 1; transition: color 200ms; }');
+    expect(run(dir).code).toBe(0);
+  });
+
   it('collectThemedAppRoots 只回傳有 @use theme-pack 的 app', () => {
     const base = mkdtempSync(join(tmpdir(), 'lt-'));
     const apps = join(base, 'apps');

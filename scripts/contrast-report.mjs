@@ -29,6 +29,9 @@ import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   contrastForTextOnStack,
+  parseColor,
+  effectiveBackground,
+  contrastRatio,
   THRESHOLD_NORMAL_TEXT,
   THRESHOLD_LARGE_TEXT,
   passes,
@@ -179,15 +182,19 @@ const PAIRS = [
     selector: '.collapse-toggle .material-symbols-rounded',
     kind: 'ui', // icon，門檻 3:1
   },
-  // ticket: 語意用途變數（batch 1）新增：輸入框邊框對所在底色，3:1（UI 邊界門檻）。
-  // 選 filled 文字欄位的 wrapper；找不到（該頁該質地沒有可見的 mat-form-field）就標記 skipped，
-  // 不讓整格失敗——已知限制見報告末段。
+  // ticket: 語意用途變數（batch 1）新增、batch 2 修正：輸入框邊界對所在底色，3:1（UI 邊界門檻）。
+  // /dashboard 沒有 filled 輸入框（batch 1 因此 56 格全部 skip），改到建單頁 /orders/new 量。
+  // 各質地畫「輸入框邊界」的手段不同，依序取第一個存在的：
+  //   1. wrapper 自己的 border（frosted 等）→ 對父層底色；
+  //   2. Material 的底線（.mdc-line-ripple::before 的 border-bottom）→ 對欄位填色；
+  //   3. 都沒有（clay、soft-ui 以填色／內陰影區隔）→ 欄位填色對父層底色。
   {
     key: 'input_border_on_surface',
-    label: '輸入框邊框 on 所在底色',
+    label: '輸入框邊界（邊框／底線／填色）on 所在底色',
     selector: '.mat-mdc-text-field-wrapper.mdc-text-field--filled',
     kind: 'ui',
-    borderPair: true, // 特殊處理：量 border-color 對父層底色，不是 color 對 bgLayers
+    page: '/orders/new',
+    borderPair: true,
   },
 ];
 
@@ -248,45 +255,59 @@ async function focusViaKeyboard(page, selector) {
   return false;
 }
 
-// ticket: 語意用途變數（batch 1）新增。border-color 對「相鄰底色」（父層合成色，
-// 與 extractFocusOutline 的 adjacentBgLayers 邏輯一致：邊框畫在元素邊界，視覺上鄰接的是
-// 父層的底色堆疊，不是元素自己的 fill）。
+// ticket: 語意用途變數（batch 1）新增、batch 2 改成三段式（見 PAIRS 的 input_border_on_surface）。
+// 回傳 { method, fg, bgLayers }：fg 是邊界本身的顏色（可能半透明，由 contrastOfLayer 合成）。
 async function extractBorderPairData(page, selector) {
   return page.evaluate((sel) => {
     const el = document.querySelector(sel);
     if (!el) return null;
     const cs = getComputedStyle(el);
-    if (cs.borderStyle === 'none' || parseFloat(cs.borderTopWidth) === 0) return { noBorder: true };
-    const layers = [];
+    const parentLayers = [];
     let node = el.parentElement;
     while (node) {
-      layers.push(getComputedStyle(node).backgroundColor);
+      parentLayers.push(getComputedStyle(node).backgroundColor);
       node = node.parentElement;
     }
-    layers.reverse();
-    return { borderColor: cs.borderTopColor, bgLayers: layers };
+    parentLayers.reverse();
+    if (cs.borderTopStyle !== 'none' && parseFloat(cs.borderTopWidth) > 0) {
+      return { method: 'border', fg: cs.borderTopColor, bgLayers: parentLayers };
+    }
+    const ripple = el.querySelector('.mdc-line-ripple');
+    if (ripple) {
+      const rb = getComputedStyle(ripple, '::before');
+      if (rb.borderBottomStyle !== 'none' && parseFloat(rb.borderBottomWidth) > 0) {
+        return { method: 'underline', fg: rb.borderBottomColor, bgLayers: [...parentLayers, cs.backgroundColor] };
+      }
+    }
+    return { method: 'fill', fg: cs.backgroundColor, bgLayers: parentLayers };
   }, selector);
 }
 
-// ticket: 語意用途變數（batch 1）新增。選取文字 --app-selection-fg / --app-selection-bg
-// 對比：計畫要求「直接從計算後的變數值算，不需要真的選取」，故直接讀 :root 上兩個
-// custom property 的計算值，當成純色 pair 交給既有的 contrastForTextOnStack。
+// 前景可能半透明（邊框 color-mix、填色 80%、側欄選取底 28%）：先把前景疊到底色堆疊上，
+// 再跟底色本身比。contrastForTextOnStack 會丟掉前景 alpha，這裡不能用它。
+function contrastOfLayer(fgStr, layersOuterToInner) {
+  const bg = effectiveBackground(layersOuterToInner.map(parseColor));
+  const fg = effectiveBackground([...layersOuterToInner, fgStr].map(parseColor));
+  return { ratio: contrastRatio(fg, bg), effectiveBg: bg, fgRgb: fg };
+}
+
+// ticket: 語意用途變數（batch 1）新增選取文字對比；不需要真的拖曳選取。
 async function extractSelectionColors(page) {
   return page.evaluate(() => {
-    // getComputedStyle().getPropertyValue('--x') 對 custom property 只做 var() 代換，
-    // 不會像一般屬性一樣正規化成 rgb()（可能拿到 #hex 或色名）。借一個隱藏元素把值指派給
-    // 一般顏色屬性（color/background-color），逼瀏覽器正規化，parseColor 才吃得下去。
-    const probe = document.createElement('div');
-    probe.style.position = 'fixed';
-    probe.style.opacity = '0';
-    probe.style.pointerEvents = 'none';
-    probe.style.color = 'var(--app-selection-fg)';
-    probe.style.backgroundColor = 'var(--app-selection-bg)';
-    document.body.appendChild(probe);
-    const cs = getComputedStyle(probe);
-    const result = { fg: cs.color, bg: cs.backgroundColor };
-    probe.remove();
-    return result;
+    // batch 2 起 ::selection 真的有套用（component.scss，soft-ui 另有覆寫），直接讀元素的
+    // getComputedStyle(el, '::selection')，而不是只讀變數——這樣質地層的覆寫也會被量到。
+    // 內容區：頁面大標；側欄：品牌名稱。底色 = 選取底疊在該元素的底色堆疊上。
+    function read(sel) {
+      const el = document.querySelector(sel);
+      if (!el) return null;
+      const cs = getComputedStyle(el, '::selection');
+      const layers = [];
+      let n = el;
+      while (n) { layers.push(getComputedStyle(n).backgroundColor); n = n.parentElement; }
+      layers.reverse();
+      return { fg: cs.color, bg: cs.backgroundColor, layers };
+    }
+    return { content: read('.ui-text-title'), sidenav: read('.brand-copy .brand-name') };
   });
 }
 
@@ -356,28 +377,7 @@ async function measureCombo(page, texture, color) {
 
   const results = {};
   for (const pair of PAIRS) {
-    if (pair.borderPair) {
-      const bd = await extractBorderPairData(page, pair.selector);
-      if (!bd) {
-        results[pair.key] = { skipped: true, reason: 'selector not found' };
-        continue;
-      }
-      if (bd.noBorder) {
-        results[pair.key] = { skipped: true, reason: '該質地此元素目前無邊框（border-style: none 或寬度 0）' };
-        continue;
-      }
-      const { ratio, effectiveBg } = contrastForTextOnStack(bd.borderColor, bd.bgLayers);
-      results[pair.key] = {
-        label: pair.label,
-        kind: pair.kind,
-        threshold: THRESHOLD_LARGE_TEXT, // ui 門檻 3:1
-        ratio: Number(ratio.toFixed(2)),
-        pass: passes(ratio, pair.kind),
-        textColor: bd.borderColor,
-        effectiveBg,
-      };
-      continue;
-    }
+    if (pair.page) continue; // 其他頁面的 pair 在 focus／selection 量完後另外處理
     const data = await extractPairData(page, pair.selector);
     if (!data) {
       results[pair.key] = { skipped: true, reason: 'selector not found' };
@@ -443,26 +443,70 @@ async function measureCombo(page, texture, color) {
     };
   }
 
-  // ticket: 語意用途變數（batch 1）新增：選取文字 --app-selection-fg / --app-selection-bg，4.5:1。
+  // 選取文字（batch 1 新增、batch 2 改讀實際的 ::selection），4.5:1。
   const sel = await extractSelectionColors(page);
-  if (sel?.fg && sel?.bg) {
-    const { ratio, effectiveBg } = contrastForTextOnStack(sel.fg, [sel.bg]);
-    results['selection_text'] = {
-      label: '選取文字 --app-selection-fg on --app-selection-bg',
+  for (const [key, label, d] of [
+    ['selection_text', '選取文字（內容區大標的 ::selection）', sel?.content],
+    ['selection_text_sidenav', '側欄內選取文字（品牌名稱的 ::selection）', sel?.sidenav],
+  ]) {
+    if (!d || !d.fg || !d.bg) {
+      results[key] = { skipped: true, reason: '讀不到 ::selection 的計算值' };
+      continue;
+    }
+    const selBg = effectiveBackground([...d.layers, d.bg].map(parseColor));
+    const ratio = contrastRatio(parseColor(d.fg), selBg);
+    results[key] = {
+      label,
       kind: 'normal',
       threshold: THRESHOLD_NORMAL_TEXT,
       ratio: Number(ratio.toFixed(2)),
       pass: passes(ratio, 'normal'),
-      textColor: sel.fg,
-      effectiveBg,
-      note: '第一批未套用到任何選取樣式，純粹先驗證變數的計算後對比；第二批才會實際套用。',
+      textColor: d.fg,
+      effectiveBg: selBg,
+      note: `::selection background ${d.bg} 疊在元素底色堆疊上`,
     };
-  } else {
-    results['selection_text'] = { skipped: true, reason: '讀不到 --app-selection-fg/-bg 的計算值' };
   }
 
   // 移開 focus，避免殘留影響下一次截圖
   await page.evaluate(() => document.activeElement && document.activeElement.blur());
+
+  return results;
+}
+
+// 其他頁面的 pair（batch 2：輸入框邊界改到 /orders/new）。在儀表板截圖之後才呼叫，
+// 截圖牆維持儀表板畫面。
+async function measureOtherPages(page, texture, color, results) {
+  const otherPages = [...new Set(PAIRS.filter((p) => p.page).map((p) => p.page))];
+  for (const path of otherPages) {
+    await page.goto(`${BASE_URL}${path}`, { waitUntil: 'networkidle', timeout: 20000 });
+    await page.evaluate(
+      ({ p, t }) => {
+        document.documentElement.dataset['paradigm'] = p;
+        document.documentElement.dataset['theme'] = t;
+      },
+      { p: texture.id, t: color.id },
+    );
+    await page.waitForTimeout(600);
+    for (const pair of PAIRS.filter((p) => p.page === path)) {
+      const bd = await extractBorderPairData(page, pair.selector);
+      if (!bd) {
+        results[pair.key] = { skipped: true, reason: `selector not found on ${path}` };
+        continue;
+      }
+      const { ratio, effectiveBg, fgRgb } = contrastOfLayer(bd.fg, bd.bgLayers);
+      results[pair.key] = {
+        label: pair.label,
+        kind: pair.kind,
+        threshold: THRESHOLD_LARGE_TEXT, // ui 門檻 3:1
+        ratio: Number(ratio.toFixed(2)),
+        pass: passes(ratio, pair.kind),
+        textColor: bd.fg,
+        compositedFg: fgRgb,
+        effectiveBg,
+        note: `${path}；量測方式：${bd.method}`,
+      };
+    }
+  }
 
   return results;
 }
@@ -500,6 +544,7 @@ async function main() {
       const results = await measureCombo(page, texture, color);
       const shotName = `${texture.id}__${color.id}.png`;
       await page.screenshot({ path: join(SCREENSHOT_DIR, shotName) });
+      await measureOtherPages(page, texture, color, results);
       const fails = cellFails(results);
       matrix.push({
         texture: texture.id,
@@ -563,8 +608,8 @@ function renderMarkdown(matrix) {
   lines.push('- 量測畫面固定為 `/dashboard`（含月曆），尚未擴充到訂單列表、order-create 表單、dialog 做交叉驗證。');
   lines.push('- alpha compositing 只合成純色數值，不模擬 `backdrop-filter: blur()` 的取樣效果；背景若非純色/低頻漸層，合成結果為近似值。');
   lines.push('- focus 外框量測固定用「新增訂單」主要按鈕；若不同質地對 outlined 按鈕/連結有不同 focus 樣式，未逐一覆蓋。');
-  lines.push('- `input_border_on_surface`：/dashboard 若該質地當前沒有可見的 `.mat-mdc-text-field-wrapper.mdc-text-field--filled`，該格標記略過，不計入不合格。');
-  lines.push('- `selection_text`：第一批 `--app-selection-fg/-bg` 尚未套用到任何實際選取樣式，這裡只驗證變數本身的計算後對比是否達標，供第二批套用前先確認。');
+  lines.push('- `input_border_on_surface`：在 `/orders/new` 量第一個 filled 輸入框；依序取 wrapper 邊框 → Material 底線 → 欄位填色對父層底色（見 note 的「量測方式」）。只量靜止狀態，不含 hover／focus。');
+  lines.push('- `selection_text`／`selection_text_sidenav`：直接用計算後的變數值合成，不實際拖曳選取文字。');
   return lines.join('\n');
 }
 
