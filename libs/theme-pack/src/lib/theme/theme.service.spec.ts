@@ -57,6 +57,25 @@ describe('ThemeService', () => {
     expect(localStorage.getItem('cr.theme')).toBe('cool-grey');
   });
 
+  it.each([
+    ['removed-texture', 'verdant'],
+    ['xyz', ''],
+  ])('init 時 localStorage 存了不認得的質地 %s：退回預設質地、配色校正到相容值，並覆寫殘值', (paradigm, theme) => {
+    localStorage.setItem('cr.paradigm', paradigm);
+    localStorage.setItem('cr.theme', theme);
+    svc.init();
+    expect(svc.paradigm()).toBe('material');
+    expect(document.documentElement.dataset['paradigm']).toBe('material');
+    expect(localStorage.getItem('cr.paradigm')).toBe('material');
+    expect(svc.compatibleThemes().map((t) => t.id)).toContain(svc.theme());
+  });
+
+  it('setParadigm 收到不認得的質地 id 時退回預設質地', () => {
+    svc.setParadigm('removed-texture');
+    expect(svc.paradigm()).toBe('material');
+    expect(localStorage.getItem('cr.paradigm')).toBe('material');
+  });
+
   it('ADR 0007：init 時已存組合相容，維持原樣', () => {
     localStorage.setItem('cr.paradigm', 'soft-ui');
     localStorage.setItem('cr.theme', 'midnight');

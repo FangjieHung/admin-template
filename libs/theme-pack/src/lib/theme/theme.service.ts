@@ -8,6 +8,7 @@ import {
   THEME_KEY,
   getDefaultThemeId,
   isThemeCompatible,
+  resolveParadigmId,
   type ThemeOption,
 } from './theme.token';
 
@@ -24,7 +25,8 @@ export class ThemeService {
   });
 
   init(): void {
-    const paradigmId = localStorage.getItem(PARADIGM_KEY) ?? DEFAULT_PARADIGM;
+    // 已刪除或不認得的質地 id 一律退回預設質地，並覆寫掉殘值；否則整頁會失去質地樣式且沒有任何錯誤。
+    const paradigmId = resolveParadigmId(localStorage.getItem(PARADIGM_KEY));
     this.paradigm.set(paradigmId);
     this.doc.documentElement.dataset['paradigm'] = paradigmId;
     localStorage.setItem(PARADIGM_KEY, paradigmId);
@@ -37,7 +39,8 @@ export class ThemeService {
     this.setTheme(themeId);
   }
 
-  setParadigm(id: string): void {
+  setParadigm(requestedId: string): void {
+    const id = resolveParadigmId(requestedId);
     this.paradigm.set(id);
     this.doc.documentElement.dataset['paradigm'] = id;
     localStorage.setItem(PARADIGM_KEY, id);

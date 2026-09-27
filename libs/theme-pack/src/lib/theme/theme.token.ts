@@ -82,6 +82,11 @@ export const TEXTURE_COMPATIBILITY: Record<string, TextureCompatibility> = {
   },
 };
 
+/** 不認得的質地 id（已刪除的質地殘留在 localStorage、拼錯）一律退回 DEFAULT_PARADIGM。 */
+export function resolveParadigmId(id: string | null | undefined): string {
+  return texture.some((t) => t.id === id) ? (id as string) : DEFAULT_PARADIGM;
+}
+
 /** 某個質地的相容配色 id 清單；未知質地 fallback 為全部配色相容。 */
 export function getCompatibleThemeIds(paradigmId: string): readonly string[] {
   return TEXTURE_COMPATIBILITY[paradigmId]?.compatibleThemeIds ?? ALL_COLOR_THEME_IDS;
