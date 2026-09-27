@@ -33,7 +33,7 @@
 
 圖層順序：只替「會跟別的元件互相遮擋」的層命名，值維持現狀；元件內部自己的疊放（`z-index: 1`、`-1`）不必改。預計：`--app-z-sticky`（頁內固定列）、`--app-z-drawer`（responsive-panel 的 100/101）、`--app-z-floating`（外觀浮動面板 500）；CDK overlay 的 1000 只在註解中記錄，不改。實際層級以盤點結果為準。
 
-## 第一批：畫面不變（值完全照舊）
+## 第一批：畫面不變（值完全照舊）（已完成，commit 66a9fe5、a3de927、45d11b8；驗收補做後修正 1478720）
 
 1. 新增 `_semantic.scss`、`_combos.scss`，接進 theme-pack 的樣式入口。
 2. 焦點框、強調邊框、狀態疊加、Material 陰影色調、遮罩（預設 = 現況）、圖層順序改成用變數。質地層覆寫成各自現值，確保每個組合的**計算後數值**完全相同。
@@ -43,7 +43,7 @@
 
 驗收：改前、改後各跑一次「計算樣式快照」腳本（7 質地 × 相容配色 × 代表元素的一般／hover／focus 狀態，記錄 outline、border、background、box-shadow、z-index、transition），兩份 JSON 必須完全相同；另加截圖位元組比對。
 
-## 第二批：會改變畫面（需要使用者看截圖）
+## 第二批：會改變畫面（需要使用者看截圖）（已完成，commit 6204259、20310ae、3b4bfb3 與本文件所在的 docs commit）
 
 1. 深色側欄 7 處寫死的半透明白改成 `--app-shell-*`。
 2. Material 陰影色調改成跟著配色走（淺色配色取 on-surface 的色相；深色配色 Midnight 退回近黑，做法參考 Soft UI 已有的邏輯）。

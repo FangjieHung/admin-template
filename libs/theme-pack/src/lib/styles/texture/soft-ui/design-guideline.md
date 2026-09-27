@@ -53,6 +53,11 @@
 - **對話框**：32px 圓角、與畫布同色、無框、level3 凸起。
 - **chip／徽章**：`.ui-chip` ＋ `.ui-chip--{tone}`，16px 圓角（不是膠囊）、輕微內凹，底色與字色來自 `--app-{tone}-bg/fg`。
 
+## 語意用途變數（2026-09-27 第二批）
+
+- **停用**：按鈕與膠囊停用（`:disabled`、`.is-disabled`、`[aria-disabled='true']`）統一吃 `--app-disabled-fg`／`--app-disabled-bg`、`box-shadow: none`（停用的按鈕不再浮起）、`cursor: not-allowed`。
+- **動態**：轉場時長只用 `--app-motion-fast`（150ms）／`-base`（200ms）／`-slow`（400ms），easing 用 `--app-ease-standard`；`prefers-reduced-motion` 時三檔由 `_semantic.scss` 歸零，本質地不必再寫 `transition: none`。
+
 ## Do / Don't
 
 **Do**

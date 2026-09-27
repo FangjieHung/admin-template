@@ -24,7 +24,7 @@
 | 內凹 | `--frost-well` | 上方內陰影 ＋ 1px 亮線 | 輸入框、按下中的按鈕 | — |
 | 面板色 | `--frost-panel` | `--mat-sys-surface` 88% 透明 | 卡片、對話框、選單、次要按鈕 | — |
 | 邊線 | `--frost-border` | 1px，`--mat-sys-outline-variant` 45% 混 surface（極淡的霧邊） | 卡片、對話框、選單、欄位、次要按鈕、側欄右緣 | — |
-| 背景模糊 | `backdrop-filter` | 卡片 `blur(20px) saturate(1.08)`、側欄 18px、對話框／選單 20px | 所有面板 | — |
+| 背景模糊 | `backdrop-filter` | 卡片 `blur(20px) saturate(1.08)`、側欄 18px、對話框／選單 20px；對話框遮罩 `--app-scrim-blur` 6px | 所有面板 | `prefers-reduced-transparency: reduce` 時全部關掉 |
 | 字體 display | `--font-display` | Plus Jakarta Sans ＋ Noto Sans TC（字距 -0.035em） | 頁面大標、`.ui-text-display`／`-title` | — |
 | 字體 body | `--font-body` | Plus Jakarta Sans ＋ Noto Sans TC（與 display 同字族） | 內文、小節標、表單 | — |
 | 字體 mono | `--font-mono` | IBM Plex Mono | 代碼類資料 | — |
@@ -54,6 +54,14 @@
 - **空狀態**：卡片內置中：一個圖示、一行 `.ui-text-subtitle`、一行 `.ui-text-caption`、一顆主色膠囊按鈕。留白充足，不另加色塊。
 - **對話框**：24px 圓角、`--frost-panel` 底＋背景模糊、1px 霧邊、level4。
 - **chip／徽章**：`.ui-chip` ＋ `.ui-chip--{tone}`，膠囊形、無陰影、前面一顆狀態圓點（`.ui-chip__dot`），顏色來自 `--app-{tone}-bg/fg/dot`。
+
+## 語意用途變數（2026-09-27 第二批）
+
+- **側欄滑過／目前項目**：`--app-shell-hover`，本質地在 `_tokens.scss` 設為 shell 前景 9%。
+- **遮罩**：`--app-scrim`（配色 `inverse-surface` 45%）＋本質地的 `--app-scrim-blur: 6px` 輕微霧化。
+- **減少透明度**：`@media (prefers-reduced-transparency: reduce)` 時所有 `backdrop-filter` 設 `none`，`--frost-panel` 改實色 `--mat-sys-surface`、側欄改 `--app-shell-bg`、輸入框改 `--mat-sys-surface-container-high`、遮罩不霧化。
+- **停用**：按鈕與膠囊停用（`:disabled`、`.is-disabled`、`[aria-disabled='true']`）統一吃 `--app-disabled-fg`／`--app-disabled-bg`、`box-shadow: none`、`cursor: not-allowed`。
+- **動態**：轉場時長只用 `--app-motion-fast`（150ms）／`-base`（200ms）／`-slow`（400ms），easing 用 `--app-ease-standard`；`prefers-reduced-motion` 時三檔由 `_semantic.scss` 歸零，本質地不必再寫 `transition: none`。
 
 ## Do / Don't
 

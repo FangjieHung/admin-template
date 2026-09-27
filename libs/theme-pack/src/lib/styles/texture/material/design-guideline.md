@@ -8,7 +8,7 @@ Google 風的親切工作台：大圓角、白色卡片輕輕浮在畫布上，�
 
 ## 造型規格
 
-顏色一律用語意 token（`--mat-sys-*`、`--app-*`），顏色由配色軸決定；本質地不指定任何色碼。陰影顏色目前寫在 `_tokens.scss`，是這個質地唯一允許的例外。
+顏色一律用語意 token（`--mat-sys-*`、`--app-*`），顏色由配色軸決定；本質地不指定任何色碼。陰影顏色由 `--app-shadow-tint` 決定（預設 `--mat-sys-on-surface`，淺色配色的陰影帶該配色墨色的色相；Midnight 在配色層改成近黑，並在 `_combos.scss` 把透明度放大 4 倍），本質地不寫任何色碼。
 
 | 項目 | Token | 目標值 | 用在 | 現況 → 目標 |
 | --- | --- | --- | --- | --- |
@@ -49,8 +49,15 @@ Google 風的親切工作台：大圓角、白色卡片輕輕浮在畫布上，�
 - **表格**：放在 `.ui-card` 裡，表格本身透明無框；列之間只用 `--mat-sys-outline-variant` 細線。數字欄靠右對齊。
 - **表單**：用 Material filled 欄位（16px 圓角、無底線）。相連欄位用 `.ui-field-group`。區塊標題用 `.ui-text-subtitle`。
 - **空狀態**：卡片內置中，一個大圖示（`--mat-sys-on-surface-variant`）、一行 `.ui-text-subtitle`、一行 `.ui-text-caption` 說明、一顆主要按鈕。不另加陰影或邊框。
-- **對話框**：28px 圓角、level4 陰影，底下有遮罩。標題用 `.ui-text-subtitle`，動作按鈕靠右。
+- **對話框**：28px 圓角、level4 陰影，底下有遮罩（`--app-scrim`）。標題用 `.ui-text-subtitle`，動作按鈕靠右。
 - **chip／徽章**：用 `.ui-chip` ＋ `.ui-chip--{tone}`，膠囊形（corner-full），底色與文字來自 `--app-{tone}-bg/fg`。
+
+## 語意用途變數（2026-09-27 第二批）
+
+- **陰影色調**：見上方「顏色」段；Midnight 的卡片陰影為近黑 16–40%，其餘配色 4–10%。
+- **遮罩**：對話框背後的遮罩吃 `--app-scrim`（配色的 `inverse-surface` 45%；Midnight 改近黑 45%），不再是 Material 的純黑 32%。
+- **停用**：維持 Angular Material 原生停用樣式（不套 `--app-disabled-*`）。
+- **動態**：轉場時長只用 `--app-motion-fast`（150ms）／`-base`（200ms）／`-slow`（400ms），easing 用 `--app-ease-standard`；`prefers-reduced-motion` 時三檔由 `_semantic.scss` 歸零，本質地不必再寫 `transition: none`。
 
 ## Do / Don't
 

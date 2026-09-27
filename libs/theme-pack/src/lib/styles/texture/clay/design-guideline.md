@@ -55,6 +55,12 @@
 - **對話框**：32px 圓角、無框、`--clay-shadow-deep`（最厚的一層）。
 - **chip／徽章**：`.ui-chip` ＋ `.ui-chip--{tone}`，膠囊形（corner-full）、粗體 700、帶 small 陰影（小顆的黏土豆），顏色來自 `--app-{tone}-bg/fg`。
 
+## 語意用途變數（2026-09-27 第二批）
+
+- **停用**：按鈕與膠囊停用（`:disabled`、`.is-disabled`、`[aria-disabled='true']`）統一吃 `--app-disabled-fg`／`--app-disabled-bg`、`box-shadow: none`（去掉立體陰影與主色漸層）、`cursor: not-allowed`。
+- **動態**：轉場時長只用 `--app-motion-fast`（150ms）／`-base`（200ms）／`-slow`（400ms），easing 用 `--app-ease-standard`；`prefers-reduced-motion` 時三檔由 `_semantic.scss` 歸零，本質地的 reduced-motion 區塊只保留「停光暈、取消位移」。
+- **焦點框 3px**：只寫在本質地自己的按鈕／膠囊與輸入框規則裡（就地覆寫 `--app-focus-ring-width`），外觀浮動按鈕等其他元件維持全站 2px。
+
 ## Do / Don't
 
 **Do**

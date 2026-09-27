@@ -44,6 +44,12 @@
 - **對話框**：直角、1px 髮絲框、無陰影，標題用襯線 display 字體，標題下方一條髮絲線，動作列上方一條髮絲線。
 - **chip／徽章**：`.ui-chip--{tone}`，2px 圓角的小方籤，顏色來自 `--app-{tone}-bg/fg`；字級小、可加字距，不做膠囊。
 
+## 語意用途變數（2026-09-27 第二批）
+
+- **側欄滑過／目前項目**：`--app-shell-hover`，本質地在 `_tokens.scss` 設為 shell 前景 7%（比全站 12% 淡）。
+- **停用**：按鈕與膠囊停用（`:disabled`、`.is-disabled`、`[aria-disabled='true']`）統一吃 `--app-disabled-fg`／`--app-disabled-bg`、`box-shadow: none`（本質地本來就沒有陰影）、`cursor: not-allowed`。
+- **動態**：轉場時長只用 `--app-motion-fast`（150ms）／`-base`（200ms）／`-slow`（400ms），easing 用 `--app-ease-standard`；`prefers-reduced-motion` 時三檔由 `_semantic.scss` 歸零，本質地不必再寫 `transition: none`。
+
 ## Do / Don't
 
 **Do**

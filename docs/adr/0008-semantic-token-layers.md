@@ -1,6 +1,6 @@
 # ADR 0008：語意用途變數的三層覆寫（預設 → 質地/配色 → 組合）
 
-- 狀態：已決策、第一批（畫面不變）已實作（2026-09-27）；第二批（會改變畫面）待辦
+- 狀態：已決策；第一批（畫面不變）與第二批（會改變畫面）皆已實作（2026-09-27）
 - 日期：2026-09-27
 
 ## 背景
@@ -39,3 +39,23 @@ ticket 09 定案 `TEXTURE_COMPATIBILITY` 後，使用者問「某個質地 × �
 - 強調邊框：linen 質地的紙感格線（20%）→ `--app-border-emphasis`。
 - 互動狀態疊加：soft-ui／frosted 的側欄 hover（8%／9%）→ `--app-state-hover`。
 - 跨元件圖層順序：`responsive-panel`（100/101）、`floating-appearance-panel`（500）→ `--app-z-drawer`／`--app-z-floating`。
+
+## 第一批驗收補做（2026-09-27）
+
+第一批上線時沒有做改前／改後比對。補做方式：`4daac0f`（改前）與第一批 HEAD 各編一份 admin，對 7 質地 × 相容配色共 43 組 × 3 頁（儀表板、訂單列表、建單頁）記錄代表元素一般／hover／鍵盤 focus 的計算樣式（125,302 個欄位）並截整頁圖。抓到一個真的差異：clay 把 `--app-focus-ring-width: 3px` 寫在質地層，讓外觀浮動按鈕、搜尋鈕等沒有 clay recipe 的元件從 2px 變 3px；已改成只在 clay 自己兩條規則內就地覆寫（`fix(theme-pack)` commit）。另外 147 個欄位只差序列化（`color-mix()` 的計算值寫成 `color(srgb …)`，數值與原 `rgba()` 相同），Material 陰影因此在截圖上有 ±1 階的量化差，肉眼不可見。
+
+## 第二批決定（2026-09-27）
+
+| 項目 | 決定 | 層 |
+| --- | --- | --- |
+| 深色側欄 | `side-nav.component.scss` 7 處 `rgba(255,255,255,N)` → `--app-shell-scrollbar`(24%)／`-hairline`(16%)／`-hover`(12%)／`-subtle`(8%)。`--app-shell-on` 是白色的 Verdant／Sandstone／Azure 畫面不變；Midnight（slate-100）幾乎不變；Candy／Cool Grey 的淺色側欄從「白色疊白色、看不見」變成深色墨水疊加；Mist Ink／Glacier Blue 的滑過底色本來就由配色層以實色覆寫，不受影響。editorial（7%）、frosted（9%）的側欄滑過改用 `--app-shell-hover`，濃度在質地層覆寫。 | 1、2（質地） |
+| 陰影色調 | 刪掉 material 質地層的 `--app-shadow-tint: rgb(35 34 32)`，改吃預設 `--mat-sys-on-surface`（Verdant 的 on-surface 剛好就是 35 34 32，畫面不變）。只有 Midnight 的 background 是深色（相對亮度 0.008，其餘 ≥ 0.78），在配色層設 `color-mix(in srgb, var(--mat-sys-background) 30%, black)`；同樣 4–10% 的透明度在深底上看不見，所以 material × midnight 在組合層把 level1–4 放大成 16/20/28/40%。 | 2（配色）、3（組合） |
+| 遮罩 | 全域 `.cdk-overlay-container .cdk-overlay-dark-backdrop`（0-2-0，蓋過 CDK 執行期插入的 0-1-0）改吃 `--app-scrim` 與 `blur(var(--app-scrim-blur))`；`libs/ui` responsive-panel 的抽屜背板同樣改用。預設改成 `inverse-surface` 45%。只有 Midnight 的 inverse-surface 是淺色（相對亮度 0.834），在配色層改近黑 45%。Frosted 質地層 `--app-scrim-blur: 6px`。 | 1、2 |
+| 圓角 | `app.scss` 卡片分頁標籤 2rem → `corner-extra-large`、`.stat-card` 1rem → `corner-medium`、側欄品牌標 14px → `corner-medium`；0.5rem／0.375rem／4px（admin 各面板、`libs/contract-signing`、`libs/booking-flow` 共 25 處）→ `corner-small`。`999px` 膠囊、`50%` 圓形、`10rem`（今日圓點，等同膠囊）、`0` 與 `var(--x, 4px)` 這類 fallback 不改。 | — |
+| 動態 | 新增的 3 檔套用到所有 transition：≤160ms → fast、180–220ms → base、≥300ms → slow；ease／ease-out／ease-in-out → `--app-ease-standard`，Material 的 `cubic-bezier(0.4,0,0.2,1)`、側欄的 `cubic-bezier(0.25,0.8,0.25,1)` 保留。page-toolbar 的 90ms 延遲改成 `calc(var(--app-motion-base) * 0.45)`，跟著時長一起縮放。`prefers-reduced-motion` 由第 1 層把三檔歸零；原本只關 transition 的區塊（soft-ui、editorial、page-toolbar）刪掉，clay／frosted 只刪 transition 那一段、保留關動畫與取消位移。`lint:theme` 新規則：元件 scss 的 transition 不得寫死 ms/s（變數定義檔除外、`0s` 允許）。keyframes 動畫（responsive-panel、dual-month-range-picker）不在本次範圍。 | 1 |
+| 停用 | soft-ui、clay、frosted、editorial 對自訂造型的按鈕與膠囊加 `:is(:disabled, .is-disabled, [aria-disabled='true'], .mat-mdc-button-disabled)` → `--app-disabled-fg/-bg`、`box-shadow: none`、`cursor: not-allowed`。material、linen、grid 沒有自訂按鈕造型，維持 Material 原生。 | 質地 recipe |
+| 選取文字 | 全域 `::selection` 用 `--app-selection-bg/-fg`；`.app-sidenav` 內用 `color-mix(in srgb, var(--app-shell-on) 28%, transparent)` 底、`--app-shell-on` 字。 | 全域樣式 |
+| 減少透明度 | Frosted 在 `@media (prefers-reduced-transparency: reduce)` 下關掉所有 `backdrop-filter`，`--frost-panel` 改 `--mat-sys-surface`、側欄改 `--app-shell-bg`、輸入框改 `surface-container-high`、`--app-scrim-blur` 歸零。 | 2（質地）＋ recipe |
+| 狀態層 | `--app-state-selected`：卡片分頁標籤的目前項目（取代 `surface-container-highest`）；`--app-state-pressed`：卡片分頁標籤與可點表格列按下（表格列疊在 hover 底色上）。派車「可用車輛」選中列已有主色框線，未改。 | — |
+
+對照圖與差異清單：第二批報告（scratchpad `batch2/compare.html`、`batch2/report.md`）。
