@@ -1,6 +1,6 @@
 # ADR 0008：語意用途變數的三層覆寫（預設 → 質地/配色 → 組合）
 
-- 狀態：已決策；第一批（畫面不變）、第二批（會改變畫面）、第三批（欄位邊界）與第四批（原生勾選框與狀態對比）皆已實作（2026-09-27）
+- 狀態：已決策；第一批（畫面不變）、第二批（會改變畫面）、第三批（欄位邊界）與第四批（原生勾選框與狀態對比）皆已實作（2026-09-27）；遺留項目收尾（動畫時長、等寬數字、data-table 變數）已實作（2026-09-28）
 - 日期：2026-09-27
 
 ## 背景
@@ -106,3 +106,15 @@ ticket 09 定案 `TEXTURE_COMPATIBILITY` 後，使用者問「某個質地 × �
 鍵盤實測（playwright，看 `checked` 值）：data-table Tab 走得到全部 11 個勾選框、Space 勾選／取消（網址不變，列的鍵盤導覽沒有被觸發）、表頭因此變半選、表頭 Space 全選；可用車輛與 booking 保險方案 Tab 進入群組、方向鍵移動並選取。
 
 對照圖只存在執行當時的 scratchpad（`batch4/compare.html`），未進 repo。
+
+## 遺留項目收尾（2026-09-28）
+
+交接信 `docs/plans/2026-09-26-theme-handoff.md` 末段「已知但未處理」的三項樣式問題，加上 booking 前台的截圖驗收。
+
+1. **關鍵影格動畫時長**（`b6a690c`）：全站 scss 只有 4 個 `animation`。一次性的進場動畫（`libs/ui` responsive-panel、dual-month-range-picker 的底部滑入，0.2s ease-out）改用 `var(--app-motion-base) var(--app-ease-standard)`，時長不變。無限循環、時長本身就是節奏的裝飾動畫不塞進三檔，新增層 1 變數 `--app-motion-loop: 8s`（= 目前唯一的循環動畫：clay 背景光暈；另一顆 10s、-2s 起跑寫成 `× 1.25`／`× -0.25`，值不變，easing 維持 ease-in-out 的來回感）。**減少動態的決定**：三檔與 `--app-motion-loop` 在 `prefers-reduced-motion` 一律歸零；用到循環動畫的 recipe 另外明寫 `animation: none` 停掉（clay 已有），歸零只是保底。實測：改前 responsive-panel 在減少動態下仍以 0.2s 滑入，改後 0s；dual-month-range-picker、clay 光暈維持停止。`lint:theme` 的「不得寫死時長」擴充到 `animation`／`animation-duration`／`animation-delay`，並補上負的延遲（`-2s`）。
+2. **等寬數字共用 class**（`67e1955`）：新增 `.ui-text-numeric`（`component.scss`，0-1-0：`tabular-nums`）。元件裡 21 處寫死的 `font-variant-numeric: tabular-nums`（admin 派車月曆／時間軸／可用車輛／工作清單明細、備車佇列、訂單摘要、訂單明細金額、待補卡、取消分頁、訂單列表待補徽章，`libs/order-form` 方案表與收款列）全部刪掉，改在 template 加 class；data-table 對 `align: 'end'` 的 th/td 自動加。Grid 質地讓它用 `var(--font-mono), var(--font-zh)`：中文接回 Noto（CONTRACT「中文固定 Noto」，與 Grid 的 `--font-display` 同寫法），取代原本只掛在 `.dt-align-end` 的 `--font-mono`（該處中文原本掉到系統備援字體，這次一併改正）。
+3. **data-table 的 `!important`**（`ab4d5d3`）：根因是元件樣式經 Angular 封裝後每段選擇器都多一個屬性（`.dt-table tbody tr` → 0-4-2），全域 recipe（0-3-2）蓋不過。元件改以變數暴露外觀——`--dt-frame`、`--dt-head-border-color`、`--dt-row-border-color`、`--dt-col-divider`、`--dt-cell-padding-block`、`--dt-header-bg`、`--dt-row-hover-bg`，fallback = 原值；質地只在 `.dt-table` 上設變數。Soft UI／Clay／Frosted／元件自己選取欄的 `!important` 全數移除（元件選取欄改用 `.dt-table .dt-selection-*` 提高到 0-4-0）。三個質地原本的 `.dt-table { background: transparent }` 是多餘的（元件本來就不設底色），刪掉。量測發現 Grid 的 `thead tr { border-bottom: 1px solid outline }` 從未生效（表頭分隔線一直是 outline-variant），為了畫面不變沒有補設 `--dt-head-border-color`，留給使用者看圖決定（Grid 準則「已知限制」）。為了畫面不變也保留一個既有怪癖：手機卡片版只有下緣吃 Soft UI 的淡線（以前 `!important` 的 border-bottom-color 蓋到了卡片下緣），其餘三邊仍是 outline-variant。
+
+驗收（改前 = 動任何樣式檔前以 `124dfa2` 編出的 admin，2026-09-27T19:22Z 編譯、19:26–19:37Z 量測；改後 19:37–19:48Z 量測）：43 個相容組合 × 訂單列表（一般、hover 第 2 列、勾選第 1 列、390px 卡片版）、優惠券、車輛三張表，記錄 table／表頭列／th／前 3 列與其 td／最後一列的底色、邊框 4 邊（寬／樣式／色）、陰影、字色、padding、圓角、字體、`font-variant-numeric`、高度，共 280,962 個欄位：0 差異（另 220 個是「兩邊寬度都是 0px」的邊框樣式／顏色，不會畫出來；80 個是 Grid 數字欄的字體，預期）。`tabular-nums` 元素（訂單列表、優惠券、車輛、建單頁、訂單明細總覽與取消分頁、儀表板月曆／時間軸／兩個對話框）17,044 個欄位：`font-variant-numeric` 0 差異；`font-family` 只有 Grid 的 `.ui-text-numeric` 元素與其子元素換成 mono（預期），其他 6 個質地 0 差異。對比掃描 56 格 0 不合格。
+
+booking 前台（第二～四批對 `libs/booking-flow` 的影響，之前只跑過 test／build）：`3bfa52d`（session 開始前）與收尾後各編一份，手機 390／桌面 1280 × 8 個畫面（搜尋空白、搜尋結果、日期面板、方案、訂單、填好的訂單、付款、完成）逐像素比對。差異都在預期內：filled／outlined 欄位邊界（第三批）、方案單選鈕與付款方式 mat-radio（第四批）、手機日期面板遮罩改成 inverse-surface 45%、車卡標籤圓角（第二批）；付款、完成頁 0 差異。對照頁只存在執行當時的 scratchpad（`batch6/booking-compare.html`），未進 repo。

@@ -74,3 +74,12 @@
 5. 文件：CONTRACT.md 用途變數表、ADR 0008「原生勾選框與狀態對比」一節、質地準則（圓角 small 列、Soft UI／Clay 的勾選框段落）。
 
 驗收：改前（HEAD 34b7fed）／改後 43 個相容組合 × 2 畫面（data-table、可用車輛）＋ booking 保險方案對照圖、7 質地的勾選框／單選鈕狀態特寫、欄位滑過／焦點／錯誤特寫；對比掃描 56 格 0 不合格（新 pair 在相容組合最低 3.17，不需調整變數）；鍵盤實測（Tab／Space／方向鍵）通過；theme-pack／admin／affiliate／booking 測試、admin／booking build、`lint:theme`、`vitest run scripts` 通過。
+
+## 遺留項目收尾（已完成，commit b6a690c、ab4d5d3、67e1955 與本文件所在的 docs commit）
+
+1. 關鍵影格動畫：進場動畫吃 `--app-motion-base`／`--app-ease-standard`，循環動畫吃新的 `--app-motion-loop`（8s），減少動態時全部歸零、循環動畫另以 `animation: none` 停止；`lint:theme` 擴充到 `animation*`。
+2. `.ui-text-numeric`：取代 21 處寫死的 `tabular-nums`，Grid 換 `var(--font-mono), var(--font-zh)`；data-table 的 `align: 'end'` 欄自動掛上。
+3. data-table：`--dt-*` 外觀變數，移除所有 `.dt-table` 相關 `!important`。
+4. booking 前台改前（3bfa52d）／改後逐像素對照，差異皆為第二～四批預期內的變更。
+
+驗收：43 個相容組合計算樣式改前／改後比對（表格 280,962 欄位、數字元素 17,044 欄位，0 非預期差異）、減少動態模擬下所有動畫 0s 或停止、Grid × Verdant 建單頁金額特寫；對比掃描 56 格 0 不合格；theme-pack／ui／order-form／booking-flow／admin／affiliate／booking 測試、admin／booking build、`lint:theme`、`vitest run scripts`（排除 `.claude/worktrees`）通過。

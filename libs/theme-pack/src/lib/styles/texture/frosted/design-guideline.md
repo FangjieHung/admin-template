@@ -86,6 +86,6 @@
 - **陰影色寫死（已解決）**：`--frost-shadow`、`--frost-shadow-hover` 改用 `color-mix(in srgb, var(--mat-sys-on-surface) …%, transparent)`（暗側，深色配色退回中性黑）；`--frost-highlight` 改用 `color-mix(in srgb, var(--mat-sys-surface-container-lowest/-highest) …%, transparent)`（亮側），理由與做法同 Soft UI／Clay，見 `_tokens.scss` 註解。
 - **對話框沒用 extra-large 圓角（已解決）**：對話框、選單、日期選擇器改用 `--mat-sys-corner-extra-large`（32px）。
 - **`.ui-card--inverse` 有框有影（已解決）**：改成 `border: 0; box-shadow: none;`，保留漸層背景與圓角，符合 [`CONTRACT.md`](../../CONTRACT.md)「無邊框無陰影」。
-- **表格 recipe 打不到 Admin 的表格（已解決）**：新增 `.dt-table` 規則，表格透明、列高改用 `padding-block: 1.0625rem !important`（≈17px，對應 54px 列高目標），表頭不加不透明底色。`!important` 原因同 Soft UI／Clay。
+- **表格 recipe 打不到 Admin 的表格（已解決）**：表格透明（元件本來就不設底色）、表頭不加不透明底色；列高改用元件暴露的 `--dt-cell-padding-block: 1.0625rem`（≈17px，對應 54px 列高目標）。2026-09-28 前是 `padding-block: 1.0625rem !important`，原因與改法同 Soft UI（變數清單見 CONTRACT.md「共用元件的外觀變數」），畫面不變。
 - **焦點框缺口（已解決）**：`:focus-visible` 規則加入 `.ui-card--clickable` 與 `.nav-flyout-item`。
 - **側欄收合選單對比（ticket 13 新發現並修復）**：`.nav-flyout` 背景換成 `--frost-panel`（跟隨配色的淺色玻璃）後，文字仍沿用 `side-nav.component.scss` 給深色側欄用的 `--app-shell-on`／`-muted`，在淺色配色（如 Verdant、Sandstone）下收合選單裡的項目幾乎看不見；主側欄本身背景仍是 `--app-shell-bg`（深色）沒有這個問題。修法：`.nav-flyout`／`.nav-flyout-item` 改綁 `--mat-sys-on-surface`／`-variant`（含 hover／active），全部 `!important`（原因同上）。實測 Frosted × Verdant 收合選單文字對比 5.56:1，通過 4.5:1 門檻；截圖見 `reports/13/frosted_verdant_flyout.png`。

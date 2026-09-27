@@ -50,6 +50,7 @@
 ## 已知但未處理（不在這次範圍，可提給使用者）
 
 - Admin 首次載入 787 kB，仍超出 720 kB 預算約 67 kB（本 session 開始前已超出，773 kB）。
-- Grid 的等寬數字沒套到建單表單的金額（元件自己寫死 `tabular-nums`，需要共用 class）。見 Grid 準則「已知限制」。
-- Soft UI／Clay／Frosted 的 `.dt-table` 規則用了 `!important`（data-table 元件的樣式權重相同）。
+- ~~Grid 的等寬數字沒套到建單表單的金額~~ **已處理（commit 67e1955）**：共用 class `.ui-text-numeric`，Grid 換 `--font-mono`（見 ADR 0008「遺留項目收尾」）。
+- ~~Soft UI／Clay／Frosted 的 `.dt-table` 規則用了 `!important`~~ **已處理（commit ab4d5d3）**：data-table 以 `--dt-*` 變數暴露外觀，質地只設變數；另發現 Grid 表頭加強線從未生效，保留現狀待看圖決定（Grid 準則「已知限制」）。
+- **已處理（commit b6a690c）**：關鍵影格動畫時長改用 `--app-motion-*`（新增 `--app-motion-loop`），`lint:theme` 擋 `animation` 寫死時長。
 - `.claude/worktrees/agent-*` 留有 16 個已合併的 agent worktree，可請使用者同意後清掉（先 `git worktree list` 確認，只移除對應分支已併入 main 的）。

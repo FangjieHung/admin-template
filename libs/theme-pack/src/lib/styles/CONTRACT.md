@@ -22,6 +22,7 @@
 | `.ui-text-title`                | 頁面大標（原 `.v-page-title`）                                                    |
 | `.ui-text-subtitle`             | 卡片與表單的小節標題（字級、字重由質地包提供）                                    |
 | `.ui-text-caption`              | 卡片內小節標／quiet label（原 `.v-card-label`）                                   |
+| `.ui-text-numeric`              | 數字文字（金額、日期、時間、數量、車牌）：預設 `tabular-nums`；Grid 另換 `--font-mono`（中文接 `--font-zh`）。元件不要自己寫 `font-variant-numeric`，在 template 加這個 class（`component.scss`）；data-table 的 `align: 'end'` 欄自動掛上 |
 | `.ui-chip` + `.ui-chip--{tone}` | 狀態徽章 + tone 變體（tone：`positive`/`info`/`neutral`/`warning`/`danger`）      |
 | `.ui-btn`                       | 按鈕（未來擴充：`--sm`/`--md`/`--lg` × `--solid`/`--outline`/`--ghost`/`--text`） |
 | `.ui-table`                     | 表格（未來擴充）                                                                  |
@@ -90,13 +91,30 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 | `--app-shadow-tint` | `var(--mat-sys-on-surface)` | Material 陰影色調 | 已套用（material 質地的 `--mat-sys-level*`）；Midnight 配色層改近黑，`_combos.scss` 放大 material × midnight 的透明度 |
 | `--app-shell-hairline` / `-scrollbar` / `-hover` / `-subtle` | `color-mix(in srgb, var(--app-shell-on) 16%/24%/12%/8%, transparent)` | 深色側欄的細線、捲軸、滑過、淡底 | 已套用（`side-nav.component.scss`）；editorial 7%、frosted 9% 在質地層覆寫 `-hover` |
 | `--app-scrim` / `-blur` | `color-mix(in srgb, var(--mat-sys-inverse-surface) 45%, transparent)` / `0px` | 對話框、抽屜背後的遮罩 | 已套用（CDK `.cdk-overlay-dark-backdrop`、`libs/ui` responsive-panel 背板）；Midnight 改近黑 45%；frosted 霧化 6px（減少透明度時 0） |
-| `--app-motion-fast` / `-base` / `-slow` / `--app-ease-standard` | `150ms` / `200ms` / `400ms` / `cubic-bezier(0.2, 0, 0, 1)` | 轉場時長／easing | 已套用（全站元件 scss 的 transition；`lint:theme` 擋寫死 ms/s）；`prefers-reduced-motion` 時三檔歸零 |
+| `--app-motion-fast` / `-base` / `-slow` / `--app-ease-standard` | `150ms` / `200ms` / `400ms` / `cubic-bezier(0.2, 0, 0, 1)` | 轉場與一次性進場動畫的時長／easing | 已套用（全站元件 scss 的 transition；`libs/ui` responsive-panel、dual-month-range-picker 的滑入動畫；`lint:theme` 擋 transition／animation 寫死 ms/s）；`prefers-reduced-motion` 時三檔歸零 |
+| `--app-motion-loop` | `8s` | 無限循環的裝飾動畫（時長本身是節奏，不套三檔） | 已套用（clay 背景光暈：`8s`、另一顆 `× 1.25`＝10s、起跑 `× -0.25`＝-2s）；`prefers-reduced-motion` 時歸零，用到的 recipe 另寫 `animation: none` 停掉 |
 | `--app-disabled-fg` / `-bg` / `-opacity` | on-surface 38% / 12% / `0.38` | 停用狀態 | fg／bg 已套用（soft-ui、clay、frosted、editorial 的按鈕與膠囊）；material 等維持 Material 原生；`-opacity` 未使用 |
 | `--app-selection-bg` / `-fg` | `var(--mat-sys-primary-container)` / `var(--mat-sys-on-primary-container)` | 選取文字 | 已套用（`component.scss` 全域 `::selection`；深色側欄內改 shell-on 28% 底＋shell-on 字） |
 | `--app-z-sticky` / `--app-z-drawer` / `--app-z-floating` | `20` / `101` / `500` | 跨元件圖層順序（值不變） | 已套用（`libs/booking-flow` 結帳頁手機版底部摘要、`responsive-panel`、`floating-appearance-panel`）；CDK overlay 的 `1000` 只記錄於註解 |
 
 第二批（2026-09-27，會改變畫面）的決定與改前／改後對照見 ADR 0008「第二批」一節。
-另外：圓角一律用 `--mat-sys-corner-*`（`999px` 膠囊、`50%` 圓形、`0` 除外）；轉場時長一律用 `--app-motion-*`。
+另外：圓角一律用 `--mat-sys-corner-*`（`999px` 膠囊、`50%` 圓形、`0` 除外）；轉場與關鍵影格動畫時長一律用 `--app-motion-*`。
+
+### 共用元件的外觀變數（`--dt-*`，data-table）
+
+`libs/ui` 的 data-table 樣式經 Angular 封裝後權重比質地 recipe 高（`.dt-table tbody tr` 是 0-4-2，
+`:root[data-paradigm] .dt-table tbody tr` 是 0-3-2），質地要改外觀時**只在 `.dt-table` 上設下列變數**，
+不直接覆寫屬性、不用 `!important`。變數沒設時用元件內 `var()` 的 fallback（= 元件原值）。
+
+| 變數 | 預設 | 用途 | 目前設定的質地 |
+| --- | --- | --- | --- |
+| `--dt-frame` | `0 solid`（無外框） | 表格外框（border 簡寫） | Grid：`1px solid var(--mat-sys-outline)` |
+| `--dt-head-border-color` | `var(--mat-sys-outline-variant)` | 表頭與內容的分隔線顏色 | （無；Grid 準則寫的 outline 加強從未生效，維持現狀，見 Grid 準則） |
+| `--dt-row-border-color` | `var(--mat-sys-outline-variant)` | 列與列之間的分隔線（手機卡片版的下緣也吃它） | Soft UI：`color-mix(in srgb, var(--mat-sys-outline) 22%, transparent)` |
+| `--dt-col-divider` | `0 solid`（無欄線） | 欄線（儲存格右側 border 簡寫，最後一欄永遠沒有） | Grid：`1px solid var(--mat-sys-outline-variant)` |
+| `--dt-cell-padding-block` | `0.75rem`（手機卡片版 `0.3125rem`） | 儲存格上下留白，決定列高 | Soft UI `1rem`、Frosted `1.0625rem`、Clay `1.125rem`（手機卡片版一樣吃這個值） |
+| `--dt-header-bg` | `transparent` | 表頭列底色 | （無） |
+| `--dt-row-hover-bg` | `var(--mat-sys-surface-container-high)` | 可點列滑過／按下的底色（按下另疊 `--app-state-pressed`） | （無） |
 
 ### 字體（質地包提供，中英分軌）
 

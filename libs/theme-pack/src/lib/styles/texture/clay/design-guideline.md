@@ -88,5 +88,5 @@
 - **手機卡片圓角寫死（已解決）**：改成 `border-radius: calc(var(--mat-sys-corner-large) * 0.75)`，數值不變（32px × 0.75 = 24px）但改用 token 推導，corner-large 之後若調整會跟著變。
 - **`.ui-card--inverse` 有陰影（已解決）**：拆成獨立規則，`box-shadow: none`，其餘（`--mat-sys-inverse-surface` 底、圓角）不變，符合 [`CONTRACT.md`](../../CONTRACT.md)。
 - **卡片用了背景模糊（維持現況，不是缺陷）**：`.ui-card` 仍保留 `backdrop-filter: blur(20px)`。準則本來就只是提醒「輔助效果、新元件不要擴大使用」，不是要移除既有效果；拿掉會改變 Clay 卡片目前的視覺個性，此次不動。
-- **表格 recipe 打不到 Admin 的表格（已解決）**：新增 `.dt-table` 規則，列高改用 `padding-block: 1.125rem !important`（≈18px，對應 56px 列高目標）。`!important` 是必要的，原因與 Soft UI 相同（共用元件的樣式是元件執行期插入，跟全域規則同特異度時插入順序不保證）。不加欄線，符合「列高寬鬆、不加欄線」的準則。
+- **表格 recipe 打不到 Admin 的表格（已解決）**：列高改用元件暴露的 `--dt-cell-padding-block: 1.125rem`（≈18px，對應 56px 列高目標），不加欄線，符合「列高寬鬆、不加欄線」的準則。2026-09-28 前是 `padding-block: 1.125rem !important`，原因與改法同 Soft UI（變數清單見 CONTRACT.md「共用元件的外觀變數」），畫面不變。背景光暈的漂浮動畫時長吃 `--app-motion-loop`（8s，另一顆 1.25 倍／-0.25 倍起跑），減少動態時停止。
 - **可點卡片沒有鍵盤焦點框（已解決）**：`:focus-visible` 規則加入 `.ui-card--clickable`。
