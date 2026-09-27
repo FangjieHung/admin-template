@@ -6,8 +6,9 @@
   --mat-sys-corner-extra-large: 48px;
   --mat-sys-corner-full: 999px;
 
-  // 焦點框比其他質地粗一級（3px，其餘質地均為 2px），質感上呼應立體軟陶的厚重感。
-  --app-focus-ring-width: 3px;
+  // 焦點框：clay 自己的按鈕／膠囊與輸入框焦點框是 3px（其餘質地 2px），但這個 3px 只套在
+  // recipes.scss 那兩條規則上（就地覆寫 --app-focus-ring-width）。不在質地層覆寫，否則
+  // 外觀浮動按鈕、搜尋鈕等 clay recipe 沒接手的元件也會從 2px 變 3px（第一批驗收抓到的差異）。
 
   // 環境陰影／高光從語意 token 調出，理由同 Soft UI：暗側用 on-surface（跟著配色的
   // 深色調走），深色配色找不到比 background 更暗的面時退回中性黑；亮側用

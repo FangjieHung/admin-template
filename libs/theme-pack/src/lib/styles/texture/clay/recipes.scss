@@ -145,6 +145,7 @@
     box-shadow: var(--clay-shadow-pressed);
   }
   :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base, .ui-card--clickable, .nav-link, .nav-sublink, .nav-group-trigger):focus-visible {
+    --app-focus-ring-width: 3px;
     --app-focus-ring-offset: 3px;
     outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
     outline-offset: var(--app-focus-ring-offset);
@@ -163,6 +164,7 @@
     transition: background-color 200ms ease-out, box-shadow 200ms ease-out;
   }
   .mat-mdc-form-field:focus-within .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    --app-focus-ring-width: 3px;
     background: var(--mat-sys-surface);
     outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
     outline-offset: var(--app-focus-ring-offset);
