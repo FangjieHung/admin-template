@@ -33,37 +33,12 @@ import {
   AUDIT_ENTRY_REPO,
   PREP_TASK_REPO,
 } from './core/repositories/tokens';
-import {
-  seedVehicles,
-  seedMembers,
-  seedOrders,
-  seedMaintenanceRecords,
-  seedPricingPlans,
-  seedSeasonCalendar,
-  seedAddOns,
-  seedCoupons,
-  seedPartners,
-  seedPayouts,
-  seedPayments,
-  seedRefunds,
-  seedChargeAdjustments,
-  seedIdentityDocuments,
-  seedDriverCredentials,
-  seedContractVersions,
-  seedHandoverRecords,
-  seedCancellationCases,
-  seedCustomerCreditLedger,
-  seedReminderStatuses,
-  seedOperatorRecoveryCases,
-  seedAuditEntries,
-  seedPrepTasks,
-} from './core/repositories/seed-data';
-import { ZH_TW_SHELL } from './core/i18n/zh-tw-shell';
+import { demoSeed, ensureDemoData, storageResetHandler } from './core/repositories/demo-data';
 import { ThemeService } from '@car-rental/theme-pack';
 // 殼層（Initial bundle）只從 repositories 子路徑取用，不經過 @car-rental/domain 的 barrel：
 // barrel 一旦被主 bundle 靜態引入，各頁面用到的 domain 模組（報價、取消、交車檢核…）都會被併進主 bundle。
 import {
-  LocalStorageRepository,
+  LazySeedLocalStorageRepository,
   normalizeRentalOrder,
   normalizeVehicle,
 } from '@car-rental/domain/repositories';
@@ -77,42 +52,63 @@ import { MockDriverEligibilityGateway } from './core/services/mock-driver-eligib
 import { ReminderGateway } from './core/services/reminder.gateway';
 import { MockReminderGateway } from './core/services/mock-reminder.gateway';
 
-/**
- * 本機資料格式異常、重設為示範資料時的提示。MatSnackBar（連同它的 overlay 元件）只在真的要顯示時才載入：
- * 這個提示極少出現，不值得讓每次開站的 Initial bundle 都帶著它（各頁面自己用到 snack-bar 時也共用同一個 chunk）。
- */
-function notifyStorageReset(injector: Injector): () => void {
-  return () =>
-    void import('@angular/material/snack-bar').then(({ MatSnackBar }) =>
-      injector
-        .get(MatSnackBar)
-        .open(ZH_TW_SHELL.storageReset, undefined, { duration: 4000 }),
-    );
-}
+/** 啟動時要確認有示範資料的 repository（app.config 提供的全部本機集合）。 */
+const DEMO_DATA_REPOS = [
+  VEHICLE_REPO,
+  MEMBER_REPO,
+  ORDER_REPO,
+  MAINTENANCE_REPO,
+  PRICING_PLAN_REPO,
+  SEASON_CALENDAR_REPO,
+  ADDON_REPO,
+  COUPON_REPO,
+  PARTNER_REPO,
+  PAYOUT_REPO,
+  PAYMENT_REPO,
+  REFUND_REPO,
+  CHARGE_ADJUSTMENT_REPO,
+  IDENTITY_DOCUMENT_REPO,
+  DRIVER_CREDENTIAL_REPO,
+  CONTRACT_VERSION_REPO,
+  HANDOVER_RECORD_REPO,
+  CANCELLATION_CASE_REPO,
+  CUSTOMER_CREDIT_LEDGER_REPO,
+  REMINDER_STATUS_REPO,
+  OPERATOR_RECOVERY_CASE_REPO,
+  AUDIT_ENTRY_REPO,
+  PREP_TASK_REPO,
+] as const;
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideAppInitializer(() => inject(ThemeService).init()),
+    // 畫面開始讀資料前，先確認每個集合都有可用的本機資料；缺的或損壞的才動態載入示範資料（見 demo-data.ts）。
+    provideAppInitializer(() =>
+      ensureDemoData(
+        DEMO_DATA_REPOS.map((token) => inject(token)),
+        inject(Injector),
+      ),
+    ),
     {
       provide: VEHICLE_REPO,
       // 舊資料可能還用更名前的 branchId 欄位、值是遷移前的據點類型文字/門市全名，用 normalizeVehicle 統一轉成 branchId。
       useFactory: () =>
-        new LocalStorageRepository(
+        new LazySeedLocalStorageRepository(
           'cr.vehicles',
-          seedVehicles,
-          notifyStorageReset(inject(Injector)),
+          demoSeed((m) => m.seedVehicles),
+          storageResetHandler(inject(Injector)),
           normalizeVehicle,
         ),
     },
     {
       provide: MEMBER_REPO,
       useFactory: () =>
-        new LocalStorageRepository(
+        new LazySeedLocalStorageRepository(
           'cr.members',
-          seedMembers,
-          notifyStorageReset(inject(Injector)),
+          demoSeed((m) => m.seedMembers),
+          storageResetHandler(inject(Injector)),
         ),
     },
     {
@@ -122,170 +118,195 @@ export const appConfig: ApplicationConfig = {
       // 小客車的訂金安全預設值需要查車型，所以要能拿到 VEHICLE_REPO。
       useFactory: () => {
         const vehicleRepo = inject(VEHICLE_REPO);
-        return new LocalStorageRepository(
+        return new LazySeedLocalStorageRepository(
           'cr.bookings',
-          seedOrders,
-          notifyStorageReset(inject(Injector)),
-          (item) => normalizeRentalOrder(item, (vehicleId) => vehicleRepo.getById(vehicleId)?.category),
+          demoSeed((m) => m.seedOrders),
+          storageResetHandler(inject(Injector)),
+          (item) =>
+            normalizeRentalOrder(item, (vehicleId) => vehicleRepo.getById(vehicleId)?.category),
         );
       },
     },
     {
       provide: MAINTENANCE_REPO,
       useFactory: () =>
-        new LocalStorageRepository(
+        new LazySeedLocalStorageRepository(
           'cr.maintenance',
-          seedMaintenanceRecords,
-          notifyStorageReset(inject(Injector)),
+          demoSeed((m) => m.seedMaintenanceRecords),
+          storageResetHandler(inject(Injector)),
         ),
     },
     {
       provide: PRICING_PLAN_REPO,
       useFactory: () =>
-        new LocalStorageRepository(
+        new LazySeedLocalStorageRepository(
           'cr.pricingPlans',
-          seedPricingPlans,
-          notifyStorageReset(inject(Injector)),
+          demoSeed((m) => m.seedPricingPlans),
+          storageResetHandler(inject(Injector)),
         ),
     },
     {
       provide: SEASON_CALENDAR_REPO,
       useFactory: () =>
-        new LocalStorageRepository(
+        new LazySeedLocalStorageRepository(
           'cr.seasonCalendar',
-          seedSeasonCalendar,
-          notifyStorageReset(inject(Injector)),
+          demoSeed((m) => m.seedSeasonCalendar),
+          storageResetHandler(inject(Injector)),
         ),
     },
     {
       provide: ADDON_REPO,
       useFactory: () =>
-        new LocalStorageRepository('cr.addOns', seedAddOns, notifyStorageReset(inject(Injector))),
+        new LazySeedLocalStorageRepository(
+          'cr.addOns',
+          demoSeed((m) => m.seedAddOns),
+          storageResetHandler(inject(Injector)),
+        ),
     },
     {
       provide: COUPON_REPO,
       useFactory: () =>
-        new LocalStorageRepository('cr.coupons', seedCoupons, notifyStorageReset(inject(Injector))),
+        new LazySeedLocalStorageRepository(
+          'cr.coupons',
+          demoSeed((m) => m.seedCoupons),
+          storageResetHandler(inject(Injector)),
+        ),
     },
     {
       provide: PARTNER_REPO,
       useFactory: () =>
-        new LocalStorageRepository('cr.partners', seedPartners, notifyStorageReset(inject(Injector))),
+        new LazySeedLocalStorageRepository(
+          'cr.partners',
+          demoSeed((m) => m.seedPartners),
+          storageResetHandler(inject(Injector)),
+        ),
     },
     {
       provide: PAYOUT_REPO,
       useFactory: () =>
-        new LocalStorageRepository('cr.payouts', seedPayouts, notifyStorageReset(inject(Injector))),
+        new LazySeedLocalStorageRepository(
+          'cr.payouts',
+          demoSeed((m) => m.seedPayouts),
+          storageResetHandler(inject(Injector)),
+        ),
     },
     // --- Task 7：租務作業工作流 repository ---
     {
       provide: PAYMENT_REPO,
       useFactory: () =>
-        new LocalStorageRepository('cr.payments', seedPayments, notifyStorageReset(inject(Injector))),
+        new LazySeedLocalStorageRepository(
+          'cr.payments',
+          demoSeed((m) => m.seedPayments),
+          storageResetHandler(inject(Injector)),
+        ),
     },
     {
       provide: REFUND_REPO,
       useFactory: () =>
-        new LocalStorageRepository('cr.refunds', seedRefunds, notifyStorageReset(inject(Injector))),
+        new LazySeedLocalStorageRepository(
+          'cr.refunds',
+          demoSeed((m) => m.seedRefunds),
+          storageResetHandler(inject(Injector)),
+        ),
     },
     {
       provide: CHARGE_ADJUSTMENT_REPO,
       useFactory: () =>
-        new LocalStorageRepository(
+        new LazySeedLocalStorageRepository(
           'cr.chargeAdjustments',
-          seedChargeAdjustments,
-          notifyStorageReset(inject(Injector)),
+          demoSeed((m) => m.seedChargeAdjustments),
+          storageResetHandler(inject(Injector)),
         ),
     },
     {
       provide: IDENTITY_DOCUMENT_REPO,
       useFactory: () =>
-        new LocalStorageRepository(
+        new LazySeedLocalStorageRepository(
           'cr.identityDocuments',
-          seedIdentityDocuments,
-          notifyStorageReset(inject(Injector)),
+          demoSeed((m) => m.seedIdentityDocuments),
+          storageResetHandler(inject(Injector)),
         ),
     },
     {
       provide: DRIVER_CREDENTIAL_REPO,
       useFactory: () =>
-        new LocalStorageRepository(
+        new LazySeedLocalStorageRepository(
           'cr.driverCredentials',
-          seedDriverCredentials,
-          notifyStorageReset(inject(Injector)),
+          demoSeed((m) => m.seedDriverCredentials),
+          storageResetHandler(inject(Injector)),
         ),
     },
     {
       provide: CONTRACT_VERSION_REPO,
       useFactory: () =>
-        new LocalStorageRepository(
+        new LazySeedLocalStorageRepository(
           'cr.contractVersions',
-          seedContractVersions,
-          notifyStorageReset(inject(Injector)),
+          demoSeed((m) => m.seedContractVersions),
+          storageResetHandler(inject(Injector)),
         ),
     },
     {
       provide: HANDOVER_RECORD_REPO,
       useFactory: () =>
-        new LocalStorageRepository(
+        new LazySeedLocalStorageRepository(
           'cr.handoverRecords',
-          seedHandoverRecords,
-          notifyStorageReset(inject(Injector)),
+          demoSeed((m) => m.seedHandoverRecords),
+          storageResetHandler(inject(Injector)),
         ),
     },
     {
       provide: CANCELLATION_CASE_REPO,
       useFactory: () =>
-        new LocalStorageRepository(
+        new LazySeedLocalStorageRepository(
           'cr.cancellationCases',
-          seedCancellationCases,
-          notifyStorageReset(inject(Injector)),
+          demoSeed((m) => m.seedCancellationCases),
+          storageResetHandler(inject(Injector)),
         ),
     },
     {
       provide: CUSTOMER_CREDIT_LEDGER_REPO,
       useFactory: () =>
-        new LocalStorageRepository(
+        new LazySeedLocalStorageRepository(
           'cr.customerCreditLedger',
-          seedCustomerCreditLedger,
-          notifyStorageReset(inject(Injector)),
+          demoSeed((m) => m.seedCustomerCreditLedger),
+          storageResetHandler(inject(Injector)),
         ),
     },
     {
       provide: REMINDER_STATUS_REPO,
       useFactory: () =>
-        new LocalStorageRepository(
+        new LazySeedLocalStorageRepository(
           'cr.reminderStatuses',
-          seedReminderStatuses,
-          notifyStorageReset(inject(Injector)),
+          demoSeed((m) => m.seedReminderStatuses),
+          storageResetHandler(inject(Injector)),
         ),
     },
     {
       provide: OPERATOR_RECOVERY_CASE_REPO,
       useFactory: () =>
-        new LocalStorageRepository(
+        new LazySeedLocalStorageRepository(
           'cr.operatorRecoveryCases',
-          seedOperatorRecoveryCases,
-          notifyStorageReset(inject(Injector)),
+          demoSeed((m) => m.seedOperatorRecoveryCases),
+          storageResetHandler(inject(Injector)),
         ),
     },
     {
       provide: AUDIT_ENTRY_REPO,
       useFactory: () =>
-        new LocalStorageRepository(
+        new LazySeedLocalStorageRepository(
           'cr.auditEntries',
-          seedAuditEntries,
-          notifyStorageReset(inject(Injector)),
+          demoSeed((m) => m.seedAuditEntries),
+          storageResetHandler(inject(Injector)),
         ),
     },
     // 4.3：整備待辦（還車後自動列入，「整備完成」結案；不影響車輛狀態與可用數）。
     {
       provide: PREP_TASK_REPO,
       useFactory: () =>
-        new LocalStorageRepository(
+        new LazySeedLocalStorageRepository(
           'cr.prepTasks',
-          seedPrepTasks,
-          notifyStorageReset(inject(Injector)),
+          demoSeed((m) => m.seedPrepTasks),
+          storageResetHandler(inject(Injector)),
         ),
     },
     // --- Task 7：外部服務 adapter（開發期一律使用安全的本機模擬實作） ---
