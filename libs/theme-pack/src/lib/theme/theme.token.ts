@@ -11,6 +11,7 @@ export const texture: ThemeOption[] = [
   { id: 'clay', label: 'Clay 立體軟陶' },
   { id: 'editorial', label: 'Editorial 編輯式極簡' },
   { id: 'frosted', label: 'Frosted 霧光玻璃' },
+  { id: 'aero', label: 'Aero 雲霧玻璃' },
 ];
 
 export const COLOR_THEMES: ThemeOption[] = [
@@ -73,6 +74,11 @@ export const TEXTURE_COMPATIBILITY: Record<string, TextureCompatibility> = {
   frosted: {
     compatibleThemeIds: ['verdant', 'midnight', 'azure', 'candy', 'mist-ink', 'glacier-blue'],
     defaultThemeId: 'candy',
+  },
+  // 高亮度雲霧玻璃只搭配冷調、淺色畫布；深色與暖沙會讓透明層失去參考圖的空氣感。
+  aero: {
+    compatibleThemeIds: ['azure', 'cool-grey', 'mist-ink', 'glacier-blue'],
+    defaultThemeId: 'glacier-blue',
   },
 };
 

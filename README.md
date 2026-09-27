@@ -177,7 +177,7 @@ For more information on using the Angular CLI, including detailed command refere
 
 ## 雙軸主題系統
 
-本專案採用**質地（Paradigm）× 配色（Color-theme）**的兩軸主題架構。質地管造型（圓角、陰影、字體、背景紋理與元件密度），配色管顏色。一套配色可搭配不同質地；同一質地可套用不同配色。目前提供 Material、Linen、Grid、Soft UI、Clay、Editorial、Frosted 七種質地與 Verdant、Midnight、Sandstone、Azure、Cool Grey、Candy、Mist Ink、Glacier Blue 八套配色，Admin 設定頁可自由組合，共 56 種。Soft UI 以雙向陰影呈現浮雕，Clay 以四層陰影和環境光暈呈現立體軟陶，Editorial 以白色工作區、細邊線及炭黑重點呈現極簡風格，Frosted 則以霧面半透明面板、柔和邊緣光和上方環境光暈呈現金融儀表板風格；質地陰影會適應明暗配色。
+本專案採用**質地（Paradigm）× 配色（Color-theme）**的兩軸主題架構。質地管造型（圓角、陰影、字體、背景紋理與元件密度），配色管顏色。一套配色可搭配不同質地；同一質地可套用不同配色。目前提供 Material、Linen、Grid、Soft UI、Clay、Editorial、Frosted、Aero 八種質地與 Verdant、Midnight、Sandstone、Azure、Cool Grey、Candy、Mist Ink、Glacier Blue 八套配色。相容白名單目前核准 47 組組合；設定頁只顯示目前質地可搭配的配色。Soft UI 以雙向陰影呈現浮雕，Clay 以四層陰影和環境光暈呈現立體軟陶，Editorial 以白色工作區、細邊線及炭黑重點呈現極簡風格，Frosted 則以霧面半透明面板、柔和邊緣光和上方環境光暈呈現金融儀表板風格，Aero 以雲霧環境光與高透亮邊玻璃呈現輕盈工作台風格；質地陰影會適應明暗配色。
 
 可用的 token 與 `ui-` class 契約見 `libs/theme-pack/src/lib/styles/CONTRACT.md`。
 

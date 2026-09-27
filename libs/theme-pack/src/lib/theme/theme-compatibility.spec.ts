@@ -34,6 +34,10 @@ describe('theme-compatibility（ADR 0007，2026-09-27 定案清單）', () => {
     },
     editorial: { excluded: ['cool-grey'], defaultThemeId: 'mist-ink' },
     frosted: { excluded: ['sandstone', 'cool-grey'], defaultThemeId: 'candy' },
+    aero: {
+      excluded: ['verdant', 'midnight', 'sandstone', 'candy'],
+      defaultThemeId: 'glacier-blue',
+    },
   };
 
   it('每個質地都有一筆定案', () => {
