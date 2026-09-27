@@ -56,6 +56,46 @@
 | 深色側欄     | `--app-shell-bg`、`--app-shell-on`、`--app-shell-on-muted` |
 | 日曆範圍底色 | `--app-calendar-range-fill`                                |
 
+### 用途變數（`--app-*`，第二類：跨質地重複的造型/狀態邏輯）
+
+上面那組 `--app-*` 是「配色缺口」（狀態色、shell 色）；這組是「造型/互動邏輯缺口」——
+7 個質地包各自用 `color-mix()`／寫死值重複實作同一種用途（焦點框、強調邊框、
+hover/active 疊加、Material 陰影色調、圖層順序…），沒有單一調整點。
+ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/0008-semantic-token-layers.md`。
+
+#### 分層規則
+
+| 層 | 選擇器 | 權重 | 放什麼 | 檔案 |
+| --- | --- | --- | --- | --- |
+| 1. 預設 | `:root` | 0-1-0 | 每個 `--app-*` 用途變數的預設值 | `styles/_semantic.scss` |
+| 2. 質地 | `:root[data-paradigm='x']` | 0-2-0 | 造型相關的例外（邊框濃淡、狀態層濃度、陰影、寬度） | 各質地 `texture/*/_tokens.scss` |
+| 2. 配色 | `:root[data-theme='x']` | 0-2-0 | 顏色本身需要例外（例如深色配色的陰影色調，目前尚未使用） | 各配色 `color-themes/*/_tokens.scss` |
+| 3. 組合 | `:root[data-paradigm='x'][data-theme='y']` | 0-3-0 | 只有某一格「質地 × 配色」需要例外 | `styles/_combos.scss`（目前為空） |
+
+**同一個變數不可以同時在質地層與配色層定義**（兩者權重相同，會變成看載入順序決定勝負）；
+兩者都要改同一個變數時改用組合層。個別 DOM 選擇器若需要與該層典型值不同的數值（例如
+某個按鈕的 `outline-offset` 跟同質地其他按鈕不同），可以在該選擇器規則內就地覆寫變數
+（等同一次性的「實例覆寫」），不算破壞分層——只是不寫進共用檔案。
+
+#### 目前的用途變數
+
+| 變數 | 預設（層 1） | 用途 | 目前狀態 |
+| --- | --- | --- | --- |
+| `--app-focus-ring` | `var(--mat-sys-primary)` | 焦點框顏色 | 已套用（全站 25 處） |
+| `--app-focus-ring-width` / `-offset` | `2px` / `2px` | 焦點框粗細／距離；各處現值不同時就地覆寫 | 已套用 |
+| `--app-border-emphasis` | `color-mix(in srgb, var(--mat-sys-outline-variant) 35%, transparent)` | 強調邊框／分隔線 | 已套用（linen；grid 的裝飾格線因公式形狀不同未收編，見 ADR 0008） |
+| `--app-state-hover` / `-pressed` / `-selected` | `color-mix(in srgb, var(--mat-sys-on-surface) 8%/12%/16%, transparent)` | 滑過／按下／選取的底色疊加 | hover 已套用（soft-ui、frosted）；pressed/selected 已定義未套用 |
+| `--app-shadow-tint` | `var(--mat-sys-on-surface)` | Material 陰影色調 | 已套用（material 質地覆寫成 `rgb(35 34 32)`） |
+| `--app-shell-hairline` / `-scrollbar` / `-hover` / `-subtle` | `color-mix(in srgb, var(--app-shell-on) 16%/24%/12%/8%, transparent)` | 深色側欄的細線、捲軸、滑過、淡底 | 已定義未套用（第二批套用到 side-nav） |
+| `--app-scrim` / `-blur` | `rgba(0, 0, 0, 0.32)` / `0px` | 對話框、抽屜背後的遮罩 | 已定義未套用（現況全站沒有覆寫 CDK 背板色） |
+| `--app-motion-fast` / `-base` / `-slow` / `--app-ease-standard` | `150ms` / `200ms` / `400ms` / `cubic-bezier(0.2, 0, 0, 1)` | 轉場時長／easing | 已定義未套用（含 `prefers-reduced-motion` 歸零） |
+| `--app-disabled-fg` / `-bg` / `-opacity` | on-surface 38% / 12% / `0.38` | 停用狀態 | 已定義未套用 |
+| `--app-selection-bg` / `-fg` | `var(--mat-sys-primary-container)` / `var(--mat-sys-on-primary-container)` | 選取文字 | 已定義未套用；對比掃描已加入驗證 |
+| `--app-z-drawer` / `--app-z-floating` | `101` / `500` | 跨元件圖層順序（值不變） | 已套用（`responsive-panel`、`floating-appearance-panel`）；CDK overlay 的 `1000` 只記錄於註解 |
+
+「已定義未套用」代表變數存在於 `_semantic.scss` 但沒有任何規則讀取它，畫面不受影響；
+用途留給第二批（會改變畫面的項目，見計畫文件）。
+
 ### 字體（質地包提供，中英分軌）
 
 `--font-zh`（中文固定 Noto）、`--font-en`（英文依質地）、`--font-display`、`--font-body`、`--font-mono`

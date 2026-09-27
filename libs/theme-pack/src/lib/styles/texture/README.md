@@ -21,7 +21,7 @@
 
 ## 新增一種質地
 
-1. **造型 token**：建立 `<id>/_tokens.scss`，在 `:root[data-paradigm='<id>']` 下定義全部圓角、陰影、字體 token（清單見 CONTRACT.md「可用 token」）。缺一個就會退回別的質地的值。
+1. **造型 token**：建立 `<id>/_tokens.scss`，在 `:root[data-paradigm='<id>']` 下定義全部圓角、陰影、字體 token（清單見 CONTRACT.md「可用 token」）。缺一個就會退回別的質地的值。同時檢查 CONTRACT.md「用途變數」表：`--app-focus-ring-width`、`--app-border-emphasis`、`--app-state-hover/-pressed/-selected`、`--app-shadow-tint` 若這個質地的現值跟第 1 層預設不同，也要在這裡覆寫（分層規則見 ADR 0008），不要在 `recipes.scss` 裡重新寫一份 `color-mix()`／寫死值。
 2. **recipe**：建立 `<id>/recipes.scss`，用同一個選擇器包住，覆蓋 CONTRACT.md 的全部 `ui-*` class 與 Material 元件（卡片、表單、日期選擇器、按鈕、表格、對話框、狀態徽章、文字樣式）。需要額外字型時仿照 `clay/_fonts.scss`。
 3. **登錄**：在 [`_registry.scss`](./_registry.scss) 加上 `@forward '<id>/tokens'` 與 `@forward '<id>/recipes'`。
 4. **選項與相容配色**：在 [`theme.token.ts`](../../theme/theme.token.ts) 的 `texture` 加一筆，並填 `compatibleThemes`（白名單）與 `defaultTheme`。新質地預設不相容任何配色，逐一以對比掃描（WCAG 4.5:1）＋目視確認後加入。
