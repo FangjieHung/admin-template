@@ -1,9 +1,11 @@
 @use 'tailwindcss';
 @use 'assets/style/tailwind-base';
 @use '@angular/material' as mat;
+@use 'theme-pack/src/lib/styles/semantic' as *;
 @use 'theme-pack/src/lib/styles/texture/registry' as *;
 @use 'theme-pack/src/lib/styles/color-themes/verdant/tokens' as *;
 @use 'theme-pack/src/lib/styles/component';
+@use 'theme-pack/src/lib/styles/combos' as *;
 
 /* ============================================================
    Angular Material：主題（色彩/造型 token 由

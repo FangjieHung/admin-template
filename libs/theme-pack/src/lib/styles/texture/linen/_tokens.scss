@@ -10,6 +10,9 @@
   --mat-sys-level3: none;
   --mat-sys-level4: none;
 
+  // 紙感格線比全站預設（35%）淡得多，才不會蓋掉紙張質感。
+  --app-border-emphasis: color-mix(in srgb, var(--mat-sys-outline-variant) 20%, transparent);
+
   --font-zh: 'Noto Sans TC', system-ui, sans-serif;
   --font-en: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
   --font-body: 'Inter', var(--font-zh);

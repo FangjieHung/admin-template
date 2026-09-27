@@ -6,10 +6,15 @@
   --mat-sys-corner-large: 22px; // 原 --radius-lg
   --mat-sys-corner-extra-large: 28px; // 原 --radius-xl
   --mat-sys-corner-full: 999px; // 原 --radius-pill
-  --mat-sys-level1: 0 1px 2px rgba(35, 34, 32, 0.04);
-  --mat-sys-level2: 0 2px 8px rgba(35, 34, 32, 0.05);
-  --mat-sys-level3: 0 8px 24px rgba(35, 34, 32, 0.07);
-  --mat-sys-level4: 0 16px 40px rgba(35, 34, 32, 0.1);
+
+  // 陰影色調：material 質地固定用暖灰 rgb(35 34 32)（原 rgba(35,34,32,N) 寫死值），
+  // 不隨配色調整（第二批才會處理成跟配色走）。用 color-mix 對 --app-shadow-tint 取 alpha，
+  // color-mix(in srgb, C N%, transparent) 在數學上等於 rgba(C, N%)，計算後顏色與原寫死值相同。
+  --app-shadow-tint: rgb(35 34 32);
+  --mat-sys-level1: 0 1px 2px color-mix(in srgb, var(--app-shadow-tint) 4%, transparent);
+  --mat-sys-level2: 0 2px 8px color-mix(in srgb, var(--app-shadow-tint) 5%, transparent);
+  --mat-sys-level3: 0 8px 24px color-mix(in srgb, var(--app-shadow-tint) 7%, transparent);
+  --mat-sys-level4: 0 16px 40px color-mix(in srgb, var(--app-shadow-tint) 10%, transparent);
 
   // 字體：中英分軌（spec §6）。中文固定、英文依質地。
   --font-zh: 'Noto Sans TC', system-ui, sans-serif;

@@ -48,7 +48,7 @@
   }
   .nav-flyout-item.active,
   .nav-flyout-item:hover {
-    background: color-mix(in srgb, var(--mat-sys-on-surface) 9%, transparent) !important;
+    background: var(--app-state-hover) !important;
     color: var(--mat-sys-on-surface) !important;
   }
 
@@ -125,8 +125,9 @@
     box-shadow: var(--frost-well);
   }
   :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base, .ui-card--clickable, .nav-link, .nav-sublink, .nav-group-trigger, .nav-flyout-item):focus-visible {
-    outline: 2px solid var(--mat-sys-primary);
-    outline-offset: 3px;
+    --app-focus-ring-offset: 3px;
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
   }
   .ui-nav-pill { padding: 10px 18px; font-weight: 600; white-space: nowrap; }
 
@@ -138,8 +139,8 @@
     box-shadow: var(--frost-well);
   }
   .mat-mdc-form-field:focus-within .mat-mdc-text-field-wrapper.mdc-text-field--filled {
-    outline: 2px solid var(--mat-sys-primary);
-    outline-offset: 2px;
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
   }
   .mat-mdc-form-field {
     --mat-form-field-filled-active-indicator-height: 0;

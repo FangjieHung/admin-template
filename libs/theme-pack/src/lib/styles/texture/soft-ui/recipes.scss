@@ -42,7 +42,7 @@
   }
   .nav-link:hover,
   .nav-sublink:hover {
-    background: color-mix(in srgb, var(--mat-sys-on-surface) 8%, transparent) !important;
+    background: var(--app-state-hover) !important;
     color: var(--mat-sys-on-surface) !important;
   }
   .nav-subgroup {
@@ -144,8 +144,8 @@
     box-shadow: var(--soft-inset-small);
   }
   :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base, .ui-card--clickable, .nav-link, .nav-sublink, .nav-group-trigger):focus-visible {
-    outline: 2px solid var(--mat-sys-primary);
-    outline-offset: 2px;
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
   }
 
   .ui-nav-pill {
@@ -168,8 +168,8 @@
   }
   .mat-mdc-form-field:focus-within .mat-mdc-text-field-wrapper.mdc-text-field--filled {
     box-shadow: var(--soft-inset-deep);
-    outline: 2px solid var(--mat-sys-primary);
-    outline-offset: 2px;
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
   }
   .mat-mdc-form-field {
     --mat-form-field-filled-active-indicator-height: 0;

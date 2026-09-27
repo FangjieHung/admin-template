@@ -1,0 +1,80 @@
+// src/styles/_semantic.scss
+// 語意用途變數（第 1 層：`:root`，權重 0-1-0）。
+//
+// 分層規則（docs/plans/2026-09-27-semantic-tokens.md、docs/adr/0008-semantic-token-layers.md）：
+//   層 1 預設（這份檔案）→ 層 2 質地／配色（各質地 `_tokens.scss`／各配色 `_tokens.scss`，0-2-0）
+//   → 層 3 組合（`_combos.scss`，0-3-0，僅在單一質地×配色需要例外時使用）。
+// 同一個變數不可以同時在質地層與配色層定義（兩者權重相同，會變成看載入順序決定）；
+// 兩者都要改同一個變數時改用組合層。
+//
+// 本檔只放「預設值」，且第一批（畫面不變）要求每個變數的預設值必須等於改動前
+// 全站最常見的既有寫死值／既有 color-mix 運算式，質地層再依各自現值覆寫成例外。
+:root {
+  // ---- 焦點框 ----
+  // 全站 22 處 `outline: Npx solid var(--mat-sys-primary)` 中，2px/2px 是最常見的組合；
+  // 例外（clay 的 3px 寬、各處不同的 offset）由質地層或個別選擇器就地覆寫。
+  --app-focus-ring: var(--mat-sys-primary);
+  --app-focus-ring-width: 2px;
+  --app-focus-ring-offset: 2px;
+
+  // ---- 強調邊框 ----
+  // 取代 frosted `--frost-border`、linen 虛線分隔點等處各自的
+  // `color-mix(in srgb, var(--mat-sys-outline-variant) N%, transparent)`。
+  --app-border-emphasis: color-mix(in srgb, var(--mat-sys-outline-variant) 35%, transparent);
+
+  // ---- 互動狀態疊加層 ----
+  // 取代 soft-ui／frosted／editorial 側欄 hover、active 各自的 color-mix 疊加。
+  --app-state-hover: color-mix(in srgb, var(--mat-sys-on-surface) 8%, transparent);
+  --app-state-pressed: color-mix(in srgb, var(--mat-sys-on-surface) 12%, transparent);
+  --app-state-selected: color-mix(in srgb, var(--mat-sys-on-surface) 16%, transparent);
+
+  // ---- Material 陰影色調 ----
+  // material 質地層覆寫成現值 rgb(35 34 32)；其餘質地各自有自訂陰影 token，不套用此變數。
+  --app-shadow-tint: var(--mat-sys-on-surface);
+
+  // ---- 深色側欄（shell）疊加 ----
+  // 第二批才會把 side-nav.component.scss 裡寫死的 rgba(255,255,255,N) 換成這組變數；
+  // 這裡先定義預設值＝現有 side-nav 用的量，第一批尚未套用到 side-nav 本身。
+  --app-shell-hairline: color-mix(in srgb, var(--app-shell-on) 16%, transparent);
+  --app-shell-scrollbar: color-mix(in srgb, var(--app-shell-on) 24%, transparent);
+  --app-shell-hover: color-mix(in srgb, var(--app-shell-on) 12%, transparent);
+  --app-shell-subtle: color-mix(in srgb, var(--app-shell-on) 8%, transparent);
+
+  // ---- 遮罩（dialog／drawer 背板）----
+  // 現況：全站沒有任何地方覆寫 CDK overlay 背板色，一律吃 Angular Material 內建預設；
+  // 這裡先定義變數但不套用到任何選擇器（沒被使用就不影響畫面，符合第一批「畫面不變」）。
+  // 套用時機留給第二批：屆時要先實測 `.cdk-overlay-dark-backdrop` 的目前計算值當預設。
+  --app-scrim: rgba(0, 0, 0, 0.32);
+  --app-scrim-blur: 0px;
+
+  // ---- 跨元件圖層順序 ----
+  // 只替「會跟別的元件互相遮擋」的層命名，值維持現狀。CDK overlay（mat-dialog 等）用 1000，
+  // 只在此註解記錄、不改：floating-appearance-panel 選 500 就是為了確保 dialog 開啟時蓋過它。
+  --app-z-drawer: 101; // responsive-panel 的展開面板；backdrop 用 --app-z-drawer - 1（100）。
+  --app-z-floating: 500; // 外觀浮動面板／按鈕（floating-appearance-panel）。
+
+  // ---- 停用狀態（定義但第一批不套用，見計畫第 2 節）----
+  --app-disabled-fg: color-mix(in srgb, var(--mat-sys-on-surface) 38%, transparent);
+  --app-disabled-bg: color-mix(in srgb, var(--mat-sys-on-surface) 12%, transparent);
+  --app-disabled-opacity: 0.38;
+
+  // ---- 轉場時長（定義但第一批不套用）----
+  --app-motion-fast: 150ms;
+  --app-motion-base: 200ms;
+  --app-motion-slow: 400ms;
+  --app-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  // ---- 選取文字（定義但第一批不套用）----
+  --app-selection-bg: var(--mat-sys-primary-container);
+  --app-selection-fg: var(--mat-sys-on-primary-container);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  // 第一批只定義，不套用（無任何規則讀取這三個變數），故此區塊本身不影響畫面；
+  // 第二批把 transition 收斂成這 3 檔變數後，這裡會讓它們在使用者要求下全部歸零。
+  :root {
+    --app-motion-fast: 0ms;
+    --app-motion-base: 0ms;
+    --app-motion-slow: 0ms;
+  }
+}

@@ -6,6 +6,9 @@
   --mat-sys-corner-extra-large: 48px;
   --mat-sys-corner-full: 999px;
 
+  // 焦點框比其他質地粗一級（3px，其餘質地均為 2px），質感上呼應立體軟陶的厚重感。
+  --app-focus-ring-width: 3px;
+
   // 環境陰影／高光從語意 token 調出，理由同 Soft UI：暗側用 on-surface（跟著配色的
   // 深色調走），深色配色找不到比 background 更暗的面時退回中性黑；亮側用
   // surface-container-lowest/highest 取代死白，讓黏土的反光也帶一點配色材質感。

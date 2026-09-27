@@ -116,8 +116,8 @@
     transform: scale(0.98);
   }
   :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-button-base, .nav-link, .nav-sublink, .nav-group-trigger):focus-visible {
-    outline: 2px solid var(--mat-sys-primary);
-    outline-offset: 2px;
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
   }
   .ui-nav-pill { padding: 10px 16px; font-weight: 650; white-space: nowrap; }
 
@@ -129,8 +129,9 @@
     box-shadow: none;
   }
   .mat-mdc-form-field:focus-within .mat-mdc-text-field-wrapper.mdc-text-field--filled {
-    outline: 2px solid var(--mat-sys-primary);
-    outline-offset: 1px;
+    --app-focus-ring-offset: 1px;
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
   }
   .mat-mdc-form-field {
     --mat-form-field-filled-active-indicator-height: 0;

@@ -1,4 +1,5 @@
-// z-index 選 500：低於 CDK overlay（mat-dialog 等）的 1000，dialog 開啟時一定蓋過這個面板／按鈕。
+// z-index 用 --app-z-floating（值 500）：低於 CDK overlay（mat-dialog 等）的 1000，
+// dialog 開啟時一定蓋過這個面板／按鈕；變數定義在 libs/theme-pack/src/lib/styles/_semantic.scss。
 //
 // 走查記錄（coordinator 要求，17 條路徑 × 1280／390 兩個寬度）：先後試過把觸發按鈕釘死在視窗
 // 四個角落、改掛進頁首 flex 排版兩種做法。四個固定角落全部撞到東西（桌機撞頁首主要操作鈕、
@@ -7,8 +8,6 @@
 // 不擋路」的判斷交給使用者自己，而不是元件自己猜。拖曳用 Angular CDK drag-drop（cdkDrag +
 // cdkDragBoundary，不是自己算 pointer 座標）；位移量／邊界夾回／鍵盤移動／面板開啟方向這些
 // 純運算抽到 floating-appearance-panel.position.ts，可以直接單元測試。
-$panel-z: 500;
-
 :host {
   display: contents;
 }
@@ -27,7 +26,7 @@ $panel-z: 500;
   // top/left）：視窗縮放時瀏覽器自動重新定錨到新的右／下邊界，位移量本身不必跟著視窗寬高換算。
   bottom: 16px;
   right: 16px;
-  z-index: $panel-z;
+  z-index: var(--app-z-floating);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -50,8 +49,8 @@ $panel-z: 500;
   }
 
   &:focus-visible {
-    outline: 2px solid var(--mat-sys-primary);
-    outline-offset: 2px;
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
   }
 
   &.cdk-drag-dragging {
@@ -61,7 +60,7 @@ $panel-z: 500;
 
 .appearance-panel {
   position: fixed;
-  z-index: $panel-z;
+  z-index: var(--app-z-floating);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;

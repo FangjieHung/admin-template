@@ -70,8 +70,8 @@
 }
 
 .dt-selection-checkbox:focus-visible {
-  outline: 2px solid var(--mat-sys-primary);
-  outline-offset: 2px;
+  outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+  outline-offset: var(--app-focus-ring-offset);
 }
 
 .dt-table tbody tr {
@@ -92,8 +92,9 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--mat-sys-primary);
-    outline-offset: -2px;
+    --app-focus-ring-offset: -2px;
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
   }
 }
 

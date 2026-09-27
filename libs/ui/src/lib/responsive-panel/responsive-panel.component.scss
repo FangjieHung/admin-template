@@ -105,7 +105,7 @@
   max-height: 70vh;
   overflow-y: auto;
   border-radius: var(--mat-sys-corner-large) var(--mat-sys-corner-large) 0 0;
-  z-index: 101;
+  z-index: var(--app-z-drawer);
   animation: responsive-panel-slide-up 0.2s ease-out;
 }
 
@@ -113,7 +113,8 @@
   position: fixed;
   inset: 0;
   background: rgb(0 0 0 / 40%);
-  z-index: 100;
+  // 永遠比 --app-z-drawer 低 1，維持「面板蓋過背板」的疊放關係，值不變（101-1=100）。
+  z-index: calc(var(--app-z-drawer) - 1);
 }
 
 @keyframes responsive-panel-slide-up {

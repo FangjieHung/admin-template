@@ -5,12 +5,12 @@
     background-image:
       repeating-linear-gradient(
         0deg,
-        color-mix(in srgb, var(--mat-sys-outline-variant) 20%, transparent) 0 1px,
+        var(--app-border-emphasis) 0 1px,
         transparent 1px 6px
       ),
       repeating-linear-gradient(
         90deg,
-        color-mix(in srgb, var(--mat-sys-outline-variant) 20%, transparent) 0 1px,
+        var(--app-border-emphasis) 0 1px,
         transparent 1px 6px
       );
   }
@@ -31,8 +31,8 @@
       .nav-sublink,
       .nav-group-trigger
     ):focus-visible {
-    outline: 2px solid var(--mat-sys-primary);
-    outline-offset: 2px;
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
   }
 
   .ui-card {
@@ -104,8 +104,9 @@
     border-radius: inherit;
   }
   .mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper.mdc-text-field--filled {
-    outline: 2px solid var(--mat-sys-primary);
-    outline-offset: -2px;
+    --app-focus-ring-offset: -2px;
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
   }
   .ui-field-group {
     display: flex;
