@@ -32,14 +32,23 @@ describe('SettingsPageComponent', () => {
     expect((fixture.nativeElement as HTMLElement).querySelectorAll('h1')).toHaveLength(0);
   });
 
-  it('顯示所有質地與配色選項', () => {
+  it('顯示所有質地與目前質地的相容配色（不相容的隱藏）', () => {
     const fixture = TestBed.createComponent(SettingsPageComponent);
     fixture.detectChanges();
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    const compatible = TestBed.inject(ThemeService).compatibleThemes().map((c) => c.id);
 
-    for (const option of [...texture, ...COLOR_THEMES]) {
+    for (const option of texture) {
       expect(text).toContain(option.label);
     }
+    for (const option of COLOR_THEMES) {
+      if (compatible.includes(option.id)) {
+        expect(text).toContain(option.label);
+      } else {
+        expect(text).not.toContain(option.label);
+      }
+    }
+    expect(compatible.length).toBeLessThan(COLOR_THEMES.length);
   });
 
   it('選擇配色與質地會更新 ThemeService 並標示目前選項', () => {

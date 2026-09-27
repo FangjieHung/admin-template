@@ -1,4 +1,4 @@
-// 高彩度糖果色只提供語意色；與全部質地自由組合。
+// 高彩度糖果色只提供語意色；可搭配的質地見 theme.token.ts 的 TEXTURE_COMPATIBILITY。
 :root[data-theme='candy'] {
   --_canvas: #f4f1fa;
   --_ink: #332f3a;

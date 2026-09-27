@@ -1,6 +1,6 @@
 # ADR 0007：質地與配色改為白名單相容，質地為主軸
 
-- 狀態：已決策、機制已實作（2026-09-26）；相容清單仍為暫定版，待定案
+- 狀態：已決策、機制已實作（2026-09-26）；相容清單已定案（2026-09-27）
 - 日期：2026-09-26
 
 ## 背景
@@ -24,3 +24,17 @@ ADR 0002 的前提是「自由組合」：組合矩陣每一格都必須可讀�
 
 - 取代 ADR 0002 第 5 條「所有組合均須可讀」，改成「所有**相容**組合均須可讀」。
 - 相容清單只存在 TS registry 一處；質地準則文件只引用它，不重抄。
+
+## 定案清單（2026-09-27）
+
+由設計者依美感挑選；定案前 56 格對比已全數合格（ticket 15），所以排除的理由都是美感，不是可讀性。實際清單以 `theme.token.ts` 的 `TEXTURE_COMPATIBILITY` 為準，下表只是當天的快照。
+
+| 質地 | 排除 | 預設配色 |
+| --- | --- | --- |
+| Material | Candy | Verdant |
+| Linen | Candy | Sandstone |
+| Grid | （無） | Verdant |
+| Soft UI | Sandstone、Verdant | Cool Grey |
+| Clay | 只保留 Midnight、Cool Grey | Cool Grey |
+| Editorial | Cool Grey | Mist Ink |
+| Frosted | Sandstone、Cool Grey | Candy |

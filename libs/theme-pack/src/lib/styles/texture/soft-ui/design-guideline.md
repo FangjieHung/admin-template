@@ -69,11 +69,11 @@
 
 ## 相容配色
 
-見 [`theme.token.ts`](../../../theme/theme.token.ts) 中 `TEXTURE_COMPATIBILITY['soft-ui']` 的 `compatibleThemeIds` 與 `defaultThemeId`（唯一來源，此處不列清單）。目前是暫定版：排除 Sandstone 與 Verdant、預設 Cool Grey，定案見 ticket 09。
+見 [`theme.token.ts`](../../../theme/theme.token.ts) 中 `TEXTURE_COMPATIBILITY['soft-ui']` 的 `compatibleThemeIds` 與 `defaultThemeId`（唯一來源，此處不列清單；2026-09-27 定案，見 ADR 0007）。
 
 ## 已知問題（2026-09-26 依現況盤點；2026-09-26 ticket 13 更新狀態）
 
-- **陰影色寫死（已解決）**：`--soft-shadow-*` 改用 `color-mix(in srgb, var(--mat-sys-on-surface) …%, transparent)` 調暗影、`color-mix(in srgb, var(--mat-sys-surface-container-lowest/-highest) …%, transparent)` 調亮影，深色配色（暗影方向找不到比 background 更暗的面）退回中性黑，理由與做法見 `_tokens.scss` 註解。實測 Verdant、Midnight、Sandstone、Candy 下浮雕陰影都跟著配色調性走，不再是單一冷灰藍。Sandstone／Verdant 目前仍在相容清單外（ticket 09 才決定是否重新開放），但截圖比對此次修復前後，色偏已明顯改善，不再發灰顯髒。
+- **陰影色寫死（已解決）**：`--soft-shadow-*` 改用 `color-mix(in srgb, var(--mat-sys-on-surface) …%, transparent)` 調暗影、`color-mix(in srgb, var(--mat-sys-surface-container-lowest/-highest) …%, transparent)` 調亮影，深色配色（暗影方向找不到比 background 更暗的面）退回中性黑，理由與做法見 `_tokens.scss` 註解。實測 Verdant、Midnight、Sandstone、Candy 下浮雕陰影都跟著配色調性走，不再是單一冷灰藍。Sandstone／Verdant 在 2026-09-27 定案時仍依美感排除，但截圖比對此次修復前後，色偏已明顯改善，不再發灰顯髒。
 - **`.ui-card--inverse` 不是反白（已解決）**：改成獨立規則，`--mat-sys-inverse-surface` 底、`--mat-sys-inverse-on-surface` 字、`box-shadow: none`，符合 [`CONTRACT.md`](../../CONTRACT.md)「深色 hero 卡、無邊框無陰影」。目前 Admin 模板尚未有頁面使用這個 class，以合成節點驗證規則本身正確。
 - **表格 recipe 打不到 Admin 的表格（已解決）**：新增 `.dt-table` 規則（表格透明、列高改用 `padding-block: 1rem !important`、列間線改用 `color-mix(in srgb, var(--mat-sys-outline) 22%, transparent) !important`）。`!important` 是必要的——共用元件 `libs/ui/data-table` 的樣式是 Angular 執行期注入的 `<style>`，跟這裡的全域規則特異度打平時，依插入順序有時會晚於全域樣式而贏過 cascade，量測到未加 `!important` 時列高被打回原本的 12px。保留 `.mat-mdc-table`／`.mat-mdc-row` 規則以防未來真的用到 `mat-table`。
 - **可點卡片沒有鍵盤焦點框（已解決）**：`:focus-visible` 規則加入 `.ui-card--clickable`，套用 `libs/theme-pack/src/lib/styles/texture/material/buttons.scss` 同一組 outline 寫法。

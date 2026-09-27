@@ -7,7 +7,7 @@ import {
   isThemeCompatible,
 } from './theme.token';
 
-describe('theme-compatibility（ADR 0007，暫定清單）', () => {
+describe('theme-compatibility（ADR 0007，2026-09-27 定案清單）', () => {
   it('質地清單裡的每個質地都有相容清單與預設配色', () => {
     for (const t of texture) {
       const ids = getCompatibleThemeIds(t.id);
@@ -22,22 +22,31 @@ describe('theme-compatibility（ADR 0007，暫定清單）', () => {
     }
   });
 
-  it('soft-ui 不相容 sandstone 與 verdant（暫定清單）', () => {
-    expect(isThemeCompatible('soft-ui', 'sandstone')).toBe(false);
-    expect(isThemeCompatible('soft-ui', 'verdant')).toBe(false);
+  // 設計定案：每個質地排除哪些配色、預設哪個配色。
+  const DECISIONS: Record<string, { excluded: string[]; defaultThemeId: string }> = {
+    material: { excluded: ['candy'], defaultThemeId: 'verdant' },
+    linen: { excluded: ['candy'], defaultThemeId: 'sandstone' },
+    grid: { excluded: [], defaultThemeId: 'verdant' },
+    'soft-ui': { excluded: ['sandstone', 'verdant'], defaultThemeId: 'cool-grey' },
+    clay: {
+      excluded: ['verdant', 'sandstone', 'azure', 'candy', 'mist-ink', 'glacier-blue'],
+      defaultThemeId: 'cool-grey',
+    },
+    editorial: { excluded: ['cool-grey'], defaultThemeId: 'mist-ink' },
+    frosted: { excluded: ['sandstone', 'cool-grey'], defaultThemeId: 'candy' },
+  };
+
+  it('每個質地都有一筆定案', () => {
+    expect(Object.keys(DECISIONS).sort()).toEqual(texture.map((t) => t.id).sort());
   });
 
-  it('soft-ui 的預設配色不是 verdant（因為不相容）', () => {
-    expect(getDefaultThemeId('soft-ui')).not.toBe('verdant');
-  });
-
-  it('soft-ui 以外的質地暫定與全部配色相容', () => {
-    const allIds = COLOR_THEMES.map((c) => c.id);
-    for (const t of texture) {
-      if (t.id === 'soft-ui') continue;
-      expect(getCompatibleThemeIds(t.id)).toEqual(allIds);
-    }
-  });
+  for (const [textureId, d] of Object.entries(DECISIONS)) {
+    it(`${textureId}：相容清單 = 全部扣掉 [${d.excluded.join(', ')}]，預設 ${d.defaultThemeId}`, () => {
+      const expected = COLOR_THEMES.map((c) => c.id).filter((id) => !d.excluded.includes(id));
+      expect(getCompatibleThemeIds(textureId)).toEqual(expected);
+      expect(getDefaultThemeId(textureId)).toBe(d.defaultThemeId);
+    });
+  }
 
   it('未知質地 fallback 為全部配色相容、預設配色為 DEFAULT_THEME', () => {
     expect(isThemeCompatible('unknown-texture', 'midnight')).toBe(true);

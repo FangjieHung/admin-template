@@ -72,7 +72,7 @@
 
 ## 相容配色
 
-見 [`theme.token.ts`](../../../theme/theme.token.ts) 中 `TEXTURE_COMPATIBILITY.clay` 的 `compatibleThemeIds` 與 `defaultThemeId`（唯一來源，此處不列清單；暫定版，定案見 ticket 09）。
+見 [`theme.token.ts`](../../../theme/theme.token.ts) 中 `TEXTURE_COMPATIBILITY.clay` 的 `compatibleThemeIds` 與 `defaultThemeId`（唯一來源，此處不列清單；2026-09-27 定案，見 ADR 0007）。
 
 ## 已知問題（2026-09-26 依現況盤點；2026-09-26 ticket 13 更新狀態）
 

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { COLOR_THEMES, texture } from '../theme/theme.token';
+import { COLOR_THEMES, DEFAULT_PARADIGM, isThemeCompatible, texture } from '../theme/theme.token';
 import { ThemeService } from '../theme/theme.service';
 import { AppearancePanelService } from '../theme/appearance-panel.service';
 import { FloatingAppearancePanelComponent } from './floating-appearance-panel.component';
@@ -23,7 +23,7 @@ describe('FloatingAppearancePanelComponent', () => {
     expect((fixture.nativeElement as HTMLElement).querySelector('.appearance-fab')).toBeNull();
   });
 
-  it('AppearancePanelService.visible 為 true 時渲染按鈕；點擊開啟面板，質地與配色選項都在', () => {
+  it('AppearancePanelService.visible 為 true 時渲染按鈕；點擊開啟面板，列出全部質地與目前質地的相容配色', () => {
     TestBed.inject(AppearancePanelService).setVisible(true);
     const fixture = create();
     const el = fixture.nativeElement as HTMLElement;
@@ -38,8 +38,15 @@ describe('FloatingAppearancePanelComponent', () => {
     expect(btn.getAttribute('aria-expanded')).toBe('true');
     const panel = el.querySelector('#appearance-floating-panel');
     expect(panel).not.toBeNull();
-    for (const option of [...texture, ...COLOR_THEMES]) {
+    for (const option of texture) {
       expect(panel?.textContent).toContain(option.label);
+    }
+    for (const option of COLOR_THEMES) {
+      if (isThemeCompatible(DEFAULT_PARADIGM, option.id)) {
+        expect(panel?.textContent).toContain(option.label);
+      } else {
+        expect(panel?.textContent).not.toContain(option.label);
+      }
     }
   });
 

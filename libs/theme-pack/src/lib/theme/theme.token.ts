@@ -31,7 +31,7 @@ export const PARADIGM_KEY = 'cr.paradigm';
 export const THEME_KEY = 'cr.theme';
 
 // ADR 0007：質地是主軸，每個質地宣告自己的相容配色（白名單）與一個預設配色。
-// 這份清單是暫定版（issue #02）：全部相容，僅 Soft UI 不相容 Sandstone、Verdant；定案見 issue #09。
+// 清單於 2026-09-27 由設計定案（ticket 09），依據是美感；56 格對比已全數合格（ticket 15）。
 // 相容清單只存在這一處，settings 頁與之後的外觀浮動面板（ticket 03）都透過 ThemeService 讀取，不重抄清單。
 export interface TextureCompatibility {
   readonly compatibleThemeIds: readonly string[];
@@ -40,19 +40,40 @@ export interface TextureCompatibility {
 
 const ALL_COLOR_THEME_IDS: readonly string[] = COLOR_THEMES.map((c) => c.id);
 
+// 白名單一律逐一列出（ADR 0007 第 1 條）：新增配色時不會自動出現在任何質地，要逐一加進來。
 export const TEXTURE_COMPATIBILITY: Record<string, TextureCompatibility> = {
-  material: { compatibleThemeIds: ALL_COLOR_THEME_IDS, defaultThemeId: 'verdant' },
-  linen: { compatibleThemeIds: ALL_COLOR_THEME_IDS, defaultThemeId: 'verdant' },
-  grid: { compatibleThemeIds: ALL_COLOR_THEME_IDS, defaultThemeId: 'verdant' },
+  // 排除 Candy
+  material: {
+    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue'],
+    defaultThemeId: 'verdant',
+  },
+  // 排除 Candy
+  linen: {
+    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue'],
+    defaultThemeId: 'sandstone',
+  },
+  // 全部相容
+  grid: {
+    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue'],
+    defaultThemeId: 'verdant',
+  },
+  // 排除 Sandstone、Verdant
   'soft-ui': {
-    // Soft UI 的陰影是冷灰藍調（rgb 163 177 198），跟暖沙 Sandstone、偏亮綠的 Verdant 對比不足；
-    // 預設改用色調相近的 Cool Grey。
-    compatibleThemeIds: ALL_COLOR_THEME_IDS.filter((id) => id !== 'sandstone' && id !== 'verdant'),
+    compatibleThemeIds: ['midnight', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue'],
     defaultThemeId: 'cool-grey',
   },
-  clay: { compatibleThemeIds: ALL_COLOR_THEME_IDS, defaultThemeId: 'verdant' },
-  editorial: { compatibleThemeIds: ALL_COLOR_THEME_IDS, defaultThemeId: 'verdant' },
-  frosted: { compatibleThemeIds: ALL_COLOR_THEME_IDS, defaultThemeId: 'verdant' },
+  // 只保留 Midnight、Cool Grey
+  clay: { compatibleThemeIds: ['midnight', 'cool-grey'], defaultThemeId: 'cool-grey' },
+  // 排除 Cool Grey
+  editorial: {
+    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'candy', 'mist-ink', 'glacier-blue'],
+    defaultThemeId: 'mist-ink',
+  },
+  // 排除 Sandstone、Cool Grey
+  frosted: {
+    compatibleThemeIds: ['verdant', 'midnight', 'azure', 'candy', 'mist-ink', 'glacier-blue'],
+    defaultThemeId: 'candy',
+  },
 };
 
 /** 某個質地的相容配色 id 清單；未知質地 fallback 為全部配色相容。 */
