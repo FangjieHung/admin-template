@@ -135,9 +135,9 @@
 .dt-align-end {
   text-align: right;
   // 1.8：金額／里程等數字欄一律靠右、等寬數字，直接掛在既有的 align:'end' 設定上，
-  // 不必為每個使用端再另外加共用 class。純文字欄位即使誤用 align:'end' 也不受影響——
-  // tabular-nums 只在有數字字符時才會改變字寬。
-  font-variant-numeric: tabular-nums;
+  // 不必為每個使用端再另外加 class：template 對 align:'end' 的 th/td 自動加共用的 `.ui-text-numeric`
+  // （theme-pack component.scss：tabular-nums；Grid 質地另換 --font-mono）。純文字欄位即使誤用 align:'end'
+  // 也不受影響——tabular-nums 只在有數字字符時才會改變字寬。
 }
 
 .dt-empty {

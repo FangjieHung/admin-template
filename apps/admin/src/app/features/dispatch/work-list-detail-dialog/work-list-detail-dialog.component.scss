@@ -16,7 +16,6 @@
 .work-list-detail-dialog__plate {
   font-size: 1.375rem;
   font-weight: 700;
-  font-variant-numeric: tabular-nums;
   color: var(--mat-sys-on-surface);
 }
 
@@ -87,7 +86,6 @@
 }
 
 .work-list-detail__time {
-  font-variant-numeric: tabular-nums;
 }
 
 // 「客人」列：姓名與電話連結放一起，空間不足時允許換行。

@@ -61,7 +61,7 @@
             @for (item of blocked(); track item.vehicle.id) {
               <li class="avl__blocked-row">
                 <span class="avl__blocked-vehicle">
-                  <span class="avl__plate">{{ item.vehicle.plateNumber }}</span>
+                  <span class="avl__plate ui-text-numeric">{{ item.vehicle.plateNumber }}</span>
                   <span class="avl__model">{{ item.vehicle.model }}</span>
                 </span>
                 <span class="avl__reason">{{ item.reason }}</span>
@@ -76,7 +76,7 @@
 
 <ng-template #rowContent let-row>
   <span class="avl__vehicle">
-    <span class="avl__plate">{{ row.vehicle.plateNumber }}</span>
+    <span class="avl__plate ui-text-numeric">{{ row.vehicle.plateNumber }}</span>
     <span class="avl__model">{{ row.vehicle.model }}</span>
   </span>
   <span class="avl__where">
@@ -89,7 +89,7 @@
       <span class="avl__muted">{{ t.rentalSearch.locationUnset }}</span>
     }
   </span>
-  <span class="avl__price">
+  <span class="avl__price ui-text-numeric">
     <span class="avl__amount">{{ row.quote?.rentalSubtotal | twd }}</span>
     <span class="avl__days">{{ daysText() }}</span>
   </span>

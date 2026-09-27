@@ -55,6 +55,6 @@
   </button>
 
   @if (draftGroups().length > 0) {
-    <p class="payment-drafts__footer" [class.is-overpaid]="isOverpaid()">{{ footerText() }}</p>
+    <p class="payment-drafts__footer ui-text-numeric" [class.is-overpaid]="isOverpaid()">{{ footerText() }}</p>
   }
 </div>

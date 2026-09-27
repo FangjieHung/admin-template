@@ -1,5 +1,5 @@
 <h2 mat-dialog-title class="work-list-detail-dialog__title">
-  <span class="work-list-detail-dialog__plate">{{ data.title }}</span>
+  <span class="work-list-detail-dialog__plate ui-text-numeric">{{ data.title }}</span>
   <span class="work-list-detail-dialog__subtitle">{{ data.subtitle }}</span>
 </h2>
 
@@ -34,7 +34,7 @@
     </div>
     <div>
       <dt>{{ data.timeTerm }}</dt>
-      <dd class="work-list-detail__time">{{ data.time }}</dd>
+      <dd class="work-list-detail__time ui-text-numeric">{{ data.time }}</dd>
     </div>
     @for (field of data.fields; track field.term) {
       <div>

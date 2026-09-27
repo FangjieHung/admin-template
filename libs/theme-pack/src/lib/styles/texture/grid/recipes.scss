@@ -204,10 +204,11 @@
   .mat-mdc-header-cell:last-child {
     border-right: 0;
   }
-  // 所有會被比較、加總、排序的數字欄（既有共用 class，見 data-table.component.scss 的 .dt-align-end）
-  // 一律改用等寬字體，配合既有的 tabular-nums 靠右對齊。
-  .dt-align-end {
-    font-family: var(--font-mono);
+  // 所有數字資料（金額、日期、時間、數量、車牌；data-table 的 align:'end' 欄也會自動掛上）一律用等寬字體，
+  // 配合共用 class 的 tabular-nums。中文字接回 --font-zh（中文固定 Noto，與 --font-display 同一個寫法），
+  // 不讓「剩 3 台」「10/5 起」這類夾中文的數字文字掉到系統備援字體。
+  .ui-text-numeric {
+    font-family: var(--font-mono), var(--font-zh);
   }
 
   // Admin 實際用的表格是共用元件 libs/ui/data-table（.dt-table，原生 <table>），

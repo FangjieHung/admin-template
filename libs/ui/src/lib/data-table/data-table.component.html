@@ -97,7 +97,7 @@
               </th>
             }
             @for (col of resolvedColumns(); track col.key) {
-              <th scope="col" [class]="'dt-align-' + (col.align ?? 'start')">{{ col.label }}</th>
+              <th scope="col" [class]="'dt-align-' + (col.align ?? 'start') + (col.align === 'end' ? ' ui-text-numeric' : '')">{{ col.label }}</th>
             }
             @if (hasSecondary()) {
               <th scope="col" class="dt-expand-head"></th>
@@ -131,7 +131,7 @@
               @for (col of resolvedColumns(); track col.key) {
                 <td
                   [attr.data-label]="col.label"
-                  [class]="'dt-align-' + (col.align ?? 'start')"
+                  [class]="'dt-align-' + (col.align ?? 'start') + (col.align === 'end' ? ' ui-text-numeric' : '')"
                   [class.is-secondary]="!col.primary"
                 >
                   @if (cellTemplates().get(col.key); as tpl) {

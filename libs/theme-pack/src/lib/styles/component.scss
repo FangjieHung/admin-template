@@ -23,6 +23,14 @@ body {
   min-height: 100%;
 }
 
+// ---- 數字文字（CONTRACT.md `.ui-text-numeric`）----
+// 金額、日期、時間、數量、車牌等會被比較或對齊的數字：等寬數字，數字變動時字寬不跳。
+// 元件不要再自己寫 `font-variant-numeric: tabular-nums`，改在 template 加這個 class，
+// 質地才有單一掛勾換字體（Grid 換成 --font-mono）。權重只有 0-1-0，元件 scss 可就地蓋過。
+.ui-text-numeric {
+  font-variant-numeric: tabular-nums;
+}
+
 // ---- 語意用途變數的全域套用（ADR 0008 第二批）----
 
 // 遮罩：CDK 的 `.cdk-overlay-dark-backdrop`（mat-dialog 等）改吃 --app-scrim／--app-scrim-blur。

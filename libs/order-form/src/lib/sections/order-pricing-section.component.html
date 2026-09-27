@@ -30,9 +30,9 @@
               <span class="visually-hidden">{{ s.insuranceTable.select }}</span>
             </th>
             <th scope="col">{{ s.insuranceTable.plan }}</th>
-            <th scope="col" class="is-num">{{ s.insuranceTable.deductible }}</th>
-            <th scope="col" class="is-num">{{ s.insuranceTable.daily }}</th>
-            <th scope="col" class="is-num pricing-table__days">
+            <th scope="col" class="is-num ui-text-numeric">{{ s.insuranceTable.deductible }}</th>
+            <th scope="col" class="is-num ui-text-numeric">{{ s.insuranceTable.daily }}</th>
+            <th scope="col" class="is-num pricing-table__days ui-text-numeric">
               {{ days() === null ? s.insuranceTable.subtotal : days() + s.insuranceTable.subtotalDaysSuffix }}
             </th>
           </tr>
@@ -48,15 +48,15 @@
                 <mat-radio-button [value]="row.id" [aria-label]="row.name" />
               </td>
               <td class="pricing-table__name">{{ row.name }}</td>
-              <td class="is-num">
+              <td class="is-num ui-text-numeric">
                 @if (row.deductible; as d) {
                   {{ twd(d.min) }}@if (d.max !== d.min) {–{{ twd(d.max) }}}
                 } @else {
                   <span class="is-muted">—</span>
                 }
               </td>
-              <td class="is-num">{{ twd(row.daily) }}</td>
-              <td class="is-num">{{ row.subtotal === null ? '—' : twd(row.subtotal) }}</td>
+              <td class="is-num ui-text-numeric">{{ twd(row.daily) }}</td>
+              <td class="is-num ui-text-numeric">{{ row.subtotal === null ? '—' : twd(row.subtotal) }}</td>
             </tr>
           }
         </tbody>
@@ -71,16 +71,16 @@
         <thead>
           <tr>
             <th scope="col">{{ s.addOnTable.item }}</th>
-            <th scope="col" class="is-num">{{ s.addOnTable.unitPrice }}</th>
+            <th scope="col" class="is-num ui-text-numeric">{{ s.addOnTable.unitPrice }}</th>
             <th scope="col" class="pricing-table__qty">{{ s.addOnTable.qty }}</th>
-            <th scope="col" class="is-num">{{ s.addOnTable.subtotal }}</th>
+            <th scope="col" class="is-num ui-text-numeric">{{ s.addOnTable.subtotal }}</th>
           </tr>
         </thead>
         <tbody>
           @for (row of addOnRows(); track row.addOn.id) {
             <tr class="pricing-table__add-on">
               <th scope="row" class="pricing-table__name">{{ row.addOn.name }}</th>
-              <td class="is-num">{{ twd(row.addOn.unitPrice) }}{{ s.addOnTable.unitSuffix[row.addOn.unit] }}</td>
+              <td class="is-num ui-text-numeric">{{ twd(row.addOn.unitPrice) }}{{ s.addOnTable.unitSuffix[row.addOn.unit] }}</td>
               <td class="pricing-table__qty">
                 <div class="qty-stepper">
                   <button
@@ -93,7 +93,7 @@
                   >
                     <span class="material-symbols-rounded" aria-hidden="true">remove</span>
                   </button>
-                  <output class="qty-stepper__value">{{ row.qty }}</output>
+                  <output class="qty-stepper__value ui-text-numeric">{{ row.qty }}</output>
                   <button
                     mat-icon-button
                     type="button"
@@ -105,14 +105,14 @@
                   </button>
                 </div>
               </td>
-              <td class="is-num pricing-table__subtotal">{{ row.subtotal === null ? '—' : twd(row.subtotal) }}</td>
+              <td class="is-num pricing-table__subtotal ui-text-numeric">{{ row.subtotal === null ? '—' : twd(row.subtotal) }}</td>
             </tr>
           }
         </tbody>
         <tfoot>
           <tr>
             <th scope="row" colspan="3">{{ s.addOnTable.total }}</th>
-            <td class="is-num pricing-table__total">{{ addOnTotal() === null ? '—' : twd(addOnTotal()) }}</td>
+            <td class="is-num pricing-table__total ui-text-numeric">{{ addOnTotal() === null ? '—' : twd(addOnTotal()) }}</td>
           </tr>
         </tfoot>
       </table>

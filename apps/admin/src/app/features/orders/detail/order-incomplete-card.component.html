@@ -2,7 +2,7 @@
   <h2 class="incomplete-card__title" [id]="titleId">
     <span class="material-symbols-rounded incomplete-card__icon" aria-hidden="true">assignment_late</span>
     {{ t.orderDetail.incomplete.title }}
-    <span class="incomplete-card__count">{{ items().length }}</span>
+    <span class="incomplete-card__count ui-text-numeric">{{ items().length }}</span>
   </h2>
   <ul class="incomplete-card__list">
     @for (item of items(); track item.kind) {

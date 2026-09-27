@@ -100,7 +100,7 @@
                 <!-- 可用數是參考資訊：平常淡色純文字，快沒車（≤ 1）才轉警示色；過去的日子不顯示。 -->
                 @if (!isPast(d)) {
                   <span
-                    class="calendar-view__available"
+                    class="calendar-view__available ui-text-numeric"
                     [class.calendar-view__available--low]="isLowAvailability(stats)"
                   >
                     {{ t.dispatch.available }} {{ stats.available }}
@@ -141,8 +141,8 @@
             <mat-tab>
               <ng-template mat-tab-label>
                 <span class="panel-tab-label">
-                  <span class="panel-tab-label__title">{{ pickupLabel.title }}</span>
-                  <span class="panel-tab-label__meta">{{ pickupLabel.done }}</span>
+                  <span class="panel-tab-label__title ui-text-numeric">{{ pickupLabel.title }}</span>
+                  <span class="panel-tab-label__meta ui-text-numeric">{{ pickupLabel.done }}</span>
                 </span>
               </ng-template>
               <ng-template matTabContent>
@@ -188,7 +188,7 @@
                             </span>
                           }
                         </span>
-                        <span class="work-list-row__time">{{ fmtTime(row.order.startTime) }}</span>
+                        <span class="work-list-row__time ui-text-numeric">{{ fmtTime(row.order.startTime) }}</span>
                         <span class="material-symbols-rounded work-list-row__chevron" aria-hidden="true">
                           chevron_right
                         </span>
@@ -204,8 +204,8 @@
             <mat-tab>
               <ng-template mat-tab-label>
                 <span class="panel-tab-label">
-                  <span class="panel-tab-label__title">{{ returnLabel.title }}</span>
-                  <span class="panel-tab-label__meta">
+                  <span class="panel-tab-label__title ui-text-numeric">{{ returnLabel.title }}</span>
+                  <span class="panel-tab-label__meta ui-text-numeric">
                     {{ returnLabel.done }}
                     @if (returnLabel.overdue; as overdue) {
                       <span class="panel-tab-label__overdue">{{ overdue }}</span>
@@ -242,7 +242,7 @@
                               </span>
                             }
                           </span>
-                          <span class="work-list-row__time">{{ fmtTime(row.order.endTime) }}</span>
+                          <span class="work-list-row__time ui-text-numeric">{{ fmtTime(row.order.endTime) }}</span>
                           <span class="material-symbols-rounded work-list-row__chevron" aria-hidden="true">
                             chevron_right
                           </span>
@@ -258,7 +258,7 @@
             <mat-tab>
               <ng-template mat-tab-label>
                 <span class="panel-tab-label">
-                  <span class="panel-tab-label__title">{{ availableTabLabel() }}</span>
+                  <span class="panel-tab-label__title ui-text-numeric">{{ availableTabLabel() }}</span>
                 </span>
               </ng-template>
               <ng-template matTabContent>
@@ -267,7 +267,7 @@
                     <p class="available-panel__past">{{ t.dispatch.availablePanel.pastDate }}</p>
                   } @else {
                     <div class="available-panel__query">
-                      <p class="available-panel__start">{{ startsOnLabel() }}</p>
+                      <p class="available-panel__start ui-text-numeric">{{ startsOnLabel() }}</p>
                       <div class="available-panel__fields">
                         <mat-form-field subscriptSizing="dynamic">
                           <mat-label>{{ t.dispatch.availablePanel.returnDate }}</mat-label>

@@ -12,7 +12,7 @@
       <span class="prep-queue__plate">{{ r.plate }}</span>
     </ng-template>
     <ng-template dtCell="nextPickupAt" let-r>
-      <span class="prep-queue__next-pickup" [class.prep-queue__next-pickup--none]="!r.hasNextPickup">{{
+      <span class="prep-queue__next-pickup ui-text-numeric" [class.prep-queue__next-pickup--none]="!r.hasNextPickup">{{
         r.nextPickupAt
       }}</span>
     </ng-template>

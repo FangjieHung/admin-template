@@ -1,7 +1,7 @@
 <div class="cancellation-tab">
   <section class="ui-card cancellation-tab__stage" data-stage="cancel" [attr.aria-labelledby]="titleIds.cancel">
     <h2 class="cancellation-tab__title" [id]="titleIds.cancel">
-      <span class="cancellation-tab__step" aria-hidden="true">1</span>
+      <span class="cancellation-tab__step ui-text-numeric" aria-hidden="true">1</span>
       {{ t.orderDetail.cancellationStages.cancel }}
     </h2>
     <app-cancellation-panel [bookingId]="bookingId()" />
@@ -10,7 +10,7 @@
 
   <section class="ui-card cancellation-tab__stage" data-stage="refund" [attr.aria-labelledby]="titleIds.refund">
     <h2 class="cancellation-tab__title" [id]="titleIds.refund">
-      <span class="cancellation-tab__step" aria-hidden="true">2</span>
+      <span class="cancellation-tab__step ui-text-numeric" aria-hidden="true">2</span>
       {{ t.orderDetail.cancellationStages.refund }}
     </h2>
     <app-customer-credit-panel [bookingId]="bookingId()" part="refund" />
@@ -18,7 +18,7 @@
 
   <section class="ui-card cancellation-tab__stage" data-stage="credit" [attr.aria-labelledby]="titleIds.credit">
     <h2 class="cancellation-tab__title" [id]="titleIds.credit">
-      <span class="cancellation-tab__step" aria-hidden="true">3</span>
+      <span class="cancellation-tab__step ui-text-numeric" aria-hidden="true">3</span>
       {{ t.orderDetail.cancellationStages.credit }}
     </h2>
     <app-customer-credit-panel [bookingId]="bookingId()" part="credit" />

@@ -167,38 +167,38 @@
                 <dl class="order-detail__fields order-detail__fields--amounts">
                   @if (b.priceBreakdown; as q) {
                     <dt>{{ t.orderForm.rentalSubtotal }}</dt>
-                    <dd>{{ q.rentalSubtotal | twd }}</dd>
+                    <dd class="ui-text-numeric">{{ q.rentalSubtotal | twd }}</dd>
                     <dt>{{ t.orderForm.insuranceSubtotal }}</dt>
-                    <dd>{{ q.insuranceSubtotal | twd }}</dd>
+                    <dd class="ui-text-numeric">{{ q.insuranceSubtotal | twd }}</dd>
                     <dt>{{ t.orderForm.addOnSubtotal }}</dt>
-                    <dd>{{ q.addOnSubtotal | twd }}</dd>
+                    <dd class="ui-text-numeric">{{ q.addOnSubtotal | twd }}</dd>
                     @for (line of q.addOnLines; track line.addOnId) {
                       <dt class="order-detail__sub">{{ line.name }} × {{ line.qty }}</dt>
-                      <dd class="order-detail__sub">{{ line.amount | twd }}</dd>
+                      <dd class="order-detail__sub ui-text-numeric">{{ line.amount | twd }}</dd>
                     }
                     <dt class="is-total">{{ t.orderForm.quoteTotal }}</dt>
-                    <dd class="is-total">{{ q.total | twd }}</dd>
+                    <dd class="is-total ui-text-numeric">{{ q.total | twd }}</dd>
                   }
                   <dt>{{ t.orderDetail.depositRequired }}</dt>
-                  <dd>{{ b.depositRequired | twd }}</dd>
+                  <dd class="ui-text-numeric">{{ b.depositRequired | twd }}</dd>
                   <dt>{{ t.orderDetail.netPaid }}</dt>
-                  <dd>{{ (paymentSummary()?.netPaid ?? 0) | twd }}</dd>
+                  <dd class="ui-text-numeric">{{ (paymentSummary()?.netPaid ?? 0) | twd }}</dd>
                   @if (balance(); as bal) {
                     @switch (bal.kind) {
                       @case ('overpaid') {
                         <dt class="is-overpaid">{{ t.orderDetail.overpaid }}</dt>
-                        <dd class="is-overpaid order-detail__balance">{{ bal.amount | twd }}</dd>
+                        <dd class="is-overpaid order-detail__balance ui-text-numeric">{{ bal.amount | twd }}</dd>
                       }
                       @case ('unquoted') {
                         <dt>{{ t.orderDetail.balanceDue }}</dt>
-                        <dd class="order-detail__balance">
+                        <dd class="order-detail__balance ui-text-numeric">
                           —
                           <span class="order-detail__balance-note">{{ t.orderDetail.noQuoteBalance }}</span>
                         </dd>
                       }
                       @default {
                         <dt>{{ t.orderDetail.balanceDue }}</dt>
-                        <dd class="order-detail__balance">{{ bal.amount | twd }}</dd>
+                        <dd class="order-detail__balance ui-text-numeric">{{ bal.amount | twd }}</dd>
                       }
                     }
                   }

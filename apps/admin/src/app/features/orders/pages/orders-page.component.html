@@ -107,7 +107,7 @@
           </ng-template>
           <ng-template dtCell="incomplete" let-b>
             @if (incompleteOf(b).length > 0) {
-              <span class="ui-chip ui-chip--warning incomplete-badge" [matTooltip]="incompleteSummary(b)">
+              <span class="ui-chip ui-chip--warning incomplete-badge ui-text-numeric" [matTooltip]="incompleteSummary(b)">
                 <span aria-hidden="true">{{ incompleteOf(b).length }}</span>
                 <span class="sr-only">{{ incompleteCountLabel(b) }}：{{ incompleteSummary(b) }}</span>
               </span>
