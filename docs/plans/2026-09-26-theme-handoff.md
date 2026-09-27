@@ -49,7 +49,7 @@
 
 ## 已知但未處理（不在這次範圍，可提給使用者）
 
-- Admin 首次載入 787 kB，仍超出 720 kB 預算約 67 kB（本 session 開始前已超出，773 kB）。
+- ~~Admin 首次載入 787 kB，仍超出 720 kB 預算約 67 kB~~ **已處理（commit 46511cf、e5b2cd2）**：主題改版後一度到 807 kB；拆出殼層字串 `zh-tw-shell.ts`、domain 改走 `@car-rental/domain/repositories` 子路徑、snack-bar 動態載入、`provideNativeDateAdapter` 移到用日期選擇器的兩個元件，降到 711.78 kB（2026-09-28）。只剩約 8 kB 餘裕，後續選項見 ADR 0008 之外的 session 紀錄：seed-data 動態載入（16 kB）、使用者選單 `@defer`（23.6 kB，行為會變）。
 - ~~Grid 的等寬數字沒套到建單表單的金額~~ **已處理（commit 67e1955）**：共用 class `.ui-text-numeric`，Grid 換 `--font-mono`（見 ADR 0008「遺留項目收尾」）。
 - ~~Soft UI／Clay／Frosted 的 `.dt-table` 規則用了 `!important`~~ **已處理（commit ab4d5d3）**：data-table 以 `--dt-*` 變數暴露外觀，質地只設變數；另發現 Grid 表頭加強線從未生效，保留現狀待看圖決定（Grid 準則「已知限制」）。
 - **已處理（commit b6a690c）**：關鍵影格動畫時長改用 `--app-motion-*`（新增 `--app-motion-loop`），`lint:theme` 擋 `animation` 寫死時長。
