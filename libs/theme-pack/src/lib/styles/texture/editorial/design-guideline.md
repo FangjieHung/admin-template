@@ -39,7 +39,7 @@
 
 - **卡片**：`.ui-card` 目標為直角、無陰影、1px 髮絲框、底色 `--mat-sys-surface-container-low`（現況 12px 圓角，hover 會出現陰影 → 目標 hover 只把框線換成 `--mat-sys-outline`）。新頁面優先用「標題＋髮絲分隔線」的段落排版，真的需要一個可點的單元時才用卡片。
 - **表格**：無外框，表頭用小字 caption 樣式、下方一條 `--mat-sys-on-surface` 強調線；資料列之間 1px 髮絲線，不加欄線。數字欄靠右。
-- **表單**：輸入框 2px 圓角、`--mat-sys-surface-container-high` 底、1px 髮絲框；聚焦時 2px `--mat-sys-primary` 外框。欄位群組之間用留白與小節標分段，不另加卡片框。
+- **表單**：輸入框 2px 圓角、`--mat-sys-surface-container-high` 底、1px 細框，顏色 `--app-field-border`（原本的 outline-variant 髮絲線對底色不到 3:1）；聚焦時 2px `--app-focus-ring` 外框，錯誤時框線換 error 色。欄位群組之間用留白與小節標分段，不另加卡片框。
 - **空狀態**：不放色塊、不放框。一行襯線標題、一行灰色說明、一顆文字或外框按鈕，左對齊或置中都可，但要有充足留白。
 - **對話框**：直角、1px 髮絲框、無陰影，標題用襯線 display 字體，標題下方一條髮絲線，動作列上方一條髮絲線。
 - **chip／徽章**：`.ui-chip--{tone}`，2px 圓角的小方籤，顏色來自 `--app-{tone}-bg/fg`；字級小、可加字距，不做膠囊。

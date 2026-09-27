@@ -21,7 +21,7 @@
 | 陰影 level2 | `--mat-sys-level2` | `3px 3px 0 0 var(--mat-sys-outline)` | 可點卡片 hover、按鈕 hover | 已完成（`.ui-card--clickable:hover` 已補 level2） |
 | 陰影 level3 | `--mat-sys-level3` | `4px 4px 0 0 var(--mat-sys-outline)` | 選單、日期選擇器 | 已完成 |
 | 陰影 level4 | `--mat-sys-level4` | `6px 6px 0 0 var(--mat-sys-outline)` | 對話框 | 已完成 |
-| 邊線 | `--mat-sys-outline` | 1px 實線，明顯可見 | 卡片、對話框、選單、日期選擇器、表格外框、表單欄位 | 已完成：對話框／選單／日期選擇器／欄位補上 1px outline；欄位 focus 時改 2px `--mat-sys-primary` |
+| 邊線 | `--mat-sys-outline`（欄位用 `--app-field-border`） | 1px 實線，明顯可見 | 卡片、對話框、選單、日期選擇器、表格外框、表單欄位 | 已完成：對話框／選單／日期選擇器補上 1px outline；欄位邊框改吃 `--app-field-border`（Verdant 的 outline 不到 3:1，配色層加深），focus 時改 2px `--mat-sys-primary` |
 | 內格線 | `--mat-sys-outline-variant` | 1px | 表格列線與欄線、卡片內分區、對話框標題列/動作列分隔 | 已完成。Admin 實際表格是共用元件 `libs/ui/data-table`（`.dt-table` 原生 `<table>`，非 `mat-mdc-table`），欄線／外框／表頭分隔線是在 grid `recipes.scss` 用 `.dt-table` 選擇器加的，未動共用元件檔 |
 | 字體 display | `--font-display` | IBM Plex Mono ＋ Noto Sans TC | 頁面大標、大數字 | — |
 | 字體 body | `--font-body` | Inter ＋ Noto Sans TC | 內文、表單 | — |
@@ -41,7 +41,7 @@ hover 的回饋是「影子多推出去一格」，按下時影子歸零、元�
 
 - **卡片**：`.ui-card`，直角、1px `--mat-sys-outline` 實框、level1 硬影。卡片標題列下方用一條 1px 內格線隔開。可點卡片 hover 升到 level2。
 - **表格**：外框 1px `outline`，列線與欄線都畫（`outline-variant`），表頭與內容之間用 `outline` 實線加強。列高 44px。所有數字欄用 `--font-mono`、`font-variant-numeric: tabular-nums`、靠右對齊，讓個位數上下對齊。
-- **表單**：欄位 2px 圓角、1px `outline` 實框，聚焦時框線換成 2px `--mat-sys-primary`。標籤可以用全大寫英文或小字 caption，像工程圖的欄位標示。數字輸入（金額、里程、天數）用 mono。
+- **表單**：欄位 2px 圓角、1px `--app-field-border` 實框（對外側底色 ≥ 3:1），聚焦時框線換成 2px `--mat-sys-primary`，錯誤時換 error 色。標籤可以用全大寫英文或小字 caption，像工程圖的欄位標示。數字輸入（金額、里程、天數）用 mono。
 - **空狀態**：卡片內畫一個虛線框（1px dashed `outline-variant`），裡面置中圖示＋一行 mono 小字狀態（例如「0 筆」）＋說明＋按鈕。
 - **對話框**：直角、1px `outline` 實框、level4 硬影（6px 偏移）。標題列與動作列各用 1px 內格線與內容分開。
 - **chip／徽章**：`.ui-chip--{tone}`，2px 圓角的方形標籤、1px 同色系邊框（`--app-{tone}-fg` 的淡化）、粗體小字。不做膠囊。
@@ -72,5 +72,5 @@ hover 的回饋是「影子多推出去一格」，按下時影子歸零、元�
 ## 已知限制（ticket 06 實作紀錄，2026-09-26）
 
 - **表格數字 mono 化的實作範圍**：本質地包只管樣式，不能改共用元件或 feature 頁面的 template。表格數字欄靠既有共用 class `.dt-align-end`（`libs/ui/data-table`）與 `input[type='number']` 屬性選擇器掛上 `--font-mono`；統計大數字沿用既有 `.ui-text-display`。但 order-form（`order-pricing-section`、`order-payment-drafts-section` 等）金額欄位是各元件自己在 `.scss` 內寫死 `font-variant-numeric: tabular-nums`，沒有共用 class 可掛勾，本 ticket 未改字體。若要全面覆蓋，需要在那些元件的 template 補一個共用的 `.ui-numeric`／`.dt-align-end` 之類的 hook（跨 feature 檔案，超出本 ticket scope，建議另開 ticket）。
-- **對話框／選單／欄位邊框**：既有 `.mat-mdc-dialog-surface`、`.mat-mdc-menu-panel`、`.mat-datepicker-content`、`.mat-mdc-text-field-wrapper.mdc-text-field--filled` 都補了 `1px solid var(--mat-sys-outline)`；欄位群組（`.ui-field-group`）為避免相鄰欄位雙線，中間欄位改 `border-left: 0`，原本的裝飾用 `::before` 分隔線保留。
+- **對話框／選單／欄位邊框**：既有 `.mat-mdc-dialog-surface`、`.mat-mdc-menu-panel`、`.mat-datepicker-content`、`.mat-mdc-text-field-wrapper.mdc-text-field--filled` 都補了 1px 實線框（前三者 `--mat-sys-outline`，欄位 `--app-field-border`）；欄位群組（`.ui-field-group`）為避免相鄰欄位雙線，中間欄位改 `border-left: 0`，原本的裝飾用 `::before` 分隔線保留。
 - **表格欄線只加在儲存格右側**（`border-right`，最後一欄歸零），未在 `<tr>` 加左右外框，外框由 `.dt-table` 本身的 `border: 1px solid outline` 提供。

@@ -55,3 +55,12 @@
 8. Frosted 在 `@media (prefers-reduced-transparency: reduce)` 改成實色、關掉 `backdrop-filter`。
 
 驗收：7 質地 × 相容配色的改前／改後對照圖（儀表板、訂單列表、開啟的對話框），對比掃描 0 不合格，測試與 build 通過。
+
+## 第三批：欄位邊界（已完成，commit c2fdbd5、bebd784 與本文件所在的 docs commit）
+
+1. 新增 `--app-field-border`（預設 outline；只有 Verdant 在配色層混 68% on-surface-variant）。
+2. 各質地的呈現形式：material／linen 恢復 1px 底線、grid／editorial／frosted 邊框、soft-ui／clay 加 1px inset 細框、outlined 欄位外框與錯誤／停用狀態統一在 `component.scss`、admin 搜尋膠囊加 inset 細框。
+3. `contrast:theme` 的 `input_border_on_surface` 擴充到建單頁、訂單列表篩選列、優惠券對話框三個畫面與所有欄位形式；`lint:theme` 擋欄位邊框用非 `--app-field-border` 的顏色。
+4. 文件：CONTRACT.md 用途變數表、ADR 0008「欄位邊界」一節、7 份質地準則的表單段落。
+
+驗收：改前（HEAD eb1243f）／改後 43 個相容組合 × 3 畫面對照圖、7 張質地特寫、focus 與錯誤狀態特寫；對比掃描 43 個相容組合欄位邊界最低 3.17（56 格全過），其他 pair 0 不合格；theme-pack／admin／affiliate／booking 測試、admin build、`lint:theme`、`vitest run scripts` 通過。

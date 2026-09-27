@@ -1,6 +1,6 @@
 # ADR 0008：語意用途變數的三層覆寫（預設 → 質地/配色 → 組合）
 
-- 狀態：已決策；第一批（畫面不變）與第二批（會改變畫面）皆已實作（2026-09-27）
+- 狀態：已決策；第一批（畫面不變）、第二批（會改變畫面）與第三批（欄位邊界）皆已實作（2026-09-27）
 - 日期：2026-09-27
 
 ## 背景
@@ -59,3 +59,24 @@ ticket 09 定案 `TEXTURE_COMPATIBILITY` 後，使用者問「某個質地 × �
 | 狀態層 | `--app-state-selected`：卡片分頁標籤的目前項目（取代 `surface-container-highest`）；`--app-state-pressed`：卡片分頁標籤與可點表格列按下（表格列疊在 hover 底色上）。派車「可用車輛」選中列已有主色框線，未改。 | — |
 
 對照圖與差異清單只存在執行當時的 scratchpad（`batch2/compare.html`、`batch2/diff-list.md`），未進 repo；決策摘要以本 ADR 為準。
+
+## 欄位邊界（2026-09-27）
+
+背景：對比掃描的 `input_border_on_surface`（輸入欄位邊界對所在底色，WCAG 1.4.11 的 3:1）56 格有 49 格不合格（相容組合 43 格中 36 格）。Material／Linen／Clay 只靠填色區隔，Soft UI 的填色與頁面同色只靠內凹陰影，Editorial／Frosted 的邊框太淡（outline-variant 髮絲線、`--frost-border` 霧邊），Grid 只有 × Verdant 不合格（1.62）。
+
+決定：
+
+1. 新增層 1 變數 `--app-field-border`，預設 `var(--mat-sys-outline)`。量 8 套配色的 outline 對「欄位實際所在底色」（建單頁卡片、訂單列表 topbar、優惠券對話框）：只有 Verdant（cream-300，外側最低 1.49、對 material 欄位填色 1.37）不合格，其餘最低是 Cool Grey 3.17。Verdant 在**配色層**覆寫成 `color-mix(in srgb, var(--mat-sys-on-surface-variant) 68%, var(--mat-sys-outline))`——68% 是讓 5 個相容質地同時「對外側底色」與「對欄位填色」都 ≥ 3:1 的最小整數（只看外側 62% 就夠；底線疊在填色上，所以取較嚴的 68%）。質地層不定義這個變數（決策 3），目前不需要組合層例外。
+2. 「形式」由質地 recipe 決定，顏色一律吃 `--app-field-border`：
+   | 質地 | 形式 |
+   | --- | --- |
+   | Material、Linen | 恢復 MDC 的 filled 底線：`--mat-form-field-filled-active-indicator-height: 1px`、`-color: var(--app-field-border)`、hover `--mat-sys-on-surface`；focus 維持 MDC 的 2px 主色底線，錯誤／停用走 MDC 自己的 token。膠囊圓角處底線被 wrapper 裁掉，只留平直段。 |
+   | Grid、Editorial、Frosted | 既有 1px 邊框改用 `--app-field-border`（Grid 的欄位群組分隔線一併）。Frosted 的霧感留給半透明填色與 `--frost-well` 內凹，`--frost-border` 只留給卡片、面板。 |
+   | Soft UI、Clay | 保留內凹／按壓陰影，前面加一層 `inset 0 0 0 1px var(--app-field-border)`（box-shadow 第一層畫在最上面）。選 inset 細框而不是 border：不改欄位尺寸，也不會破壞浮雕外輪廓。 |
+   | outlined 欄位（booking-flow） | `component.scss` 全域設 `--mat-form-field-outlined-outline-color: var(--app-field-border)`。 |
+   | 自訂輸入（admin `page-toolbar` 的 `.search` 膠囊） | 不分質地一律 1px inset 細框；收合時寬度 0，用 border 會留下 2px 殘線，底線在膠囊上會被圓角裁到只剩一小段。 |
+3. 錯誤／停用：`component.scss` 在 `.mat-mdc-text-field-wrapper.mdc-text-field--invalid`／`--disabled` 上就地覆寫 `--app-field-border` 為 `--mat-sys-error`／`--app-disabled-bg`（決策 4 的實例覆寫），所有邊框、細框形式跟著換色。停用欄位不受 1.4.11 約束。
+4. 對比掃描：`input_border_on_surface` 改量建單頁、訂單列表（展開搜尋＋篩選列）、優惠券新增對話框上所有可見、非停用、非 focus 的欄位，取「真的構成邊界的那條線」（outlined 外框 → 邊框 → inset 細框 → 底線疊在填色上 → 填色）對欄位外側底色，全部取最低值。結果：43 個相容組合最低 3.17（Cool Grey 各質地），56 格全數 ≥ 3:1，其他 pair 維持 0 不合格。
+5. `lint:theme`：在輸入欄位選擇器（`input`／`textarea`／`select`／`.mat-mdc-form-field`／`.mat-mdc-text-field-wrapper`／`.mdc-text-field`）底下，`border*`、`--mat-form-field-*-outline-color`、`*-active-indicator-color` 的 `var()` 只能是 `--app-field-border`、`--mat-sys-on-surface`（hover）、`--mat-sys-error`、`--app-disabled-*`、`--app-focus-ring`／`--mat-sys-primary`（focus）。採用完整版規則而不是只擋 `outline-variant`：對現有 theme-pack 與三個 app 的 scss 沒有誤擋（唯一命中的是 hover 的 on-surface，已列入允許），掃描範圍與既有規則相同（不含 `libs/ui`、`libs/booking-flow`，這兩處目前沒有自訂欄位邊框）。
+
+未涵蓋：原生 checkbox／radio（`libs/ui` data-table、派車可用車輛列表、booking-flow 保險方案）用 `accent-color` 的瀏覽器原生外觀，未套 `--app-field-border`；hover、focus、錯誤狀態不在對比掃描內，只以特寫截圖確認。對照圖只存在執行當時的 scratchpad（`batch3/compare.html`），未進 repo。

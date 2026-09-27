@@ -23,7 +23,7 @@
 | 陰影 level4 | `--mat-sys-level4` | `0 30px 60px` | 對話框、選單、日期選擇器 | — |
 | 內凹 | `--frost-well` | 上方內陰影 ＋ 1px 亮線 | 輸入框、按下中的按鈕 | — |
 | 面板色 | `--frost-panel` | `--mat-sys-surface` 88% 透明 | 卡片、對話框、選單、次要按鈕 | — |
-| 邊線 | `--frost-border` | 1px，`--mat-sys-outline-variant` 45% 混 surface（極淡的霧邊） | 卡片、對話框、選單、欄位、次要按鈕、側欄右緣 | — |
+| 邊線 | `--frost-border` | 1px，`--mat-sys-outline-variant` 45% 混 surface（極淡的霧邊） | 卡片、對話框、選單、次要按鈕、側欄右緣（欄位改用 `--app-field-border`，見「表單」） | — |
 | 背景模糊 | `backdrop-filter` | 卡片 `blur(20px) saturate(1.08)`、側欄 18px、對話框／選單 20px；對話框遮罩 `--app-scrim-blur` 6px | 所有面板 | `prefers-reduced-transparency: reduce` 時全部關掉 |
 | 字體 display | `--font-display` | Plus Jakarta Sans ＋ Noto Sans TC（字距 -0.035em） | 頁面大標、`.ui-text-display`／`-title` | — |
 | 字體 body | `--font-body` | Plus Jakarta Sans ＋ Noto Sans TC（與 display 同字族） | 內文、小節標、表單 | — |
@@ -50,7 +50,7 @@
 
 - **卡片**：`.ui-card`，`--frost-panel` 底＋背景模糊、1px `--frost-border` 霧邊、24px 圓角、level2。可點的加 `.ui-card--clickable`（hover 上移 2px、升到 level3）。重點數字卡用 `.ui-card--inverse`（深色漸層玻璃）。卡片內分區用留白，不再疊一層玻璃——兩層模糊會變髒。
 - **表格**：放在 `.ui-card` 裡，表格本身透明，讓卡片的玻璃透上來；不替表頭另加不透明底色。
-- **表單**：Material filled 欄位，16px 圓角、`--mat-sys-surface-container-high` 80% 透明、1px 霧邊、淺內凹（`--frost-well`）、無底線。相連欄位用 `.ui-field-group`。
+- **表單**：Material filled 欄位，16px 圓角、`--mat-sys-surface-container-high` 80% 透明、淺內凹（`--frost-well`）、無底線；邊框 1px `--app-field-border`（霧邊 `--frost-border` 對底色不到 3:1，欄位不用它；霧感留給半透明填色與內凹）。錯誤時框線換 error 色。相連欄位用 `.ui-field-group`。
 - **空狀態**：卡片內置中：一個圖示、一行 `.ui-text-subtitle`、一行 `.ui-text-caption`、一顆主色膠囊按鈕。留白充足，不另加色塊。
 - **對話框**：24px 圓角、`--frost-panel` 底＋背景模糊、1px 霧邊、level4。
 - **chip／徽章**：`.ui-chip` ＋ `.ui-chip--{tone}`，膠囊形、無陰影、前面一顆狀態圓點（`.ui-chip__dot`），顏色來自 `--app-{tone}-bg/fg/dot`。
