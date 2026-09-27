@@ -22,6 +22,13 @@
   // `color-mix(in srgb, var(--mat-sys-outline-variant) N%, transparent)`。
   --app-border-emphasis: color-mix(in srgb, var(--mat-sys-outline-variant) 35%, transparent);
 
+  // ---- 欄位邊界（第三批，2026-09-27）----
+  // 輸入欄位「可見邊界」的顏色（WCAG 1.4.11：對欄位外側底色 ≥ 3:1）。形式由質地決定——
+  // material／linen 是 filled 底線、grid／editorial／frosted 是邊框、soft-ui／clay 是 1px inset 細框、
+  // outlined 欄位是外框（component.scss），但顏色一律吃這個變數。預設 outline：8 套配色裡只有
+  // Verdant 的 outline（cream-300）不到 3:1，在配色層覆寫。錯誤／停用狀態由 component.scss 就地覆寫。
+  --app-field-border: var(--mat-sys-outline);
+
   // ---- 互動狀態疊加層 ----
   // 取代 soft-ui／frosted／editorial 側欄 hover、active 各自的 color-mix 疊加。
   --app-state-hover: color-mix(in srgb, var(--mat-sys-on-surface) 8%, transparent);

@@ -96,9 +96,13 @@
     border-bottom-left-radius: var(--app-field-shape);
     border-bottom-right-radius: var(--app-field-shape);
   }
+  // 欄位邊界：保留 MDC 的底線（像信紙上的書寫線）當可見邊界，顏色吃 --app-field-border；
+  // hover 加深、focus 維持 MDC 的 2px 主色底線（外加下方 mat-focused 的焦點框）。
   .mat-mdc-form-field {
-    --mat-form-field-filled-active-indicator-height: 0;
-    --mat-form-field-filled-focus-active-indicator-height: 0;
+    --mat-form-field-filled-active-indicator-height: 1px;
+    --mat-form-field-filled-focus-active-indicator-height: 2px;
+    --mat-form-field-filled-active-indicator-color: var(--app-field-border);
+    --mat-form-field-filled-hover-active-indicator-color: var(--mat-sys-on-surface);
   }
   .mat-mdc-form-field-focus-overlay {
     border-radius: inherit;

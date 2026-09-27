@@ -125,7 +125,8 @@
   .mat-mdc-text-field-wrapper.mdc-text-field--filled {
     --mat-form-field-filled-container-shape: var(--mat-sys-corner-medium);
     background: var(--mat-sys-surface-container-high);
-    border: 1px solid var(--mat-sys-outline-variant);
+    // 欄位邊界：原本的 outline-variant 髮絲線對底色不到 3:1，改吃 --app-field-border（仍是 1px 細線）。
+    border: 1px solid var(--app-field-border);
     border-radius: var(--mat-sys-corner-medium);
     box-shadow: none;
   }

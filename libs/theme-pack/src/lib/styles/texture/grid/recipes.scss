@@ -104,7 +104,8 @@
   .mat-mdc-text-field-wrapper.mdc-text-field--filled {
     --app-field-shape: var(--mat-sys-corner-medium);
     --mat-form-field-filled-container-shape: var(--app-field-shape);
-    border: 1px solid var(--mat-sys-outline);
+    // 欄位邊界：1px 實線框，顏色吃 --app-field-border（Verdant 的 outline 不到 3:1，配色層加深）。
+    border: 1px solid var(--app-field-border);
     border-radius: var(--app-field-shape);
   }
   .mat-mdc-text-field-wrapper.mdc-text-field--filled.mdc-text-field--focused {
@@ -143,7 +144,7 @@
     top: 10px;
     bottom: 10px;
     width: 1px;
-    background: var(--mat-sys-outline);
+    background: var(--app-field-border);
     z-index: 1;
   }
 

@@ -135,7 +135,9 @@
   .mat-mdc-text-field-wrapper.mdc-text-field--filled {
     --mat-form-field-filled-container-shape: var(--mat-sys-corner-medium);
     background: color-mix(in srgb, var(--mat-sys-surface-container-high) 80%, transparent);
-    border: 1px solid var(--frost-border);
+    // 欄位邊界：--frost-border（outline-variant 混 surface）對底色不到 3:1，欄位改吃 --app-field-border；
+    // 霧感留給半透明填色與內凹的 --frost-well。卡片、面板的霧邊仍用 --frost-border。
+    border: 1px solid var(--app-field-border);
     border-radius: var(--mat-sys-corner-medium);
     box-shadow: var(--frost-well);
   }

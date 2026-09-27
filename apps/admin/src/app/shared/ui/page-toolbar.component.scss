@@ -85,6 +85,10 @@
   border-radius: 999px;
 
   background: var(--mat-sys-surface-variant);
+  // 欄位邊界（ADR 0008「欄位邊界」）：填色對 topbar 底色不到 3:1，加 1px inset 細框。
+  // 用 inset box-shadow 而不是 border：收合時 width: 0，border 會留下 2px 殘線。
+  // 自訂膠囊不分質地都用細框（底線在膠囊上會被圓角裁到只剩一小段）。
+  box-shadow: inset 0 0 0 1px var(--app-field-border);
   overflow: hidden;
   // 延遲 = base 的 45%（原 220ms 動畫配 90ms 延遲的比例），跟著 --app-motion-base 一起縮放，
   // prefers-reduced-motion 時一併歸零。

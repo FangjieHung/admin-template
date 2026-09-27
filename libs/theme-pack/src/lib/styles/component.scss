@@ -45,3 +45,19 @@ body {
   background: color-mix(in srgb, var(--app-shell-on) 28%, var(--app-shell-bg));
   color: var(--app-shell-on);
 }
+
+// 欄位邊界（ADR 0008「欄位邊界」，第三批）：形式由質地 recipe 決定，這裡只放跨質地共通的兩件事。
+// 1. outlined 欄位（booking-flow 的確認頁／加購數量等）的外框色吃 --app-field-border。
+//    hover 維持 Material 預設的 on-surface（比 outline 深），focus／error 維持主色／error 色。
+.mat-mdc-form-field {
+  --mat-form-field-outlined-outline-color: var(--app-field-border);
+}
+// 2. 錯誤／停用狀態：在欄位本身就地覆寫變數（ADR 0008 決策 4 的實例覆寫），各質地的邊框、
+//    細框都跟著換色，不必每個 recipe 各寫一次。停用欄位不受 WCAG 1.4.11 3:1 約束，用停用底色的淡線。
+//    material／linen 的底線由 MDC 自己的 error／disabled active-indicator token 處理，不受這兩條影響。
+.mat-mdc-text-field-wrapper.mdc-text-field--invalid {
+  --app-field-border: var(--mat-sys-error);
+}
+.mat-mdc-text-field-wrapper.mdc-text-field--disabled {
+  --app-field-border: var(--app-disabled-bg);
+}
