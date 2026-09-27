@@ -58,4 +58,4 @@ ticket 09 定案 `TEXTURE_COMPATIBILITY` 後，使用者問「某個質地 × �
 | 減少透明度 | Frosted 在 `@media (prefers-reduced-transparency: reduce)` 下關掉所有 `backdrop-filter`，`--frost-panel` 改 `--mat-sys-surface`、側欄改 `--app-shell-bg`、輸入框改 `surface-container-high`、`--app-scrim-blur` 歸零。 | 2（質地）＋ recipe |
 | 狀態層 | `--app-state-selected`：卡片分頁標籤的目前項目（取代 `surface-container-highest`）；`--app-state-pressed`：卡片分頁標籤與可點表格列按下（表格列疊在 hover 底色上）。派車「可用車輛」選中列已有主色框線，未改。 | — |
 
-對照圖與差異清單：第二批報告（scratchpad `batch2/compare.html`、`batch2/report.md`）。
+對照圖與差異清單只存在執行當時的 scratchpad（`batch2/compare.html`、`batch2/diff-list.md`），未進 repo；決策摘要以本 ADR 為準。
