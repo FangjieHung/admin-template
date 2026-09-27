@@ -2,7 +2,8 @@
 @use 'assets/style/tailwind-base';
 @use '@angular/material' as mat;
 @use 'theme-pack/src/lib/styles/semantic' as *;
-@use 'theme-pack/src/lib/styles/texture/registry' as *;
+// 只用 Material 質地（index.html 固定 data-paradigm="material"），不載入整份質地清單。
+@use 'theme-pack/src/lib/styles/texture/material' as *;
 @use 'theme-pack/src/lib/styles/color-themes/midnight/tokens' as *;
 @use 'theme-pack/src/lib/styles/component';
 @use 'theme-pack/src/lib/styles/choice-controls';

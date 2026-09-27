@@ -1,0 +1,12 @@
+// src/styles/texture/material/_index.scss
+// Material 質地的完整輸出（造型 token + 全部元件 recipe）。
+// 多質地的 admin 經 texture/_registry.scss 取用；只用 Material 的 app（booking、affiliate）
+// 直接 @use 這份，避免把其他質地的 CSS 也打包進去（每多一個質地，前台樣式就會變大）。
+@forward 'tokens';
+@forward 'card';
+@forward 'form';
+@forward 'datepicker';
+@forward 'buttons';
+@forward 'table';
+@forward 'status';
+@forward 'typography';

@@ -47,6 +47,7 @@ grep -rn "texture/<id>\|color-themes/<id>\|data-theme=\"<id>\"\|data-paradigm=\"
 | 3 | `texture/_registry.scss`、`color-themes/_registry.scss` | 刪掉對應的 `@forward` |
 | 4 | `apps/admin/src/styles.scss` | 刪掉已刪質地的字型 `@use`（例如 `texture/clay/fonts`、`texture/editorial/fonts`）。**這通常是第一個 build 錯誤** |
 | 5 | `apps/affiliate/src/styles.scss` ＋ `apps/affiliate/src/index.html` | 若刪了 Midnight：scss 的 `color-themes/midnight/tokens` 與 HTML 的 `data-theme="midnight"` **兩處都要改**成保留的配色；只改一處會 build 失敗或整頁沒顏色 |
+| 5b | `apps/booking/src/styles.scss`、`apps/affiliate/src/styles.scss` | 這兩個前台只 `@use` `texture/material`（2026-09-28 起，不載入整份質地清單）。若新專案的前台要用 Material 以外的質地，把這行換成該質地，並改 `index.html` 的 `data-paradigm` |
 | 6 | `libs/theme-pack/src/lib/styles/_combos.scss` | 刪掉引用已刪 id 的組合規則。**檔案本身要留著**，三個 app 都 `@use` 它 |
 | 7 | 保留的質地／配色 `_tokens.scss` | 刪掉只為已刪配色寫的覆寫（例如 Midnight 的陰影、遮罩，Candy 的側欄淡底），若它們寫在保留的檔案裡 |
 | 8 | `libs/theme-pack/src/lib/theme/theme.token.ts` | `texture`、`COLOR_THEMES` 只留要的；`TEXTURE_COMPATIBILITY` 只留保留質地的那幾筆，每筆的 `compatibleThemeIds` 只列保留的配色，`defaultThemeId` 一定要在清單內；確認 `DEFAULT_PARADIGM`、`DEFAULT_THEME` 指向保留的 id |
