@@ -1,23 +1,20 @@
 // src/styles/texture/material/form.scss
-// mat-form-field appearance="fill" 造型：全面大圓角、單行控制項膠囊化，底部保留 1px 底線當欄位邊界。
+// mat-form-field appearance="fill" 造型：上緣圓角、下緣直角（M3 filled 標準），底部 1px 底線當欄位邊界。
 //
 // 優先用 Angular Material 22 官方 token（--mat-form-field-filled-*）；
 // 只有官方 token 蓋不到的兩處才寫選擇器，各自標註原因。
 
 [data-paradigm='material'] {
   /* ── 1. 造型基準：填色欄位的圓角 ───────────────────────────────
-     --app-field-shape 是本檔內部變數，單一數值同時餵給「官方上緣 token」
-     與「下緣補丁」，確保四角永遠同步。 */
+     只圓上緣（官方 token 本來就只作用於上緣），下緣維持直角：底線是欄位的
+     可見邊界（ADR 0008「欄位邊界」），下緣圓角會把它裁成兩端尖的弧，看起來像陰影。
+     2026-09-27 設計決定改回 M3 filled 標準形狀。 */
   .mat-mdc-text-field-wrapper.mdc-text-field--filled {
     // 預設：單行控制項（input / select / date-range）→ 膠囊
     --app-field-shape: var(--mat-sys-corner-medium);
 
     // 官方 token：只作用於 border-top-left/right-radius
     --mat-form-field-filled-container-shape: var(--app-field-shape);
-
-    // 補丁：官方沒有下緣圓角 token，只能直接補這兩個 longhand
-    border-bottom-left-radius: var(--app-field-shape);
-    border-bottom-right-radius: var(--app-field-shape);
   }
 
   // 多行 textarea 用大圓角，膠囊會讓長文字區塊變形
@@ -30,7 +27,7 @@
                hover 加深成 on-surface。
      ::after  = focus 時加粗那條（2px）：維持 MDC 預設的主色。
      錯誤／停用走 MDC 自己的 error／disabled active-indicator token。
-     底線在膠囊圓角處會被 wrapper 的 overflow:hidden 裁掉，只留平直段，外形不變。 */
+     下緣是直角，底線從左到右完整一條。 */
   .mat-mdc-form-field {
     --mat-form-field-filled-active-indicator-height: 1px;
     --mat-form-field-filled-focus-active-indicator-height: 2px;

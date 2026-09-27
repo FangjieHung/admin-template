@@ -45,7 +45,7 @@
 
 - **卡片**：`.ui-card`，`--mat-sys-surface` 底、1px 淡框、8px 圓角、無陰影。卡片內要分區時用 `--mat-sys-surface-container-low` 的色塊，不要再畫一張有框的卡片。可點卡片 hover 改變底色（往 `-container-low` 走一階），不浮起。
 - **表格**：表頭列用 `--mat-sys-surface-container` 底色；資料列之間 1px 淡線；hover 列用 `--mat-sys-surface-container-low`。不加欄線。
-- **表單**：filled 欄位 8px 圓角、底色 `--mat-sys-surface-container-high`，底部 1px 底線（像信紙上的書寫線）當可見邊界，顏色 `--app-field-border`（對外側底色 ≥ 3:1）、hover 加深；聚焦時 MDC 的 2px 主色底線＋2px `--app-focus-ring` 外框（已實作）。相連欄位用 `.ui-field-group`，接縫用淡線。
+- **表單**：filled 欄位上緣 8px 圓角、下緣直角（底線才完整）、底色 `--mat-sys-surface-container-high`，底部 1px 底線（像信紙上的書寫線）當可見邊界，顏色 `--app-field-border`（對外側底色 ≥ 3:1）、hover 加深；聚焦時 MDC 的 2px 主色底線＋2px `--app-focus-ring` 外框（已實作）。相連欄位用 `.ui-field-group`，接縫用淡線。
 - **空狀態**：在卡片內放一塊 `--mat-sys-surface-container-low` 的色塊，裡面置中圖示＋一行標題＋一行說明＋按鈕。色塊本身就是視覺焦點，不另加框或插畫陰影。
 - **對話框**：8px 圓角、`--mat-sys-surface` 底、1px 淡框、無陰影；遮罩吃 `--app-scrim`（配色的 `inverse-surface` 45%）。對話框內的次要區塊用 `-container-low`。
 - **chip／徽章**：`.ui-chip--{tone}`，4px 圓角的小方籤（不是膠囊），顏色來自 `--app-{tone}-bg/fg`。

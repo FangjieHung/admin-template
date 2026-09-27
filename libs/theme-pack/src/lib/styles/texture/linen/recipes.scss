@@ -93,8 +93,7 @@
   .mat-mdc-text-field-wrapper.mdc-text-field--filled {
     --app-field-shape: var(--mat-sys-corner-medium);
     --mat-form-field-filled-container-shape: var(--app-field-shape);
-    border-bottom-left-radius: var(--app-field-shape);
-    border-bottom-right-radius: var(--app-field-shape);
+    // 下緣維持直角（M3 filled 標準）：底線才是完整一條，不會被圓角裁成弧。
   }
   // 欄位邊界：保留 MDC 的底線（像信紙上的書寫線）當可見邊界，顏色吃 --app-field-border；
   // hover 加深、focus 維持 MDC 的 2px 主色底線（外加下方 mat-focused 的焦點框）。

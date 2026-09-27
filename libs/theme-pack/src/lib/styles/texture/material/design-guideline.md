@@ -47,7 +47,7 @@ Google 風的親切工作台：大圓角、白色卡片輕輕浮在畫布上，�
 
 - **卡片**：用 `.ui-card`（白底、hairline 邊、22px 圓角、level1）。可點的加 `.ui-card--clickable`。重點數字卡用 `.ui-card--inverse`（無邊無影）。卡片內再分區用 16px 以上的間距，不再套一層卡片。
 - **表格**：放在 `.ui-card` 裡，表格本身透明無框；列之間只用 `--mat-sys-outline-variant` 細線。數字欄靠右對齊。
-- **表單**：用 Material filled 欄位（16px 圓角），底部保留 1px 底線當可見邊界（MDC active indicator，顏色 `--app-field-border`，對欄位外側底色 ≥ 3:1；圓角處被裁掉只留平直段）；hover 加深成 `--mat-sys-on-surface`，focus 是 MDC 的 2px 主色底線，錯誤是 error 色底線。相連欄位用 `.ui-field-group`。區塊標題用 `.ui-text-subtitle`。
+- **表單**：用 Material filled 欄位（上緣 16px 圓角、下緣直角，M3 filled 標準形狀），底部 1px 底線當可見邊界（MDC active indicator，顏色 `--app-field-border`，對欄位外側底色 ≥ 3:1；下緣直角讓底線完整一條）；hover 加深成 `--mat-sys-on-surface`，focus 是 MDC 的 2px 主色底線，錯誤是 error 色底線。相連欄位用 `.ui-field-group`。區塊標題用 `.ui-text-subtitle`。
 - **空狀態**：卡片內置中，一個大圖示（`--mat-sys-on-surface-variant`）、一行 `.ui-text-subtitle`、一行 `.ui-text-caption` 說明、一顆主要按鈕。不另加陰影或邊框。
 - **對話框**：28px 圓角、level4 陰影，底下有遮罩（`--app-scrim`）。標題用 `.ui-text-subtitle`，動作按鈕靠右。
 - **chip／徽章**：用 `.ui-chip` ＋ `.ui-chip--{tone}`，膠囊形（corner-full），底色與文字來自 `--app-{tone}-bg/fg`。
@@ -63,7 +63,7 @@ Google 風的親切工作台：大圓角、白色卡片輕輕浮在畫布上，�
 
 **Do**
 - 用陰影層級表達「這東西浮起來了」：hover、選單、對話框依序升高。
-- 保持大圓角的一致：卡片 22、欄位 16、對話框 28，同一畫面不混用小圓角。
+- 保持大圓角的一致：卡片 22、欄位上緣 16（下緣直角）、對話框 28，同一畫面不混用小圓角。
 - 膠囊形給導覽和徽章，讓可點與狀態一眼可辨。
 - 需要強調時用 `.ui-card--inverse` 的反白，而不是加粗陰影。
 
