@@ -1,6 +1,6 @@
 # ADR 0008：語意用途變數的三層覆寫（預設 → 質地/配色 → 組合）
 
-- 狀態：已決策；第一批（畫面不變）、第二批（會改變畫面）與第三批（欄位邊界）皆已實作（2026-09-27）
+- 狀態：已決策；第一批（畫面不變）、第二批（會改變畫面）、第三批（欄位邊界）與第四批（原生勾選框與狀態對比）皆已實作（2026-09-27）
 - 日期：2026-09-27
 
 ## 背景
@@ -80,3 +80,29 @@ ticket 09 定案 `TEXTURE_COMPATIBILITY` 後，使用者問「某個質地 × �
 5. `lint:theme`：在輸入欄位選擇器（`input`／`textarea`／`select`／`.mat-mdc-form-field`／`.mat-mdc-text-field-wrapper`／`.mdc-text-field`）底下，`border*`、`--mat-form-field-*-outline-color`、`*-active-indicator-color` 的 `var()` 只能是 `--app-field-border`、`--mat-sys-on-surface`（hover）、`--mat-sys-error`、`--app-disabled-*`、`--app-focus-ring`／`--mat-sys-primary`（focus）。採用完整版規則而不是只擋 `outline-variant`：對現有 theme-pack 與三個 app 的 scss 沒有誤擋（唯一命中的是 hover 的 on-surface，已列入允許），掃描範圍與既有規則相同（不含 `libs/ui`、`libs/booking-flow`，這兩處目前沒有自訂欄位邊框）。
 
 未涵蓋：原生 checkbox／radio（`libs/ui` data-table、派車可用車輛列表、booking-flow 保險方案）用 `accent-color` 的瀏覽器原生外觀，未套 `--app-field-border`；hover、focus、錯誤狀態不在對比掃描內，只以特寫截圖確認。對照圖只存在執行當時的 scratchpad（`batch3/compare.html`），未進 repo。
+
+## 原生勾選框與狀態對比（2026-09-27）
+
+背景：第三批留下兩個缺口。① 原生 `input[type=checkbox|radio]`（`libs/ui` data-table 的列選取與全選〔含半選〕、派車「可用車輛」列表的單選、booking-flow 保險方案）只有 `accent-color`，未勾選外框是瀏覽器寫死的灰，不跟配色走（Midnight 上是淺灰框、Candy 上是中性灰），也不吃任何 `--app-*` 狀態變數；app 內的 mat-checkbox／mat-radio（訂單各面板、order-form 保險表、booking 付款方式、合約簽署）則是 Material 預設的 on-surface-variant 外框。② 欄位的滑過、焦點、錯誤狀態只靠截圖確認，不在對比掃描內。
+
+決定：
+
+1. 新 partial `libs/theme-pack/src/lib/styles/_choice-controls.scss`，接在 admin／affiliate／booking 的 `styles.scss`（`component` 之後）。選擇器 `input:where([type='checkbox'], [type='radio']):not(:where(.mdc-checkbox__native-control, .mdc-radio__native-control))`，權重只有 0-0-1：元件 scss 可以就地蓋過，質地 recipe 用 `[data-paradigm='x']` 前綴即可加造型；排除 MDC 的透明原生 input（它是 Material 控制項的點擊熱區，改尺寸會縮小熱區）。
+2. `appearance: none` 重畫，但保留原生 `<input>`：Tab、Space、單選群組的方向鍵、表單值與螢幕閱讀器的角色／狀態都不變（實測見下）。顏色：未勾選外框 `--app-field-border`（與欄位邊界同一個變數）、底 `--mat-sys-surface`；勾選／半選底與外框 `--mat-sys-primary`，勾號（右下兩邊旋轉 45°）、半選橫線、單選圓點用 `--mat-sys-on-primary`（`::before` 以 `currentColor` 畫，不用 SVG data URI）；焦點 `outline: var(--app-focus-ring-width) solid var(--app-focus-ring)`；錯誤（`aria-invalid='true'` 或 `ng-invalid.ng-touched`）外框 `--mat-sys-error`；停用外框與勾選底 `--app-disabled-fg`、勾號 `--mat-sys-surface`、`cursor: not-allowed`。尺寸 `max(18px, 1.125rem)`、2px 外框、圓角 `min(4px, var(--mat-sys-corner-small))`（Grid／Editorial 的 2px 維持方角，其餘 4px），單選鈕 50%；點擊熱區由外層 `<label>` 提供，不縮小。
+3. 滑過用「外框改 `--mat-sys-on-surface`」，不用 `--app-state-hover` 光暈：與欄位滑過一致；18px 方塊外一圈 8% 疊色幾乎看不見，還會跟列的滑過底色疊在一起。控制項本身或包住它的 `<label>` 被滑過都算（data-table 選取格、可用車輛整列）。
+4. 質地風格化只加形狀／陰影、不碰顏色：Soft UI 未勾選時加 `--soft-inset-small`，Clay 未勾選時加 2px 的 `--clay-ambient`／`--clay-highlight` 內陰影（兩者的欄位內凹都太大，放不進 18px）；勾選後是主色實心。其餘質地（含 Frosted：18px 上看不出霧感）不加。
+5. `forced-colors: active` 下退回 `appearance: auto`、取消 `::before`，由系統畫原生控制項。
+6. mat-checkbox／mat-radio：同一檔案把 MDC 顏色 token 指向同一組變數（未勾選 `--app-field-border`、滑過／焦點 `--mat-sys-on-surface`、勾選 `--mat-sys-primary`、勾號 `--mat-sys-on-primary`、勾選框停用 `--app-disabled-fg`）。形狀維持 Material 原樣（MDC 單選鈕是主色外圈＋圓點、不填底）。
+7. 元件層：data-table 的勾選框拿掉寫死的 16px 尺寸、`accent-color` 與重複的焦點框規則；可用車輛單選拿掉尺寸與 `accent-color`，焦點框交給整列（既有的 `:has(.avl__radio:focus-visible)`），單選鈕自己 `outline: none` 避免雙框（決策 4 的實例覆寫）。
+8. 對比掃描新增 7 個 pair（UI 3:1），56 格全量，量法沿用「取真正構成邊界的那條線」、轉場凍結量終點、焦點一律真的送 Tab：
+   - `field_hover_border`：建單頁、訂單列表篩選列、優惠券對話框每個欄位逐一滑過，量邊界對外側底色。
+   - `field_focus_indicator`：建單頁第一個欄位、對話框 Tab 到下一欄；outline、MDC 主色底線（`::after`）與「和靜止時不同」的邊框／細框／outlined 外框中取對比最高者。另記錄它對靜止邊界的比值（不設門檻）。
+   - `field_error_border`：對話框必填欄位輸入後清空、Tab 離開。
+   - `check_unchecked_border`、`check_checked_fill`、`check_mark`、`check_focus_ring`：data-table 勾選框（未勾選、勾第一列後的勾選與表頭半選、Tab 到勾選框）與可用車輛單選（未勾選、選一台）。原生外觀（`appearance` 不是 `none`）的控制項略過。
+
+   結果：56 格 0 不合格，**不需要調整任何變數值**。43 個相容組合的最低值：滑過 3.17（Cool Grey；Grid 等滑過時邊界不變的質地）、焦點 4.70（Midnight）、錯誤 5.06（Cool Grey）、未勾選外框 3.17（Cool Grey）、勾選底 4.70（Midnight）、記號 4.94（Verdant 單選圓點）、勾選框焦點框 4.70（Midnight）。焦點指示對靜止邊界的比值 1.00～3.16：主色與 `--app-field-border` 常常亮度相近（例如 Midnight 1.01），焦點的可辨識度主要靠色相與粗細（2px 底線、2px outline）而不是亮度差——門檻只看對外側底色，這項只記錄。
+9. `lint:theme`：勾選框／單選鈕選擇器（`[type=checkbox|radio]`、`.mat-mdc-checkbox`、`.mat-mdc-radio-button`、`.mdc-checkbox`、`.mdc-radio`）底下的顏色宣告不得寫死顏色（色彩函式、具名色、hex、變數 fallback 裡的寫死色都擋；`currentColor`、`transparent`、`forced-colors` 系統色允許）；`--mat-checkbox-*color`／`--mat-radio-*color` 只能指向 `--app-*`／`--mat-sys-*`；`accent-color` 只能用變數。宣告改成遇到 `;`／`}` 才判斷，單行規則也掃得到。預設掃描範圍納入 `libs/ui`、`libs/booking-flow`、`libs/contract-signing`，冒出的 10 處既有違規全部改掉：range picker 手機版遮罩 `rgb(0 0 0 / 40%)` → `--app-scrim`、booking 方案照片標籤 `rgba(0,0,0,.6)`／白字 → inverse-surface 80%／inverse-on-surface、結帳頁與選車頁 `var(--x, <寫死色>)` 的 fallback 拿掉（token 必定存在）、結帳頁手機版底部摘要的 `z-index: 20` → 新增層 1 變數 `--app-z-sticky: 20`（值不變）。
+
+鍵盤實測（playwright，看 `checked` 值）：data-table Tab 走得到全部 11 個勾選框、Space 勾選／取消（網址不變，列的鍵盤導覽沒有被觸發）、表頭因此變半選、表頭 Space 全選；可用車輛與 booking 保險方案 Tab 進入群組、方向鍵移動並選取。
+
+對照圖只存在執行當時的 scratchpad（`batch4/compare.html`），未進 repo。

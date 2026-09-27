@@ -12,7 +12,7 @@
 
 | 項目 | Token | 目標值 | 用在 | 現況 → 目標 |
 | --- | --- | --- | --- | --- |
-| 圓角 small | `--mat-sys-corner-small` | 4px | 狀態徽章、導覽膠囊、checkbox | — |
+| 圓角 small | `--mat-sys-corner-small` | 4px | 狀態徽章、導覽膠囊、checkbox（原生勾選框取 `min(4px, corner-small)`，見 `_choice-controls.scss`） | — |
 | 圓角 medium | `--mat-sys-corner-medium` | 8px | 輸入框、按鈕、snackbar | — |
 | 圓角 large | `--mat-sys-corner-large` | 8px | 卡片、面板、選單 | 已改為 8px |
 | 圓角 extra-large | `--mat-sys-corner-extra-large` | 8px | 對話框 | 已改為 8px |

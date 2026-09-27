@@ -12,7 +12,7 @@ Google 風的親切工作台：大圓角、白色卡片輕輕浮在畫布上，�
 
 | 項目 | Token | 目標值 | 用在 | 現況 → 目標 |
 | --- | --- | --- | --- | --- |
-| 圓角 small | `--mat-sys-corner-small` | 10px | 小按鈕、checkbox 容器、snackbar 內元件 | — |
+| 圓角 small | `--mat-sys-corner-small` | 10px | 小按鈕、mat-checkbox 容器、snackbar 內元件（原生勾選框取 `min(4px, corner-small)`＝4px） | — |
 | 圓角 medium | `--mat-sys-corner-medium` | 16px | 輸入框、按鈕、snackbar | — |
 | 圓角 large | `--mat-sys-corner-large` | 22px | 卡片、面板、選單 | — |
 | 圓角 extra-large | `--mat-sys-corner-extra-large` | 28px | 對話框、底部面板 | — |

@@ -12,7 +12,7 @@
 
 | 項目 | Token | 目標值 | 用在 | 現況 → 目標 |
 | --- | --- | --- | --- | --- |
-| 圓角 small | `--mat-sys-corner-small` | 2px | chip／徽章、checkbox | 已於 ticket 07 實作 |
+| 圓角 small | `--mat-sys-corner-small` | 2px | chip／徽章、checkbox（原生勾選框取 `min(4px, corner-small)`，見 `_choice-controls.scss`） | 已於 ticket 07 實作 |
 | 圓角 medium | `--mat-sys-corner-medium` | 2px | 按鈕、輸入框、導覽項目、snackbar | 已於 ticket 07 實作 |
 | 圓角 large | `--mat-sys-corner-large` | 0 | 卡片、面板、選單、日期選擇器、側欄使用者卡 | 已於 ticket 07 實作 |
 | 圓角 extra-large | `--mat-sys-corner-extra-large` | 0 | 對話框 | 已於 ticket 07 實作 |

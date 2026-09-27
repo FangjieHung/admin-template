@@ -51,6 +51,7 @@
 - **卡片**：`.ui-card`，`--mat-sys-surface` 78% 半透明＋背景模糊、無框、32px 圓角、`--clay-shadow-card`。可點的加 `.ui-card--clickable`（hover 上移 8px、陰影加深）。重點數字卡用 `.ui-card--inverse`（`--mat-sys-inverse-surface` 底）。卡片內分區靠留白與粗體小標，不再疊卡片。
 - **表格**：放在 `.ui-card` 裡，表格本身透明。列高寬鬆（目標 56px），不加欄線。
 - **表單**：Material filled 欄位，20px 圓角、`--mat-sys-surface-container-high` 底、全內凹（像在黏土上壓出的凹槽）、無底線，凹槽邊緣加 1px inset 細框 `--app-field-border`（按壓陰影本身對底色不到 3:1；錯誤時換 error 色）。相連欄位用 `.ui-field-group`。
+- **勾選框／單選鈕**：原生控制項由全域 `_choice-controls.scss` 重畫（顏色同上述變數）；本質地只在未勾選時加 2px 的按壓小凹槽（`--clay-ambient`／`--clay-highlight` 兩色內陰影，`--clay-shadow-pressed` 的 8px 放不進 18px 方塊），勾選後是主色實心。
 - **空狀態**：卡片內置中：一個大圖示、一行粗體 `.ui-text-subtitle`、一行 `.ui-text-caption`、一顆主色漸層的大按鈕。背景光暈已經提供氛圍，不另加插畫或框。
 - **對話框**：32px 圓角、無框、`--clay-shadow-deep`（最厚的一層）。
 - **chip／徽章**：`.ui-chip` ＋ `.ui-chip--{tone}`，膠囊形（corner-full）、粗體 700、帶 small 陰影（小顆的黏土豆），顏色來自 `--app-{tone}-bg/fg`。

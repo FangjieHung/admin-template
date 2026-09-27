@@ -64,3 +64,13 @@
 4. 文件：CONTRACT.md 用途變數表、ADR 0008「欄位邊界」一節、7 份質地準則的表單段落。
 
 驗收：改前（HEAD eb1243f）／改後 43 個相容組合 × 3 畫面對照圖、7 張質地特寫、focus 與錯誤狀態特寫；對比掃描 43 個相容組合欄位邊界最低 3.17（56 格全過），其他 pair 0 不合格；theme-pack／admin／affiliate／booking 測試、admin build、`lint:theme`、`vitest run scripts` 通過。
+
+## 第四批：原生勾選框與狀態對比（已完成，commit 1f34ea3、e063df5、58cf622 與本文件所在的 docs commit）
+
+1. 新 partial `libs/theme-pack/src/lib/styles/_choice-controls.scss`（接進 admin／affiliate／booking）：原生 `input[type=checkbox|radio]` 以 `appearance: none` 重畫，保留原生 input；未勾選 `--app-field-border` 外框＋`--mat-sys-surface` 底、勾選／半選 `--mat-sys-primary` 底＋`--mat-sys-on-primary` 記號、滑過 `--mat-sys-on-surface`、焦點 `--app-focus-ring`、錯誤 `--mat-sys-error`、停用 `--app-disabled-fg`；18px、圓角 `min(4px, corner-small)`；`forced-colors` 退回原生。mat-checkbox／mat-radio 的 MDC 顏色 token 指向同一組變數。Soft UI／Clay 未勾選時加小內凹，其餘質地不加。
+2. 元件：data-table、可用車輛單選拿掉寫死尺寸與 `accent-color`；可用車輛的焦點框留在整列。
+3. `contrast:theme` 新增 `field_hover_border`、`field_focus_indicator`、`field_error_border`、`check_unchecked_border`、`check_checked_fill`、`check_mark`、`check_focus_ring`（皆 3:1）。
+4. `lint:theme` 擋勾選框／單選鈕寫死顏色、MDC 勾選 token 與 `accent-color` 非變數；預設掃描納入 `libs/ui`、`libs/booking-flow`、`libs/contract-signing`，10 處既有違規改成 token（新增 `--app-z-sticky: 20`）。
+5. 文件：CONTRACT.md 用途變數表、ADR 0008「原生勾選框與狀態對比」一節、質地準則（圓角 small 列、Soft UI／Clay 的勾選框段落）。
+
+驗收：改前（HEAD 34b7fed）／改後 43 個相容組合 × 2 畫面（data-table、可用車輛）＋ booking 保險方案對照圖、7 質地的勾選框／單選鈕狀態特寫、欄位滑過／焦點／錯誤特寫；對比掃描 56 格 0 不合格（新 pair 在相容組合最低 3.17，不需調整變數）；鍵盤實測（Tab／Space／方向鍵）通過；theme-pack／admin／affiliate／booking 測試、admin／booking build、`lint:theme`、`vitest run scripts` 通過。
