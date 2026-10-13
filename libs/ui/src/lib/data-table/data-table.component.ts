@@ -23,18 +23,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DataTableCellContext, DataTableCellDirective } from './data-table-cell.directive';
 import { DataTableColumnChooserComponent } from './data-table-column-chooser.component';
+import { DataTablePagerComponent } from './data-table-pager.component';
 import { exportRows, exportTableElement } from './data-table-export';
 import {
   cellValue,
   clampPage,
-  formatLabel,
   frozenColumnKey,
   isSortableColumn,
   nextSort,
   normalizeColumnPrefs,
   orderColumns,
-  pageCount,
-  pageRange,
   pageSlice,
   sortRows,
 } from './data-table-query';
@@ -60,7 +58,13 @@ const COMPACT_QUERY = '(max-width: 640px)';
 
 @Component({
   selector: 'lib-data-table',
-  imports: [NgTemplateOutlet, MatButtonModule, MatTooltipModule, DataTableColumnChooserComponent],
+  imports: [
+    NgTemplateOutlet,
+    MatButtonModule,
+    MatTooltipModule,
+    DataTableColumnChooserComponent,
+    DataTablePagerComponent,
+  ],
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -242,8 +246,6 @@ export class DataTableComponent<T> {
 
   protected readonly currentPage = computed(() => clampPage(this.page(), this.total(), this.pageSize()));
 
-  protected readonly pageTotal = computed(() => pageCount(this.total(), this.pageSize()));
-
   /** 卡片版用「載入更多」：已載入幾頁。排序、每頁筆數或資料換了就回到第一頁。 */
   private readonly loadedPages = linkedSignal({
     source: () => [this.sort(), this.pageSize(), this.rows()] as const,
@@ -278,25 +280,6 @@ export class DataTableComponent<T> {
     }
     return chooser as DataTableColumnChooserLabels;
   });
-
-  protected readonly rangeText = computed(() => {
-    const { from, to } = pageRange(this.currentPage(), this.pageSize(), this.total());
-    return formatLabel(this.pagingLabels().range, { from, to, total: this.total() });
-  });
-
-  protected readonly pageOfText = computed(() =>
-    formatLabel(this.pagingLabels().pageOf, { page: this.currentPage() + 1, pages: this.pageTotal() }),
-  );
-
-  protected readonly shownText = computed(() =>
-    formatLabel(this.pagingLabels().shownOf, { shown: this.displayRows().length, total: this.total() }),
-  );
-
-  protected readonly canLoadMore = computed(() => this.displayRows().length < this.total());
-
-  protected pageSizeText(size: number): string {
-    return formatLabel(this.pagingLabels().pageSizeOption, { size });
-  }
 
   protected readonly isEmpty = computed(() => !this.isCustom() && this.rows().length === 0);
 
@@ -411,9 +394,7 @@ export class DataTableComponent<T> {
     this.page.set(clampPage(page, this.total(), this.pageSize()));
   }
 
-  protected onPageSizeChange(event: Event): void {
-    const size = Number((event.target as HTMLSelectElement).value);
-    if (!Number.isFinite(size) || size <= 0) return;
+  protected onPageSizeChange(size: number): void {
     this.pageSize.set(size);
     this.page.set(0);
   }

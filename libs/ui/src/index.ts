@@ -17,3 +17,4 @@ export * from './lib/saved-views/saved-view.types';
 export * from './lib/saved-views/local-storage-saved-view.repository';
 export * from './lib/saved-views/list-view-controller';
 export * from './lib/saved-views/saved-views.component';
+export * from './lib/data-table/data-table-pager.component';

@@ -61,7 +61,7 @@ export class DataTableColumnChooserComponent<T = unknown> {
 
   protected onAttach(): void {
     afterNextRender(
-      () => this.panel()?.nativeElement.querySelector<HTMLElement>('input, button')?.focus(),
+      () => this.panel()?.nativeElement.querySelector<HTMLElement>('input:not(:disabled)')?.focus(),
       { injector: this.injector },
     );
   }

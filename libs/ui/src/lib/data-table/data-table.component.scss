@@ -38,7 +38,7 @@
 //   --dt-header-bg           表頭列底色                       預設 transparent
 //   --dt-row-hover-bg        可點列滑過／按下時的底色         預設 surface-container-high
 //   --dt-frozen-bg           固定欄在橫向捲動時的底色         預設 surface（= 多數質地的卡片底色）
-//   --dt-frozen-edge         固定欄右緣的分界（box-shadow）    預設 inset -1px 0 0 outline-variant
+//   --dt-frozen-edge         固定欄右緣的分界（box-shadow）    預設 1px 0 0 0 outline-variant（畫在固定格右緣的 1px 偽元素上）
 // 手機卡片版的外框仍是 outline-variant 四邊，只有下緣吃 --dt-row-border-color（照舊：以前 !important 的
 // border-bottom-color 也蓋到了卡片下緣）。
 .dt-table {
@@ -108,7 +108,8 @@
   cursor: pointer;
 
   &:hover {
-    background: var(--dt-row-hover-bg, var(--mat-sys-surface-container-high));
+    --dt-row-tint: var(--dt-row-hover-bg, var(--mat-sys-surface-container-high));
+    background: var(--dt-row-tint);
   }
 
   // 按下：在 hover 底色上再疊一層語意「按下」狀態層（ADR 0008 第二批）。
@@ -184,137 +185,50 @@
   z-index: 1;
 }
 
+// 列本身有底色（滑過、提醒列）時，那一層透過 --dt-row-tint 疊在固定格的底色上。
 .dt-wrap--scrolled .dt-table {
   .dt-frozen,
   .dt-frozen-select {
-    background: var(--dt-frozen-bg, var(--mat-sys-surface));
+    background:
+      linear-gradient(var(--dt-row-tint, transparent), var(--dt-row-tint, transparent)),
+      var(--dt-frozen-bg, var(--mat-sys-surface));
   }
 
-  .dt-frozen {
-    box-shadow: var(--dt-frozen-edge, inset -1px 0 0 var(--mat-sys-outline-variant));
+  // 右緣分界：Chrome 不畫 border-collapse 表格儲存格自己的 box-shadow，改畫在貼右緣的 1px 偽元素上。
+  .dt-frozen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1px;
+    box-shadow: var(--dt-frozen-edge, 1px 0 0 0 var(--mat-sys-outline-variant));
+    pointer-events: none;
   }
 
-  .dt-row--clickable:hover {
-    .dt-frozen,
-    .dt-frozen-select {
-      background: var(--dt-row-hover-bg, var(--mat-sys-surface-container-high));
-    }
+  // 表格是 border-collapse：勾選欄與固定欄之間的欄線（Grid 的 --dt-col-divider）由兩格各分一半、
+  // 不屬於任何一格的底色，sticky 之後那 1px 會透出捲到底下的文字。用一條 3px、與固定格同底色的細條蓋住接縫。
+  .dt-frozen-select + .dt-frozen::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -2px;
+    width: 3px;
+    background: inherit; // 跟著固定格本身（含滑過、提醒列的底色）
+    pointer-events: none;
   }
-
-  .dt-row--danger {
-    .dt-frozen,
-    .dt-frozen-select {
-      background:
-        linear-gradient(var(--app-danger-bg), var(--app-danger-bg)),
-        var(--dt-frozen-bg, var(--mat-sys-surface));
-    }
-  }
-
-  .dt-row--warning {
-    .dt-frozen,
-    .dt-frozen-select {
-      background:
-        linear-gradient(var(--app-warning-bg), var(--app-warning-bg)),
-        var(--dt-frozen-bg, var(--mat-sys-surface));
-    }
-  }
-}
-
-// ---- 分頁（[pageable]）----
-.dt-pager {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.5rem 1rem;
-  padding: 0.75rem 1rem;
-  border-top: 1px solid var(--dt-row-border-color, var(--mat-sys-outline-variant));
-  font-size: 0.875rem;
-  color: var(--mat-sys-on-surface-variant);
-}
-
-.dt-pager--more {
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.dt-pager__size {
-  position: relative;
-  margin-right: auto;
-}
-
-.dt-pager__select {
-  min-height: 2.75rem;
-  padding: 0 0.5rem;
-  border: 1px solid var(--app-field-border);
-  border-radius: var(--mat-sys-corner-small);
-  background: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: inherit;
-  cursor: pointer;
-
-  &:focus-visible {
-    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
-    outline-offset: var(--app-focus-ring-offset);
-  }
-}
-
-.dt-pager__buttons {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.125rem;
-}
-
-.dt-pager__page {
-  padding: 0 0.5rem;
-  white-space: nowrap;
-}
-
-.dt-pager__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--mat-sys-on-surface-variant);
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background: var(--app-state-hover);
-  }
-
-  &:focus-visible {
-    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
-    outline-offset: -2px;
-  }
-
-  &:disabled {
-    color: var(--app-disabled-fg);
-    cursor: default;
-  }
-}
-
-.dt-visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  white-space: nowrap;
-  clip-path: inset(50%);
 }
 
 // 保養提醒的行級底色，沿用 .ui-chip--danger / .ui-chip--warning 相同的 design token
 .dt-row--danger {
-  background: var(--app-danger-bg);
+  --dt-row-tint: var(--app-danger-bg);
+  background: var(--dt-row-tint);
 }
 
 .dt-row--warning {
-  background: var(--app-warning-bg);
+  --dt-row-tint: var(--app-warning-bg);
+  background: var(--dt-row-tint);
 }
 
 .dt-align-start {
@@ -380,12 +294,21 @@
       clip-path: inset(50%);
     }
 
-    // 卡片版沒有欄可固定。
+    // 卡片版沒有欄可固定；::before 照常給 data-label 用（取消上面固定欄分界的定位與陰影）。
     .dt-table .dt-frozen,
     .dt-table .dt-frozen-select {
       position: static;
       background: none;
+    }
+
+    .dt-table td.dt-frozen::before {
+      position: static;
+      width: auto;
       box-shadow: none;
+    }
+
+    .dt-table .dt-frozen::after {
+      content: none;
     }
 
     // 每列是一張卡片。這裡刻意不設 background：.dt-row--danger / --warning

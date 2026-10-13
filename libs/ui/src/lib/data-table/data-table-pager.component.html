@@ -1,0 +1,65 @@
+@if (loadMoreMode()) {
+  <div class="dt-pager dt-pager--more">
+    <span class="dt-pager__range ui-text-numeric" aria-live="polite">{{ shownText() }}</span>
+    @if (canLoadMore()) {
+      <button type="button" matButton="tonal" class="dt-load-more" (click)="loadMore.emit()">
+        {{ labels().loadMore }}
+      </button>
+    }
+  </div>
+} @else {
+  <nav class="dt-pager" [attr.aria-label]="labels().nav">
+    <label class="dt-pager__size">
+      <span class="dt-visually-hidden">{{ labels().pageSizeLabel }}</span>
+      <select class="dt-pager__select" (change)="onSizeChange($event)">
+        @for (size of pageSizeOptions(); track size) {
+          <option [value]="size" [selected]="size === pageSize()">{{ pageSizeText(size) }}</option>
+        }
+      </select>
+    </label>
+    <span class="dt-pager__range ui-text-numeric" aria-live="polite">{{ rangeText() }}</span>
+    <span class="dt-pager__buttons">
+      <button
+        type="button"
+        class="dt-pager__btn"
+        [disabled]="page() === 0"
+        [attr.aria-label]="labels().firstPage"
+        [matTooltip]="labels().firstPage"
+        (click)="go(0)"
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M17 18l-6-6 6-6M7 6v12" fill="none" stroke="currentColor" stroke-width="2" /></svg>
+      </button>
+      <button
+        type="button"
+        class="dt-pager__btn"
+        [disabled]="page() === 0"
+        [attr.aria-label]="labels().prevPage"
+        [matTooltip]="labels().prevPage"
+        (click)="go(page() - 1)"
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" /></svg>
+      </button>
+      <span class="dt-pager__page ui-text-numeric">{{ pageOfText() }}</span>
+      <button
+        type="button"
+        class="dt-pager__btn"
+        [disabled]="page() >= pageTotal() - 1"
+        [attr.aria-label]="labels().nextPage"
+        [matTooltip]="labels().nextPage"
+        (click)="go(page() + 1)"
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" stroke-width="2" /></svg>
+      </button>
+      <button
+        type="button"
+        class="dt-pager__btn"
+        [disabled]="page() >= pageTotal() - 1"
+        [attr.aria-label]="labels().lastPage"
+        [matTooltip]="labels().lastPage"
+        (click)="go(pageTotal() - 1)"
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M7 6l6 6-6 6M17 6v12" fill="none" stroke="currentColor" stroke-width="2" /></svg>
+      </button>
+    </span>
+  </nav>
+}
