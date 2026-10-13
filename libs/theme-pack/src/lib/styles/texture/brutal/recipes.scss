@@ -1,0 +1,511 @@
+// Brutal 新粗野：粗黑框、飽和色塊、刻意不對稱，像海報與貼紙。層次只靠色塊（ADR 0014）：
+// 畫布（background）→ 卡片（surface）→ 浮起的面板：選單、下拉、日期選擇器、展開中的面板（secondary-container）→
+// 對話框（primary-container），每塊都用 2–3px 墨線（on-surface）框起來，右下一道墨色硬影（貼紙的厚度）。
+// 滑過：往左上浮 2px、影子變長；按下：影子收起、往右下壓進去。減少動態時不位移，只換影子。
+// 墨線、色塊、影子一律取自 _tokens.scss 的 --brutal-*（都由配色的語意 token 調出）；轉場只用 --app-motion-fast。
+:root[data-paradigm='brutal'] {
+  body {
+    background: var(--brutal-canvas);
+  }
+
+  // ---- 殼層：畫布是素色色塊，沒有紋理；側欄是一整塊殼層色，右緣一條粗墨線 ----
+  .app-shell {
+    background: var(--brutal-canvas);
+  }
+  .sidenav-container,
+  .content-area {
+    background: transparent;
+  }
+  .app-sidenav {
+    background: var(--app-shell-bg);
+    color: var(--app-shell-on);
+    border-right: var(--brutal-line-thick);
+    box-shadow: none;
+  }
+  .brand-mark,
+  .avatar {
+    border-radius: 0;
+    box-shadow: 0 0 0 2px var(--app-shell-on);
+  }
+  // 目前所在的選單項目：一塊主色容器色塊＋粗體，右下一道殼層文字色的硬影（深色側欄上是白影、淺色側欄上是墨影）。
+  :is(.nav-link, .nav-sublink, .nav-flyout-item) {
+    border-radius: 0;
+  }
+  :is(.nav-link, .nav-sublink, .nav-flyout-item).active {
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+    font-weight: 700;
+    box-shadow: 3px 3px 0 0 var(--app-shell-on);
+    transform: none;
+  }
+  .nav-link.active .nav-icon {
+    color: inherit;
+  }
+  .nav-group-trigger {
+    border-radius: 0;
+  }
+  .nav-flyout {
+    border: var(--brutal-line-thick);
+    border-radius: 0;
+    box-shadow: var(--mat-sys-level3);
+  }
+  .theme-pill {
+    border-radius: 0;
+    border: var(--brutal-line);
+    box-shadow: var(--brutal-shadow-sm);
+    font-family: var(--font-body);
+    font-weight: 700;
+  }
+
+  // ---- 卡片：白色色塊＋3px 墨框＋5px 墨影。可點卡片滑過時浮起、影子變長；按下時壓平 ----
+  .ui-card,
+  .stat-card {
+    background: var(--brutal-card);
+    color: var(--mat-sys-on-surface);
+    border: var(--brutal-line-thick);
+    border-radius: 0;
+    box-shadow: var(--brutal-shadow);
+  }
+  .ui-card--inverse {
+    // 反轉卡：一整塊墨色，影子換成主色容器色（黑底貼紙上的彩色厚度），刻意和其他卡片不一樣。
+    background: var(--mat-sys-inverse-surface);
+    color: var(--mat-sys-inverse-on-surface);
+    border: var(--brutal-line-thick);
+    box-shadow: 5px 5px 0 0 var(--mat-sys-primary-container);
+  }
+  .ui-card-header {
+    border-bottom: var(--brutal-line);
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+  }
+  .ui-card--inverse .ui-card-header {
+    border-bottom-color: var(--mat-sys-inverse-on-surface);
+  }
+  .ui-card--clickable {
+    cursor: pointer;
+    transition:
+      transform var(--app-motion-fast) var(--app-ease-standard),
+      box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .ui-card--clickable:hover,
+  .stat-card:hover {
+    transform: var(--brutal-lift);
+    box-shadow: var(--brutal-shadow-hover);
+  }
+  .ui-card--clickable:active {
+    transform: var(--brutal-press);
+    box-shadow: var(--brutal-shadow-pressed);
+  }
+
+  // ---- 導覽膠囊、卡片分頁標籤：方塊標籤，目前項目是主色實心塊＋墨影 ----
+  .ui-nav-pill {
+    padding: 8px 14px;
+    border-radius: 0;
+    border: var(--brutal-line);
+    font-size: 14px;
+    white-space: nowrap;
+    background: var(--brutal-card);
+    color: var(--mat-sys-on-surface);
+    font-weight: 700;
+    transition:
+      transform var(--app-motion-fast) var(--app-ease-standard),
+      box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .ui-nav-pill:hover {
+    background: var(--brutal-raised);
+    color: var(--mat-sys-on-secondary-container);
+  }
+  .ui-nav-pill.is-active {
+    background: var(--mat-sys-primary);
+    color: var(--mat-sys-on-primary);
+    box-shadow: var(--brutal-shadow-sm);
+  }
+  .ui-card-titleNav__item.is-active {
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+    box-shadow: inset 0 0 0 2px var(--brutal-ink);
+  }
+  .ui-nav-pill:active {
+    transform: var(--brutal-press-sm);
+    box-shadow: var(--brutal-shadow-pressed);
+  }
+
+  // 鍵盤焦點：3px 主色實線（--app-focus-ring），離 2px。與 Material 質地涵蓋同一批元素。
+  :is(
+    .theme-pill,
+    .ui-nav-pill,
+    .ui-card-titleNav__item,
+    .mat-mdc-button-base,
+    .ui-card--clickable,
+    .nav-link,
+    .nav-sublink,
+    .nav-group-trigger,
+    .nav-flyout-item
+  ):focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+
+  // ---- 按鈕：方塊＋2px 墨框＋3px 墨影。實心主色、浮起（主色容器）、tonal（副色容器）、外框（白）都是同一種貼紙 ----
+  .mat-mdc-button-base {
+    --mat-button-filled-container-shape: 0;
+    --mat-button-outlined-container-shape: 0;
+    --mat-button-protected-container-shape: 0;
+    --mat-button-text-container-shape: 0;
+    --mat-button-tonal-container-shape: 0;
+    --mat-button-outlined-outline-color: var(--brutal-ink);
+    --mat-button-outlined-outline-width: 2px;
+    --mat-button-protected-container-color: var(--mat-sys-primary-container);
+    --mat-button-protected-label-text-color: var(--mat-sys-on-primary-container);
+    --mat-button-text-label-text-weight: 700;
+  }
+  .mat-mdc-icon-button {
+    --mat-icon-button-container-shape: 0;
+  }
+  .mat-mdc-outlined-button:not(:disabled, .mat-mdc-button-disabled) {
+    background: var(--brutal-card);
+  }
+  // 墨框畫成 inset 的 box-shadow（不佔版面、按鈕高度不變）；外框按鈕的框由 Material 自己畫（上面的 outline token）。
+  :is(.mat-mdc-unelevated-button, .mat-mdc-raised-button, .mat-tonal-button):not(
+    :disabled,
+    .mat-mdc-button-disabled
+  ) {
+    box-shadow:
+      inset 0 0 0 2px var(--brutal-ink),
+      var(--brutal-shadow-sm);
+  }
+  .mat-mdc-outlined-button:not(:disabled, .mat-mdc-button-disabled) {
+    box-shadow: var(--brutal-shadow-sm);
+  }
+  :is(
+    .mat-mdc-unelevated-button,
+    .mat-mdc-raised-button,
+    .mat-tonal-button,
+    .mat-mdc-outlined-button
+  ):not(:disabled, .mat-mdc-button-disabled) {
+    transition:
+      transform var(--app-motion-fast) var(--app-ease-standard),
+      box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  :is(.mat-mdc-unelevated-button, .mat-mdc-raised-button, .mat-tonal-button):not(
+      :disabled,
+      .mat-mdc-button-disabled
+    ):hover {
+    transform: var(--brutal-lift);
+    box-shadow:
+      inset 0 0 0 2px var(--brutal-ink),
+      var(--brutal-shadow-sm-hover);
+  }
+  .mat-mdc-outlined-button:not(:disabled, .mat-mdc-button-disabled):hover {
+    transform: var(--brutal-lift);
+    box-shadow: var(--brutal-shadow-sm-hover);
+  }
+  :is(.mat-mdc-unelevated-button, .mat-mdc-raised-button, .mat-tonal-button):not(
+      :disabled,
+      .mat-mdc-button-disabled
+    ):active {
+    transform: var(--brutal-press-sm);
+    box-shadow:
+      inset 0 0 0 2px var(--brutal-ink),
+      var(--brutal-shadow-pressed);
+  }
+  .mat-mdc-outlined-button:not(:disabled, .mat-mdc-button-disabled):active {
+    transform: var(--brutal-press-sm);
+    box-shadow: var(--brutal-shadow-pressed);
+  }
+  // 文字按鈕：沒有框，滑過時一條 2px 墨色底線（海報上的手寫劃線）。
+  .mat-mdc-button:not(:disabled, .mat-mdc-button-disabled):hover {
+    text-decoration: underline 2px;
+    text-underline-offset: 4px;
+  }
+  .mat-mdc-fab-base {
+    border: var(--brutal-line);
+  }
+  // Material 卡片（mat-card）：外框卡片 3px 墨框；浮起卡片吃 level1 的墨影。
+  .mat-mdc-card {
+    --mat-card-outlined-outline-color: var(--brutal-ink);
+    --mat-card-outlined-outline-width: 3px;
+  }
+  // Material 的篩選 chip：跟狀態徽章一樣是膠囊（全站唯一的圓角），2px 墨框、粗體；選中的是副色容器色塊。
+  .mat-mdc-chip {
+    --mat-chip-container-shape: 999px;
+    --mat-chip-outline-width: 2px;
+    --mat-chip-outline-color: var(--brutal-ink);
+    --mat-chip-flat-selected-outline-width: 2px;
+    --mat-chip-label-text-weight: 700;
+  }
+
+  // ---- 欄位：白色的填寫格＋2px 墨框；滑過多一道墨影，聚焦時框換主色、右下一道主色硬影 ----
+  // 欄位邊界在這個質地是墨線（on-surface）：就地把 --app-field-border 覆寫在 Material 欄位與勾選控制項本身
+  // （CONTRACT.md「實例覆寫」，不動配色層的值）。墨色對每一塊色塊（含對話框的主色容器、表頭色塊）都遠超過 3:1，
+  // 配色層調出來的 --app-field-border 是為白底與淡底算的，疊在飽和色塊上會掉到 3:1 以下（ADR 0014）。
+  // 錯誤／停用時 component.scss 在更內層的 wrapper 再覆寫一次，照常換成 error／停用色。
+  .mat-mdc-form-field,
+  .mat-mdc-checkbox,
+  .mat-mdc-radio-button,
+  input:where([type='checkbox'], [type='radio']) {
+    --app-field-border: var(--brutal-ink);
+  }
+  .mat-mdc-form-field {
+    --mat-form-field-filled-container-color: var(--mat-sys-surface-container-lowest);
+    --mat-form-field-filled-active-indicator-height: 0;
+    --mat-form-field-filled-focus-active-indicator-height: 0;
+    --mat-form-field-outlined-container-shape: 0;
+    --mat-form-field-outlined-outline-width: 2px;
+    --mat-form-field-outlined-focus-outline-width: 3px;
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    --app-field-shape: 0;
+    --mat-form-field-filled-container-shape: var(--app-field-shape);
+    border: 2px solid var(--app-field-border);
+    border-radius: 0;
+    transition:
+      border-color var(--app-motion-fast) var(--app-ease-standard),
+      box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .mat-mdc-text-field-wrapper:not(.mdc-text-field--disabled, .mdc-text-field--focused):hover {
+    box-shadow: var(--brutal-shadow-sm);
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--filled.mdc-text-field--focused {
+    border-color: var(--mat-sys-primary);
+    box-shadow: 4px 4px 0 0 var(--mat-sys-primary);
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--outlined.mdc-text-field--focused {
+    box-shadow: 4px 4px 0 0 var(--mat-sys-primary);
+  }
+  .mat-mdc-form-field-focus-overlay {
+    border-radius: inherit;
+  }
+  // 欄位標籤：粗體（海報上的欄位標示）。
+  .mat-mdc-form-field .mdc-floating-label {
+    font-weight: 700;
+  }
+  // 數字輸入（金額、數量、天數）：等寬字對齊。
+  input[type='number'].mat-mdc-input-element {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .ui-field-group {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+  }
+  .ui-field-group > *:not(:first-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    border-left: 0;
+  }
+  .ui-field-group > *:not(:first-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--app-field-border);
+    z-index: 1;
+  }
+
+  // 原生勾選框／單選鈕：勾選後右下多一道墨色硬影（顏色仍由 _choice-controls.scss 決定）。
+  input:where([type='checkbox'], [type='radio']):not(
+      :where(.mdc-checkbox__native-control, .mdc-radio__native-control)
+    ):is(:checked, [type='checkbox']:indeterminate):not(:disabled) {
+    box-shadow: 2px 2px 0 0 var(--mat-sys-on-surface);
+  }
+  // 開關：方形軌道＋方形把手，軌道 2px 墨框。
+  .mat-mdc-slide-toggle {
+    --mat-slide-toggle-track-shape: 0;
+    --mat-slide-toggle-handle-shape: 0;
+    --mat-slide-toggle-track-outline-width: 2px;
+    --mat-slide-toggle-track-outline-color: var(--brutal-ink);
+    --mat-slide-toggle-selected-track-outline-width: 2px;
+    --mat-slide-toggle-selected-track-outline-color: var(--brutal-ink);
+  }
+  // 分頁籤：4px 方頭指示條。
+  .mat-mdc-tab-group,
+  .mat-mdc-tab-nav-bar {
+    --mat-tab-active-indicator-height: 4px;
+    --mat-tab-active-indicator-shape: 0;
+    --mat-tab-divider-color: var(--brutal-ink);
+    --mat-tab-divider-height: 2px;
+  }
+
+  // ---- 浮層：每一層換一塊色。選單、下拉、日期選擇器是副色容器色塊；對話框是主色容器色塊 ----
+  .mat-calendar,
+  .mat-datepicker-content {
+    --mat-datepicker-calendar-date-in-range-state-background-color: var(--app-calendar-range-fill);
+  }
+  .mat-datepicker-content {
+    --mat-datepicker-calendar-container-background-color: var(--brutal-raised);
+    --mat-datepicker-calendar-container-text-color: var(--mat-sys-on-secondary-container);
+    border: var(--brutal-line-thick);
+    border-radius: 0 !important;
+    box-shadow: var(--mat-sys-level3) !important;
+  }
+  .mat-mdc-dialog-container {
+    --mat-dialog-container-color: var(--brutal-overlay);
+    --mat-dialog-subhead-color: var(--mat-sys-on-primary-container);
+    --mat-dialog-supporting-text-color: var(--mat-sys-on-primary-container);
+    --mat-dialog-subhead-size: 1.5rem;
+    --mat-dialog-subhead-weight: 700;
+  }
+  .mat-mdc-dialog-surface {
+    border: var(--brutal-line-thick);
+    border-radius: 0 !important;
+    box-shadow: var(--mat-sys-level4) !important;
+  }
+  .mat-mdc-dialog-title {
+    letter-spacing: -0.01em;
+    border-bottom: var(--brutal-line);
+  }
+  .mat-mdc-dialog-actions {
+    border-top: var(--brutal-line);
+  }
+  // 說明段落與下方欄位之間留白，浮動標籤（outlined 欄位的標籤浮在上框線上）才不會壓到說明文字。
+  .mat-mdc-dialog-content > p {
+    margin: 0 0 16px;
+  }
+  .mat-mdc-menu-panel,
+  .mat-mdc-select-panel,
+  .mat-mdc-autocomplete-panel {
+    --mat-menu-container-color: var(--brutal-raised);
+    --mat-select-panel-background-color: var(--brutal-raised);
+    --mat-autocomplete-background-color: var(--brutal-raised);
+    border: var(--brutal-line-thick);
+    border-radius: 0 !important;
+  }
+  .mat-mdc-menu-item,
+  .mat-mdc-option {
+    font-weight: 700;
+  }
+  // 展開面板：收合時是一張白卡片；展開時標題列換成副色容器色塊。
+  .mat-expansion-panel {
+    --mat-expansion-container-shape: 0;
+    --mat-expansion-container-background-color: var(--brutal-card);
+    border: var(--brutal-line-thick);
+    box-shadow: var(--mat-sys-level1);
+  }
+  .mat-expansion-panel:not(:last-child) {
+    margin-bottom: 8px;
+  }
+  .mat-expansion-panel.mat-expanded > .mat-expansion-panel-header {
+    background: var(--brutal-raised);
+    color: var(--mat-sys-on-secondary-container);
+    border-bottom: var(--brutal-line);
+  }
+  .mat-mdc-snack-bar-container .mdc-snackbar__surface {
+    border: var(--brutal-line);
+    border-radius: 0 !important;
+    box-shadow: 5px 5px 0 0 var(--mat-sys-primary-container) !important;
+  }
+
+  // ---- 表格：表頭是一條主色容器色塊（標題字、粗體），下緣一條墨線；滑過的列換副色容器色塊 ----
+  .mat-mdc-table {
+    background: transparent !important;
+    border: var(--brutal-line);
+  }
+  .mat-mdc-header-row {
+    background: var(--mat-sys-primary-container);
+  }
+  .mat-mdc-header-cell {
+    color: var(--mat-sys-on-primary-container);
+    border-bottom: var(--brutal-line);
+    font-family: var(--font-display);
+    font-weight: 700;
+  }
+  // Admin 的資料表是 libs/ui 的 data-table（.dt-table）：只設元件暴露的外觀變數（CONTRACT.md「--dt-*」），不覆寫屬性。
+  .dt-table {
+    --dt-frame: var(--brutal-line);
+    --dt-header-bg: var(--mat-sys-primary-container);
+    --dt-head-border-color: var(--brutal-ink);
+    --dt-row-hover-bg: var(--brutal-raised);
+  }
+  .dt-table th {
+    font-family: var(--font-display);
+    font-weight: 700;
+  }
+
+  // ---- 狀態徽章：全站唯一的膠囊。tone 色底＋2px 墨框＋粗體；圓點外一圈墨線 ----
+  .ui-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 999px;
+    border: var(--brutal-line);
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.125rem;
+    white-space: nowrap;
+  }
+  .ui-chip__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 1.5px var(--brutal-ink);
+  }
+  @each $tone in positive, info, neutral, warning, danger {
+    .ui-chip--#{$tone} {
+      background: var(--app-#{$tone}-bg);
+      color: var(--app-#{$tone}-fg);
+      .ui-chip__dot {
+        background: var(--app-#{$tone}-dot);
+      }
+    }
+  }
+
+  // ---- 文字：標題用 Space Grotesk 粗體；頁面大標下半截墊一條主色容器色的螢光筆色塊（海報標題的貼條，刻意偏下、不對稱） ----
+  .ui-text-numeric {
+    font-variant-numeric: tabular-nums;
+  }
+  .ui-text-display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .topbar-heading h1,
+  .ui-text-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--mat-sys-on-surface);
+  }
+  .topbar-heading h1 {
+    width: fit-content;
+    padding-inline: 0.125em 0.25em;
+    background: linear-gradient(
+      transparent 55%,
+      var(--mat-sys-primary-container) 55% 90%,
+      transparent 90%
+    );
+    box-decoration-break: clone;
+  }
+  .ui-text-subtitle {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+    color: var(--mat-sys-on-surface);
+  }
+  .ui-text-caption {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--mat-sys-on-surface-variant);
+  }
+  .ui-card--inverse .ui-text-subtitle,
+  .ui-card--inverse .ui-text-caption {
+    color: inherit;
+  }
+
+  // 減少動態：不位移（滑過不浮起、按下不下壓），只換影子長短。
+  @media (prefers-reduced-motion: reduce) {
+    :is(.ui-card--clickable, .stat-card, .ui-nav-pill, .mat-mdc-button-base):is(:hover, :active) {
+      transform: none;
+    }
+  }
+}

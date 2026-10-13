@@ -1,0 +1,7 @@
+// src/styles/texture/brutal/_index.scss
+// 按需質地（ADR 0010）：brutal 的完整輸出（造型 token + 全部元件 recipe），在 apps/admin/project.json 以
+// `bundleName: texture-brutal`、`inject: false` 編成獨立的 texture-brutal.css，切到這個質地時才由 ThemeService 載入。
+// 字型 CSS 跟著這份按需載入：沒用到這個質地的人不會下載 Space Grotesk（ADR 0014）。
+@forward 'fonts';
+@forward 'tokens';
+@forward 'recipes';

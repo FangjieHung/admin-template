@@ -45,6 +45,11 @@ describe('theme-compatibility（ADR 0007，2026-09-27 定案清單）', () => {
       excluded: ['verdant', 'sandstone', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue', 'signal'],
       defaultThemeId: 'graphite',
     },
+    // ADR 0014 提案（待使用者定案）：只相容保有彩度的淺色配色；Signal 另進 Material、Grid、Editorial
+    brutal: {
+      excluded: ['verdant', 'midnight', 'cool-grey', 'mist-ink', 'glacier-blue', 'graphite', 'oled'],
+      defaultThemeId: 'signal',
+    },
   };
 
   it('每個質地都有一筆定案', () => {

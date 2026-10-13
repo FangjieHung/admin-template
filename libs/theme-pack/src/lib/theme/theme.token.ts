@@ -14,6 +14,7 @@ export const texture: ThemeOption[] = [
   { id: 'aero', label: 'Aero 雲霧玻璃' },
   { id: 'ledger', label: 'Ledger 帳冊' },
   { id: 'cockpit', label: 'Cockpit 儀表艙' },
+  { id: 'brutal', label: 'Brutal 新粗野' },
 ];
 
 export const COLOR_THEMES: ThemeOption[] = [
@@ -76,7 +77,7 @@ export function resolveThemeId(id: string | null | undefined): string {
 // 清單於 2026-09-27 由設計定案（ticket 09），依據是美感；56 格對比已全數合格（ticket 15）。
 // 2026-10-13 新增 Graphite、OLED 兩套深色配色與 Cockpit 質地（ADR 0012）：新增的格子於 2026-10-13 由使用者定案；
 // 兩套配色比照 Midnight 的相容範圍，再依美感排除（Aero 兩者都排除，OLED 另排除 Linen、Soft UI、Clay）。
-// 2026-10-13 新增 Signal 配色（ADR 0014）：新增的格子是提案，待使用者定案。
+// 2026-10-13 新增 Signal 配色與 Brutal 質地（ADR 0014）：新增的格子是提案，待使用者定案。
 // 相容清單只存在這一處，settings 頁與之後的外觀浮動面板（ticket 03）都透過 ThemeService 讀取，不重抄清單。
 export interface TextureCompatibility {
   readonly compatibleThemeIds: readonly string[];
@@ -140,6 +141,13 @@ export const TEXTURE_COMPATIBILITY: Record<string, TextureCompatibility> = {
   cockpit: {
     compatibleThemeIds: ['midnight', 'graphite', 'oled'],
     defaultThemeId: 'graphite',
+  },
+  // ADR 0014 提案（待使用者定案）：層次靠飽和色塊，只相容保有足夠彩度的淺色配色。對比 11 格全數合格；
+  // Verdant、Cool Grey、Mist Ink、Glacier Blue 依美感排除（色塊太淡或畫布與卡片同色，色塊分層讀不出來），
+  // 深色配色排除（墨線變成淺色線、色塊變成暗色容器，海報感消失）。
+  brutal: {
+    compatibleThemeIds: ['sandstone', 'azure', 'candy', 'signal'],
+    defaultThemeId: 'signal',
   },
 };
 

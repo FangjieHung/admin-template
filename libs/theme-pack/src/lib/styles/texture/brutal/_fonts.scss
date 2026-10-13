@@ -1,0 +1,5 @@
+// 由 brutal/_index.scss 第一行 @forward，跟著 texture-brutal.css 按需載入（ADR 0010）：沒切到 Brutal 的人連字型 CSS 都不下載。
+// 只載入標題用的 Space Grotesk 700 一個字重（ADR 0014；本質地的標題、表頭、對話框標題都是粗體，用不到其他字重）：從 Space Mono 改出來的怪趣味幾何黑體（a、G、R、y 的造型），
+// 新粗野海報常用的字感，和 Noto Sans／系統無襯線明顯不同；700 和蘋方、微軟正黑的粗體字重接近，中英混排的標題不會一邊粗一邊細。
+// 內文英文用裝置無襯線、數字等寬用全站已載入的 IBM Plex Mono、中文用裝置字，都不在這裡。
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap');

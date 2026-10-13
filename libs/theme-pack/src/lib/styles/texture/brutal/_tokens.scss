@@ -1,0 +1,90 @@
+// Brutal 新粗野：海報與貼紙的新粗野主義質地（ADR 0014）。造型 token，不定義配色；所有顏色由配色軸的語意 token 調出。
+// 層次只靠「色塊」：畫布、卡片、浮起的面板（選單、下拉、日期選擇器）、對話框各用配色裡一塊不同的實心底色
+// （background → surface → secondary-container → primary-container），每塊都用 2–3px 的墨線（on-surface）框起來。
+// 墨色的硬邊偏移影子（0 模糊）只是「貼紙的厚度」，不是前後的依據；按下時影子收起、元件往右下壓進去。
+:root[data-paradigm='brutal'] {
+  // 直角：海報裁切的方塊。膠囊只留給狀態徽章（recipe 裡寫 999px），按鈕、開關、FAB 都是方的。
+  --mat-sys-corner-small: 0;
+  --mat-sys-corner-medium: 0;
+  --mat-sys-corner-large: 0;
+  --mat-sys-corner-extra-large: 0;
+  --mat-sys-corner-full: 0;
+
+  // ---- 墨線與色塊：顏色全部取自配色的語意 token ----
+  --brutal-ink: var(--mat-sys-on-surface);
+  --brutal-line: 2px solid var(--brutal-ink); // 按鈕、徽章、欄位群組、表格外框、標題列分隔
+  --brutal-line-thick: 3px solid var(--brutal-ink); // 卡片、選單、日期選擇器、對話框、側欄
+  // 四個色塊層（層次的唯一手段）：畫布 → 卡片 → 浮起的面板 → 對話框。
+  --brutal-canvas: var(--mat-sys-background);
+  --brutal-card: var(--mat-sys-surface);
+  --brutal-raised: var(--mat-sys-secondary-container);
+  --brutal-overlay: var(--mat-sys-primary-container);
+  // 貼紙厚度：墨色、0 模糊、往右下偏移。小元件 3px、卡片 5px、浮層 7–8px；比 Grid（1px 框＋outline 色 2–6px）重一截。
+  --brutal-shadow-sm: 3px 3px 0 0 var(--brutal-ink);
+  --brutal-shadow-sm-hover: 5px 5px 0 0 var(--brutal-ink);
+  --brutal-shadow: 5px 5px 0 0 var(--brutal-ink);
+  --brutal-shadow-hover: 7px 7px 0 0 var(--brutal-ink);
+  --brutal-shadow-lg: 8px 8px 0 0 var(--brutal-ink);
+  // 按下：影子收成 0、元件往右下移同樣距離（像把貼紙壓平）。
+  --brutal-shadow-pressed: 0 0 0 0 var(--brutal-ink);
+  --brutal-press-sm: translate(3px, 3px);
+  --brutal-press: translate(5px, 5px);
+  --brutal-lift: translate(-2px, -2px);
+
+  // Material 的 level token：靜止的浮起元件 4px、滑過 6px、浮層 7px、對話框 8px（全部墨色、0 模糊）。
+  --mat-sys-level1: 4px 4px 0 0 var(--brutal-ink);
+  --mat-sys-level2: 6px 6px 0 0 var(--brutal-ink);
+  --mat-sys-level3: 7px 7px 0 0 var(--brutal-ink);
+  --mat-sys-level4: 8px 8px 0 0 var(--brutal-ink);
+
+  // Material 元件自己的 elevation token 沒設時用 M2 的固定黑影（不吃 level token），逐一指向墨影或 none。
+  @each $t in menu-container, select-container, autocomplete-container, timepicker-container,
+    datepicker-calendar-container
+  {
+    --mat-#{$t}-elevation-shadow: var(--mat-sys-level3);
+  }
+  --mat-dialog-container-elevation-shadow: var(--mat-sys-level4);
+  @each $t in fab-container, fab-small-container, fab-extended-container {
+    --mat-#{$t}-elevation-shadow: var(--brutal-shadow-sm);
+  }
+  // 浮起按鈕（protected）與展開面板的影子由 recipe 自己畫（要跟著按下收起），這裡先歸零。
+  @each $t in expansion-container, sidenav-container, button-protected-container,
+    button-protected-hover-container, button-protected-focus-container,
+    button-protected-pressed-container, slide-toggle-handle
+  {
+    --mat-#{$t}-elevation-shadow: none;
+  }
+  --mat-card-elevated-container-elevation: var(--mat-sys-level1);
+
+  // 互動狀態：選取是一塊實心色塊（對話框同一塊主色容器），不是淡淡的疊加。焦點框加粗到 3px（整個質地一致）。
+  --app-state-selected: var(--mat-sys-primary-container);
+  --app-focus-ring-width: 3px;
+  // 空狀態／錯誤狀態：一張虛線墨框的便條（準則「空狀態」）。
+  --app-empty-bg: var(--mat-sys-surface-container-low);
+  --app-empty-frame: 2px dashed var(--brutal-ink);
+
+  // 字型：中文用裝置字；標題用 Space Grotesk（_fonts.scss 按需載入）；英文內文用裝置的無襯線
+  // （不放 system-ui，免得中文被系統字搶走）；數字與等寬用全站已載入的 IBM Plex Mono。
+  --font-zh: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', system-ui, sans-serif;
+  --font-en: 'Space Grotesk';
+  --font-display: var(--font-en), var(--font-zh);
+  --font-body: 'Helvetica Neue', 'Segoe UI', Roboto, Arial, var(--font-zh);
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  // Material 元件的字預設是 mat.theme() 的 Inter／Plus Jakarta Sans：大標（對話框標題等）改吃標題字，其餘吃內文字；
+  // 按鈕、分頁籤、標籤這些 label 字階一律粗體（海報上的字都是壓上去的）。
+  @each $role in display-large, display-medium, display-small, headline-large, headline-medium,
+    headline-small, title-large
+  {
+    --mat-sys-#{$role}-font: var(--font-display);
+    --mat-sys-#{$role}-weight: 700;
+  }
+  @each $role in title-medium, title-small, body-large, body-medium, body-small, label-large,
+    label-medium, label-small
+  {
+    --mat-sys-#{$role}-font: var(--font-body);
+  }
+  @each $role in title-medium, title-small, label-large, label-medium, label-small {
+    --mat-sys-#{$role}-weight: 700;
+  }
+}

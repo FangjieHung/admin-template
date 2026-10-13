@@ -77,6 +77,11 @@
             "inject": false
           },
           {
+            "input": "libs/theme-pack/src/lib/styles/texture/brutal/_index.scss",
+            "bundleName": "texture-brutal",
+            "inject": false
+          },
+          {
             "input": "libs/theme-pack/src/lib/styles/color-themes/midnight/_index.scss",
             "bundleName": "color-midnight",
             "inject": false

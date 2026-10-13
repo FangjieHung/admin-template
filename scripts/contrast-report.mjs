@@ -73,6 +73,7 @@ const TEXTURES = [
   { id: 'aero', label: 'Aero 雲霧玻璃' },
   { id: 'ledger', label: 'Ledger 帳冊' },
   { id: 'cockpit', label: 'Cockpit 儀表艙' },
+  { id: 'brutal', label: 'Brutal 新粗野' },
 ];
 
 const COLOR_THEMES = [
