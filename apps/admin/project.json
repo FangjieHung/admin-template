@@ -130,6 +130,11 @@
             "input": "libs/theme-pack/src/lib/styles/color-themes/signal/_index.scss",
             "bundleName": "color-signal",
             "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/color-themes/riso-duo/_index.scss",
+            "bundleName": "color-riso-duo",
+            "inject": false
           }
         ],
         "stylePreprocessorOptions": { "includePaths": ["libs"] },

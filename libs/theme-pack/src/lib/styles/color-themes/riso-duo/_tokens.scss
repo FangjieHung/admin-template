@@ -1,0 +1,99 @@
+// src/styles/color-themes/riso-duo/_tokens.scss
+// Riso 雙色（ADR 0015）：孔版印刷最經典的一組特別色——中藍（Riso Medium Blue）＋螢光粉（Riso Fluorescent Pink），
+// 印在暖白的非塗佈紙上。淺色配色。
+// 主色是中藍：它同時是焦點框、勾選框、連結與文字按鈕的顏色，要對每一階表面 ≥ 3:1（對畫布 6.22:1）；
+// 螢光粉在淺紙上只有 2.7:1，撐不起任何文字或邊界，所以只當第二墨（secondary：Riso 質地的網點、疊印、套色錯位）
+// 與面積色塊（secondary-container），它上面的字一律用墨色。
+// 文字不是純黑：孔版雙色印刷沒有黑墨，文字墨色是從中藍壓深的墨藍（#1f2a4d，對畫布 12.4:1）。
+// 狀態色避開兩種墨：資訊用青綠（不和中藍撞）、危險用朱紅（不和螢光粉撞），彼此與兩種墨的
+// CIEDE2000 色差都 ≥ 20（scripts/riso-duo-palette.spec.mjs）。
+// token 範圍比照 Signal：一般淺色配色有的全部，加上建置產物裡有元件引用的 mat.theme() 缺口
+// （inverse-primary、on-background、tertiary 一組、neutral10、neutral-variant20，ADR 0012 附抽取方法）。
+:root[data-theme='riso-duo'] {
+  // 主題私有底層色階（僅本檔使用）
+  --_ink: #1f2a4d; // 墨藍：中藍壓深，充當「黑墨」
+  --_ink-muted: #454c69;
+  --_paper-0: #ffffff;
+  --_paper-10: #fffcf5;
+  --_paper-25: #fbf7ee;
+  --_paper-50: #f5efe2; // 非塗佈紙（畫布）
+  --_paper-75: #f8f2e6;
+  --_paper-100: #f1eadb;
+  --_paper-200: #e9e1d0;
+  --_paper-300: #d5cdbc;
+  --_paper-500: #6f7189;
+  --_blue: #3255a4; // Riso Medium Blue（主墨）
+  --_blue-double: #243f7e; // 中藍重印兩次（側欄滿版）
+  --_pink: #ff48b0; // Riso Fluorescent Pink（第二墨）
+  --_violet: #6c3d9e; // 兩墨疊印的紫（tertiary）
+
+  // M3 顏色 token
+  --mat-sys-primary: var(--_blue);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #dae0ef; // 中藍 18% 平網
+  --mat-sys-on-primary-container: var(--_ink);
+  --mat-sys-secondary: var(--_pink);
+  --mat-sys-on-secondary: var(--_ink); // 螢光粉上的字用墨色（4.55:1；白字只有 3.09:1）
+  --mat-sys-secondary-container: #ffd3ec; // 螢光粉 24% 平網
+  --mat-sys-on-secondary-container: var(--_ink);
+  --mat-sys-tertiary: var(--_violet);
+  --mat-sys-on-tertiary: #ffffff;
+  --mat-sys-tertiary-container: #e7e0ef; // 疊印紫 16% 平網
+  --mat-sys-on-tertiary-container: var(--_ink);
+  --mat-sys-background: var(--_paper-50);
+  --mat-sys-on-background: var(--_ink);
+  --mat-sys-surface: var(--_paper-10);
+  --mat-sys-surface-container-lowest: var(--_paper-0);
+  --mat-sys-surface-container-low: var(--_paper-25);
+  --mat-sys-surface-container: var(--_paper-75);
+  --mat-sys-surface-container-high: var(--_paper-100);
+  --mat-sys-surface-container-highest: var(--_paper-200);
+  --mat-sys-on-surface: var(--_ink);
+  --mat-sys-surface-variant: var(--_paper-100); /* filled input 等元件底色的 fallback 來源 */
+  --mat-sys-on-surface-variant: var(--_ink-muted);
+  --mat-sys-outline: var(--_paper-500);
+  --mat-sys-outline-variant: var(--_paper-300);
+  --mat-sys-inverse-surface: var(--_ink);
+  --mat-sys-inverse-on-surface: var(--_paper-10);
+  --mat-sys-inverse-primary: #ff9fd2; /* 墨藍反轉底（提示訊息）上的動作鈕：淡螢光粉 */
+  --mat-sys-error: #b2160f;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #ffdcd6;
+  --mat-sys-on-error-container: #8a1409;
+  // mat.theme() 直接引用的兩個調色盤色：停用選項文字（38% 混色）的基底、側欄遮罩。淺色下兩者都是深色。
+  --mat-sys-neutral10: var(--_ink);
+  --mat-sys-neutral-variant20: #2c3150;
+
+  // app 擴充狀態色（M3 缺 success/warning/info；danger 沿用 error 的色相）
+  --app-positive-bg: #d4eedb;
+  --app-positive-fg: #0c5a2e;
+  --app-positive-dot: #1e9a52;
+  --app-info-bg: #cdeef1;
+  --app-info-fg: #00545c;
+  --app-info-dot: #0a9aa6; // 青綠：和主墨中藍分開（ΔE 33）
+  --app-neutral-bg: #ebe5d8;
+  --app-neutral-fg: var(--_ink-muted);
+  --app-neutral-dot: #8a8676;
+  --app-warning-bg: #fde2b2;
+  --app-warning-fg: #7a3f00;
+  --app-warning-dot: #e88a00;
+  --app-danger-bg: #ffdcd5;
+  --app-danger-fg: #9c1a10;
+  --app-danger-dot: #e0331f; // 朱紅：和第二墨螢光粉分開（ΔE 31.7）
+
+  // 圖表色：中藍、深螢光粉、Riso 青、Riso 橘（對白色表面都 ≥ 3:1，彼此 ΔE ≥ 28）
+  --app-viz-1: var(--_blue);
+  --app-viz-2: #d81b7f;
+  --app-viz-3: #00838a;
+  --app-viz-4: #e8590c;
+
+  // 側欄：中藍印兩次（double hit，孔版把同一色重印一次讓墨更厚）的深藍滿版。
+  // 比單次的中藍深，側欄裡反白選取的字（白字疊白 28% 底）才 ≥ 4.5:1。
+  --app-shell-bg: var(--_blue-double);
+  --app-shell-on: #ffffff;
+  --app-shell-on-muted: #dce4f6;
+
+  --app-topbar-bg: color-mix(in srgb, var(--_paper-50) 86%, transparent);
+  --app-calendar-range-fill: color-mix(in srgb, var(--_blue) 20%, var(--_paper-0));
+  color-scheme: light;
+}

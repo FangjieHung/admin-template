@@ -25,29 +25,29 @@ describe('theme-compatibility（ADR 0007，2026-09-27 定案清單）', () => {
   // 設計定案：每個質地排除哪些配色、預設哪個配色。
   const DECISIONS: Record<string, { excluded: string[]; defaultThemeId: string }> = {
     material: { excluded: ['candy'], defaultThemeId: 'verdant' },
-    linen: { excluded: ['candy', 'oled', 'signal'], defaultThemeId: 'sandstone' },
+    linen: { excluded: ['candy', 'oled', 'signal', 'riso-duo'], defaultThemeId: 'sandstone' },
     grid: { excluded: [], defaultThemeId: 'verdant' },
-    'soft-ui': { excluded: ['sandstone', 'verdant', 'oled', 'signal'], defaultThemeId: 'cool-grey' },
+    'soft-ui': { excluded: ['sandstone', 'verdant', 'oled', 'signal', 'riso-duo'], defaultThemeId: 'cool-grey' },
     clay: {
-      excluded: ['verdant', 'sandstone', 'azure', 'candy', 'mist-ink', 'glacier-blue', 'oled', 'signal'],
+      excluded: ['verdant', 'sandstone', 'azure', 'candy', 'mist-ink', 'glacier-blue', 'oled', 'signal', 'riso-duo'],
       defaultThemeId: 'cool-grey',
     },
     editorial: { excluded: ['cool-grey'], defaultThemeId: 'mist-ink' },
-    frosted: { excluded: ['sandstone', 'cool-grey', 'signal'], defaultThemeId: 'candy' },
+    frosted: { excluded: ['sandstone', 'cool-grey', 'signal', 'riso-duo'], defaultThemeId: 'candy' },
     aero: {
-      excluded: ['verdant', 'midnight', 'sandstone', 'candy', 'graphite', 'oled', 'signal'],
+      excluded: ['verdant', 'midnight', 'sandstone', 'candy', 'graphite', 'oled', 'signal', 'riso-duo'],
       defaultThemeId: 'glacier-blue',
     },
     // ADR 0011 提案（待使用者定案）；Graphite、OLED 的格子是 ADR 0012 提案（待使用者定案）
-    ledger: { excluded: ['candy', 'signal'], defaultThemeId: 'azure' },
+    ledger: { excluded: ['candy', 'signal', 'riso-duo'], defaultThemeId: 'azure' },
     // ADR 0012 提案（待使用者定案）：只相容深色配色
     cockpit: {
-      excluded: ['verdant', 'sandstone', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue', 'signal'],
+      excluded: ['verdant', 'sandstone', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue', 'signal', 'riso-duo'],
       defaultThemeId: 'graphite',
     },
-    // ADR 0014 提案（待使用者定案）：只相容保有彩度的淺色配色；Signal 另進 Material、Grid、Editorial
+    // ADR 0014 提案（待使用者定案）：只相容保有彩度的淺色配色；Signal 另進 Material、Grid、Editorial（Riso 雙色是 ADR 0015 提案）
     brutal: {
-      excluded: ['verdant', 'midnight', 'cool-grey', 'mist-ink', 'glacier-blue', 'graphite', 'oled'],
+      excluded: ['verdant', 'midnight', 'cool-grey', 'mist-ink', 'glacier-blue', 'graphite', 'oled', 'riso-duo'],
       defaultThemeId: 'signal',
     },
   };

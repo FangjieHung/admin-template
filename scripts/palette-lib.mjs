@@ -1,5 +1,5 @@
-// 配色色票層檢查的共用工具（ADR 0012、0014）：直接讀 color-themes/<id>/_tokens.scss 的色碼，不用開瀏覽器。
-// dark-palette.spec.mjs（Graphite、OLED）與 signal-palette.spec.mjs（Signal）共用。
+// 配色色票層檢查的共用工具（ADR 0012、0014、0015）：直接讀 color-themes/<id>/_tokens.scss 的色碼，不用開瀏覽器。
+// dark-palette.spec.mjs（Graphite、OLED）、signal-palette.spec.mjs（Signal）與 riso-duo-palette.spec.mjs（Riso 雙色）共用。
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';

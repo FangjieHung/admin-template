@@ -88,6 +88,7 @@ const COLOR_THEMES = [
   { id: 'graphite', label: 'Graphite 石墨橘' },
   { id: 'oled', label: 'OLED 純黑' },
   { id: 'signal', label: 'Signal 訊號色' },
+  { id: 'riso-duo', label: 'Riso 雙色' },
 ];
 
 // 方便單一組合 smoke-test / 局部重跑：--textures=material,frosted --colors=verdant

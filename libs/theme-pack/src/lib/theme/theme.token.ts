@@ -29,6 +29,7 @@ export const COLOR_THEMES: ThemeOption[] = [
   { id: 'graphite', label: 'Graphite 石墨橘' },
   { id: 'oled', label: 'OLED 純黑' },
   { id: 'signal', label: 'Signal 訊號色' },
+  { id: 'riso-duo', label: 'Riso 雙色' },
 ];
 
 export const DEFAULT_PARADIGM = 'material';
@@ -78,6 +79,7 @@ export function resolveThemeId(id: string | null | undefined): string {
 // 2026-10-13 新增 Graphite、OLED 兩套深色配色與 Cockpit 質地（ADR 0012）：新增的格子於 2026-10-13 由使用者定案；
 // 兩套配色比照 Midnight 的相容範圍，再依美感排除（Aero 兩者都排除，OLED 另排除 Linen、Soft UI、Clay）。
 // 2026-10-13 新增 Signal 配色與 Brutal 質地（ADR 0014）：新增的格子是提案，待使用者定案。
+// 2026-10-13 新增 Riso 雙色配色（ADR 0015）：新增的格子是提案，待使用者定案。
 // 相容清單只存在這一處，settings 頁與之後的外觀浮動面板（ticket 03）都透過 ThemeService 讀取，不重抄清單。
 export interface TextureCompatibility {
   readonly compatibleThemeIds: readonly string[];
@@ -88,42 +90,47 @@ const ALL_COLOR_THEME_IDS: readonly string[] = COLOR_THEMES.map((c) => c.id);
 
 // 白名單一律逐一列出（ADR 0007 第 1 條）：新增配色時不會自動出現在任何質地，要逐一加進來。
 export const TEXTURE_COMPATIBILITY: Record<string, TextureCompatibility> = {
-  // 排除 Candy。Signal 是 ADR 0014 提案（待使用者定案）。
+  // 排除 Candy。Signal 是 ADR 0014 提案、Riso 雙色是 ADR 0015 提案（待使用者定案）。
   material: {
-    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue', 'graphite', 'oled', 'signal'],
+    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue', 'graphite', 'oled', 'signal', 'riso-duo'],
     defaultThemeId: 'verdant',
   },
   // 排除 Candy；OLED 依美感排除（ADR 0012：紙張色階在純黑上幾乎沒有差，紙感消失）；
   // Signal 依美感排除（ADR 0014 提案：同 Candy，飽和色塊蓋掉紙張色階）
+  // Riso 雙色依美感排除（ADR 0015 提案：同色系紙張色階已經是「紙」，再疊孔版的螢光粉與滿版藍側欄，兩種紙感互搶）。
   linen: {
     compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue', 'graphite'],
     defaultThemeId: 'sandstone',
   },
-  // 全部相容（Signal 是 ADR 0014 提案，待使用者定案）
+  // 全部相容（Signal 是 ADR 0014 提案、Riso 雙色是 ADR 0015 提案，待使用者定案）
   grid: {
-    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue', 'graphite', 'oled', 'signal'],
+    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue', 'graphite', 'oled', 'signal', 'riso-duo'],
     defaultThemeId: 'verdant',
   },
   // 排除 Sandstone、Verdant；OLED 依美感排除（ADR 0012：純黑上暗面陰影看不見，浮雕消失）；
   // Signal 依美感排除（ADR 0014 提案：墨黑側欄與飽和色塊壓過浮雕的柔和光影）
+  // Riso 雙色依美感排除（ADR 0015 提案：滿版藍側欄與螢光粉蓋過浮雕的柔和光影）。
   'soft-ui': {
     compatibleThemeIds: ['midnight', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue', 'graphite'],
     defaultThemeId: 'cool-grey',
   },
   // 只保留 Midnight、Cool Grey，加上 Graphite（ADR 0012）；OLED 依美感排除（環境陰影在純黑上看不見，體積感消失）；
   // Signal 依美感排除（ADR 0014 提案：同其他淺色配色）
+  // Riso 雙色依美感排除（ADR 0015 提案：Clay 只搭深色與冷灰）。
   clay: { compatibleThemeIds: ['midnight', 'cool-grey', 'graphite'], defaultThemeId: 'cool-grey' },
-  // 排除 Cool Grey。Signal 是 ADR 0014 提案（待使用者定案）。
+  // 排除 Cool Grey。Signal 是 ADR 0014 提案、Riso 雙色是 ADR 0015 提案（待使用者定案）。
   editorial: {
-    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'candy', 'mist-ink', 'glacier-blue', 'graphite', 'oled', 'signal'],
+    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'candy', 'mist-ink', 'glacier-blue', 'graphite', 'oled', 'signal', 'riso-duo'],
     defaultThemeId: 'mist-ink',
   },
   // 排除 Sandstone、Cool Grey；Signal 依美感排除（ADR 0014 提案：墨黑側欄與飽和色塊讓霧光玻璃失去透光感）
+  // Riso 雙色依美感排除（ADR 0015 提案：平面印刷的不透明墨色讓霧光玻璃失去透光感）。
   frosted: {
     compatibleThemeIds: ['verdant', 'midnight', 'azure', 'candy', 'mist-ink', 'glacier-blue', 'graphite', 'oled'],
     defaultThemeId: 'candy',
   },
   // 高亮度雲霧玻璃只搭配冷調、淺色畫布；深色與暖沙會讓透明層失去參考圖的空氣感（Signal 同理排除，ADR 0014 提案）。
+  // Riso 雙色依美感排除（ADR 0015 提案：高亮度雲霧玻璃只搭冷調淺色）。
   aero: {
     compatibleThemeIds: ['azure', 'cool-grey', 'mist-ink', 'glacier-blue'],
     defaultThemeId: 'glacier-blue',
@@ -132,12 +139,14 @@ export const TEXTURE_COMPATIBILITY: Record<string, TextureCompatibility> = {
   // 2026-10-13 由使用者定案。
   // Graphite、OLED 於 2026-10-13 依 ADR 0012 加入（對比全數合格），同日由使用者定案。
   // Signal 依美感排除（ADR 0014 提案：理由同 Candy）。
+  // Riso 雙色依美感排除（ADR 0015 提案：螢光粉和帳冊的冷靜數字感衝突，同 Candy、Signal）。
   ledger: {
     compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue', 'graphite', 'oled'],
     defaultThemeId: 'azure',
   },
   // 深色優先（ADR 0012）：層次靠發光，只相容深色配色。淺色配色即使對比合格也排除——光暈在淺底上讀不出來。
   // 2026-10-13 由使用者定案。Signal 是淺色配色，同樣排除。
+  // Riso 雙色依美感排除（ADR 0015 提案：深色優先質地，淺色配色一律排除）。
   cockpit: {
     compatibleThemeIds: ['midnight', 'graphite', 'oled'],
     defaultThemeId: 'graphite',
@@ -145,10 +154,12 @@ export const TEXTURE_COMPATIBILITY: Record<string, TextureCompatibility> = {
   // ADR 0014 提案（待使用者定案）：層次靠飽和色塊，只相容保有足夠彩度的淺色配色。對比 11 格全數合格；
   // Verdant、Cool Grey、Mist Ink、Glacier Blue 依美感排除（色塊太淡或畫布與卡片同色，色塊分層讀不出來），
   // 深色配色排除（墨線變成淺色線、色塊變成暗色容器，海報感消失）。
+  // Riso 雙色依美感排除（ADR 0015 提案：平網色塊太淡，Brutal 的色塊分層讀不出來）。
   brutal: {
     compatibleThemeIds: ['sandstone', 'azure', 'candy', 'signal'],
     defaultThemeId: 'signal',
   },
+
 };
 
 /** 不認得的質地 id（已刪除的質地殘留在 localStorage、拼錯）一律退回 DEFAULT_PARADIGM。 */
