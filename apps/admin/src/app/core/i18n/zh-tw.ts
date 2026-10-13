@@ -98,6 +98,30 @@ export const ZH_TW = {
     filters: '篩選活動紀錄',
     loading: '載入中',
   },
+  // 數字小卡與圖表（lib-stat-card、lib-line-chart、lib-bar-chart、lib-donut-chart）：{type} 是圖表種類、
+  // {count} 是系列或類別數、{names} 是系列名稱、{first}／{last} 是第一個與最後一個 x、{x} 是一個 x、
+  // {values} 是「系列 值」、{period} 是比較區間、{change} 是變化、{name} 是指標名稱。
+  chart: {
+    viewAsTable: '以表格檢視',
+    noData: '沒有資料',
+    loading: '載入中',
+    other: '其他',
+    total: '總計',
+    category: '項目',
+    share: '占比',
+    legend: '圖例',
+    lineChart: '折線圖',
+    barChart: '長條圖',
+    donutChart: '圓環圖',
+    seriesSummary: '{type}，{count} 個系列（{names}），{first} 到 {last}',
+    donutSummary: '{type}，{count} 類，{total}',
+    pointLabel: '{x}：{values}',
+    keyboardHint: '用方向鍵切換資料點，Esc 收起提示',
+    comparison: '較{period} {change}',
+    better: '表現變好',
+    worse: '表現變差',
+    sparkline: '{name}的趨勢，{first} 到 {last}',
+  },
   // 簽名板（lib-signature-pad）。
   signaturePad: {
     drawTab: '手寫簽名',

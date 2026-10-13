@@ -1,0 +1,136 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="數字小卡"
+    description="目前數值、跟上一期的變化（箭頭＋顏色＋文字）與選填的迷你趨勢。「未結案」「逾期」「平均回覆時間」上升是壞事（positiveIsGood=false），「本週新增」用預設（上升是好事）；最後一張整張是連結，打開儀表板樣板。"
+  >
+    <div class="cp-stats">
+      <lib-stat-card label="未結案" unit="件" period="上週" [value]="86" [previous]="92" [positiveIsGood]="false" [format]="integerFormat" />
+      <lib-stat-card
+        label="本週新增"
+        unit="件"
+        period="上週"
+        [value]="48"
+        [previous]="41"
+        [format]="integerFormat"
+        [sparkline]="data.weekly"
+      />
+      <lib-stat-card label="逾期" unit="件" period="上週" [value]="12" [previous]="9" [positiveIsGood]="false" [format]="integerFormat" />
+      <a
+        lib-stat-card
+        routerLink="/templates/dashboard"
+        label="平均回覆時間"
+        unit="小時"
+        period="上週"
+        changeMode="delta"
+        [value]="5.2"
+        [previous]="6.8"
+        [positiveIsGood]="false"
+        [sparkline]="[7.4, 6.9, 7.1, 6.2, 6, 5.6, 5.2]"
+        [sparklineColor]="3"
+      ></a>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="多系列折線"
+    description="最近 30 天依來源的新工單，5 條線。第 4、5 條是虛線與點線，每條線的資料點形狀不同（色盲時靠線型分辨）；點圖例可以關掉一條線。滑過或 Tab 進入後用方向鍵看每一天的數值。"
+  >
+    <lib-line-chart data-demo="line" [categories]="data.days" [series]="data.sources" [integer]="true" [height]="280" />
+  </app-demo-block>
+
+  <app-demo-block heading="面積" description="最近 14 天每天結束時處理中的工單數；y 軸不從 0 開始時用 [zeroBaseline]=&quot;false&quot;。">
+    <lib-line-chart data-demo="area" [categories]="data.backlogDays" [series]="data.backlog" [area]="true" [zeroBaseline]="false" [integer]="true" />
+  </app-demo-block>
+
+  <div class="cp-pair">
+    <app-demo-block heading="堆疊長條" description="最近 8 週依優先順序，直接標註每週總數；提示框與表格多一個總計。">
+      <lib-bar-chart
+        data-demo="stacked"
+        [categories]="data.weeks"
+        [series]="data.priorities"
+        [stacked]="true"
+        [showValues]="true"
+        [integer]="true"
+        [dateFormat]="weekFormat"
+      />
+    </app-demo-block>
+
+    <app-demo-block heading="橫式長條" description="依處理單位；太長的名稱截斷，滑過可看完整名稱（SVG 的 title）。">
+      <lib-bar-chart
+        data-demo="horizontal"
+        orientation="horizontal"
+        [categories]="data.teams"
+        [series]="data.teamLoad"
+        [showValues]="true"
+        [integer]="true"
+      />
+    </app-demo-block>
+  </div>
+
+  <div class="cp-pair">
+    <app-demo-block heading="圓環＋其他" description="8 類工單主題，超過 6 類時最小的 3 類併成「其他」；圖例附百分比（加總剛好 100%），點圖例或扇形可選取。">
+      <lib-donut-chart data-demo="donut" [slices]="data.topics" [valueFormat]="integerFormat" />
+    </app-demo-block>
+
+    <app-demo-block heading="以表格檢視" description="同一份資料換成表格（view=&quot;table&quot; 一開始就是表格，按鈕切回圖表）；也是報讀器與列印的替代方案。">
+      <lib-bar-chart data-demo="table" view="table" [categories]="data.weeks" [series]="data.priorities" [stacked]="true" [dateFormat]="weekFormat" />
+    </app-demo-block>
+  </div>
+
+  <app-demo-block heading="空資料與載入中" description="[loading] 時依圖表形狀的骨架；沒有資料時是空狀態（lib-empty-state）。">
+    <div class="cp-modes" role="group" aria-label="示範狀態">
+      <button type="button" class="ui-nav-pill" [class.is-active]="stateMode() === 'loading'" [attr.aria-pressed]="stateMode() === 'loading'" (click)="setStateMode('loading')">載入中</button>
+      <button type="button" class="ui-nav-pill" [class.is-active]="stateMode() === 'empty'" [attr.aria-pressed]="stateMode() === 'empty'" (click)="setStateMode('empty')">沒有資料</button>
+      <button type="button" class="ui-nav-pill" [class.is-active]="stateMode() === 'ready'" [attr.aria-pressed]="stateMode() === 'ready'" (click)="setStateMode('ready')">有資料</button>
+    </div>
+    <div class="cp-states">
+      <lib-line-chart data-demo="state-line" [categories]="data.backlogDays" [series]="stateSeries()" [loading]="stateMode() === 'loading'" [height]="180" />
+      <lib-bar-chart data-demo="state-bar" [categories]="data.teams" [series]="stateMode() === 'empty' ? [] : data.teamLoad" [loading]="stateMode() === 'loading'" [height]="180" />
+      <lib-donut-chart data-demo="state-donut" [slices]="stateMode() === 'empty' ? [] : data.topics" [loading]="stateMode() === 'loading'" [size]="160" />
+      <lib-stat-card label="未結案" [value]="86" [loading]="stateMode() === 'loading'" />
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="圖表類別色（12 套配色）"
+    description="每套配色的 --app-chart-1…6（直接讀各配色的樣式檔），底色是該配色的卡片表面，下方是對卡片表面的對比（門檻 3:1）。前 3 色在色盲模擬下也分得開；Riso 雙色只用兩種墨的深淺（ADR 0017）。"
+  >
+    <div class="cp-modes" role="group" aria-label="選擇配色">
+      <button type="button" class="ui-nav-pill" [class.is-active]="swatchFocus() === null" [attr.aria-pressed]="swatchFocus() === null" (click)="swatchFocus.set(null)">全部</button>
+      @for (s of swatches(); track s.id) {
+        <button type="button" class="ui-nav-pill" [class.is-active]="swatchFocus() === s.id" [attr.aria-pressed]="swatchFocus() === s.id" (click)="swatchFocus.set(s.id)">
+          {{ s.label }}
+        </button>
+      }
+    </div>
+    @if (swatchState() === 'loading') {
+      <p class="demo-note">讀取各配色的樣式檔中…</p>
+    } @else if (swatchState() === 'error') {
+      <p class="demo-note">讀不到配色樣式檔（離線或測試環境）。</p>
+    } @else {
+      <ul class="cp-palettes" [class.cp-palettes--one]="swatchFocus() !== null" data-demo="palettes">
+        @for (s of shownSwatches(); track s.id) {
+          <li class="cp-palette" [style.background]="s.surface" [style.color]="s.ink">
+            <span class="cp-palette__name">{{ s.label }}</span>
+            <span class="cp-palette__chips">
+              @for (c of s.colors; track $index) {
+                <span class="cp-chip">
+                  <span class="cp-chip__color" [style.background]="c.value"></span>
+                  <span class="cp-chip__text cp-chip__hex ui-text-numeric">{{ $index + 1 }} · {{ c.value }}</span>
+                  <span class="cp-chip__text ui-text-numeric">{{ contrastText(c.contrast) }}</span>
+                </span>
+              }
+            </span>
+          </li>
+        }
+      </ul>
+    }
+  </app-demo-block>
+</app-showcase-page>

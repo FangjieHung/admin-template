@@ -39,6 +39,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '「誰在何時改了什麼」的時間軸：依日期分組、相對時間、欄位的舊值與新值、留言、篩選與載入更多。',
     source: 'libs/ui/src/lib/activity-timeline',
   },
+  'charts': {
+    summary: '儀表板與報表的數字小卡（變化與迷你趨勢）、折線、長條、圓環：自己寫的輕量 SVG，顏色與造型跟著配色與質地；每張圖都能用鍵盤逐點查看、切成表格。',
+    source: 'libs/ui/src/lib/stat-card、line-chart、bar-chart、donut-chart、chart-core',
+  },
   'detail-layout': {
     summary: '打開一筆資料的整頁骨架：標題、狀態、主要動作、分頁與摘要側欄；窄螢幕自動重排，捲動時頁首縮成精簡列。',
     source: 'libs/ui/src/lib/detail-layout',
@@ -130,7 +134,6 @@ export interface PlannedItem {
 }
 
 export const PLANNED_ITEMS: readonly PlannedItem[] = [
-  { title: '數字小卡與圖表', kind: '元件', priority: 'P1', summary: '儀表板與報表的折線、長條、圓環。' },
   { title: '附件上傳與相機擷取', kind: '元件', priority: 'P1', summary: '拖放、預覽、進度、清單；手機可直接拍照。' },
   { title: '匯入精靈', kind: '元件', priority: 'P1', summary: '上傳 → 欄位對應 → 預覽驗證 → 匯入。' },
   { title: '通知中心', kind: '元件', priority: 'P1', summary: '鈴鐺、未讀數、通知清單。' },

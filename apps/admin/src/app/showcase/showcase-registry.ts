@@ -92,6 +92,13 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     load: () => import('../features/activity-log/activity-log-page.component').then((m) => m.ActivityLogPageComponent),
   },
   {
+    id: 'charts',
+    title: '數字小卡與圖表',
+    group: 'data',
+    icon: 'monitoring',
+    load: () => import('../features/charts/charts-page.component').then((m) => m.ChartsPageComponent),
+  },
+  {
     id: 'relation-select',
     title: '關聯選擇欄位',
     group: 'input',
