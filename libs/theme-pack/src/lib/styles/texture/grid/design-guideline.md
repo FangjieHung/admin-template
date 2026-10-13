@@ -25,7 +25,7 @@
 | 內格線 | `--mat-sys-outline-variant` | 1px | 表格列線與欄線、卡片內分區、對話框標題列/動作列分隔 | 已完成。Admin 實際表格是共用元件 `libs/ui/data-table`（`.dt-table` 原生 `<table>`，非 `mat-mdc-table`），外框與欄線是 grid `recipes.scss` 在 `.dt-table` 上設元件暴露的變數（`--dt-frame`、`--dt-col-divider`，見 CONTRACT.md「共用元件的外觀變數」），不覆寫屬性 |
 | 字體 display | `--font-display` | IBM Plex Mono ＋ 系統中文字（`--font-zh`） | 頁面大標、大數字 | — |
 | 字體 body | `--font-body` | Inter ＋ 系統中文字（`--font-zh`） | 內文、表單 | — |
-| 字體 mono | `--font-mono` | IBM Plex Mono（中文接 `--font-zh`） | **所有數字資料**：金額、日期、時間、數量、訂單編號、車牌 | 已完成：共用 class `.ui-text-numeric`（CONTRACT.md）在 Grid 換成 `var(--font-mono), var(--font-zh)`；元件裡原本寫死 `tabular-nums` 的數字文字（建單頁金額與方案表、訂單摘要、訂單明細金額、派車月曆／時間軸、對話框的車牌與時間等 21 處）都改掛這個 class，data-table 的 `align: 'end'` 欄自動掛上；數字輸入（`input[type='number']`）另有規則；統計大數字沿用 `.ui-text-display` |
+| 字體 mono | `--font-mono` | IBM Plex Mono（中文接 `--font-zh`） | **所有數字資料**：金額、日期、時間、數量、單號 | 已完成：共用 class `.ui-text-numeric`（CONTRACT.md）在 Grid 換成 `var(--font-mono), var(--font-zh)`；元件裡原本寫死 `tabular-nums` 的數字文字（金額、數量、日期時間等）都改掛這個 class，data-table 的 `align: 'end'` 欄自動掛上；數字輸入（`input[type='number']`）另有規則；統計大數字沿用 `.ui-text-display` |
 | 視覺密度 | `--mat-table-row-item-container-height` 等 | 表格列高 44px、表頭 48px、儲存格左右 12px | 表格 | —（互動目標仍維持 ≥ 44px） |
 | 背景紋理 | 作用在 `body`、`.sidenav-container` | 28px 細格，每 5 格（140px）一條較深的主格線，像方格紙 | 只在頁面底層 | 已完成：疊加 140px 主格線圖層，透明度比細格線高（55% vs 35%），低調不干擾閱讀 |
 

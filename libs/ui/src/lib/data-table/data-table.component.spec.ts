@@ -74,7 +74,7 @@ const LABELS: DataTableLabels = {
 class HostComponent {
   readonly labels = LABELS;
   readonly columns = signal<DataTableColumn<Row>[]>([
-    { key: 'name', label: '車牌', primary: true },
+    { key: 'name', label: '單號', primary: true },
     { key: 'status', label: '狀態', primary: true },
     { key: 'mileage', label: '里程', align: 'end' },
   ]);
@@ -106,7 +106,7 @@ class HostComponent {
 class SelectionHostComponent {
   readonly labels = LABELS;
   readonly columns = signal<DataTableColumn<Row>[]>([
-    { key: 'name', label: '車牌', primary: true },
+    { key: 'name', label: '單號', primary: true },
     { key: 'status', label: '狀態', primary: true },
   ]);
   readonly rows = signal<Row[]>([
@@ -159,20 +159,20 @@ describe('DataTableComponent 標準模式', () => {
 
   it('表頭來自 columns 的 label', () => {
     const heads = [...el.querySelectorAll('thead th')].map((th) => th.textContent?.trim());
-    expect(heads.slice(0, 3)).toEqual(['車牌', '狀態', '里程']);
+    expect(heads.slice(0, 3)).toEqual(['單號', '狀態', '里程']);
   });
 
   it('每個 td 都帶上對應欄位的 data-label', () => {
     const firstRowCells = [...el.querySelectorAll('tbody tr')[0].querySelectorAll('td')];
     expect(firstRowCells.slice(0, 3).map((td) => td.getAttribute('data-label'))).toEqual([
-      '車牌',
+      '單號',
       '狀態',
       '里程',
     ]);
   });
 
   it('沒有 dtCell template 的欄位直接印 row[key]', () => {
-    const cell = el.querySelector('tbody tr td[data-label="車牌"]');
+    const cell = el.querySelector('tbody tr td[data-label="單號"]');
     expect(cell?.textContent?.trim()).toBe('ABC-123');
   });
 
@@ -191,7 +191,7 @@ describe('DataTableComponent 標準模式', () => {
       { id: 'v3', name: null, status: 'available', mileage: 0 } as unknown as Row,
     ]);
     await fixture.whenStable();
-    const cell = el.querySelector('tbody tr td[data-label="車牌"]');
+    const cell = el.querySelector('tbody tr td[data-label="單號"]');
     expect(cell?.textContent?.trim()).toBe('');
   });
 
@@ -331,7 +331,7 @@ describe('DataTableComponent 手機版 DOM 不變性', () => {
     await fixture.whenStable();
     const el = fixture.nativeElement as HTMLElement;
     const mileageCell = el.querySelector('tbody tr td[data-label="里程"]');
-    const plateCell = el.querySelector('tbody tr td[data-label="車牌"]');
+    const plateCell = el.querySelector('tbody tr td[data-label="單號"]');
     expect(mileageCell?.classList.contains('is-secondary')).toBe(true);
     expect(plateCell?.classList.contains('is-secondary')).toBe(false);
   });
@@ -389,7 +389,7 @@ describe('DataTableComponent 展開／收合', () => {
 
   it('所有欄位都是 primary 時不渲染展開鈕', async () => {
     fixture.componentInstance.columns.set([
-      { key: 'name', label: '車牌', primary: true },
+      { key: 'name', label: '單號', primary: true },
       { key: 'status', label: '狀態', primary: true },
     ]);
     await fixture.whenStable();
@@ -407,13 +407,13 @@ describe('DataTableComponent 展開／收合', () => {
           <th colspan="2">本季</th>
         </tr>
         <tr>
-          <th>訂單數</th>
-          <th>退佣</th>
+          <th>工單數</th>
+          <th>金額</th>
         </tr>
       </ng-template>
       <ng-template dtBody>
         <tr>
-          <td>海邊民宿</td>
+          <td>北區分公司</td>
           <td>12</td>
           <td>3600</td>
         </tr>
@@ -486,7 +486,7 @@ class HeadOnlyHostComponent {
     <lib-data-table [columns]="columns" [labels]="labels">
       <ng-template dtBody>
         <tr>
-          <td>海邊民宿</td>
+          <td>北區分公司</td>
         </tr>
       </ng-template>
     </lib-data-table>
@@ -534,7 +534,7 @@ describe('DataTableComponent 逃生門模式守衛', () => {
 })
 class ExportHostComponent {
   readonly labels = LABELS;
-  readonly columns: DataTableColumn<Row>[] = [{ key: 'name', label: '車牌', primary: true }];
+  readonly columns: DataTableColumn<Row>[] = [{ key: 'name', label: '單號', primary: true }];
   readonly rows = signal<Row[]>([
     { id: 'v1', name: 'ABC-123', status: 'available', mileage: 12000 },
   ]);
@@ -559,7 +559,7 @@ class ExportHostComponent {
 })
 class SelectedExportHostComponent {
   readonly labels = LABELS;
-  readonly columns: DataTableColumn<Row>[] = [{ key: 'name', label: '車牌', primary: true }];
+  readonly columns: DataTableColumn<Row>[] = [{ key: 'name', label: '單號', primary: true }];
   readonly rows = signal<Row[]>([
     { id: 'v1', name: 'ABC-123', status: 'available', mileage: 12000 },
     { id: 'v2', name: 'XYZ-789', status: 'rented', mileage: 34000 },
@@ -577,7 +577,7 @@ class SelectedExportHostComponent {
       </ng-template>
       <ng-template dtBody>
         <tr>
-          <td>海邊民宿</td>
+          <td>北區分公司</td>
         </tr>
       </ng-template>
     </lib-data-table>
@@ -620,7 +620,7 @@ class RowClickHostComponent {
   readonly labels = LABELS;
   readonly rowClickable = signal(true);
   readonly columns = signal<DataTableColumn<Row>[]>([
-    { key: 'name', label: '車牌', primary: true },
+    { key: 'name', label: '單號', primary: true },
     { key: 'status', label: '狀態', primary: true },
     { key: 'mileage', label: '里程', align: 'end' },
   ]);

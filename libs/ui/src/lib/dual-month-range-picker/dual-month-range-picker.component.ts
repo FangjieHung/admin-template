@@ -47,7 +47,7 @@ function sameDay(a: Date | null, b: Date | null): boolean {
 
 /**
  * 雙月日期區間選擇器：點欄位開出並排的兩個月曆，點起日、再點迄日後送出 `rangeSelected`。
- * 原本在 libs/booking-flow（官網搜尋頁、admin 總覽搜尋卡），admin 建單第 1 步也要用，搬到 libs/ui 共用；
+ * 適合跨月的期間（專案期間、請假、報表區間）；
  * 畫面文字由 DUAL_MONTH_RANGE_PICKER_LABELS 提供。
  */
 @Component({

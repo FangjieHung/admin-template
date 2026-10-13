@@ -58,7 +58,7 @@
   // ---- 跨元件圖層順序 ----
   // 只替「會跟別的元件互相遮擋」的層命名，值維持現狀。CDK overlay（mat-dialog 等）用 1000，
   // 只在此註解記錄、不改：floating-appearance-panel 選 500 就是為了確保 dialog 開啟時蓋過它。
-  --app-z-sticky: 20; // 頁內固定列：booking-flow 結帳頁手機版釘在底部的訂單摘要（值照舊）。
+  --app-z-sticky: 20; // 頁內固定列：手機版釘在頁面底部的摘要或操作列（值照舊）。
   --app-z-drawer: 101; // responsive-panel 的展開面板；backdrop 用 --app-z-drawer - 1（100）。
   --app-z-floating: 500; // 外觀浮動面板／按鈕（floating-appearance-panel）。
 

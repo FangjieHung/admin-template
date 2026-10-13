@@ -31,7 +31,7 @@ describe('HeaderComponent 由選單推得的標題（defaultTitle，沒有頁面
 
   it('麵包屑節點有 route 時渲染成可點的連結', () => {
     const fixture = setup({
-      title: '會員',
+      title: '聯絡人',
       breadcrumbs: [{ label: '資料呈現', route: '/components' }],
     });
     const link = fixture.nativeElement.querySelector('.breadcrumb-link') as HTMLAnchorElement;
@@ -81,7 +81,7 @@ describe('HeaderComponent 頁面覆寫的標題與麵包屑（HeaderTitleSlot）
   });
 
   it('沒有 backTo 時不顯示返回按鈕', () => {
-    const fixture = setup({ title: '會員', breadcrumbs: [] });
+    const fixture = setup({ title: '聯絡人', breadcrumbs: [] });
     expect(fixture.nativeElement.querySelector('.topbar-back')).toBeNull();
   });
 });

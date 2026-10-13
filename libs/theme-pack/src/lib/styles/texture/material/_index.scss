@@ -1,6 +1,6 @@
 // src/styles/texture/material/_index.scss
 // Material 質地的完整輸出（造型 token + 全部元件 recipe）。
-// Material 是常駐質地（ADR 0010）：admin、booking、affiliate 的主樣式都直接 @use 這份。
+// Material 是常駐質地（ADR 0010）：admin（以及任何只用 Material 的 app）的主樣式都直接 @use 這份。
 // 其他質地是按需質地，各自由 <id>/_index.scss 編成 texture-<id>.css，不進任何主樣式。
 @forward 'tokens';
 @forward 'card';

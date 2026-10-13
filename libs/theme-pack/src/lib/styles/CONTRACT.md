@@ -1,7 +1,7 @@
 # 樣式契約（Style Contract）
 
 > 純文件，**不參與編譯**。列出共用 `ui-` class 契約與可用 token，供開發者查閱。
-> 兩軸主題（質地 × 配色）的概觀見 `docs/architecture/02-libs.md`。
+> 兩軸主題（質地 × 配色）的概觀見根目錄 `README.md`「雙軸主題系統」。
 
 元件與 template **只能**使用下列 `--mat-sys-*` 與 `--app-*` token；
 禁止寫死色碼或直接引用底層色板變數（`--primary-500` 等）——`npm run lint:theme` 會擋。
@@ -22,7 +22,7 @@
 | `.ui-text-title`                | 頁面大標（原 `.v-page-title`）                                                    |
 | `.ui-text-subtitle`             | 卡片與表單的小節標題（字級、字重由質地包提供）                                    |
 | `.ui-text-caption`              | 卡片內小節標／quiet label（原 `.v-card-label`）                                   |
-| `.ui-text-numeric`              | 數字文字（金額、日期、時間、數量、車牌）：預設 `tabular-nums`；Grid 另換 `--font-mono`（中文接 `--font-zh`）。元件不要自己寫 `font-variant-numeric`，在 template 加這個 class（`component.scss`）；data-table 的 `align: 'end'` 欄自動掛上 |
+| `.ui-text-numeric`              | 數字文字（金額、日期、時間、數量、單號）：預設 `tabular-nums`；Grid 另換 `--font-mono`（中文接 `--font-zh`）。元件不要自己寫 `font-variant-numeric`，在 template 加這個 class（`component.scss`）；data-table 的 `align: 'end'` 欄自動掛上 |
 | `.ui-chip` + `.ui-chip--{tone}` | 狀態徽章 + tone 變體（tone：`positive`/`info`/`neutral`/`warning`/`danger`）      |
 | `.ui-btn`                       | 按鈕（未來擴充：`--sm`/`--md`/`--lg` × `--solid`/`--outline`/`--ghost`/`--text`） |
 | `.ui-table`                     | 表格（未來擴充）                                                                  |
@@ -95,7 +95,7 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 | `--app-motion-loop` | `8s` | 無限循環的裝飾動畫（時長本身是節奏，不套三檔） | 已套用（clay 背景光暈：`8s`、另一顆 `× 1.25`＝10s、起跑 `× -0.25`＝-2s）；`prefers-reduced-motion` 時歸零，用到的 recipe 另寫 `animation: none` 停掉 |
 | `--app-disabled-fg` / `-bg` / `-opacity` | on-surface 38% / 12% / `0.38` | 停用狀態 | fg／bg 已套用（soft-ui、clay、frosted、editorial 的按鈕與膠囊）；material 等維持 Material 原生；`-opacity` 未使用 |
 | `--app-selection-bg` / `-fg` | `var(--mat-sys-primary-container)` / `var(--mat-sys-on-primary-container)` | 選取文字 | 已套用（`component.scss` 全域 `::selection`；深色側欄內改 shell-on 28% 底＋shell-on 字） |
-| `--app-z-sticky` / `--app-z-drawer` / `--app-z-floating` | `20` / `101` / `500` | 跨元件圖層順序（值不變） | 已套用（`libs/booking-flow` 結帳頁手機版底部摘要、`responsive-panel`、`floating-appearance-panel`）；CDK overlay 的 `1000` 只記錄於註解 |
+| `--app-z-sticky` / `--app-z-drawer` / `--app-z-floating` | `20` / `101` / `500` | 跨元件圖層順序（值不變） | 已套用（`responsive-panel`、`floating-appearance-panel`；`--app-z-sticky` 給頁內釘底的列）；CDK overlay 的 `1000` 只記錄於註解 |
 
 第二批（2026-09-27，會改變畫面）的決定與改前／改後對照見 ADR 0008「第二批」一節。
 另外：圓角一律用 `--mat-sys-corner-*`（`999px` 膠囊、`50%` 圓形、`0` 除外）；轉場與關鍵影格動畫時長一律用 `--app-motion-*`。

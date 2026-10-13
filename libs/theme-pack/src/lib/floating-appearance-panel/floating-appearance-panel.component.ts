@@ -20,8 +20,8 @@ import {
 // 一顆常駐按鈕，可拖曳停到不擋路的地方。
 //
 // 走查記錄（coordinator 要求，17 條路徑 × 1280／390 兩個寬度）：先試過把按鈕釘死在視窗四個角落
-// 各一輪，全部撞到東西——桌機寬度下跟每個列表頁頁首的主要操作鈕（「新增訂單」…）重疊、
-// 手機寬度下跟搜尋圖示鈕、page-toolbar 的固定操作列、dashboard 月曆檢視滿版鋪到視窗底都疊到過。
+// 各一輪，全部撞到東西——桌機寬度下跟每個列表頁頁首的主要操作鈕（「新增」…）重疊、
+// 手機寬度下跟搜尋圖示鈕、page-toolbar 的固定操作列、滿版頁鋪到視窗底都疊到過。
 // 後來改成掛進頁首的 flex 排版（不疊，因為 flexbox 天生不重疊），但使用者看過後選了另一個方向：
 // 維持真正的 position: fixed 浮動，改成「可拖曳」——把「這個角落安不安全」的判斷權交給使用者，
 // 讓他自己拖到當下這頁不擋路的地方，而不是由這顆元件自己去猜。定位運算（拖曳位移量、
@@ -31,7 +31,7 @@ import {
 // 這個 app 是 zoneless（package.json 沒有 zone.js），開關狀態、位移量、面板錨點都用 signal
 // 存，不是一般欄位——一開始用一般欄位在 MutationObserver callback 裡指派新值，數字算對了，
 // 畫面卻沒更新（zoneless 只認 signal／事件綁定觸發的變更偵測，不會理會 MutationObserver 這種
-// 直接呼叫瀏覽器 API 產生的 callback），實測换頁到建單頁時按鈕沒有如預期往上頂開才發現。
+// 直接呼叫瀏覽器 API 產生的 callback），實測換頁到長表單頁時按鈕沒有如預期往上頂開才發現。
 @Component({
   selector: 'lib-floating-appearance-panel',
   standalone: true,
@@ -70,7 +70,7 @@ export class FloatingAppearancePanelComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadPosition();
-    // 貼底 sticky 列（page-toolbar 的 .toolbar-actions、建單頁的 .order-create__footer）
+    // 貼底 sticky 列（page-toolbar 的 .toolbar-actions、長表單頁的貼底操作列）
     // 會隨路由出現/消失；這個元件是單一實例掛在殼層，不會隨路由重建，用 MutationObserver
     // 盯 document.body 的變動，換頁時（router-outlet 換內容）重算一次預設位置需不需要讓位。
     // 只有「使用者還沒自己拖過」時才自動調整，已經自訂過位置的話尊重使用者的選擇。
@@ -244,7 +244,7 @@ export class FloatingAppearancePanelComponent implements OnInit, OnDestroy {
 
   /**
    * 貼底 sticky／fixed 列目前實際佔用的高度：page-toolbar 的 .toolbar-actions（行動版操作列）、
-   * 建單頁的 .order-create__footer。直接量 DOM（getBoundingClientRect + computed position），
+   * 長表單頁的貼底操作列。直接量 DOM（getBoundingClientRect + computed position），
    * 不寫死任何頁面專屬的數字或 class 判斷式以外的邏輯——哪一頁有這兩個 class、贴不贴底完全由
    * 當下渲染出來的樣式決定。
    */

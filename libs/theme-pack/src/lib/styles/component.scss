@@ -24,7 +24,7 @@ body {
 }
 
 // ---- 數字文字（CONTRACT.md `.ui-text-numeric`）----
-// 金額、日期、時間、數量、車牌等會被比較或對齊的數字：等寬數字，數字變動時字寬不跳。
+// 金額、日期、時間、數量、單號等會被比較或對齊的數字：等寬數字，數字變動時字寬不跳。
 // 元件不要再自己寫 `font-variant-numeric: tabular-nums`，改在 template 加這個 class，
 // 質地才有單一掛勾換字體（Grid 換成 --font-mono）。權重只有 0-1-0，元件 scss 可就地蓋過。
 .ui-text-numeric {
@@ -55,7 +55,7 @@ body {
 }
 
 // 欄位邊界（ADR 0008「欄位邊界」，第三批）：形式由質地 recipe 決定，這裡只放跨質地共通的兩件事。
-// 1. outlined 欄位（booking-flow 的確認頁／加購數量等）的外框色吃 --app-field-border。
+// 1. outlined 欄位（一般表單、對話框裡的欄位）的外框色吃 --app-field-border。
 //    hover 維持 Material 預設的 on-surface（比 outline 深），focus／error 維持主色／error 色。
 .mat-mdc-form-field {
   --mat-form-field-outlined-outline-color: var(--app-field-border);

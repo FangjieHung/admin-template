@@ -204,7 +204,7 @@
   .mat-mdc-header-cell:last-child {
     border-right: 0;
   }
-  // 所有數字資料（金額、日期、時間、數量、車牌；data-table 的 align:'end' 欄也會自動掛上）一律用等寬字體，
+  // 所有數字資料（金額、日期、時間、數量、單號；data-table 的 align:'end' 欄也會自動掛上）一律用等寬字體，
   // 配合共用 class 的 tabular-nums。中文字接回 --font-zh（中文一律用裝置的系統字，與 --font-display 同一個寫法），
   // 不讓「剩 3 台」「10/5 起」這類夾中文的數字文字掉到系統備援字體。
   .ui-text-numeric {

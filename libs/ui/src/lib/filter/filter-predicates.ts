@@ -144,7 +144,7 @@ function formatDay(value: string): string {
   return value.replace(/-/g, '/');
 }
 
-/** chip 上顯示的文字，例：「狀態：已預約、出租中」「取車日期：今天」「金額：1,000–5,000 元」。 */
+/** chip 上顯示的文字，例：「狀態：待處理、進行中」「到期日：今天」「金額：1,000–5,000 元」。 */
 export function describeCondition<T>(cond: FilterCondition, field: FilterField<T>, labels: FilterLabels): string {
   return formatLabel(labels.chip, { field: field.label, value: describeValue(cond, field, labels) });
 }

@@ -18,7 +18,7 @@ interface DataTableColumnBase {
   /** 不納入匯出（actions 欄用）。 */
   exportSkip?: boolean;
   /**
-   * 固定在左側：橫向捲動時不跟著捲（識別欄，例如訂單編號）。只有排在最前面的那一個 frozen 欄有效，
+   * 固定在左側：橫向捲動時不跟著捲（識別欄，例如單號）。只有排在最前面的那一個 frozen 欄有效，
    * 它在欄位選擇面板裡不能隱藏、不能移動。
    */
   frozen?: boolean;

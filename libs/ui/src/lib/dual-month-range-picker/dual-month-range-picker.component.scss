@@ -23,7 +23,7 @@
 }
 
 /* ── 手機：面板改成貼齊視窗底部的 bottom sheet ────────────────────
-   768px 是 booking-flow 既有的手機斷點（見 date-step.component.scss）。
+   768px 是範本沿用的手機斷點。
    兩個月改為直向堆疊，內容因此會高過視窗，靠自身捲動而非撐破 pane。 */
 @media (max-width: 767px) {
   .calendars-row {

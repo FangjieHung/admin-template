@@ -6,13 +6,13 @@
 // 現在用 `appearance: none` 重畫外觀，但保留原生 <input>：鍵盤（Tab、Space、方向鍵）、
 // 表單值、螢幕閱讀器的角色與狀態都不變。
 //
-// 範圍：所有原生 `input[type=checkbox|radio]`（libs/ui data-table 的列選取與全選、派車「可用車輛」
-// 列表、booking-flow 保險方案），排除 Angular Material 自己的 native control（MDC 用透明的原生
+// 範圍：所有原生 `input[type=checkbox|radio]`（libs/ui data-table 的列選取與全選、
+// 展示 app 的 Material 元件總覽），排除 Angular Material 自己的 native control（MDC 用透明的原生
 // input 當點擊熱區，改它的尺寸會縮小熱區）。mat-checkbox／mat-radio 的外觀改由下方的 MDC token
 // 指向同一組變數。
 //
 // 權重：`input:where(...)` 只有 0-0-1，元件 scss（emulated 後 0-2-0）要就地調整時可以直接蓋過
-// （例如派車列表的單選鈕把焦點框交給整列），質地 recipe 用 `[data-paradigm='x']` 前綴即可加上
+// （例如清單列裡的單選鈕把焦點框交給整列），質地 recipe 用 `[data-paradigm='x']` 前綴即可加上
 // 形狀或陰影。
 //
 // 顏色對照（對比掃描 check_* pair，門檻 3:1）：

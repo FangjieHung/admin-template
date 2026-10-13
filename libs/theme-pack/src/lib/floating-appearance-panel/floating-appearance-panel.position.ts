@@ -87,7 +87,7 @@ export function serializeOffset(offset: Offset): string {
 
 /**
  * 預設位置：右下角 16px 內縮；`bottomClearance` 是貼底 sticky 列（page-toolbar 的
- * .toolbar-actions、建單頁的 .order-create__footer）目前算出來的高度，讓按鈕往上頂開。
+ * .toolbar-actions、長表單頁的貼底操作列）目前算出來的高度，讓按鈕往上頂開。
  * 沒有 sticky 列時傳 0，就是單純的右下角。
  */
 export function defaultOffset(bottomClearance: number): Offset {

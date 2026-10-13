@@ -19,7 +19,7 @@ interface FilterFieldBase {
 export type FilterField<T> =
   | (FilterFieldBase & {
       type: 'text';
-      /** 回傳陣列時任一個包含關鍵字就算符合（例如同時比對姓名與車牌）。 */
+      /** 回傳陣列時任一個包含關鍵字就算符合（例如同時比對單號與標題）。 */
       value: (row: T) => string | readonly string[] | null | undefined;
       placeholder?: string;
     })

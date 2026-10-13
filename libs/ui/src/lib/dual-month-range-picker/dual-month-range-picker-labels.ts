@@ -2,10 +2,10 @@ import { InjectionToken } from '@angular/core';
 
 /**
  * 雙月日期區間選擇器的畫面文字。libs/ui 不內建使用者可見字串（同 DataTableLabels），
- * 由使用端提供：官網由 booking-flow 的 BOOKING_FLOW_LABELS 帶入，admin 由 ZH_TW 帶入。
+ * 由使用端提供（展示 app 見 apps/admin/src/app/shared/ui/component-label-providers.ts）。
  */
 export interface DualMonthRangePickerLabels {
-  /** 欄位標籤，例：「租期」。 */
+  /** 欄位標籤，例：「專案期間」。 */
   field: string;
   /** 尚未選擇時欄位內的提示文字。 */
   placeholder: string;

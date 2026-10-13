@@ -92,7 +92,7 @@
 
   // 欄位邊界（ADR 0008「欄位邊界」）：outline（cream-300 #d0cbbd）對頁面／卡片／topbar 底色只有
   // 1.49:1、對 material 欄位填色 1.37:1。往 on-surface-variant（cream-600）混 68%，是讓 5 個相容質地
-  // 在建單頁、訂單列表篩選列、優惠券對話框都同時「對外側底色」與「對欄位填色」≥ 3:1 的最小整數
+  // 在表單頁、清單篩選列、對話框都同時「對外側底色」與「對欄位填色」≥ 3:1 的最小整數
   // （改前量到：外側最低 3.26、填色最低 3.01）；只要求對外側時 62% 即可，取 68% 讓底線疊在填色上也過。
   --app-field-border: color-mix(in srgb, var(--mat-sys-on-surface-variant) 68%, var(--mat-sys-outline));
 }

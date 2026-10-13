@@ -7,7 +7,7 @@ import { HoverPreviewRangeStrategy } from './hover-preview-range-strategy';
 import { DUAL_MONTH_RANGE_PICKER_LABELS, DualMonthRangePickerLabels } from './dual-month-range-picker-labels';
 
 const LABELS: DualMonthRangePickerLabels = {
-  field: '租期',
+  field: '專案期間',
   placeholder: '選擇日期範圍',
   prevMonth: '上個月',
   nextMonth: '下個月',
@@ -146,7 +146,7 @@ describe('DualMonthRangePickerComponent 畫面文字與相依', () => {
     });
     const fixture = TestBed.createComponent(DualMonthRangePickerComponent);
     expect(() => fixture.detectChanges()).not.toThrow();
-    expect((fixture.nativeElement as HTMLElement).querySelector('mat-label')?.textContent?.trim()).toBe('租期');
+    expect((fixture.nativeElement as HTMLElement).querySelector('mat-label')?.textContent?.trim()).toBe('專案期間');
   });
 });
 
@@ -294,7 +294,7 @@ describe('DualMonthRangePickerComponent 鍵盤操作（WCAG combobox/datepicker 
     expect(component['isOpen']).toBe(false);
     expect(document.activeElement).toBe(input);
   });
-  it('用鍵盤（Enter）在月曆選完起訖、面板自動關閉後，焦點回到租期欄位而不是掉到 <body>', async () => {
+  it('用鍵盤（Enter）在月曆選完起訖、面板自動關閉後，焦點回到日期欄位而不是掉到 <body>', async () => {
     input.focus();
     pressKey(input, { key: 'Enter' });
     fixture.detectChanges();
