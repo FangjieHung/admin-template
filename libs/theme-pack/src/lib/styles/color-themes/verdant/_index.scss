@@ -1,0 +1,8 @@
+// src/styles/color-themes/verdant/_index.scss
+// 常駐配色（ADR 0013）：verdant 是預設配色，也是按需配色載入失敗時的退路，由 admin 的 styles.scss 直接 @use、
+// 編進主樣式；其他配色各自由 <id>/_index.scss 編成 color-<id>.css（apps/admin/project.json 的 inject:false 入口）。
+// 內容跟按需配色的入口一樣：配色 token＋只在這個配色才生效的組合規則（_combos.scss 的 for-color）。
+@use '../../combos';
+@forward 'tokens';
+
+@include combos.for-color('verdant');

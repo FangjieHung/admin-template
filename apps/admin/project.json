@@ -75,6 +75,51 @@
             "input": "libs/theme-pack/src/lib/styles/texture/cockpit/_index.scss",
             "bundleName": "texture-cockpit",
             "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/color-themes/midnight/_index.scss",
+            "bundleName": "color-midnight",
+            "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/color-themes/sandstone/_index.scss",
+            "bundleName": "color-sandstone",
+            "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/color-themes/azure/_index.scss",
+            "bundleName": "color-azure",
+            "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/color-themes/cool-grey/_index.scss",
+            "bundleName": "color-cool-grey",
+            "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/color-themes/candy/_index.scss",
+            "bundleName": "color-candy",
+            "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/color-themes/mist-ink/_index.scss",
+            "bundleName": "color-mist-ink",
+            "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/color-themes/glacier-blue/_index.scss",
+            "bundleName": "color-glacier-blue",
+            "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/color-themes/graphite/_index.scss",
+            "bundleName": "color-graphite",
+            "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/color-themes/oled/_index.scss",
+            "bundleName": "color-oled",
+            "inject": false
           }
         ],
         "stylePreprocessorOptions": { "includePaths": ["libs"] },
@@ -90,7 +135,7 @@
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "659kB",
+              "maximumWarning": "603kB",
               "maximumError": "850kB"
             },
             {

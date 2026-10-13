@@ -5,10 +5,11 @@
 // 常駐質地（ADR 0010）：只有 Material 編進主樣式；其餘質地各自編成 texture-<id>.css（見 project.json 的 styles），
 // 切到該質地時才下載。
 @use 'theme-pack/src/lib/styles/texture/material' as *;
-@use 'theme-pack/src/lib/styles/color-themes/registry' as *;
+// 常駐配色（ADR 0013）：只有預設配色 Verdant 編進主樣式；其餘配色各自編成 color-<id>.css，切到該配色時才下載。
+// 組合覆寫（_combos.scss）按配色分組，跟著各配色的入口輸出（verdant 的在這裡）。
+@use 'theme-pack/src/lib/styles/color-themes/verdant' as *;
 @use 'theme-pack/src/lib/styles/component';
 @use 'theme-pack/src/lib/styles/choice-controls';
-@use 'theme-pack/src/lib/styles/combos' as *;
 
 /* ============================================================
    Angular Material：主題（色彩/造型 token 由

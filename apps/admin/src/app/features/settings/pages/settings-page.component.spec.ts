@@ -6,11 +6,11 @@ import { ZH_TW } from '../../../core/i18n/zh-tw';
 import { HeaderTitleSlot } from '../../../layout/header/header-title';
 import { SettingsPageComponent } from './settings-page.component';
 
-// jsdom 不會下載樣式表：手動送出按需質地 <link> 的 load 事件（ADR 0010），再等 setParadigm 的 promise 跑完。
-async function loadTexture(id: string): Promise<void> {
+// jsdom 不會下載樣式表：手動送出按需質地／按需配色 <link> 的 load 事件（ADR 0010、0013），再等切換的 promise 跑完。
+async function loadPendingStyles(): Promise<void> {
   document.head
-    .querySelector(`link[rel="stylesheet"][data-texture-css="${id}"]`)
-    ?.dispatchEvent(new Event('load'));
+    .querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"][data-texture-css], link[rel="stylesheet"][data-color-css]')
+    .forEach((l) => l.dataset['state'] !== 'loaded' && l.dispatchEvent(new Event('load')));
   await new Promise((resolve) => setTimeout(resolve));
 }
 
@@ -21,7 +21,9 @@ describe('SettingsPageComponent', () => {
   });
 
   afterEach(() => {
-    document.head.querySelectorAll('link[data-texture-css], link[data-texture-prefetch]').forEach((l) => l.remove());
+    document.head
+      .querySelectorAll('link[data-texture-css], link[data-texture-prefetch], link[data-color-css], link[data-color-prefetch]')
+      .forEach((l) => l.remove());
   });
 
   it('顯示外觀設定文案', () => {
@@ -73,7 +75,7 @@ describe('SettingsPageComponent', () => {
 
     (fixture.nativeElement.querySelector(`[data-theme-id="${color.id}"]`) as HTMLButtonElement).click();
     (fixture.nativeElement.querySelector(`[data-paradigm-id="${paradigm.id}"]`) as HTMLButtonElement).click();
-    await loadTexture(paradigm.id);
+    await loadPendingStyles();
     fixture.detectChanges();
 
     expect(theme.theme()).toBe(color.id);
@@ -93,7 +95,7 @@ describe('SettingsPageComponent', () => {
     fixture.detectChanges();
 
     (fixture.nativeElement.querySelector('[data-paradigm-id="soft-ui"]') as HTMLButtonElement).click();
-    await loadTexture('soft-ui');
+    await loadPendingStyles();
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('[data-theme-id="sandstone"]')).toBeNull();
@@ -107,7 +109,7 @@ describe('SettingsPageComponent', () => {
 
     const theme = TestBed.inject(ThemeService);
     const ready = theme.init();
-    await loadTexture('soft-ui');
+    await loadPendingStyles();
     await ready;
     const fixture = TestBed.createComponent(SettingsPageComponent);
     fixture.detectChanges();

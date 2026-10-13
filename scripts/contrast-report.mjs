@@ -458,32 +458,41 @@ async function extractFocusOutline(page, selector) {
   }, selector);
 }
 
-// ADR 0010：只有 Material 編在主樣式裡，其他質地是按需載入的 texture-<id>.css。重新整理時 index.html 的開機腳本
-// 會依 localStorage 載入它；這裡再確認一次該質地的 <link> 已載入完成（沒有就自己插入並等 load），
-// 才改 dataset 開始量，否則會量到沒有質地樣式的畫面。插入位置跟 ThemeService 一樣排在主樣式之前。
+// ADR 0010／0013：主樣式只有常駐質地（Material）與常駐配色（Verdant），其他質地與配色是按需載入的
+// texture-<id>.css／color-<id>.css。重新整理時 index.html 的開機腳本會依 localStorage 載入它們；但 ThemeService.init()
+// 會把不相容的組合校正成預設配色、並移除沒套用的配色 <link>，所以這裡再確認一次兩個 <link> 都已載入完成（沒有就自己
+// 插入並等 load），才改 dataset 開始量，否則會量到沒有質地或配色樣式的畫面。插入位置跟 ThemeService 一樣：
+// 質地排在開機腳本後面、配色排在質地後面，都在主樣式之前。
 async function applyCombo(page, paradigm, theme) {
   await page.evaluate(
     async ({ p, t }) => {
-      if (p !== 'material') {
-        const selector = `link[rel="stylesheet"][data-texture-css="${p}"]`;
-        let link = document.querySelector(selector);
-        if (!link || !link.sheet) {
-          link?.remove();
-          link = document.createElement('link');
-          link.rel = 'stylesheet';
-          link.href = `texture-${p}.css`;
-          link.setAttribute('data-texture-css', p);
-          const loaded = new Promise((resolve, reject) => {
-            link.addEventListener('load', resolve, { once: true });
-            link.addEventListener('error', () => reject(new Error(`無法載入 texture-${p}.css`)), { once: true });
-          });
-          const anchors = document.querySelectorAll('link[data-texture-css]');
-          const anchor = anchors[anchors.length - 1] ?? document.getElementById('app-texture-boot');
-          if (anchor) anchor.after(link);
-          else document.head.prepend(link);
-          await loaded;
+      const ensure = async (attr, id, href, anchorAttrs) => {
+        let link = document.querySelector(`link[rel="stylesheet"][${attr}="${id}"]`);
+        if (link && link.sheet) return;
+        link?.remove();
+        link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        link.setAttribute(attr, id);
+        const loaded = new Promise((resolve, reject) => {
+          link.addEventListener('load', resolve, { once: true });
+          link.addEventListener('error', () => reject(new Error(`無法載入 ${href}`)), { once: true });
+        });
+        let anchor = null;
+        for (const a of anchorAttrs) {
+          const found = document.querySelectorAll(`link[rel="stylesheet"][${a}]`);
+          if (found.length > 0) {
+            anchor = found[found.length - 1];
+            break;
+          }
         }
-      }
+        anchor = anchor ?? document.getElementById('app-texture-boot');
+        if (anchor) anchor.after(link);
+        else document.head.prepend(link);
+        await loaded;
+      };
+      if (p !== 'material') await ensure('data-texture-css', p, `texture-${p}.css`, ['data-texture-css']);
+      if (t !== 'verdant') await ensure('data-color-css', t, `color-${t}.css`, ['data-color-css', 'data-texture-css']);
       document.documentElement.dataset['paradigm'] = p;
       document.documentElement.dataset['theme'] = t;
     },

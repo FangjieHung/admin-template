@@ -4,15 +4,27 @@
 // 只有某一格「質地 × 配色」需要例外（質地層與配色層都想改同一個變數）時才在這裡加規則。
 // 分層規則見 `_semantic.scss` 開頭註解與 `docs/adr/0008-semantic-token-layers.md`。
 //
+// ADR 0013：組合規則按「配色」分組寫在 `for-color($id)` 裡，跟著該配色的樣式一起輸出——
+//   - 常駐配色（Verdant）：admin 的 `styles.scss` `@include for-color('verdant')`，編進主樣式。
+//   - 按需配色：`color-themes/<id>/_index.scss` `@include for-color('<id>')`，編進 `color-<id>.css`。
+// 規則只在 `data-theme` 是該配色時才比對得到，而這個配色生效時它的檔案一定已經載入（ThemeService 等檔案載入完才換
+// `data-theme`），所以跟著配色走就保證會生效；未使用的配色不會把它的組合規則帶進主樣式。
+// 0-3-0 高於質地層與配色層的 0-2-0，勝負與載入順序無關，不受「按需檔案排在主樣式之前」影響。
+// 這個檔案本身不輸出任何 CSS，新增規則時記得放進對應配色的 `@if` 分支。
+//
 // 第二批（2026-09-27）加入第一條：material × midnight 的陰影透明度。
 
-// Material 質地的陰影透明度（4/5/7/10%）是為淺底設計的；Midnight 的陰影色調已在配色層改成近黑，
-// 但同樣的透明度在 #0e1626 深底上幾乎看不見，卡片會失去層次。放大 4 倍（16/20/28/40%），
-// 接近 Material 深色主題的陰影濃度。--mat-sys-level* 由 material 質地層定義、深色與否由配色決定，
-// 兩軸都有份，所以放組合層（ADR 0008 決策 3）。
-:root[data-paradigm='material'][data-theme='midnight'] {
-  --mat-sys-level1: 0 1px 2px color-mix(in srgb, var(--app-shadow-tint) 16%, transparent);
-  --mat-sys-level2: 0 2px 8px color-mix(in srgb, var(--app-shadow-tint) 20%, transparent);
-  --mat-sys-level3: 0 8px 24px color-mix(in srgb, var(--app-shadow-tint) 28%, transparent);
-  --mat-sys-level4: 0 16px 40px color-mix(in srgb, var(--app-shadow-tint) 40%, transparent);
+@mixin for-color($id) {
+  @if $id == 'midnight' {
+    // Material 質地的陰影透明度（4/5/7/10%）是為淺底設計的；Midnight 的陰影色調已在配色層改成近黑，
+    // 但同樣的透明度在 #0e1626 深底上幾乎看不見，卡片會失去層次。放大 4 倍（16/20/28/40%），
+    // 接近 Material 深色主題的陰影濃度。--mat-sys-level* 由 material 質地層定義、深色與否由配色決定，
+    // 兩軸都有份，所以放組合層（ADR 0008 決策 3）。
+    :root[data-paradigm='material'][data-theme='midnight'] {
+      --mat-sys-level1: 0 1px 2px color-mix(in srgb, var(--app-shadow-tint) 16%, transparent);
+      --mat-sys-level2: 0 2px 8px color-mix(in srgb, var(--app-shadow-tint) 20%, transparent);
+      --mat-sys-level3: 0 8px 24px color-mix(in srgb, var(--app-shadow-tint) 28%, transparent);
+      --mat-sys-level4: 0 16px 40px color-mix(in srgb, var(--app-shadow-tint) 40%, transparent);
+    }
+  }
 }

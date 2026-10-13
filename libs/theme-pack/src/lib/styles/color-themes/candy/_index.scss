@@ -1,0 +1,8 @@
+// src/styles/color-themes/candy/_index.scss
+// 按需配色（ADR 0013）：candy 的配色 token＋只在這個配色才生效的組合規則（_combos.scss 的 for-color），
+// 在 apps/admin/project.json 以 `bundleName: color-candy`、`inject: false` 編成獨立的 color-candy.css，
+// 切到這個配色時才由 ThemeService 載入。
+@use '../../combos';
+@forward 'tokens';
+
+@include combos.for-color('candy');

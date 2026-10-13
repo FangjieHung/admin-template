@@ -67,8 +67,9 @@ import { FloatingAppearancePanelComponent } from '@admin-template/theme-pack/flo
         { name: 'paradigm()／theme()', type: 'Signal<string>', description: '目前質地／配色 id。' },
         { name: 'compatibleThemes()', type: 'Signal<ThemeOption[]>', description: '目前質地相容的配色。' },
         { name: 'setParadigm(id)', type: 'Promise<void>', description: '切換質地；按需質地下載完才套用，失敗時退回 Material 並提示。' },
-        { name: 'setTheme(id)', type: 'void', description: '切換配色（不相容時忽略）。' },
-        { name: 'prefetchTextures()', type: 'void', description: '背景預先下載按需質地的樣式。' },
+        { name: 'setTheme(id)', type: 'Promise<void>', description: '切換配色；按需配色下載完才套用，失敗時退回 Verdant 並提示。' },
+        { name: 'pendingParadigm()／pendingTheme()', type: 'Signal<string | null>', description: '已選、樣式還在下載的質地／配色。' },
+        { name: 'prefetchTextures()／prefetchColors()', type: 'void', description: '背景預先下載按需質地／按需配色的樣式。' },
       ],
     },
   ];

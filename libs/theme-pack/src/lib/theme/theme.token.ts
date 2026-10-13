@@ -51,6 +51,26 @@ export function textureStylesheetHref(id: string): string {
   return `texture-${id}.css`;
 }
 
+// ADR 0013：配色比照質地。常駐配色（預設配色）編進主樣式，也是按需配色載入失敗時的退路；其餘配色都是按需配色，
+// 各自編成 `color-<id>.css`（apps/admin/project.json 的 styles，`inject: false`）。新增配色預設就是按需，不用改這裡；
+// admin index.html 開機腳本的 `onDemandColors` 與 project.json 由 scripts/texture-registration.spec.mjs 比對。
+export const RESIDENT_COLOR_THEME_IDS: readonly string[] = [DEFAULT_THEME];
+
+/** 這個配色的樣式是否要按需下載（常駐配色以外的已知配色）。 */
+export function isOnDemandColorTheme(id: string): boolean {
+  return COLOR_THEMES.some((c) => c.id === id) && !RESIDENT_COLOR_THEME_IDS.includes(id);
+}
+
+/** 按需配色樣式檔的網址（相對於 `<base href>`；檔名不帶 hash，同 ADR 0010）。 */
+export function colorThemeStylesheetHref(id: string): string {
+  return `color-${id}.css`;
+}
+
+/** 不認得的配色 id（已刪除的配色殘留在 localStorage、拼錯）一律退回 DEFAULT_THEME。 */
+export function resolveThemeId(id: string | null | undefined): string {
+  return COLOR_THEMES.some((c) => c.id === id) ? (id as string) : DEFAULT_THEME;
+}
+
 // ADR 0007：質地是主軸，每個質地宣告自己的相容配色（白名單）與一個預設配色。
 // 清單於 2026-09-27 由設計定案（ticket 09），依據是美感；56 格對比已全數合格（ticket 15）。
 // 2026-10-13 新增 Graphite、OLED 兩套深色配色與 Cockpit 質地（ADR 0012）：新增的格子是提案，待使用者定案；

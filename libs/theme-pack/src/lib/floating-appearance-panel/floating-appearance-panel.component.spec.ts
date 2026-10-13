@@ -1,16 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { COLOR_THEMES, DEFAULT_PARADIGM, isThemeCompatible, texture } from '../theme/theme.token';
+import { COLOR_THEMES, DEFAULT_PARADIGM, DEFAULT_THEME, isThemeCompatible, texture } from '../theme/theme.token';
 import { ThemeService } from '../theme/theme.service';
 import { AppearancePanelService } from '../theme/appearance-panel.service';
 import { FloatingAppearancePanelComponent } from './floating-appearance-panel.component';
 import { POSITION_STORAGE_KEY } from './floating-appearance-panel.position';
 
-// jsdom 不會下載樣式表：手動送出按需質地 <link> 的 load 事件（ADR 0010），再等 setParadigm 的 promise 跑完。
-async function loadTexture(id: string): Promise<void> {
+// jsdom 不會下載樣式表：手動送出按需質地／按需配色 <link> 的 load 事件（ADR 0010、0013），再等切換的 promise 跑完。
+async function loadPendingStyles(): Promise<void> {
   document.head
-    .querySelector(`link[rel="stylesheet"][data-texture-css="${id}"]`)
-    ?.dispatchEvent(new Event('load'));
+    .querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"][data-texture-css], link[rel="stylesheet"][data-color-css]')
+    .forEach((l) => l.dataset['state'] !== 'loaded' && l.dispatchEvent(new Event('load')));
   await new Promise((resolve) => setTimeout(resolve));
 }
 
@@ -21,7 +21,9 @@ describe('FloatingAppearancePanelComponent', () => {
   });
 
   afterEach(() => {
-    document.head.querySelectorAll('link[data-texture-css], link[data-texture-prefetch]').forEach((l) => l.remove());
+    document.head
+      .querySelectorAll('link[data-texture-css], link[data-texture-prefetch], link[data-color-css], link[data-color-prefetch]')
+      .forEach((l) => l.remove());
   });
 
   function create() {
@@ -62,7 +64,7 @@ describe('FloatingAppearancePanelComponent', () => {
     }
   });
 
-  it('點選質地／配色會更新 ThemeService 並標示 aria-pressed', () => {
+  it('點選質地／配色會更新 ThemeService 並標示 aria-pressed', async () => {
     TestBed.inject(AppearancePanelService).setVisible(true);
     const fixture = create();
     const el = fixture.nativeElement as HTMLElement;
@@ -71,25 +73,32 @@ describe('FloatingAppearancePanelComponent', () => {
 
     const theme = TestBed.inject(ThemeService);
     (el.querySelector('[data-theme-id="midnight"]') as HTMLButtonElement).click();
+    // ADR 0013：配色樣式載入完成前維持舊配色。
+    expect(theme.theme()).toBe('verdant');
+    await loadPendingStyles();
     fixture.detectChanges();
 
     expect(theme.theme()).toBe('midnight');
     expect(el.querySelector('[data-theme-id="midnight"]')?.getAttribute('aria-pressed')).toBe('true');
   });
 
-  it('ADR 0010：打開面板就在背景預先下載所有按需質地的樣式', () => {
+  it('ADR 0010／0013：打開面板就在背景預先下載所有按需質地與按需配色的樣式', () => {
     TestBed.inject(AppearancePanelService).setVisible(true);
     const fixture = create();
     const el = fixture.nativeElement as HTMLElement;
-    expect(document.head.querySelector('link[rel="prefetch"][data-texture-prefetch]')).toBeNull();
+    expect(document.head.querySelector('link[rel="prefetch"]')).toBeNull();
 
     (el.querySelector('.appearance-fab') as HTMLButtonElement).click();
     fixture.detectChanges();
 
-    const prefetched = Array.from(document.head.querySelectorAll<HTMLLinkElement>('link[rel="prefetch"]')).map(
-      (l) => l.dataset['texturePrefetch'],
-    );
+    const prefetched = Array.from(
+      document.head.querySelectorAll<HTMLLinkElement>('link[rel="prefetch"][data-texture-prefetch]'),
+    ).map((l) => l.dataset['texturePrefetch']);
     expect(prefetched).toEqual(texture.map((t) => t.id).filter((id) => id !== DEFAULT_PARADIGM));
+    const colors = Array.from(document.head.querySelectorAll<HTMLLinkElement>('link[rel="prefetch"][data-color-prefetch]')).map(
+      (l) => l.dataset['colorPrefetch'],
+    );
+    expect(colors).toEqual(COLOR_THEMES.map((c) => c.id).filter((id) => id !== DEFAULT_THEME));
   });
 
   it('ADR 0007：切到 Soft UI 後配色列只顯示相容配色（跟設定頁一致，重用 ThemeService.compatibleThemes）', async () => {
@@ -102,7 +111,7 @@ describe('FloatingAppearancePanelComponent', () => {
     (el.querySelector('[data-paradigm-id="soft-ui"]') as HTMLButtonElement).click();
     // ADR 0010：樣式載入完成前維持舊質地。
     expect(TestBed.inject(ThemeService).paradigm()).toBe(DEFAULT_PARADIGM);
-    await loadTexture('soft-ui');
+    await loadPendingStyles();
     fixture.detectChanges();
 
     expect(el.querySelector('[data-theme-id="sandstone"]')).toBeNull();

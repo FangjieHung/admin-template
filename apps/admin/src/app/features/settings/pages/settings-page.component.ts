@@ -26,8 +26,9 @@ export class SettingsPageComponent {
   constructor() {
     // /settings 不在側欄選單裡，由頁面自己設定標題。
     provideHeaderTitle(() => ({ title: this.t.settingsPage.title, breadcrumbs: [] }));
-    // ADR 0010：設定頁跟外觀面板一樣列出全部質地，進頁就在背景預先下載按需質地的樣式。
+    // ADR 0010／0013：設定頁跟外觀面板一樣列出質地與配色，進頁就在背景預先下載按需質地與按需配色的樣式。
     this.theme.prefetchTextures();
+    this.theme.prefetchColors();
   }
 
   protected onParadigm(id: string): void {
@@ -36,7 +37,8 @@ export class SettingsPageComponent {
   }
 
   protected onTheme(id: string): void {
-    this.theme.setTheme(id);
+    // 按需配色載入完成才會真的切換（ADR 0013），失敗時 ThemeService 自己退回並提示。
+    void this.theme.setTheme(id);
   }
 
   protected onAppearancePanelToggle(event: MatSlideToggleChange): void {
