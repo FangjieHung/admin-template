@@ -22,7 +22,7 @@
 | `.ui-text-title`                | 頁面大標（原 `.v-page-title`）                                                    |
 | `.ui-text-subtitle`             | 卡片與表單的小節標題（字級、字重由質地包提供）                                    |
 | `.ui-text-caption`              | 卡片內小節標／quiet label（原 `.v-card-label`）                                   |
-| `.ui-text-numeric`              | 數字文字（金額、日期、時間、數量、單號）：預設 `tabular-nums`；Grid、Ledger 另換 `--font-mono`（中文接 `--font-zh`）。元件不要自己寫 `font-variant-numeric`，在 template 加這個 class（`component.scss`）；data-table 的 `align: 'end'` 欄自動掛上 |
+| `.ui-text-numeric`              | 數字文字（金額、日期、時間、數量、單號）：預設 `tabular-nums`；Grid、Ledger、Cockpit 另換 `--font-mono`（中文接 `--font-zh`）。元件不要自己寫 `font-variant-numeric`，在 template 加這個 class（`component.scss`）；data-table 的 `align: 'end'` 欄自動掛上 |
 | `.ui-chip` + `.ui-chip--{tone}` | 狀態徽章 + tone 變體（tone：`positive`/`info`/`neutral`/`warning`/`danger`）      |
 | `.ui-btn`                       | 按鈕（未來擴充：`--sm`/`--md`/`--lg` × `--solid`/`--outline`/`--ghost`/`--text`） |
 | `.ui-table`                     | 表格（未來擴充）                                                                  |
@@ -95,7 +95,7 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 | `--app-motion-loop` | `8s` | 無限循環的裝飾動畫（時長本身是節奏，不套三檔） | 已套用（clay 背景光暈：`8s`、另一顆 `× 1.25`＝10s、起跑 `× -0.25`＝-2s）；`prefers-reduced-motion` 時歸零，用到的 recipe 另寫 `animation: none` 停掉 |
 | `--app-disabled-fg` / `-bg` / `-opacity` | on-surface 38% / 12% / `0.38` | 停用狀態 | fg／bg 已套用（soft-ui、clay、frosted、editorial 的按鈕與膠囊）；material 等維持 Material 原生；`-opacity` 未使用 |
 | `--app-selection-bg` / `-fg` | `var(--mat-sys-primary-container)` / `var(--mat-sys-on-primary-container)` | 選取文字 | 已套用（`component.scss` 全域 `::selection`；深色側欄內改 shell-on 28% 底＋shell-on 字） |
-| `--app-skeleton-bg` / `-shine` / `-radius` / `-duration` | on-surface 8% / surface 60% / `var(--mat-sys-corner-small)` / `calc(var(--app-motion-loop) / 5)`（1.6s） | 載入骨架的色塊底色、閃光亮帶、圓角、閃光循環時長 | 已套用（`libs/ui` 的 `lib-skeleton`、`lib-data-table` 的載入列，共用 `feedback-state/_skeleton-block.scss`）；圓角跟著質地的 corner-small，目前沒有質地需要覆寫；`prefers-reduced-motion` 時 loop 歸零，元件另寫 `animation: none` 停成純底色 |
+| `--app-skeleton-bg` / `-shine` / `-radius` / `-duration` | on-surface 8% / surface 60% / `var(--mat-sys-corner-small)` / `calc(var(--app-motion-loop) / 5)`（1.6s） | 載入骨架的色塊底色、閃光亮帶、圓角、閃光循環時長 | 已套用（`libs/ui` 的 `lib-skeleton`、`lib-data-table` 的載入列，共用 `feedback-state/_skeleton-block.scss`）；圓角跟著質地的 corner-small，目前沒有質地需要覆寫；Cockpit 在質地層把閃光改成 primary 12% 的掃描光；`prefers-reduced-motion` 時 loop 歸零，元件另寫 `animation: none` 停成純底色 |
 | `--app-empty-bg` / `-frame` / `-shadow` | `transparent` / `0 solid transparent` / `none` | 空狀態與錯誤狀態（`lib-empty-state`、`lib-error-state`）的外框：底色、框線（border 簡寫）、陰影 | 已套用；質地層覆寫：Linen 底色 `--mat-sys-surface-container-low`、Grid 框線 `1px dashed var(--mat-sys-outline-variant)`、Soft UI 陰影 `var(--soft-inset-small)`（各準則「空狀態」）；其餘質地維持「卡片內置中、不加色塊或框」 |
 | `--app-z-sticky` / `--app-z-drawer` / `--app-z-floating` | `20` / `101` / `500` | 跨元件圖層順序（值不變） | 已套用（`responsive-panel`、`floating-appearance-panel`；`--app-z-sticky` 給頁內釘底的列）；CDK overlay 的 `1000` 只記錄於註解 |
 
@@ -111,12 +111,12 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 | 變數 | 預設 | 用途 | 目前設定的質地 |
 | --- | --- | --- | --- |
 | `--dt-frame` | `0 solid`（無外框） | 表格外框（border 簡寫） | Grid：`1px solid var(--mat-sys-outline)` |
-| `--dt-head-border-color` | `var(--mat-sys-outline-variant)` | 表頭與內容的分隔線顏色 | Ledger：`var(--mat-sys-outline)`（Grid 準則寫的 outline 加強從未生效，維持現狀，見 Grid 準則） |
+| `--dt-head-border-color` | `var(--mat-sys-outline-variant)` | 表頭與內容的分隔線顏色 | Cockpit：`var(--cockpit-edge-strong)`；Ledger：`var(--mat-sys-outline)`（Grid 準則寫的 outline 加強從未生效，維持現狀，見 Grid 準則） |
 | `--dt-row-border-color` | `var(--mat-sys-outline-variant)` | 列與列之間的分隔線（手機卡片版的下緣也吃它） | Soft UI：`color-mix(in srgb, var(--mat-sys-outline) 22%, transparent)`；Ledger：`var(--mat-sys-outline-variant)` |
 | `--dt-col-divider` | `0 solid`（無欄線） | 欄線（儲存格右側 border 簡寫，最後一欄永遠沒有） | Grid：`1px solid var(--mat-sys-outline-variant)` |
 | `--dt-cell-padding-block` | `0.75rem`（手機卡片版 `0.3125rem`） | 儲存格上下留白，決定列高 | Soft UI `1rem`、Frosted `1.0625rem`、Clay `1.125rem`、Ledger `0.375rem`（手機卡片版一樣吃這個值） |
-| `--dt-header-bg` | `transparent` | 表頭列底色 | Ledger：on-surface 9% 混進 surface |
-| `--dt-row-hover-bg` | `var(--mat-sys-surface-container-high)` | 可點列滑過／按下的底色（按下另疊 `--app-state-pressed`） | Ledger：primary 8% 混進 surface |
+| `--dt-header-bg` | `transparent` | 表頭列底色 | Ledger：on-surface 9% 混進 surface；Cockpit：`var(--mat-sys-surface-container)` |
+| `--dt-row-hover-bg` | `var(--mat-sys-surface-container-high)` | 可點列滑過／按下的底色（按下另疊 `--app-state-pressed`） | Ledger：primary 8% 混進 surface；Cockpit：primary 10% 混進 surface |
 | `--dt-font-size` | `0.875rem` | 表格字級 | Ledger `0.8125rem`（13px） |
 | `--dt-cell-padding-inline` | `1rem` | 儲存格左右留白（勾選欄另計） | Ledger `0.625rem` |
 | `--dt-row-stripe-bg` | `transparent` | 斑馬紋：偶數列疊一層的底色（畫成 background-image，疊在滑過、提醒列的底色之上；按下時拿掉；固定欄捲動時一樣疊上；手機卡片版不畫） | Ledger：on-surface 6% |
