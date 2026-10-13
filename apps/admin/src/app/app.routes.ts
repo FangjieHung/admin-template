@@ -38,15 +38,10 @@ export const routes: Routes = [
       ...guarded(permissionOf(feature.id, 'view')),
     }),
   ),
-  // 頁面樣板：工單的列表、詳情、表單（權限與離開提醒在 tickets.routes.ts）。
-  {
-    path: 'templates/tickets',
-    loadChildren: () => import('./features/tickets/tickets.routes').then((m) => m.TICKET_ROUTES),
-  },
+  // 頁面樣板：規劃中清單、儀表板、工單的列表／詳情／表單（路由與權限在 templates.routes.ts、tickets.routes.ts）。
   {
     path: 'templates',
-    loadComponent: () =>
-      import('./features/templates/templates-page.component').then((m) => m.TemplatesPageComponent),
+    loadChildren: () => import('./features/templates/templates.routes').then((m) => m.TEMPLATE_ROUTES),
   },
   {
     path: 'login',

@@ -62,10 +62,11 @@ describe('App（展示 app 的殼層）', () => {
     for (const entry of SHOWCASE_ENTRIES) {
       expect(routes.filter((r) => r === showcaseRoute(entry))).toHaveLength(1);
     }
-    // 頁面樣板（工單三頁、登入）連到自己的網址，不在 /components 底下。
+    // 頁面樣板（儀表板、工單三頁、登入）連到自己的網址，不在 /components 底下。
     expect(groupOf(navItems, '頁面樣板')?.children.map((c) => c.route)).toEqual([
       '/components/roles',
       '/components/error-pages',
+      '/templates/dashboard',
       '/templates/tickets',
       '/templates/tickets/TK-2048',
       '/templates/tickets/TK-2048/edit',

@@ -91,6 +91,20 @@ export class TicketRepository {
     return [...(this.data.activity.get(id) ?? [])];
   }
 
+  /**
+   * 每張工單第一次變成「已完成」或「已關閉」的時間（ISO），從活動紀錄找；還沒結案的不在裡面。
+   * 儀表板的結案趨勢與平均處理時間用。接後端時改成工單本身的 resolvedAt 欄位或統計 API。
+   */
+  async resolvedTimes(): Promise<Map<string, string>> {
+    await this.delay();
+    const result = new Map<string, string>();
+    for (const [id, entries] of this.data.activity) {
+      const done = entries.filter((e) => e.kind === 'resolve' || e.kind === 'close');
+      if (done.length) result.set(id, new Date(Math.min(...done.map((e) => new Date(e.at).getTime()))).toISOString());
+    }
+    return result;
+  }
+
   /** 名字（清單、詳情顯示用）；找不到回 id 本身。 */
   personName(id: string | null): string {
     if (!id) return '';

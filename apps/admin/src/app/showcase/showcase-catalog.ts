@@ -99,6 +99,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '找不到頁面（404）與沒有權限兩個錯誤頁樣板：說明發生什麼事、可以怎麼辦，以及「回首頁」。',
     source: 'libs/access（沒有權限的守門）、apps/admin/src/app/features/errors',
   },
+  'dashboard': {
+    summary: '儀表板樣板：期間切換（7 天／30 天／本季，寫在網址上）、4 張數字小卡、新增與結案趨勢、依狀態與分類的分布、指派給我的待辦。',
+    source: 'libs/ui（stat-card、line-chart、donut-chart、bar-chart）、apps/admin/src/app/features/dashboard',
+  },
   'ticket-list': {
     summary: '工單列表樣板：頁首工具列（搜尋、狀態）、進階篩選、已儲存檢視、資料表（分頁、排序、欄位選擇、多選批次操作），篩選與頁碼同步到網址。',
     source: 'libs/ui（data-table、page-toolbar、filter、saved-views）、apps/admin/src/app/features/tickets/ticket-list',
@@ -145,7 +149,6 @@ export const PLANNED_ITEMS: readonly PlannedItem[] = [
   { title: '樹狀選單與樹狀表', kind: '元件', priority: 'P2', summary: '組織架構、分類。' },
   { title: '列印與 PDF 版面', kind: '元件', priority: 'P2', summary: '單據可列印、可寄送。' },
   { title: '富文字、留言與 @提及', kind: '元件', priority: 'P2', summary: '備註與內部協作。' },
-  { title: '儀表板', kind: '頁面樣板', priority: 'P1', summary: '數字小卡、圖表與待辦清單。' },
   { title: '設定頁', kind: '頁面樣板', priority: 'P1', summary: '分組設定項與儲存提示。' },
   { title: '空白頁', kind: '頁面樣板', priority: 'P1', summary: '只有殼層的起點。' },
 ];

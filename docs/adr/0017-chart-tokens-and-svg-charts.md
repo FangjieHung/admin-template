@@ -81,6 +81,10 @@ Riso 雙色是唯一刻意只用「同色系深淺」的配色：孔版只有兩
 
 ## 後果
 
-- 每套配色多 6 個變數（約 0.15 kB）；Verdant 是常駐配色，這 6 個加上 `_semantic.scss` 的 10 個預設進主樣式。
-- 新增一套配色時，要在它的 `_tokens.scss` 加 `--app-chart-1…6`，並把 id 加進 `scripts/chart-palette.spec.mjs` 的清單；沒加的話 spec 會報「自己定義 6 個類別色」失敗。
+- **Initial bundle**：584.80 → 585.79 kB（+0.99 kB）。主樣式 `styles.css` 43.38 → 43.94 kB（+563 bytes，只有 `_semantic.scss` 的 10 個圖表預設與 Verdant 的 6 個類別色；規則集合比對沒有新的 Tailwind utility）；`main.js` +426 bytes（側欄的「數字小卡與圖表」「儀表板」兩筆）。為了不超過 1 kB，`/templates` 底下的路由（規劃中清單、儀表板、工單）改成 `features/templates/templates.routes.ts` 一個 `loadChildren`，原本兩筆路由從 main 拿掉。
+- **按需配色**：每套 `color-<id>.css` +138 bytes（6 個類別色）。
+- **按需質地**（有特調的 7 個）：Sketch +701、Brutal +653、Riso +503、Cockpit +457、Editorial +384、Grid +305、Ledger +257 bytes；其餘 6 個不變。
+- **圖表元件**：4 個元件與共用的 chart-core（圖例、表格、骨架、提示框、上方工具列、刻度與路徑的純函式、鍵盤與 ResizeObserver）合起來 gzip 前約 61.7 kB（同一個 lazy chunk 62.4 kB，gzip 約 15–17 kB），超過原本「40 kB 以內」的目標。最大的是長條圖（11.7 kB：直式／橫式、分組／堆疊、類別標籤的旋轉與截斷、數值標註）與折線圖（9.8 kB）。已經做的瘦身：折線、長條、圓環的樣式集中成一份不封裝的 `chart-styles.scss`（由 `lib-chart-styles` 載入一次；封裝時三個元件各帶一份、選擇器還多一段屬性，約省 6 kB），提示框與工具列抽成共用的內部元件。剩下的主要是 Angular 編譯後的模板程式（SVG 每個屬性綁定都是一條指令）。仍遠小於 ECharts、Chart.js，而且只有用到圖表的頁面下載。
+- 每套配色多 6 個變數；新增一套配色時，要在它的 `_tokens.scss` 加 `--app-chart-1…6`，並把 id 加進 `scripts/chart-palette.spec.mjs` 的清單；沒加的話 spec 會報「自己定義 6 個類別色」失敗。
 - 圖表元件只認得「類別」與「數值」，不認得任何業務資料；畫面文字由 `CHART_LABELS` 提供。
+- 對比（13 種質地各用預設配色，儀表板實測）：軸文字、圖例、小卡數值與比較文字、提示框文字最低 5.44:1（Soft UI／Clay × Cool Grey 的軸文字）；類別色對卡片底最低 3.58:1（Aero × Glacier Blue，半透明卡片透出畫布）。

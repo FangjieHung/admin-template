@@ -1,0 +1,174 @@
+<!-- 頁首：標題「儀表板」（provideHeaderTitle）；右邊是期間切換與樣板說明。 -->
+<ng-template appHeaderToolbar>
+  <div class="db-toolbar">
+    <div class="db-period" role="group" aria-label="期間">
+      @for (p of periods; track p.id) {
+        <button
+          type="button"
+          class="ui-nav-pill"
+          [attr.data-period]="p.id"
+          [class.is-active]="period() === p.id"
+          [attr.aria-pressed]="period() === p.id"
+          (click)="setPeriod(p.id)"
+        >
+          {{ p.label }}
+        </button>
+      }
+    </div>
+    <app-template-info [info]="info" />
+  </div>
+</ng-template>
+
+@if (loadState() === 'error') {
+  <section class="ui-card p-4 sm:p-6" data-state="error">
+    <lib-error-state
+      message="儀表板載入失敗"
+      hint="請確認網路連線後再試一次。"
+      detail="示範：網址帶 ?demo=error 時模擬載入失敗，按重試會拿掉它。"
+      (retry)="retry()"
+    />
+  </section>
+} @else {
+  @let s = stats();
+  @let po = periodOption();
+  <div class="db">
+    <section class="db-stats" aria-label="重點數字">
+      <a
+        lib-stat-card
+        data-stat="open"
+        routerLink="/templates/tickets"
+        label="未結案"
+        unit="件"
+        [queryParams]="openListParams"
+        [value]="s.open.value"
+        [previous]="s.open.previous"
+        [period]="po.since"
+        [positiveIsGood]="false"
+        [format]="integer"
+        [loading]="loading()"
+      ></a>
+      <lib-stat-card
+        data-stat="created"
+        unit="件"
+        [label]="po.createdLabel"
+        [value]="s.created.value"
+        [previous]="s.created.previous"
+        [period]="po.compare"
+        [positiveIsGood]="false"
+        [format]="integer"
+        [sparkline]="s.created.spark"
+        [loading]="loading()"
+      />
+      <lib-stat-card
+        data-stat="overdue"
+        label="逾期"
+        unit="件"
+        [value]="s.overdue.value"
+        [previous]="s.overdue.previous"
+        [period]="po.since"
+        [positiveIsGood]="false"
+        [format]="integer"
+        [loading]="loading()"
+      />
+      <lib-stat-card
+        data-stat="hours"
+        label="平均處理時間"
+        unit="小時"
+        [value]="s.avgHours.value"
+        [previous]="s.avgHours.previous"
+        [period]="po.compare"
+        [positiveIsGood]="false"
+        [loading]="loading()"
+      />
+    </section>
+
+    <section class="ui-card db-card db-trend" aria-labelledby="db-trend-title">
+      <h2 id="db-trend-title" class="ui-text-subtitle">新增與結案趨勢</h2>
+      <lib-line-chart
+        data-chart="trend"
+        [categories]="s.trend.categories"
+        [series]="s.trend.series"
+        [integer]="true"
+        [valueFormat]="integer"
+        [height]="300"
+        [loading]="loading()"
+      />
+    </section>
+
+    <section class="ui-card db-card db-status" aria-labelledby="db-status-title">
+      <h2 id="db-status-title" class="ui-text-subtitle">依狀態</h2>
+      <lib-donut-chart
+        data-chart="status"
+        centerLabel="工單"
+        [slices]="s.byStatus"
+        [size]="180"
+        [valueFormat]="integer"
+        [loading]="loading()"
+      />
+    </section>
+
+    <section class="ui-card db-card db-category" aria-labelledby="db-category-title">
+      <h2 id="db-category-title" class="ui-text-subtitle">依分類</h2>
+      <lib-bar-chart
+        data-chart="category"
+        orientation="horizontal"
+        [categories]="s.byCategory.categories"
+        [series]="s.byCategory.series"
+        [stacked]="true"
+        [showValues]="true"
+        [integer]="true"
+        [valueFormat]="integer"
+        [loading]="loading()"
+      />
+    </section>
+
+    <section class="ui-card db-card db-todo" aria-labelledby="db-todo-title">
+      <div class="db-card__head">
+        <h2 id="db-todo-title" class="ui-text-subtitle">指派給我的待辦</h2>
+        @if (!loading() && todoCount()) {
+          <span class="ui-text-caption ui-text-numeric" data-todo-count>{{ todoCount() }} 筆</span>
+        }
+      </div>
+      @if (loading()) {
+        <lib-skeleton variant="list" [count]="5" />
+      } @else if (todo().length === 0) {
+        <lib-empty-state
+          [compact]="true"
+          icon="task_alt"
+          message="沒有指派給你的待辦"
+          [detail]="assigneeLabel() ? '目前身分（' + assigneeLabel() + '）沒有未結案的工單。' : ''"
+        />
+      } @else {
+        <ul class="db-todo__list">
+          @for (t of todo(); track t.id) {
+            <li>
+              <a class="db-todo__item" data-todo [routerLink]="['/templates/tickets', t.id]">
+                <span class="db-todo__main">
+                  <span class="db-todo__title">{{ t.title }}</span>
+                  <span class="db-todo__meta ui-text-numeric">
+                    {{ t.id }}
+                    @if (t.dueDate) {
+                      · 期限 {{ formatDueDate(t.dueDate) }}
+                    }
+                  </span>
+                </span>
+                <span class="db-todo__tags">
+                  @if (overdue(t)) {
+                    <span class="ui-chip ui-chip--danger">逾期</span>
+                  }
+                  <lib-status-chip [status]="statusTones[t.status]" [label]="statusLabels[t.status]" />
+                </span>
+              </a>
+            </li>
+          }
+        </ul>
+        @if (todoParams(); as params) {
+          <a class="db-todo__all" data-todo-all routerLink="/templates/tickets" [queryParams]="params">
+            查看全部
+            <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
+          </a>
+        }
+      }
+    </section>
+  </div>
+}

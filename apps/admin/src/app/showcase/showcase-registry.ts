@@ -204,6 +204,7 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     icon: 'error',
     load: () => import('../features/error-pages/error-pages-page.component').then((m) => m.ErrorPagesPageComponent),
   },
+  { id: 'dashboard', title: '儀表板', group: 'templates', icon: 'dashboard', path: 'templates/dashboard', access: 'ticket:view' },
   // 工單的列表、詳情、表單三頁串成一個流程（features/tickets，路由在 tickets.routes.ts）。
   { id: 'ticket-list', title: '列表頁', group: 'templates', icon: 'list_alt', path: 'templates/tickets', access: 'ticket:view' },
   { id: 'ticket-detail', title: '詳情頁', group: 'templates', icon: 'article', path: 'templates/tickets/TK-2048', access: 'ticket:view' },
