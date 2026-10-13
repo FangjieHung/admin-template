@@ -1,0 +1,94 @@
+// src/styles/color-themes/signal/_tokens.scss
+// Signal 訊號色（ADR 0014）：亮的暖紙畫布＋墨黑文字與框線＋高彩度的訊號色。淺色配色。
+// 主色是訊號藍（不是訊號黃或訊號紅）：主色也是焦點框、勾選框、連結與文字按鈕的顏色，要對每一階表面 ≥ 3:1——
+// 黃色在淺底上做不到，紅色又會和「危險」撞色。訊號黃改當最大面積的色塊（primary-container：對話框、選取、目前項目），
+// 粉紅（secondary-container：選單、下拉、日期選擇器）與薄荷（tertiary-container）當另外兩塊，給 Brutal 的色塊分層用。
+// 狀態色：正向綠、資訊青綠、警示橘、危險紅，彼此與主色的 CIEDE2000 色差都 ≥ 20（scripts/signal-palette.spec.mjs）。
+// token 範圍比照 Graphite：一般淺色配色有的全部，加上建置產物裡有元件引用的 mat.theme() 缺口
+// （inverse-primary、on-background、tertiary 一組、neutral10、neutral-variant20，ADR 0012 附抽取方法）。
+:root[data-theme='signal'] {
+  // 主題私有底層色階（僅本檔使用）
+  --_ink: #141414;
+  --_ink-muted: #4a4438;
+  --_paper-0: #ffffff;
+  --_paper-25: #fffaee;
+  --_paper-50: #fbf2dc;
+  --_paper-75: #fdf4e2;
+  --_paper-100: #f6ead0;
+  --_paper-200: #efe0bf;
+  --_paper-300: #d9cbb0;
+  --_paper-500: #6b6254;
+  --_cobalt: #2438e8; // 訊號藍（主色）
+  --_yellow: #ffd60a; // 訊號黃（最大的色塊）
+  --_pink: #ffb3df; // 訊號粉
+  --_mint: #8deadf; // 訊號薄荷
+
+  // M3 顏色 token
+  --mat-sys-primary: var(--_cobalt);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: var(--_yellow);
+  --mat-sys-on-primary-container: var(--_ink);
+  --mat-sys-secondary: #b0005f;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: var(--_pink);
+  --mat-sys-on-secondary-container: var(--_ink);
+  --mat-sys-tertiary: #00695f;
+  --mat-sys-on-tertiary: #ffffff;
+  --mat-sys-tertiary-container: var(--_mint);
+  --mat-sys-on-tertiary-container: var(--_ink);
+  --mat-sys-background: var(--_paper-50);
+  --mat-sys-on-background: var(--_ink);
+  --mat-sys-surface: var(--_paper-0);
+  --mat-sys-surface-container-lowest: var(--_paper-0);
+  --mat-sys-surface-container-low: var(--_paper-25);
+  --mat-sys-surface-container: var(--_paper-75);
+  --mat-sys-surface-container-high: var(--_paper-100);
+  --mat-sys-surface-container-highest: var(--_paper-200);
+  --mat-sys-on-surface: var(--_ink);
+  --mat-sys-surface-variant: var(--_paper-100); /* filled input 等元件底色的 fallback 來源 */
+  --mat-sys-on-surface-variant: var(--_ink-muted);
+  --mat-sys-outline: var(--_paper-500);
+  --mat-sys-outline-variant: var(--_paper-300);
+  --mat-sys-inverse-surface: var(--_ink);
+  --mat-sys-inverse-on-surface: #ffffff;
+  --mat-sys-inverse-primary: var(--_yellow); /* 墨黑反轉底（提示訊息）上的動作鈕 */
+  --mat-sys-error: #a8000c;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #ffdad6;
+  --mat-sys-on-error-container: #8c0b10;
+  // mat.theme() 直接引用的兩個調色盤色：停用選項文字（38% 混色）的基底、側欄遮罩。淺色下兩者都是深色。
+  --mat-sys-neutral10: var(--_ink);
+  --mat-sys-neutral-variant20: #2e2a22;
+
+  // app 擴充狀態色（M3 缺 success/warning/info；danger 沿用 error 的色相）
+  --app-positive-bg: #c8f2d2;
+  --app-positive-fg: #0a5c2a;
+  --app-positive-dot: #13a14b;
+  --app-info-bg: #c9eff8;
+  --app-info-fg: #00525a;
+  --app-info-dot: #0898a8;
+  --app-neutral-bg: #ebe3d1;
+  --app-neutral-fg: var(--_ink-muted);
+  --app-neutral-dot: #8b8270;
+  --app-warning-bg: #ffe0b8;
+  --app-warning-fg: #7d3a00;
+  --app-warning-dot: #ff8a00;
+  --app-danger-bg: #ffdad6;
+  --app-danger-fg: #9e0f17;
+  --app-danger-dot: #ee2b24;
+
+  // 圖表色：訊號藍、訊號橘紅、青綠、洋紅（色相各差 ≥ 60°，對白色表面都 ≥ 3:1）
+  --app-viz-1: var(--_cobalt);
+  --app-viz-2: #e8480c;
+  --app-viz-3: #00857a;
+  --app-viz-4: #b5179e;
+
+  // 側欄：一整塊墨黑
+  --app-shell-bg: var(--_ink);
+  --app-shell-on: #ffffff;
+  --app-shell-on-muted: #cfc8b8;
+
+  --app-topbar-bg: color-mix(in srgb, var(--_paper-50) 86%, transparent);
+  --app-calendar-range-fill: color-mix(in srgb, var(--_cobalt) 18%, var(--_paper-100));
+  color-scheme: light;
+}

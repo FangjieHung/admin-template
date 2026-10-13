@@ -25,24 +25,24 @@ describe('theme-compatibility（ADR 0007，2026-09-27 定案清單）', () => {
   // 設計定案：每個質地排除哪些配色、預設哪個配色。
   const DECISIONS: Record<string, { excluded: string[]; defaultThemeId: string }> = {
     material: { excluded: ['candy'], defaultThemeId: 'verdant' },
-    linen: { excluded: ['candy', 'oled'], defaultThemeId: 'sandstone' },
+    linen: { excluded: ['candy', 'oled', 'signal'], defaultThemeId: 'sandstone' },
     grid: { excluded: [], defaultThemeId: 'verdant' },
-    'soft-ui': { excluded: ['sandstone', 'verdant', 'oled'], defaultThemeId: 'cool-grey' },
+    'soft-ui': { excluded: ['sandstone', 'verdant', 'oled', 'signal'], defaultThemeId: 'cool-grey' },
     clay: {
-      excluded: ['verdant', 'sandstone', 'azure', 'candy', 'mist-ink', 'glacier-blue', 'oled'],
+      excluded: ['verdant', 'sandstone', 'azure', 'candy', 'mist-ink', 'glacier-blue', 'oled', 'signal'],
       defaultThemeId: 'cool-grey',
     },
     editorial: { excluded: ['cool-grey'], defaultThemeId: 'mist-ink' },
-    frosted: { excluded: ['sandstone', 'cool-grey'], defaultThemeId: 'candy' },
+    frosted: { excluded: ['sandstone', 'cool-grey', 'signal'], defaultThemeId: 'candy' },
     aero: {
-      excluded: ['verdant', 'midnight', 'sandstone', 'candy', 'graphite', 'oled'],
+      excluded: ['verdant', 'midnight', 'sandstone', 'candy', 'graphite', 'oled', 'signal'],
       defaultThemeId: 'glacier-blue',
     },
     // ADR 0011 提案（待使用者定案）；Graphite、OLED 的格子是 ADR 0012 提案（待使用者定案）
-    ledger: { excluded: ['candy'], defaultThemeId: 'azure' },
+    ledger: { excluded: ['candy', 'signal'], defaultThemeId: 'azure' },
     // ADR 0012 提案（待使用者定案）：只相容深色配色
     cockpit: {
-      excluded: ['verdant', 'sandstone', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue'],
+      excluded: ['verdant', 'sandstone', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue', 'signal'],
       defaultThemeId: 'graphite',
     },
   };
