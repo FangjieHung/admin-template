@@ -1,0 +1,4 @@
+// --font-body 用 DM Sans。拆成按需質地以前，DM Sans 是「順便」跟著 Clay 的字型 CSS 載入的（admin 主樣式一律
+// @import），拆開後要自己載（ADR 0010；漏掉時 base vs head 計算樣式比對抓到徽章寬度差 0.9px）。
+// 只載入字型 CSS；瀏覽器在實際用到這個質地時才下載字型檔。
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');

@@ -91,6 +91,31 @@ describe('按需質地登錄一致（ADR 0010）', () => {
     expect(dirs.sort()).toEqual([...TEXTURES].sort());
   });
 
+  it('按需質地用到的 Google Fonts 字型，必須由它自己的 _fonts.scss 載入（不能靠別的質地順便載入）', () => {
+    // 拆檔前所有質地的字型 CSS 都在主樣式裡，Soft UI／Aero 的 DM Sans 其實是跟著 Clay 載入的。
+    const familiesOf = (id) => {
+      const p = join(ROOT, TEXTURE_DIR, id, '_fonts.scss');
+      if (!existsSync(p)) return [];
+      return [...readFileSync(p, 'utf8').matchAll(/family=([^:&']+)/g)].map((m) => m[1].replace(/\+/g, ' '));
+    };
+    const textureOnlyFamilies = new Set(TEXTURES.flatMap(familiesOf));
+    for (const id of ON_DEMAND) {
+      const css = ['_tokens.scss', 'recipes.scss']
+        .map((f) => join(ROOT, TEXTURE_DIR, id, f))
+        .filter(existsSync)
+        .map((p) => readFileSync(p, 'utf8'))
+        .join('\n');
+      const used = [...css.matchAll(/'([^']+)'/g)].map((m) => m[1]).filter((f) => textureOnlyFamilies.has(f));
+      const own = familiesOf(id);
+      for (const family of new Set(used)) {
+        expect(own, `${id} 用到 ${family}`).toContain(family);
+      }
+      if (own.length > 0) {
+        expect(readFileSync(join(ROOT, TEXTURE_DIR, id, '_index.scss'), 'utf8')).toMatch(/^@forward 'fonts';/m);
+      }
+    }
+  });
+
   it('admin 主樣式只 @use 常駐質地，不含任何按需質地', () => {
     for (const id of ON_DEMAND) {
       expect(ADMIN_STYLES).not.toMatch(new RegExp(`texture/${id}\\b`));
