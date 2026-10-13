@@ -4,7 +4,9 @@ import { provideRouter } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
 import { AccessService, provideAccess } from '@admin-template/access';
+import { CONFIRM_DIALOG_LABELS } from '@admin-template/ui';
 import { DEMO_ACCESS_CONFIG } from '../../core/access/demo-access';
+import { ZH_TW } from '../../core/i18n/zh-tw';
 import { RolesPageComponent } from './roles-page.component';
 
 describe('RolesPageComponent（角色與權限）', () => {
@@ -89,6 +91,18 @@ describe('RolesPageComponent（角色與權限）', () => {
     dialogOpen.mockClear();
     expect(await page.canLeave()).toBe(true);
     expect(dialogOpen).not.toHaveBeenCalled();
+  });
+
+  it('「還原示範資料」的確認對話框帶有頁面 providers 提供的按鈕文字，並用頁面的 injector 開（不再是空白對話框）', async () => {
+    const { el, settle } = await render();
+    const button = Array.from(el.querySelectorAll('button')).find((b) => b.textContent?.trim() === '還原示範資料');
+    button?.click();
+    await settle();
+    expect(dialogOpen).toHaveBeenCalledTimes(1);
+    const config = dialogOpen.mock.calls[0][1];
+    expect(config.data).toMatchObject({ confirmLabel: '還原', cancelLabel: ZH_TW.common.cancel });
+    // 對話框的 injector 是頁面的 injector：對話框元件自己 inject CONFIRM_DIALOG_LABELS 也找得到。
+    expect(config.injector.get(CONFIRM_DIALOG_LABELS)).toEqual({ confirm: ZH_TW.common.confirm, cancel: ZH_TW.common.cancel });
   });
 
   it('指派角色：勾選後使用者的角色與實際權限更新；刪除自訂角色時一併拿掉', async () => {

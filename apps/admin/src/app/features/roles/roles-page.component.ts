@@ -1,6 +1,5 @@
-import { Component, HostListener, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, Injector, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
 import { AccessRole, AccessService, AccessUser, CanDirective, HasUnsavedChanges } from '@admin-template/access';
 import { PermissionMatrixComponent, RoleDraft, uniqueCopyName } from '@admin-template/access/permission-matrix';
 import { RoleManagementService } from '@admin-template/access/role-management';
@@ -59,7 +58,8 @@ export class RolesPageComponent implements HasUnsavedChanges {
   protected readonly entry = ENTRY;
   protected readonly access = inject(AccessService);
   private readonly roleManagement = inject(RoleManagementService);
-  private readonly dialog = inject(MatDialog);
+  // 確認對話框要用頁面的 injector 開，才讀得到這一頁 providers 提供的 CONFIRM_DIALOG_LABELS。
+  private readonly injector = inject(Injector);
   private readonly toast = inject(ToastService);
   protected readonly tableLabels = ADMIN_DATA_TABLE_LABELS;
 
@@ -152,7 +152,7 @@ export class RolesPageComponent implements HasUnsavedChanges {
   protected async remove(): Promise<void> {
     const role = this.selected();
     const users = this.access.usersWithRole(role.id).length;
-    const ok = await openConfirmDialog(this.dialog, {
+    const ok = await openConfirmDialog(this.injector, {
       title: `刪除「${role.name}」？`,
       message: users
         ? `有 ${users} 位使用者使用這個角色，刪除後他們會失去這個角色的權限。刪除後無法復原。`
@@ -166,7 +166,7 @@ export class RolesPageComponent implements HasUnsavedChanges {
   }
 
   protected async resetDemo(): Promise<void> {
-    const ok = await openConfirmDialog(this.dialog, {
+    const ok = await openConfirmDialog(this.injector, {
       message: '刪除所有自訂角色，並把每位使用者的角色還原成預設？',
       confirmLabel: '還原',
     });
@@ -199,7 +199,7 @@ export class RolesPageComponent implements HasUnsavedChanges {
   /** 離開頁面（unsavedChangesGuard）或換角色前：有變更就問要不要捨棄。 */
   async canLeave(): Promise<boolean> {
     if (!this.draft.dirty()) return true;
-    const discard = await openConfirmDialog(this.dialog, {
+    const discard = await openConfirmDialog(this.injector, {
       title: '有尚未儲存的變更',
       message: `「${this.selected().name}」的變更還沒儲存，要捨棄嗎？`,
       confirmLabel: '捨棄變更',

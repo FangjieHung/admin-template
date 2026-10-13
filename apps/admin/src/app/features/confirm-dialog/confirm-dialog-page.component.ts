@@ -1,6 +1,5 @@
 import { Component, Injector, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
 import { openConfirmDialog } from '@admin-template/ui';
 import { CONFIRM_DIALOG_LABEL_PROVIDERS } from '../../shared/ui/component-label-providers';
 import { DemoBlockComponent } from '../../showcase/demo-block.component';
@@ -28,30 +27,29 @@ const ENTRY = detailOf('confirm-dialog');
   styleUrl: '../../showcase/demo-shared.scss',
 })
 export class ConfirmDialogPageComponent {
-  private readonly dialog = inject(MatDialog);
-  // CONFIRM_DIALOG_LABELS 只在這一頁提供，開對話框時要把頁面的 injector 傳進去（放在 app 層就不必）。
+  // 用頁面的 injector 開對話框：CONFIRM_DIALOG_LABELS 只在這一頁的 providers 提供，對話框也讀得到。
   private readonly injector = inject(Injector);
   protected readonly entry = ENTRY;
   protected readonly result = signal('（尚未操作）');
 
   protected async deleteProject(): Promise<void> {
-    const ok = await openConfirmDialog(this.dialog, { message: '確定刪除「官網改版」？刪除後無法復原。', confirmLabel: '刪除' }, { injector: this.injector });
+    const ok = await openConfirmDialog(this.injector, { message: '確定刪除「官網改版」？刪除後無法復原。', confirmLabel: '刪除' });
     this.result.set(ok ? '已刪除（示範）' : '取消刪除');
   }
 
   protected async submitReport(): Promise<void> {
-    const ok = await openConfirmDialog(this.dialog, { message: '送出後主管會收到通知。', tone: 'primary', confirmLabel: '送出' }, { injector: this.injector });
+    const ok = await openConfirmDialog(this.injector, { message: '送出後主管會收到通知。', tone: 'primary', confirmLabel: '送出' });
     this.result.set(ok ? '已送出（示範）' : '先不送出');
   }
 
   protected async archive(): Promise<void> {
-    const ok = await openConfirmDialog(this.dialog, {
+    const ok = await openConfirmDialog(this.injector, {
       title: '封存 12 張工單？',
       message: '封存的工單不會出現在清單裡，但可以從「已封存」檢視找回。',
       confirmLabel: '封存',
       cancelLabel: '先不要',
       tone: 'primary',
-    }, { injector: this.injector });
+    });
     this.result.set(ok ? '已封存（示範）' : '沒有封存');
   }
 
@@ -61,11 +59,13 @@ export class ConfirmDialogPageComponent {
     '需要填寫內容才能確認：做成一般對話框表單。',
   ];
 
-  protected readonly usage = `// app.config.ts 的 providers（一次）：預設按鈕文字。
-// 只在某一頁提供時，開對話框要傳 { injector }，對話框才找得到頁面層的 provider。
+  protected readonly usage = `// app.config.ts 或頁面的 providers（一次）：預設按鈕文字。
 providers: [{ provide: CONFIRM_DIALOG_LABELS, useValue: { confirm: '確認', cancel: '取消' } }]
 
-const ok = await openConfirmDialog(this.dialog, {
+// 傳入頁面的 injector：對話框讀得到頁面層提供的文字。
+private readonly injector = inject(Injector);
+
+const ok = await openConfirmDialog(this.injector, {
   message: '確定刪除「官網改版」？刪除後無法復原。',
   confirmLabel: '刪除',
 });
@@ -73,8 +73,9 @@ if (ok) this.delete();`;
 
   protected readonly api: ApiSection[] = [
     {
-      title: 'openConfirmDialog(dialog, data, config?)',
+      title: 'openConfirmDialog(injector, data, config?)',
       rows: [
+        { name: 'injector', type: 'Injector', default: '必填', description: '呼叫端的 inject(Injector)；從它讀預設文字，也當成對話框的 injector（頁面 providers 才找得到）。' },
         { name: 'data.message', type: 'string', default: '必填', description: '要確認的事，寫成完整的一句話。' },
         { name: 'data.title', type: 'string', default: '—', description: '選填標題。' },
         { name: 'data.confirmLabel', type: 'string', default: 'labels.confirm', description: '確認鈕文字，最好是動詞。' },
@@ -86,7 +87,7 @@ if (ok) this.delete();`;
     },
     {
       title: '注入',
-      rows: [{ name: 'CONFIRM_DIALOG_LABELS', type: 'ConfirmDialogLabels', default: '選填', description: '預設的確認／取消文字；data 沒給又沒提供時會報錯。' }],
+      rows: [{ name: 'CONFIRM_DIALOG_LABELS', type: 'ConfirmDialogLabels', default: '選填', description: '預設的確認／取消文字（app 或頁面層都可以）；data 沒給又沒提供時，開啟前就報錯。' }],
     },
   ];
 }

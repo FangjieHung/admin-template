@@ -1,4 +1,4 @@
-import { Component, InjectionToken, inject } from '@angular/core';
+import { Component, InjectionToken, Injector, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogConfig, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
@@ -29,7 +29,7 @@ export interface ConfirmDialogData {
 
 /**
  * 確認對話框：在執行不可復原或影響範圍大的動作前，要使用者再確認一次。
- * 通常不直接使用元件，而是呼叫 `openConfirmDialog(dialog, data)`，它回傳 Promise<boolean>。
+ * 通常不直接使用元件，而是呼叫 `openConfirmDialog(injector, data)`，它回傳 Promise<boolean>。
  */
 @Component({
   selector: 'lib-confirm-dialog',
@@ -50,12 +50,32 @@ function missingLabel(name: keyof ConfirmDialogLabels): never {
   throw new Error(`ConfirmDialog：缺少「${name}」按鈕文字。請在 data 給 ${name}Label，或提供 CONFIRM_DIALOG_LABELS。`);
 }
 
-/** 開啟確認對話框；使用者按確認回 true，按取消、按 Esc 或點遮罩回 false。 */
+/**
+ * 開啟確認對話框；使用者按確認回 true，按取消、按 Esc 或點遮罩回 false。
+ *
+ * 第一個參數是呼叫端（頁面元件）的 `Injector`（`inject(Injector)`）。MatDialog 預設用自己的（根層）injector 建立對話框，
+ * 看不到頁面 `providers` 提供的 CONFIRM_DIALOG_LABELS，對話框會開成空白；所以這裡從呼叫端的 injector 讀文字，
+ * 並把它當成對話框的 injector（`config.injector` 有給時以它為準）。文字缺少時在開啟之前就丟錯，不會開出空白對話框。
+ */
 export async function openConfirmDialog(
-  dialog: MatDialog,
+  injector: Injector,
   data: ConfirmDialogData,
   config: Omit<MatDialogConfig<ConfirmDialogData>, 'data'> = {},
 ): Promise<boolean> {
-  const ref = dialog.open(ConfirmDialogComponent, { width: '360px', autoFocus: 'dialog', ...config, data });
+  const dialogInjector = config.injector ?? config.viewContainerRef?.injector ?? injector;
+  const labels = dialogInjector.get(CONFIRM_DIALOG_LABELS, null);
+  const resolved: ConfirmDialogData = {
+    ...data,
+    confirmLabel: data.confirmLabel ?? labels?.confirm ?? missingLabel('confirm'),
+    cancelLabel: data.cancelLabel ?? labels?.cancel ?? missingLabel('cancel'),
+  };
+  const dialog = injector.get(MatDialog);
+  const ref = dialog.open(ConfirmDialogComponent, {
+    width: '360px',
+    autoFocus: 'dialog',
+    injector: dialogInjector,
+    ...config,
+    data: resolved,
+  });
   return (await firstValueFrom(ref.afterClosed())) === true;
 }
