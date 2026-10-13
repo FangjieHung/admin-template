@@ -1,0 +1,170 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  @if (!access.persisted()) {
+    <p class="roles-warning" role="status">無法存到這台裝置，關閉頁面後變更會遺失。</p>
+  }
+
+  <app-demo-block
+    heading="角色與權限矩陣"
+    description="預設角色唯讀；要調整就複製成自訂角色再改。勾選後按「儲存變更」才會生效，還沒儲存就換角色或離開這一頁會先問一次。"
+  >
+    @if (!canEdit()) {
+      <p class="roles-readonly-note" data-readonly-note>你目前的身分只能檢視角色（需要「設定・編輯」才能修改）。</p>
+    }
+
+    <div class="roles-layout">
+      <nav class="roles-list" aria-label="角色">
+        <p class="ui-text-caption roles-list__heading">預設角色</p>
+        <ul>
+          @for (role of presetRoles(); track role.id) {
+            <li>
+              <button
+                type="button"
+                class="roles-item"
+                [class.is-selected]="role.id === selected().id"
+                [attr.aria-current]="role.id === selected().id ? 'true' : null"
+                [attr.data-role-id]="role.id"
+                (click)="select(role)"
+              >
+                <span class="roles-item__name">{{ role.name }}</span>
+                <span class="roles-item__meta ui-text-numeric">{{ permissionCount(role) }} 項・{{ userCount(role) }} 人</span>
+              </button>
+            </li>
+          }
+        </ul>
+
+        <p class="ui-text-caption roles-list__heading">自訂角色</p>
+        @if (customRoles().length) {
+          <ul>
+            @for (role of customRoles(); track role.id) {
+              <li>
+                <button
+                  type="button"
+                  class="roles-item"
+                  [class.is-selected]="role.id === selected().id"
+                  [attr.aria-current]="role.id === selected().id ? 'true' : null"
+                  [attr.data-role-id]="role.id"
+                  (click)="select(role)"
+                >
+                  <span class="roles-item__name">{{ role.name }}</span>
+                  <span class="roles-item__meta ui-text-numeric">{{ permissionCount(role) }} 項・{{ userCount(role) }} 人</span>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <lib-empty-state
+            [compact]="true"
+            icon="group_add"
+            message="還沒有自訂角色"
+            detail="選一個角色，按「複製成自訂角色」後再修改權限。"
+          />
+        }
+      </nav>
+
+      <section class="roles-editor" aria-labelledby="role-editor-title">
+        <div class="roles-editor__head">
+          <div class="roles-editor__title">
+            <h3 id="role-editor-title" class="ui-text-subtitle">{{ selected().name }}</h3>
+            <lib-status-chip [label]="selected().preset ? '預設角色' : '自訂角色'" [status]="selected().preset ? 'draft' : 'info'" />
+            @if (draft.dirty()) {
+              <lib-status-chip label="尚未儲存" status="warning" />
+            }
+          </div>
+          <div class="demo-row">
+            <button type="button" matButton="outlined" *libCan="'settings:edit'" data-action="copy" (click)="copy()">
+              複製成自訂角色
+            </button>
+            @if (!selected().preset) {
+              <button type="button" matButton class="roles-danger" *libCan="'settings:edit'" data-action="delete" (click)="remove()">
+                刪除角色
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (selected().preset) {
+          <p class="demo-list__meta roles-editor__hint">預設角色不能修改。要調整權限，先複製成自訂角色。</p>
+        }
+
+        @if (!readonly()) {
+          <div class="roles-name">
+            <label for="role-name" class="roles-name__label">角色名稱</label>
+            <input
+              id="role-name"
+              class="roles-name__input"
+              type="text"
+              autocomplete="off"
+              [value]="draft.name()"
+              [attr.aria-invalid]="nameError() ? 'true' : null"
+              [attr.aria-describedby]="nameError() ? 'role-name-error' : null"
+              (input)="onNameInput($event)"
+            />
+            @if (nameError(); as error) {
+              <p id="role-name-error" class="roles-name__error">{{ error }}</p>
+            }
+          </div>
+        }
+
+        <lib-permission-matrix
+          [features]="access.features"
+          [actionLabels]="access.labels.actions"
+          [value]="draft.permissions()"
+          [readonly]="readonly()"
+          [caption]="selected().name + '的權限'"
+          (valueChange)="draft.permissions.set($event)"
+        />
+
+        @if (!readonly()) {
+          <div class="roles-editor__footer">
+            <button type="button" matButton [disabled]="!draft.dirty()" (click)="discard()">捨棄變更</button>
+            <button type="button" matButton="filled" [disabled]="!draft.dirty() || !!nameError()" data-action="save" (click)="save()">
+              儲存變更
+            </button>
+          </div>
+        }
+      </section>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="指派角色給使用者"
+    description="一位使用者可以有多個角色，實際權限是所有角色的聯集。改了目前身分的角色，側欄與按鈕會立刻跟著變。"
+  >
+    <lib-data-table [columns]="columns" [rows]="userRows()" [labels]="tableLabels" [showExport]="false" emptyText="沒有使用者">
+      <ng-template dtCell="roleNames" let-row>
+        @if (canEdit()) {
+          <fieldset class="roles-assign">
+            <legend class="roles-sr">{{ row.name }}的角色</legend>
+            @for (role of access.roles(); track role.id) {
+              <label class="roles-assign__option">
+                <input
+                  type="checkbox"
+                  [checked]="hasRole(row, role.id)"
+                  [attr.data-assign]="row.id + ':' + role.id"
+                  (change)="onAssign(row, role.id, $event)"
+                />
+                <span>{{ role.name }}</span>
+              </label>
+            }
+          </fieldset>
+        } @else {
+          {{ row.roleNames }}
+        }
+      </ng-template>
+      <ng-template dtCell="permissionCount" let-row>{{ row.permissionCount }} 項</ng-template>
+    </lib-data-table>
+
+    <div class="demo-row roles-reset">
+      <button type="button" matButton *libCan="'settings:edit'" (click)="resetDemo()">還原示範資料</button>
+    </div>
+  </app-demo-block>
+
+  <p class="demo-note roles-status" aria-live="polite">{{ status() }}</p>
+</app-showcase-page>

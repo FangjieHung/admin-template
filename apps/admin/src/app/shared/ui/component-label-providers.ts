@@ -6,6 +6,7 @@ import {
   SIGNATURE_PAD_LABELS,
   provideToast,
 } from '@admin-template/ui';
+import { PERMISSION_MATRIX_LABELS } from '@admin-template/access/permission-matrix';
 import { ZH_TW } from '../../core/i18n/zh-tw';
 
 /**
@@ -34,3 +35,8 @@ export const FEEDBACK_STATE_LABEL_PROVIDERS: Provider[] = [{ provide: FEEDBACK_S
 
 /** 提示訊息：ToastService 本身與錯誤提示的關閉鈕文字。要顯示提示的頁面在 providers 加上這組。 */
 export const TOAST_PROVIDERS: Provider[] = provideToast(ZH_TW.toast);
+
+/** 權限矩陣（libs/access 的 lib-permission-matrix）。不經過 @admin-template/ui，走 libs/access 的深路徑。 */
+export const PERMISSION_MATRIX_LABEL_PROVIDERS: Provider[] = [
+  { provide: PERMISSION_MATRIX_LABELS, useValue: ZH_TW.permissionMatrix },
+];

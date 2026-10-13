@@ -1,4 +1,5 @@
 import { Type } from '@angular/core';
+import type { AccessCheck } from '@admin-template/access';
 
 /**
  * 展示 app 的元件目錄：側欄、路由、首頁的元件表都從這份清單產生，新增一個展示頁只要在這裡加一筆。
@@ -6,7 +7,7 @@ import { Type } from '@angular/core';
  * 說明文字與規劃中清單放在 showcase-catalog.ts，只有展示頁（lazy chunk）會用到。
  */
 
-export type ShowcaseGroupId = 'overview' | 'data' | 'input' | 'feedback' | 'layout';
+export type ShowcaseGroupId = 'overview' | 'data' | 'input' | 'feedback' | 'layout' | 'access' | 'templates';
 
 export interface ShowcaseGroup {
   id: ShowcaseGroupId;
@@ -20,6 +21,8 @@ export const SHOWCASE_GROUPS: readonly ShowcaseGroup[] = [
   { id: 'input', label: '表單與輸入', icon: 'edit_note' },
   { id: 'feedback', label: '回饋', icon: 'chat_info' },
   { id: 'layout', label: '版面與導覽', icon: 'space_dashboard' },
+  { id: 'access', label: '權限', icon: 'shield_person' },
+  { id: 'templates', label: '頁面樣板', icon: 'web' },
 ];
 
 export interface ShowcaseEntry {
@@ -29,6 +32,10 @@ export interface ShowcaseEntry {
   group: ShowcaseGroupId;
   icon: string;
   load: () => Promise<Type<unknown>>;
+  /** 需要的權限：沒有時側欄不列出、直接開網址顯示「沒有權限」頁（libs/access）。 */
+  access?: AccessCheck;
+  /** 頁面有未儲存的變更時，離開前先確認（頁面實作 HasUnsavedChanges）。 */
+  guardUnsaved?: boolean;
 }
 
 export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
@@ -141,6 +148,29 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     icon: 'palette',
     load: () =>
       import('../features/appearance-panel/appearance-panel-page.component').then((m) => m.AppearancePanelPageComponent),
+  },
+  {
+    id: 'access-control',
+    title: '權限控制',
+    group: 'access',
+    icon: 'shield_person',
+    load: () => import('../features/access-control/access-control-page.component').then((m) => m.AccessControlPageComponent),
+  },
+  {
+    id: 'roles',
+    title: '角色與權限',
+    group: 'templates',
+    icon: 'admin_panel_settings',
+    access: 'settings:view',
+    guardUnsaved: true,
+    load: () => import('../features/roles/roles-page.component').then((m) => m.RolesPageComponent),
+  },
+  {
+    id: 'error-pages',
+    title: '錯誤頁',
+    group: 'templates',
+    icon: 'error',
+    load: () => import('../features/error-pages/error-pages-page.component').then((m) => m.ErrorPagesPageComponent),
   },
 ];
 

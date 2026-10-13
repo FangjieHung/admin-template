@@ -33,7 +33,7 @@ export class HomePageComponent {
     ...SHOWCASE_ENTRIES.map((e) => ({
       id: e.id,
       title: e.title,
-      kind: '元件',
+      kind: e.group === 'templates' ? '頁面樣板' : '元件',
       group: GROUP_LABEL.get(e.group) ?? '',
       status: 'done' as const,
       priority: '—',

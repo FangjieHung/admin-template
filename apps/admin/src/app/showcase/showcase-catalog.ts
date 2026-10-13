@@ -71,6 +71,18 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '浮在每一頁角落的面板，即時切換質地與配色；也是設定頁外觀選項的另一個入口。',
     source: 'libs/theme-pack/src/lib/floating-appearance-panel',
   },
+  'access-control': {
+    summary: '依權限決定畫面：路由守門（直接開網址顯示「沒有權限」）、按鈕依權限隱藏或停用＋提示需要的角色、側欄只列出看得到的頁面。純前端只能隱藏畫面，不是安全防護。',
+    source: 'libs/access/src/lib',
+  },
+  'roles': {
+    summary: '角色與權限的管理頁樣板：預設角色唯讀、複製成自訂角色再修改，功能 × 動作的權限矩陣，以及指派角色給使用者。',
+    source: 'libs/access/src/lib/permission-matrix、apps/admin/src/app/features/roles',
+  },
+  'error-pages': {
+    summary: '找不到頁面（404）與沒有權限兩個錯誤頁樣板：說明發生什麼事、可以怎麼辦，以及「回首頁」。',
+    source: 'libs/access（沒有權限的守門）、apps/admin/src/app/features/errors',
+  },
 };
 
 export function detailOf(id: string): ShowcaseDetail {
@@ -92,7 +104,6 @@ export interface PlannedItem {
 export const PLANNED_ITEMS: readonly PlannedItem[] = [
   { title: '關聯選擇欄位', kind: '元件', priority: 'P0', summary: '輸入就搜尋，從大量資料裡挑一筆（客戶、專案、負責人）。' },
   { title: '詳情頁版型', kind: '元件', priority: 'P0', summary: '標題＋狀態＋主要動作＋分頁＋摘要側欄。' },
-  { title: '權限控制', kind: '元件', priority: 'P0', summary: '路由守門、依權限隱藏或停用按鈕、沒有權限頁、切換身分小工具。' },
   { title: '數字小卡與圖表', kind: '元件', priority: 'P1', summary: '儀表板與報表的折線、長條、圓環。' },
   { title: '活動紀錄', kind: '元件', priority: 'P1', summary: '誰在何時改了什麼的時間軸。' },
   { title: '附件上傳與相機擷取', kind: '元件', priority: 'P1', summary: '拖放、預覽、進度、清單；手機可直接拍照。' },
@@ -112,7 +123,5 @@ export const PLANNED_ITEMS: readonly PlannedItem[] = [
   { title: '表單頁', kind: '頁面樣板', priority: 'P0', summary: '分段表單、驗證與操作列。' },
   { title: '儀表板', kind: '頁面樣板', priority: 'P1', summary: '數字小卡、圖表與待辦清單。' },
   { title: '設定頁', kind: '頁面樣板', priority: 'P1', summary: '分組設定項與儲存提示。' },
-  { title: '角色與權限矩陣', kind: '頁面樣板', priority: 'P0', summary: '功能 × 動作（檢視、建立、編輯、刪除、核准）的勾選矩陣。' },
   { title: '空白頁', kind: '頁面樣板', priority: 'P1', summary: '只有殼層的起點。' },
-  { title: '錯誤頁（404、沒有權限）', kind: '頁面樣板', priority: 'P0', summary: '找不到頁面與沒有權限的說明與返回動作。' },
 ];

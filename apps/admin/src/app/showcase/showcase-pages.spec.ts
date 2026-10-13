@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { provideAccess } from '@admin-template/access';
+import { DEMO_ACCESS_CONFIG } from '../core/access/demo-access';
 import { SHOWCASE_ENTRIES } from './showcase-registry';
 import { PLANNED_ITEMS, SHOWCASE_DETAILS, detailOf } from './showcase-catalog';
 
@@ -11,7 +13,7 @@ describe('展示目錄', () => {
     } catch {
       // 測試環境沒有 localStorage 時略過
     }
-    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+    TestBed.configureTestingModule({ providers: [provideRouter([]), provideAccess(DEMO_ACCESS_CONFIG)] });
   });
 
   it('id 不重複，每一筆都有說明與原始碼位置', () => {

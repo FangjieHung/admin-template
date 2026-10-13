@@ -1,0 +1,131 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <p class="ac-notice" role="note">
+    <span class="material-symbols-rounded" aria-hidden="true">info</span>
+    純前端只能隱藏畫面，不是安全防護；接後端時伺服器必須再檢查一次。
+  </p>
+
+  <app-demo-block
+    heading="目前身分"
+    description="換一個示範帳號，下面每一塊示範、側欄與「角色與權限」頁都會立刻跟著變。也可以在側欄打開「切換身分」小工具，每一頁都能換。"
+  >
+    <dl class="demo-state">
+      <div>
+        <dt>使用者</dt>
+        <dd>{{ access.currentUser()?.name ?? '未登入' }}</dd>
+      </div>
+      <div>
+        <dt>角色</dt>
+        <dd>{{ currentRoleNames() }}</dd>
+      </div>
+      <div>
+        <dt>權限數</dt>
+        <dd class="ui-text-numeric">{{ grantedList().length }}</dd>
+      </div>
+    </dl>
+    <div class="demo-row" role="group" aria-label="示範帳號">
+      @for (user of users(); track user.id) {
+        <button
+          type="button"
+          class="ui-nav-pill"
+          [class.is-active]="access.currentUser()?.id === user.id"
+          [attr.aria-pressed]="access.currentUser()?.id === user.id"
+          [attr.data-user-id]="user.id"
+          (click)="switchTo(user.id)"
+        >
+          {{ user.name }}・{{ user.roles }}
+        </button>
+      }
+    </div>
+    <mat-slide-toggle class="ac-switcher-toggle" [checked]="switcher.visible()" (change)="onSwitcherToggle($event)">
+      在側欄顯示「切換身分」小工具
+    </mat-slide-toggle>
+
+    <h3 class="ui-text-caption ac-subheading">目前身分的實際權限（所有角色的聯集）</h3>
+    <lib-permission-matrix
+      [features]="access.features"
+      [actionLabels]="access.labels.actions"
+      [value]="grantedList()"
+      [readonly]="true"
+      [caption]="(access.currentUser()?.name ?? '未登入') + '的實際權限'"
+    />
+  </app-demo-block>
+
+  <app-demo-block
+    heading="依權限隱藏（*libCan）"
+    description="預設做法：沒有權限的按鈕直接不出現。需要時用 else 換成一段說明。"
+  >
+    <div class="ac-toolbar" aria-label="工單清單的操作">
+      <span class="demo-list__title">工單清單</span>
+      <div class="demo-row">
+        <button type="button" matButton="filled" *libCan="'ticket:create'" (click)="act('新增工單')">新增工單</button>
+        <button type="button" matButton="outlined" *libCan="'ticket:edit'" (click)="act('批次編輯')">批次編輯</button>
+        <button type="button" matButton="outlined" *libCan="'ticket:delete'; else noDelete" (click)="act('刪除')">刪除</button>
+        <ng-template #noDelete>
+          <span class="demo-list__meta" data-else="ticket:delete">（沒有刪除權限）</span>
+        </ng-template>
+      </div>
+    </div>
+    <div class="ac-toolbar" aria-label="聯絡人清單的操作">
+      <span class="demo-list__title">聯絡人</span>
+      <div class="demo-row">
+        <button type="button" matButton="filled" *libCan="'contact:create'; else contactReadOnly" (click)="act('新增聯絡人')">新增聯絡人</button>
+        <ng-template #contactReadOnly>
+          <span class="demo-list__meta">唯讀：只能檢視聯絡人</span>
+        </ng-template>
+      </div>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="停用＋提示（[libDisabledUnless]）"
+    description="只用在使用者預期它在的地方，例如詳情頁的「核准」：按鈕還在、可以聚焦，滑過或用鍵盤聚焦時說明需要的角色，點了不會有動作。"
+  >
+    <article class="ac-detail" aria-labelledby="ac-detail-title">
+      <div class="ac-detail__head">
+        <div>
+          <p class="ui-text-caption ui-text-numeric">T-1024</p>
+          <h3 id="ac-detail-title" class="ui-text-subtitle">冷氣保養排程</h3>
+        </div>
+        <lib-status-chip label="待核准" status="pending" />
+      </div>
+      <p class="demo-list__meta">申請人：王小明・預算 NT$ 12,000</p>
+      <div class="demo-row ac-detail__actions">
+        <button type="button" matButton="outlined" [libDisabledUnless]="'ticket:approve'" (click)="act('退回')">退回</button>
+        <button type="button" matButton="filled" [libDisabledUnless]="'ticket:approve'" (click)="act('核准')">核准</button>
+      </div>
+    </article>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="路由守門與側欄"
+    description="每一頁都需要對應功能的「檢視」。沒有權限的頁面不會出現在側欄；直接開網址會看到「沒有權限」頁（網址列不變），換成有權限的身分就自動回到那一頁。"
+  >
+    <ul class="demo-list">
+      @for (route of routes(); track route.url) {
+        <li [attr.data-route]="route.url">
+          <span>
+            <a class="demo-list__title" [routerLink]="route.url">{{ route.label }}</a>
+            <span class="demo-list__meta">　需要：{{ route.need }}</span>
+          </span>
+          <lib-status-chip [label]="route.allowed ? '可以開啟' : '會顯示沒有權限'" [status]="route.allowed ? 'completed' : 'draft'" />
+        </li>
+      }
+      <li>
+        <span>
+          <a class="demo-list__title" routerLink="/components/does-not-exist">不存在的網址</a>
+          <span class="demo-list__meta">　任何人都會看到「找不到頁面」</span>
+        </span>
+        <lib-status-chip label="404" status="draft" />
+      </li>
+    </ul>
+  </app-demo-block>
+
+  <p class="demo-note result" aria-live="polite">結果：{{ result() }}</p>
+</app-showcase-page>
