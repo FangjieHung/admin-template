@@ -1,0 +1,75 @@
+@if (loading()) {
+  <lib-skeleton variant="card" label="載入通知設定中" />
+} @else {
+  <section class="ui-card acs-card p-4 sm:p-6" aria-labelledby="notify-title">
+    <div class="acs-card__head">
+      <h2 id="notify-title" class="ui-text-subtitle">通知</h2>
+      <p class="acs-lede">選擇哪些事件要通知你、用什麼管道。改了就會儲存，不必按「儲存」。</p>
+    </div>
+
+    <div class="acs-row notify-pause" data-field="paused">
+      <div class="acs-row__text">
+        <span class="acs-row__title" id="pause-label">全部暫停</span>
+        <span class="acs-hint" id="pause-hint" data-pause-hint>
+          @if (paused()) {
+            已暫停所有通知：恢復之前不會收到站內或 Email 通知。下面的個別設定會保留，恢復後照舊。
+          } @else {
+            暫時不想被打擾時開啟（例如休假）；個別設定會保留。
+          }
+        </span>
+      </div>
+      <mat-slide-toggle
+        [checked]="paused()"
+        [disabled]="isPending('paused')"
+        aria-labelledby="pause-label"
+        aria-describedby="pause-hint"
+        (change)="setPaused($event)"
+        data-action="pause"
+      />
+    </div>
+
+    <hr class="acs-divider" />
+
+    @if (matrix(); as m) {
+      <div class="notify-table-wrap">
+        <table class="notify-table" [class.is-disabled]="paused()" [attr.aria-describedby]="paused() ? 'pause-hint' : null">
+          <caption class="acs-vh">每個事件要用哪些管道通知</caption>
+          <thead>
+            <tr>
+              <th scope="col">事件</th>
+              @for (c of channels; track c.id) {
+                <th scope="col" class="notify-table__channel">{{ c.label }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of events; track e.id) {
+              <tr>
+                <th scope="row">
+                  <span class="notify-table__event">{{ e.label }}</span>
+                  <span class="notify-table__desc">{{ e.description }}</span>
+                </th>
+                @for (c of channels; track c.id) {
+                  <td class="notify-table__cell">
+                    <input
+                      type="checkbox"
+                      [checked]="m[e.id][c.id]"
+                      [disabled]="paused() || isPending(e.id + '.' + c.id)"
+                      [attr.aria-label]="e.label + '：' + c.label"
+                      [attr.data-cell]="e.id + '.' + c.id"
+                      (change)="toggle(e.id, c.id, $event)"
+                    />
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <p class="acs-demo-note">
+      示範：「每日摘要 × Email」第一次切換固定失敗，勾選會還原並提示錯誤；網址加上 <code>?demo=fail</code> 則每次即時儲存都失敗。
+    </p>
+  </section>
+}

@@ -1,0 +1,102 @@
+// 設定頁各分組共用的版面。卡片、欄位、按鈕的造型交給質地 recipe；這裡只排版面，只用語意 token。
+// 寬度斷點用 container query：外層 .acs__content 是 inline-size 容器（側欄開合、窄螢幕都跟著內容寬度走）。
+
+:host {
+  display: block;
+}
+
+.acs-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.acs-card {
+  display: grid;
+  gap: 1rem;
+
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
+}
+
+.acs-card__head {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.acs-lede,
+.acs-hint {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.acs-demo-note {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+
+  code {
+    font-family: var(--font-mono);
+  }
+}
+
+// 窄的時候單欄，夠寬時兩欄；.acs-wide 占滿一列。
+.acs-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem 1rem;
+
+  mat-form-field {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  @container acs-content (min-width: 40rem) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.acs-wide {
+  grid-column: 1 / -1;
+}
+
+// 一列設定：左邊標題與說明，右邊控制項（開關、按鈕）。
+.acs-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+}
+
+.acs-row__text {
+  display: grid;
+  flex: 1 1 18rem;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.acs-row__title {
+  color: var(--mat-sys-on-surface);
+  font-weight: 600;
+}
+
+.acs-divider {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+// 只給報讀器的文字（父層要是定位元素，免得撐出捲動）。
+.acs-vh {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

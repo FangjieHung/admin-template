@@ -1,0 +1,80 @@
+@if (loading()) {
+  <lib-skeleton variant="card" [count]="2" label="載入個人資料中" />
+} @else {
+  <form id="profile-form" class="acs-stack" [formGroup]="form" (ngSubmit)="save()" novalidate [attr.aria-busy]="saving() ? 'true' : null">
+    <section class="ui-card acs-card p-4 sm:p-6" aria-labelledby="profile-title">
+      <div class="acs-card__head">
+        <h2 id="profile-title" class="ui-text-subtitle">個人資料</h2>
+        <p class="acs-lede">其他人在指派、留言時看到的名字與聯絡方式。改完按底部的「儲存」。</p>
+      </div>
+
+      <div class="profile-avatar">
+        <span class="profile-avatar__badge" aria-hidden="true">{{ initials() }}</span>
+        <div class="profile-avatar__text">
+          <span class="acs-row__title">頭像</span>
+          <span class="acs-hint">沒有上傳照片時，用顯示名稱的縮寫。</span>
+        </div>
+        <button matButton="outlined" type="button" (click)="changeAvatar()" data-action="change-avatar">更換</button>
+      </div>
+
+      <div class="acs-grid">
+        <mat-form-field appearance="outline" data-field="displayName">
+          <mat-label>顯示名稱</mat-label>
+          <input matInput formControlName="displayName" required autocomplete="name" />
+          <mat-hint align="end" class="ui-text-numeric">{{ form.controls.displayName.value.length }}/{{ nameMax }}</mat-hint>
+          <mat-error>{{ messageOf('displayName') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" data-field="email">
+          <mat-label>Email</mat-label>
+          <input
+            #emailInput
+            matInput
+            type="email"
+            formControlName="email"
+            required
+            autocomplete="email"
+            [readonly]="!editingEmail()"
+          />
+          @if (!editingEmail()) {
+            <button matTextSuffix matButton type="button" class="profile-email-change" (click)="editEmail()" data-action="change-email">變更</button>
+          }
+          <mat-hint>{{ editingEmail() ? '儲存後會寄確認信到新的信箱（示範）。' : '登入與通知用的信箱。' }}</mat-hint>
+          <mat-error>{{ messageOf('email') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" data-field="jobTitle">
+          <mat-label>職稱</mat-label>
+          <input matInput formControlName="jobTitle" autocomplete="organization-title" />
+          <mat-hint>選填</mat-hint>
+          <mat-error>{{ messageOf('jobTitle') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" data-field="locale">
+          <mat-label>介面語言</mat-label>
+          <mat-select formControlName="locale" required>
+            @for (l of locales; track l.id) {
+              <mat-option [value]="l.id">{{ l.nativeName }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>{{ messageOf('locale') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" data-field="timeZone">
+          <mat-label>時區</mat-label>
+          <mat-select formControlName="timeZone" required>
+            @for (z of timeZones; track z.id) {
+              <mat-option [value]="z.id">{{ z.label }}</mat-option>
+            }
+          </mat-select>
+          <mat-hint>日期與提醒的時間依這個時區顯示。</mat-hint>
+          <mat-error>{{ messageOf('timeZone') }}</mat-error>
+        </mat-form-field>
+      </div>
+    </section>
+  </form>
+
+  @if (dirty()) {
+    <app-unsaved-bar formId="profile-form" [saving]="saving()" (discard)="discardChanges()" />
+  }
+}

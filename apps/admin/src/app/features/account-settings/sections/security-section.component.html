@@ -1,0 +1,104 @@
+@if (loading()) {
+  <lib-skeleton variant="card" [count]="3" label="載入安全性設定中" />
+} @else {
+  <div class="acs-stack">
+    <!-- 變更密碼：明確存檔（「儲存」在底部的未儲存列） -->
+    <form id="password-form" class="ui-card acs-card p-4 sm:p-6" [formGroup]="form" (ngSubmit)="save()" novalidate aria-labelledby="password-title">
+      <div class="acs-card__head">
+        <h2 id="password-title" class="ui-text-subtitle">變更密碼</h2>
+        <p class="acs-lede">輸入目前的密碼，再設定新密碼。示範：目前密碼輸入 <code>wrong-password</code> 會被拒絕。</p>
+      </div>
+
+      <div class="acs-grid">
+        <mat-form-field appearance="outline" class="acs-wide password-current" data-field="current">
+          <mat-label>目前的密碼</mat-label>
+          <input matInput type="password" formControlName="current" required autocomplete="current-password" />
+          <mat-error>{{ messageOf('current') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" data-field="next">
+          <mat-label>新密碼</mat-label>
+          <input matInput type="password" formControlName="next" required autocomplete="new-password" aria-describedby="password-rules" />
+          <mat-error>{{ messageOf('next') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" data-field="confirm">
+          <mat-label>確認新密碼</mat-label>
+          <input matInput type="password" formControlName="confirm" required autocomplete="new-password" />
+          <mat-error>{{ messageOf('confirm') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="password-check">
+        <div class="password-strength" [attr.data-strength]="strength() ?? 'none'">
+          <span class="password-strength__label">密碼強度：</span>
+          <span class="password-strength__meter" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+          <span class="password-strength__value" aria-live="polite">{{ strength() ? strengthLabels[strength()!] : '尚未輸入' }}</span>
+        </div>
+        <ul id="password-rules" class="password-rules" aria-label="新密碼的規則">
+          @for (rule of rules(); track rule.id) {
+            <li [attr.data-rule]="rule.id" [attr.data-met]="rule.met">
+              <span class="material-symbols-rounded" aria-hidden="true">{{ rule.met ? 'check_circle' : 'radio_button_unchecked' }}</span>
+              {{ rule.label }}
+              <span class="acs-vh">{{ rule.met ? '（已符合）' : '（未符合）' }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+    </form>
+
+    <!-- 兩步驟驗證：即時儲存 -->
+    <section class="ui-card acs-card p-4 sm:p-6" aria-labelledby="twofactor-title">
+      <div class="acs-row">
+        <div class="acs-row__text">
+          <h2 id="twofactor-title" class="ui-text-subtitle">兩步驟驗證</h2>
+          <span class="acs-hint" id="twofactor-hint">
+            {{ twoFactor() ? '已開啟：登入時除了密碼，還要輸入驗證 App 的 6 位數代碼。' : '開啟後，登入時除了密碼還要輸入驗證 App 的代碼（示範：不會真的綁定）。' }}
+          </span>
+        </div>
+        <mat-slide-toggle
+          [checked]="twoFactor()"
+          [disabled]="twoFactorPending()"
+          aria-labelledby="twofactor-title"
+          aria-describedby="twofactor-hint"
+          (change)="setTwoFactor($event)"
+          data-action="two-factor"
+        />
+      </div>
+    </section>
+
+    <!-- 登入中的裝置 -->
+    <section class="ui-card acs-card p-4 sm:p-6" aria-labelledby="sessions-title">
+      <div class="acs-card__head">
+        <h2 id="sessions-title" class="ui-text-subtitle">登入中的裝置</h2>
+        <p class="acs-lede">看到不認得的裝置就登出它，再變更密碼。</p>
+      </div>
+      <ul class="sessions">
+        @for (s of sessions(); track s.id) {
+          <li class="sessions__item" [attr.data-session]="s.id">
+            <span class="material-symbols-rounded sessions__icon" aria-hidden="true">{{ s.icon }}</span>
+            <div class="sessions__text">
+              <span class="acs-row__title">{{ s.device }}</span>
+              <span class="acs-hint">{{ s.location }} · {{ lastActive(s) }}</span>
+            </div>
+            @if (s.current) {
+              <span class="ui-chip ui-chip--positive">目前這台</span>
+            } @else {
+              <button matButton="outlined" type="button" [disabled]="signingOut() === s.id" (click)="signOut(s)" data-action="sign-out">
+                登出這台
+              </button>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  </div>
+
+  @if (dirty()) {
+    <app-unsaved-bar formId="password-form" [saving]="saving()" (discard)="discardChanges()" />
+  }
+}

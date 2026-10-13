@@ -72,7 +72,7 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     source: 'libs/ui/src/lib/toast',
   },
   'confirm-dialog': {
-    summary: '執行刪除等不可復原的動作前，再問一次；回傳使用者是否確認。',
+    summary: '執行刪除等不可復原的動作前，再問一次；影響很大的動作可以要求先輸入確認字樣。回傳使用者是否確認。',
     source: 'libs/ui/src/lib/confirm-dialog',
   },
   'responsive-panel': {
@@ -119,6 +119,14 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '登入樣板：帳號密碼、顯示密碼、記住我、送出中與錯誤訊息（帳密錯誤、帳號鎖定）；示範帳號登入後切換成對應的身分。',
     source: 'libs/access（示範身分）、apps/admin/src/app/features/auth',
   },
+  'settings-template': {
+    summary: '設定頁樣板：分組導覽同步到網址（個人資料、通知、安全性、偏好、進階），示範明確存檔（未儲存列、離開前確認）與即時儲存（失敗時還原）兩種模式，以及要輸入確認字樣的刪除帳號。',
+    source: 'libs/ui（confirm-dialog、toast）、apps/admin/src/app/features/account-settings',
+  },
+  'blank-page': {
+    summary: '空白頁樣板：只有殼層、頁首與一張空卡片，附上開新頁面的四個步驟與程式碼片段；整個樣板只有一個檔案。',
+    source: 'libs/theme-pack（.ui-card）、apps/admin/src/app/features/blank-page',
+  },
 };
 
 export function detailOf(id: string): ShowcaseDetail {
@@ -149,6 +157,4 @@ export const PLANNED_ITEMS: readonly PlannedItem[] = [
   { title: '樹狀選單與樹狀表', kind: '元件', priority: 'P2', summary: '組織架構、分類。' },
   { title: '列印與 PDF 版面', kind: '元件', priority: 'P2', summary: '單據可列印、可寄送。' },
   { title: '富文字、留言與 @提及', kind: '元件', priority: 'P2', summary: '備註與內部協作。' },
-  { title: '設定頁', kind: '頁面樣板', priority: 'P1', summary: '分組設定項與儲存提示。' },
-  { title: '空白頁', kind: '頁面樣板', priority: 'P1', summary: '只有殼層的起點。' },
 ];

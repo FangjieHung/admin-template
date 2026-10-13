@@ -210,6 +210,8 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
   { id: 'ticket-detail', title: '詳情頁', group: 'templates', icon: 'article', path: 'templates/tickets/TK-2048', access: 'ticket:view' },
   { id: 'ticket-form', title: '表單頁', group: 'templates', icon: 'edit_document', path: 'templates/tickets/TK-2048/edit', access: 'ticket:edit' },
   { id: 'login', title: '登入', group: 'templates', icon: 'login', path: 'login' },
+  { id: 'settings-template', title: '設定頁', group: 'templates', icon: 'manage_accounts', path: 'templates/settings' },
+  { id: 'blank-page', title: '空白頁', group: 'templates', icon: 'note_add', path: 'templates/blank' },
 ];
 
 export function showcaseRoute(entry: ShowcaseEntry): string {

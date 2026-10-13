@@ -3,7 +3,7 @@ import { ACCESS_DATA_KEY, AccessCheck, accessGuard } from '@admin-template/acces
 
 /**
  * 頁面樣板的路由（app.routes.ts 用 loadChildren 掛在 /templates，整份都是 lazy，不佔 Initial bundle）：
- * 規劃中清單、儀表板、工單（列表、詳情、表單，路由在 tickets.routes.ts）。
+ * 規劃中清單、儀表板、工單（列表、詳情、表單，路由在 tickets.routes.ts）、設定頁（分組子路由在 account-settings.routes.ts）、空白頁。
  */
 function guarded(access: AccessCheck): Partial<Route> {
   return { canActivate: [accessGuard], data: { [ACCESS_DATA_KEY]: access }, runGuardsAndResolvers: 'always' };
@@ -24,5 +24,14 @@ export const TEMPLATE_ROUTES: Routes = [
   {
     path: 'tickets',
     loadChildren: () => import('../tickets/tickets.routes').then((m) => m.TICKET_ROUTES),
+  },
+  // 設定頁：每個使用者都能改自己的設定，不另外守門。
+  {
+    path: 'settings',
+    loadChildren: () => import('../account-settings/account-settings.routes').then((m) => m.ACCOUNT_SETTINGS_ROUTES),
+  },
+  {
+    path: 'blank',
+    loadComponent: () => import('../blank-page/blank-page.component').then((m) => m.BlankPageComponent),
   },
 ];

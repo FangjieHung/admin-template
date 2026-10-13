@@ -24,7 +24,8 @@ describe('展示目錄', () => {
       expect(detailOf(entry.id).source).toMatch(/^libs\//);
     }
     expect(Object.keys(SHOWCASE_DETAILS).sort()).toEqual([...ids].sort());
-    expect(PLANNED_ITEMS.some((p) => p.kind === '頁面樣板')).toBe(true);
+    // 頁面樣板都做完了；規劃中清單只剩元件（templates-page 顯示「都已完成」）。
+    expect(PLANNED_ITEMS.every((p) => p.kind === '元件')).toBe(true);
   });
 
   it('展示頁有 load（路由 /components/<id>）；頁面樣板改給 path（路由自己宣告），兩者剛好一個', () => {

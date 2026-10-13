@@ -1,0 +1,65 @@
+// 事件 × 管道的勾選表：原生勾選框（外觀由全域 _choice-controls.scss 依質地重畫）。
+.notify-table-wrap {
+  position: relative;
+  overflow-x: auto;
+}
+
+.notify-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  th,
+  td {
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    text-align: start;
+    vertical-align: middle;
+  }
+
+  tbody tr:last-child :is(th, td) {
+    border-bottom: 0;
+  }
+
+  thead th {
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  tbody th {
+    font-weight: 400;
+  }
+}
+
+.notify-table .notify-table__channel,
+.notify-table .notify-table__cell {
+  width: 5.5rem;
+  text-align: center;
+}
+
+.notify-table__event,
+.notify-table__desc {
+  display: block;
+}
+
+.notify-table__event {
+  color: var(--mat-sys-on-surface);
+  font-weight: 600;
+}
+
+.notify-table__desc {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.8125rem;
+}
+
+// 勾選框的點擊熱區至少 24px（WCAG 2.5.8）：格子本身夠大，勾選框維持原生尺寸。
+.notify-table__cell input {
+  margin: 0;
+  vertical-align: middle;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
