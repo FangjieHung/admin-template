@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { AppearancePanelService, COLOR_THEMES, ThemeService, texture } from '@car-rental/theme-pack';
+import { AppearancePanelService, COLOR_THEMES, ThemeService, texture } from '@admin-template/theme-pack';
 import { DemoBlockComponent } from '../../showcase/demo-block.component';
 import { ApiSection, ShowcasePageComponent } from '../../showcase/showcase-page.component';
 import { detailOf } from '../../showcase/showcase-catalog';
@@ -51,13 +51,13 @@ export class AppearancePanelPageComponent {
 // app.ts
 protected readonly appearancePanel = inject(AppearancePanelService);
 // 面板元件走深路徑匯入，@defer 才能把它拆成獨立 chunk
-import { FloatingAppearancePanelComponent } from '@car-rental/theme-pack/floating-appearance-panel';`;
+import { FloatingAppearancePanelComponent } from '@admin-template/theme-pack/floating-appearance-panel';`;
 
   protected readonly api: ApiSection[] = [
     {
       title: 'AppearancePanelService',
       rows: [
-        { name: 'visible', type: 'WritableSignal<boolean>', default: 'localStorage', description: '面板是否顯示；記在瀏覽器（cr.appearancePanel）。' },
+        { name: 'visible', type: 'WritableSignal<boolean>', default: 'localStorage', description: '面板是否顯示；記在瀏覽器（app.appearancePanel）。' },
         { name: 'setVisible(value)', type: 'void', description: '開關面板並記住。' },
       ],
     },

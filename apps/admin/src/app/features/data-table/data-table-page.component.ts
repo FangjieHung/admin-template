@@ -20,8 +20,8 @@ import {
   applyFilters,
   removeCondition,
   upsertCondition,
-} from '@car-rental/ui';
-import { StatusKey } from '@car-rental/theme-pack';
+} from '@admin-template/ui';
+import { StatusKey } from '@admin-template/theme-pack';
 import { fmtDateTime } from '../../core/date-utils';
 import { HeaderToolbarDirective } from '../../layout/header/header-toolbar-slot';
 import { ADMIN_DATA_TABLE_LABELS } from '../../shared/ui/data-table-labels';

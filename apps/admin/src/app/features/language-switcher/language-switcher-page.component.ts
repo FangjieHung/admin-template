@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { I18N_CONFIG, I18nService, LanguageSwitcherComponent } from '@car-rental/ui';
+import { I18N_CONFIG, I18nService, LanguageSwitcherComponent } from '@admin-template/ui';
 import { DEMO_PROJECTS } from '../../showcase/demo-data';
 import { DemoBlockComponent } from '../../showcase/demo-block.component';
 import { ApiSection, ShowcasePageComponent } from '../../showcase/showcase-page.component';

@@ -1,7 +1,7 @@
 import { Component, Injector, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { openConfirmDialog } from '@car-rental/ui';
+import { openConfirmDialog } from '@admin-template/ui';
 import { CONFIRM_DIALOG_LABEL_PROVIDERS } from '../../shared/ui/component-label-providers';
 import { DemoBlockComponent } from '../../showcase/demo-block.component';
 import { ApiSection, ShowcasePageComponent } from '../../showcase/showcase-page.component';

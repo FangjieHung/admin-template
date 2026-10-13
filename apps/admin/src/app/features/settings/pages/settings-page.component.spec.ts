@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { AppearancePanelService, COLOR_THEMES, ThemeService, texture } from '@car-rental/theme-pack';
+import { AppearancePanelService, COLOR_THEMES, ThemeService, texture } from '@admin-template/theme-pack';
 import { ZH_TW } from '../../../core/i18n/zh-tw';
 import { HeaderTitleSlot } from '../../../layout/header/header-title';
 import { SettingsPageComponent } from './settings-page.component';
@@ -101,8 +101,8 @@ describe('SettingsPageComponent', () => {
   });
 
   it('ADR 0007：從 Soft UI × Sandstone 的已存組合重新載入，變成 Soft UI 的預設配色', async () => {
-    localStorage.setItem('cr.paradigm', 'soft-ui');
-    localStorage.setItem('cr.theme', 'sandstone');
+    localStorage.setItem('app.paradigm', 'soft-ui');
+    localStorage.setItem('app.theme', 'sandstone');
 
     const theme = TestBed.inject(ThemeService);
     const ready = theme.init();

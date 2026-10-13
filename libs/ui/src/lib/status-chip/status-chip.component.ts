@@ -1,5 +1,5 @@
 import { Component, computed, input } from '@angular/core';
-import { StatusKey, toneOf } from '@car-rental/theme-pack';
+import { StatusKey, toneOf } from '@admin-template/theme-pack';
 
 /**
  * 狀態標籤：一顆圓點＋文字。顏色不由呼叫端指定，而是依「狀態語意」（`StatusKey`，例如 approved、pending、

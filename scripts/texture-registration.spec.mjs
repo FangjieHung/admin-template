@@ -33,7 +33,7 @@ const TEXTURES = idsOf(TOKEN, 'texture');
 const COLOR_THEMES = idsOf(TOKEN, 'COLOR_THEMES');
 const ON_DEMAND = TEXTURES.filter((id) => !RESIDENT.includes(id));
 
-const bootMatch = INDEX_HTML.match(/<script id="cr-texture-boot">([\s\S]*?)<\/script>/);
+const bootMatch = INDEX_HTML.match(/<script id="app-texture-boot">([\s\S]*?)<\/script>/);
 const BOOT = bootMatch?.[1] ?? '';
 
 function arrayInBoot(name) {
@@ -134,7 +134,7 @@ describe('按需質地登錄一致（ADR 0010）', () => {
       .replace(/<!--[\s\S]*?-->/g, '')
       .replace(BOOT, '');
     const base = head.indexOf('<base ');
-    const boot = head.indexOf('<script id="cr-texture-boot">');
+    const boot = head.indexOf('<script id="app-texture-boot">');
     const firstSheet = head.search(/<link[^>]*rel="stylesheet"/);
     expect(base).toBeGreaterThan(-1);
     expect(boot).toBeGreaterThan(base);
@@ -145,12 +145,12 @@ describe('按需質地登錄一致（ADR 0010）', () => {
 
 describe('開機腳本行為（ADR 0010）', () => {
   it('存的是按需質地：設好 data-paradigm／data-theme，並由解析器寫入會擋渲染的 <link>', () => {
-    const { attrs, writes } = runBoot({ 'cr.paradigm': 'clay', 'cr.theme': 'midnight' });
+    const { attrs, writes } = runBoot({ 'app.paradigm': 'clay', 'app.theme': 'midnight' });
     expect(attrs['data-paradigm']).toBe('clay');
     expect(attrs['data-theme']).toBe('midnight');
     expect(writes).toHaveLength(1);
     expect(writes[0]).toMatch(/^<link rel="stylesheet" href="texture-clay\.css" data-texture-css="clay"/);
-    expect(writes[0]).toContain('onerror="__crTextureFailed(this)"');
+    expect(writes[0]).toContain('onerror="__appTextureFailed(this)"');
   });
 
   it.each([
@@ -158,14 +158,14 @@ describe('開機腳本行為（ADR 0010）', () => {
     ['removed-texture', '不認得的 id'],
     [null, '沒存過'],
     ['clay" onload="alert(1)', '注入字串'],
-  ])('cr.paradigm = %s（%s）：維持 material，不寫入任何 <link>', (paradigm) => {
-    const { attrs, writes } = runBoot(paradigm === null ? {} : { 'cr.paradigm': paradigm });
+  ])('app.paradigm = %s（%s）：維持 material，不寫入任何 <link>', (paradigm) => {
+    const { attrs, writes } = runBoot(paradigm === null ? {} : { 'app.paradigm': paradigm });
     expect(attrs['data-paradigm']).toBe('material');
     expect(writes).toEqual([]);
   });
 
   it('不認得的配色 id 不寫進 data-theme（維持 index.html 的預設，留給 ThemeService.init() 校正）', () => {
-    const { attrs } = runBoot({ 'cr.paradigm': 'grid', 'cr.theme': 'removed-theme' });
+    const { attrs } = runBoot({ 'app.paradigm': 'grid', 'app.theme': 'removed-theme' });
     expect(attrs['data-theme']).toBe('verdant');
   });
 
@@ -176,12 +176,12 @@ describe('開機腳本行為（ADR 0010）', () => {
   });
 
   it('<link> 載入失敗：退回 material、校正 localStorage、留下 data-texture-fallback、移除 <link>', () => {
-    const { attrs, store, window } = runBoot({ 'cr.paradigm': 'editorial' });
+    const { attrs, store, window } = runBoot({ 'app.paradigm': 'editorial' });
     let removed = false;
-    window.__crTextureFailed({ getAttribute: () => 'editorial', remove: () => (removed = true) });
+    window.__appTextureFailed({ getAttribute: () => 'editorial', remove: () => (removed = true) });
     expect(attrs['data-paradigm']).toBe('material');
     expect(attrs['data-texture-fallback']).toBe('editorial');
-    expect(store['cr.paradigm']).toBe('material');
+    expect(store['app.paradigm']).toBe('material');
     expect(removed).toBe(true);
   });
 });

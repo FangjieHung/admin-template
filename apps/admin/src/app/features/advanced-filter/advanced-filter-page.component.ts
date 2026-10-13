@@ -7,7 +7,7 @@ import {
   FilterField,
   FilterOption,
   applyFilters,
-} from '@car-rental/ui';
+} from '@admin-template/ui';
 import { fmtDateTime } from '../../core/date-utils';
 import { ADMIN_FILTER_LABELS } from '../../shared/ui/list-view-labels';
 import { rangePickerLabelProviders } from '../../shared/ui/component-label-providers';

@@ -3,7 +3,7 @@ import { Injectable, signal } from '@angular/core';
 // ticket 03（外觀浮動面板）：設定頁的開關與每一頁角落的按鈕要共用同一份狀態，
 // 不管是哪個進來改（設定頁的 checkbox 或未來別處），兩邊都要立刻同步，所以狀態放在
 // 共用的 theme-pack service，而不是各自在元件裡讀 localStorage。
-export const APPEARANCE_PANEL_KEY = 'cr.appearancePanel';
+export const APPEARANCE_PANEL_KEY = 'app.appearancePanel';
 
 @Injectable({ providedIn: 'root' })
 export class AppearancePanelService {

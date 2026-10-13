@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { STATUS_TONE, StatusKey } from '@car-rental/theme-pack';
-import { StatusChipComponent } from '@car-rental/ui';
+import { STATUS_TONE, StatusKey } from '@admin-template/theme-pack';
+import { StatusChipComponent } from '@admin-template/ui';
 import { DemoBlockComponent } from '../../showcase/demo-block.component';
 import { ApiSection, ShowcasePageComponent } from '../../showcase/showcase-page.component';
 import { detailOf } from '../../showcase/showcase-catalog';

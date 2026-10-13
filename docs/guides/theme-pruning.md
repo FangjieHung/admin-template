@@ -45,7 +45,7 @@ grep -rn "texture/<id>\|color-themes/<id>\|data-theme=\"<id>\"\|data-paradigm=\"
 | 1 | `libs/theme-pack/src/lib/styles/texture/<id>/` | 不要的質地整個資料夾刪掉（連同它的 `design-guideline.md`） |
 | 2 | `libs/theme-pack/src/lib/styles/color-themes/<id>/` | 不要的配色整個資料夾刪掉 |
 | 3 | `color-themes/_registry.scss` | 刪掉對應的 `@forward`。質地沒有 registry 了（2026-10-13 起按需載入，ADR 0010），改做第 4 步 |
-| 4 | `apps/admin/project.json` ＋ `apps/admin/src/index.html` | 已刪質地的 `texture-<id>` 樣式入口（`build.options.styles` 裡 `inject: false` 那幾筆）刪掉，**這通常是第一個 build 錯誤**；`index.html` 開機腳本（`#cr-texture-boot`）的 `onDemandTextures` 刪掉同一個 id，刪了配色就從 `colorThemes` 刪掉。只留 Material 時 `onDemandTextures` 寫成空陣列 `[]`。質地字型在各自的 `_index.scss`，跟著資料夾一起刪，不用另外處理 |
+| 4 | `apps/admin/project.json` ＋ `apps/admin/src/index.html` | 已刪質地的 `texture-<id>` 樣式入口（`build.options.styles` 裡 `inject: false` 那幾筆）刪掉，**這通常是第一個 build 錯誤**；`index.html` 開機腳本（`#app-texture-boot`）的 `onDemandTextures` 刪掉同一個 id，刪了配色就從 `colorThemes` 刪掉。只留 Material 時 `onDemandTextures` 寫成空陣列 `[]`。質地字型在各自的 `_index.scss`，跟著資料夾一起刪，不用另外處理 |
 | 5 | `apps/affiliate/src/styles.scss` ＋ `apps/affiliate/src/index.html` | 若刪了 Midnight：scss 的 `color-themes/midnight/tokens` 與 HTML 的 `data-theme="midnight"` **兩處都要改**成保留的配色；只改一處會 build 失敗或整頁沒顏色 |
 | 5b | `apps/booking/src/styles.scss`、`apps/affiliate/src/styles.scss` | 這兩個前台只 `@use` `texture/material`（2026-09-28 起，不載入整份質地清單）。若新專案的前台要用 Material 以外的質地，把這行換成該質地，並改 `index.html` 的 `data-paradigm` |
 | 6 | `libs/theme-pack/src/lib/styles/_combos.scss` | 刪掉引用已刪 id 的組合規則。**檔案本身要留著**，三個 app 都 `@use` 它 |
@@ -67,13 +67,13 @@ grep -rn "texture/<id>\|color-themes/<id>\|data-theme=\"<id>\"\|data-paradigm=\"
 | `libs/theme-pack/src/lib/floating-appearance-panel/` | 整個資料夾刪掉（6 個檔） |
 | `libs/theme-pack/src/lib/theme/appearance-panel.service.ts`（含 `.spec.ts`） | 刪掉 |
 | `libs/theme-pack/src/index.ts` | 刪掉 service 與 component 兩行 `export` |
-| `tsconfig.base.json` | 刪掉 path alias `@car-rental/theme-pack/floating-appearance-panel`。**最容易漏**：當初為了延遲載入另開的深路徑，只刪 barrel export 不會報錯 |
+| `tsconfig.base.json` | 刪掉 path alias `@admin-template/theme-pack/floating-appearance-panel`。**最容易漏**：當初為了延遲載入另開的深路徑，只刪 barrel export 不會報錯 |
 | `apps/admin/src/app/app.ts` | 刪 `AppearancePanelService`、`FloatingAppearancePanelComponent` 的 import、`imports` 陣列那一項、`appearancePanel` 欄位 |
 | `apps/admin/src/app/app.html` | 刪掉 `@defer (when appearancePanel.visible()) { <lib-floating-appearance-panel /> }` 區塊 |
 | 設定頁 | 刪掉「顯示外觀浮動面板」開關：`MatSlideToggleModule`、`onAppearancePanelToggle`、`.appearance-panel-toggle` 樣式、相關 spec |
 | `docs/design-system/theme-glossary.md` | 刪「外觀浮動面板」那一列 |
 
-不用處理：`_semantic.scss` 的 `--app-z-floating` 沒人用了，但留著無害；使用者瀏覽器裡的 `cr.appearancePanel*` 沒有程式會讀。
+不用處理：`_semantic.scss` 的 `--app-z-floating` 沒人用了，但留著無害；使用者瀏覽器裡的 `app.appearancePanel*` 沒有程式會讀。
 
 刪掉面板後 **`ThemeService` 仍然需要**：app 啟動時它負責把瀏覽器裡的舊設定校正回預設（見第 5 節），設定頁也靠它取得相容配色。
 
@@ -92,7 +92,7 @@ grep -rn "texture/<id>\|color-themes/<id>\|data-theme=\"<id>\"\|data-paradigm=\"
 
 ## 5. 瀏覽器裡的舊設定
 
-使用者的瀏覽器可能存著已刪的質地或配色（`localStorage` 的 `cr.paradigm`、`cr.theme`）。
+使用者的瀏覽器可能存著已刪的質地或配色（`localStorage` 的 `app.paradigm`、`app.theme`）。
 
 - **配色**：有相容檢查，不在清單內就會退回該質地的預設配色。
 - **質地**：2026-09-28 起 `ThemeService` 會經過 `resolveParadigmId()`，不認得的質地一律退回 `DEFAULT_PARADIGM` 並覆寫舊值。在這之前質地沒有任何檢查，**整頁會失去質地樣式（卡片沒圓角、沒陰影），console 卻沒有任何錯誤**。複製專案時確認這個修正已經在裡面：
@@ -149,7 +149,7 @@ grep -n "resolveParadigmId" libs/theme-pack/src/lib/theme/theme.service.ts
 3. `npm run lint:theme` 通過；`npx vitest run scripts --exclude '.claude/**' --exclude '**/node_modules/**'` 通過。
 4. 啟動 admin 後跑 `npm run contrast:theme -- --base-url=http://localhost:<port>`，保留的組合全部 0 不合格。
 5. 第 1 節的 grep 在程式與 scss 裡 0 殘留（測試用的舊值測資、註解可以例外）。
-6. 在瀏覽器存一個已刪的質地與配色（例如 `localStorage.setItem('cr.paradigm', 'clay')`），重新整理後確認退回預設、卡片有正常的圓角和陰影。
+6. 在瀏覽器存一個已刪的質地與配色（例如 `localStorage.setItem('app.paradigm', 'clay')`），重新整理後確認退回預設、卡片有正常的圓角和陰影。
 7. 開儀表板、訂單列表、設定頁截圖確認正常，console 0 錯誤。
 
 ---

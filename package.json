@@ -1,5 +1,5 @@
 {
-  "name": "penghu-rental-admin",
+  "name": "admin-template",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -9,7 +9,7 @@
     "test": "nx test admin",
     "lint:theme": "node scripts/lint-theme.mjs",
     "contrast:theme": "node scripts/contrast-report.mjs",
-    "deploy": "nx build admin --base-href /bbd-car-rental/ && npx angular-cli-ghpages --dir=dist/penghu-rental-admin/browser"
+    "deploy": "nx build admin --base-href /bbd-car-rental/ && npx angular-cli-ghpages --dir=dist/admin-template/browser"
   },
   "private": true,
   "packageManager": "npm@11.16.0",

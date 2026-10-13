@@ -28,8 +28,8 @@ export const COLOR_THEMES: ThemeOption[] = [
 export const DEFAULT_PARADIGM = 'material';
 export const DEFAULT_THEME = 'verdant';
 
-export const PARADIGM_KEY = 'cr.paradigm';
-export const THEME_KEY = 'cr.theme';
+export const PARADIGM_KEY = 'app.paradigm';
+export const THEME_KEY = 'app.theme';
 
 // ADR 0010：常駐質地編進主樣式（一打開就有，也是按需質地載入失敗時的退路）；其餘質地都是按需質地，
 // 各自編成 `texture-<id>.css`（apps/admin/project.json 的 styles，`inject: false`），用到時才下載。

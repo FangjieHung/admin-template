@@ -1,4 +1,4 @@
-import { DataTableLabels } from '@car-rental/ui';
+import { DataTableLabels } from '@admin-template/ui';
 import { ZH_TW } from '../../core/i18n/zh-tw';
 
 /** admin 全站共用的 DataTable 文案，避免每頁重複組裝。 */

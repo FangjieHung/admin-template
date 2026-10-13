@@ -68,7 +68,7 @@
           }
         ],
         "stylePreprocessorOptions": { "includePaths": ["libs"] },
-        "outputPath": "dist/penghu-rental-admin"
+        "outputPath": "dist/admin-template"
       },
       "configurations": {
         "production": {

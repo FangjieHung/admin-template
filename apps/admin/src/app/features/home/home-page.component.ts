@@ -1,6 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DataTableCellDirective, DataTableColumn, DataTableComponent, StatusChipComponent } from '@car-rental/ui';
+import { DataTableCellDirective, DataTableColumn, DataTableComponent, StatusChipComponent } from '@admin-template/ui';
 import { ADMIN_DATA_TABLE_LABELS } from '../../shared/ui/data-table-labels';
 import { SHOWCASE_ENTRIES, SHOWCASE_GROUPS, showcaseRoute } from '../../showcase/showcase-registry';
 import { PLANNED_ITEMS, detailOf } from '../../showcase/showcase-catalog';

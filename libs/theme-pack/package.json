@@ -1,5 +1,5 @@
 {
-  "name": "@car-rental/theme-pack",
+  "name": "@admin-template/theme-pack",
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/cdk": "^22.0.4",

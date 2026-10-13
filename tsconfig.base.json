@@ -7,13 +7,13 @@
     "module": "preserve",
     "skipLibCheck": true,
     "paths": {
-      "@car-rental/theme-pack": [
+      "@admin-template/theme-pack": [
         "./libs/theme-pack/src/index.ts"
       ],
-      "@car-rental/theme-pack/floating-appearance-panel": [
+      "@admin-template/theme-pack/floating-appearance-panel": [
         "./libs/theme-pack/src/lib/floating-appearance-panel/floating-appearance-panel.component.ts"
       ],
-      "@car-rental/ui": [
+      "@admin-template/ui": [
         "./libs/ui/src/index.ts"
       ]
     }

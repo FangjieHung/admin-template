@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { StatusChipComponent } from '@car-rental/ui';
+import { StatusChipComponent } from '@admin-template/ui';
 import { PLANNED_ITEMS } from '../../showcase/showcase-catalog';
 import { provideHeaderTitle } from '../../layout/header/header-title';
 

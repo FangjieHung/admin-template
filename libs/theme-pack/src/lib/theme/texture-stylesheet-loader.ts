@@ -5,7 +5,7 @@ import { isOnDemandTexture, textureStylesheetHref } from './theme.token';
 /** 開機腳本（apps/admin/src/index.html）與這個 loader 共用的標記：`<link data-texture-css="<id>">`。 */
 export const TEXTURE_LINK_ATTR = 'data-texture-css';
 /** 開機腳本的 `<script id>`；執行期插入的質地 `<link>` 一律排在它後面（主樣式之前），見 insertionPoint()。 */
-export const TEXTURE_BOOT_SCRIPT_ID = 'cr-texture-boot';
+export const TEXTURE_BOOT_SCRIPT_ID = 'app-texture-boot';
 /** 開機時質地樣式載入失敗，開機腳本會把失敗的 id 記在 `<html data-texture-fallback>`，交給 ThemeService.init() 提示。 */
 export const TEXTURE_FALLBACK_ATTR = 'data-texture-fallback';
 

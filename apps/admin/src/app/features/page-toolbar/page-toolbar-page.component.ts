@@ -1,5 +1,5 @@
 import { Component, computed, signal } from '@angular/core';
-import { FilterOption, FilterSelectComponent, PageToolbarComponent } from '@car-rental/ui';
+import { FilterOption, FilterSelectComponent, PageToolbarComponent } from '@admin-template/ui';
 import { HeaderToolbarDirective } from '../../layout/header/header-toolbar-slot';
 import { LIST_TOOLBAR_LABEL_PROVIDERS } from '../../shared/ui/list-toolbar-labels';
 import { DEMO_PROJECTS } from '../../showcase/demo-data';

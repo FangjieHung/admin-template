@@ -4,12 +4,12 @@ import { ConnectedPosition } from '@angular/cdk/overlay';
 import { MatSidenavContainer, MatSidenavModule } from '@angular/material/sidenav';
 import { Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
-import { AppearancePanelService } from '@car-rental/theme-pack';
+import { AppearancePanelService } from '@admin-template/theme-pack';
 // 面板元件單獨走這條深路徑（不經過 barrel），讓 @defer 能把它與
 // @angular/cdk/drag-drop 拆進獨立 chunk——barrel（index.ts）同時匯出 AppearancePanelService，
 // 若跟它共用同一個 import 語句／模組，AppearancePanelService 的 eager 使用會拖著整個 barrel
 // （含面板元件）一起被主 bundle 靜態引入，defer 就無法把它轉成動態 import。
-import { FloatingAppearancePanelComponent } from '@car-rental/theme-pack/floating-appearance-panel';
+import { FloatingAppearancePanelComponent } from '@admin-template/theme-pack/floating-appearance-panel';
 import { ZH_TW_SHELL } from './core/i18n/zh-tw-shell';
 import { SideNavComponent } from './layout/side-nav/side-nav.component';
 import { NavEntry, NavGroup, isNavGroup } from './layout/side-nav/nav-item.model';

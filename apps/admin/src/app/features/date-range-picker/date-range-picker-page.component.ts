@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { DualMonthRangePickerComponent, SelectedDateRange } from '@car-rental/ui';
+import { DualMonthRangePickerComponent, SelectedDateRange } from '@admin-template/ui';
 import { fmtDate } from '../../core/date-utils';
 import { rangePickerLabelProviders } from '../../shared/ui/component-label-providers';
 import { DemoBlockComponent } from '../../showcase/demo-block.component';

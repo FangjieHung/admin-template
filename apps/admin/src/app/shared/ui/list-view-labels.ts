@@ -1,4 +1,4 @@
-import { FilterLabels, SavedViewsLabels } from '@car-rental/ui';
+import { FilterLabels, SavedViewsLabels } from '@admin-template/ui';
 import { ZH_TW } from '../../core/i18n/zh-tw';
 
 /** 進階篩選與條件 chips 的文字（lib-advanced-filter／lib-filter-chips）。 */

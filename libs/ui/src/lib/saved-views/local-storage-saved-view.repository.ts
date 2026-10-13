@@ -3,7 +3,7 @@ import { ListViewState, SavedView, SavedViewRepository, SavedViewWriteResult } f
 export interface LocalStorageSavedViewRepositoryOptions {
   /** 目前使用者的識別；每位使用者的檢視分開存（key 裡含這個值）。 */
   userId: () => string;
-  /** localStorage key 的前綴，預設 'cr.savedViews'。 */
+  /** localStorage key 的前綴，預設 'app.savedViews'。 */
   prefix?: string;
   /** 測試用：換掉 storage。取用本身丟錯（隱私模式、封鎖網站資料）也會被接住。 */
   storage?: () => Storage;
@@ -62,7 +62,7 @@ export class LocalStorageSavedViewRepository implements SavedViewRepository {
   private readonly prefix: string;
 
   constructor(private readonly options: LocalStorageSavedViewRepositoryOptions) {
-    this.prefix = options.prefix ?? 'cr.savedViews';
+    this.prefix = options.prefix ?? 'app.savedViews';
   }
 
   private key(listId: string): string {

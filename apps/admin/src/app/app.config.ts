@@ -8,9 +8,9 @@ import {
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
-import { TEXTURE_FALLBACK_MESSAGE, TEXTURE_FALLBACK_NOTIFIER, ThemeService } from '@car-rental/theme-pack';
+import { TEXTURE_FALLBACK_MESSAGE, TEXTURE_FALLBACK_NOTIFIER, ThemeService } from '@admin-template/theme-pack';
 
-// 根層刻意不 import @car-rental/ui：barrel 一旦被主 bundle 靜態引入，所有元件都會進 Initial bundle。
+// 根層刻意不 import @admin-template/ui：barrel 一旦被主 bundle 靜態引入，所有元件都會進 Initial bundle。
 // 各展示頁在自己的 providers 提供元件需要的文字（shared/ui/*-labels.ts）。
 export const appConfig: ApplicationConfig = {
   providers: [

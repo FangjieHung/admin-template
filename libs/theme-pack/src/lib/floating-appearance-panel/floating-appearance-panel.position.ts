@@ -33,7 +33,7 @@ export interface PanelAnchor {
   readonly maxHeight: number;
 }
 
-export const POSITION_STORAGE_KEY = 'cr.appearancePanel.position';
+export const POSITION_STORAGE_KEY = 'app.appearancePanel.position';
 export const EDGE_INSET = 16;
 export const FAB_SIZE = 44;
 export const KEYBOARD_MOVE_STEP = 16;

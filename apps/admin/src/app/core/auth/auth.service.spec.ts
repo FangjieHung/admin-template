@@ -14,20 +14,20 @@ describe('AuthService', () => {
 
     service.login();
 
-    expect(JSON.parse(localStorage.getItem('cr.auth.session') ?? 'null')).toEqual({
+    expect(JSON.parse(localStorage.getItem('app.auth.session') ?? 'null')).toEqual({
       user: 'admin',
     });
   });
 
   it('logout 清除 session 並導向登入頁', () => {
-    localStorage.setItem('cr.auth.session', JSON.stringify({ user: 'admin' }));
+    localStorage.setItem('app.auth.session', JSON.stringify({ user: 'admin' }));
     const service = TestBed.inject(AuthService);
     const router = TestBed.inject(Router);
     const navigateSpy = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
 
     service.logout();
 
-    expect(localStorage.getItem('cr.auth.session')).toBeNull();
+    expect(localStorage.getItem('app.auth.session')).toBeNull();
     expect(navigateSpy).toHaveBeenCalledWith('/login');
   });
 });

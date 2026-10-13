@@ -472,7 +472,7 @@ async function applyCombo(page, paradigm, theme) {
             link.addEventListener('error', () => reject(new Error(`無法載入 texture-${p}.css`)), { once: true });
           });
           const anchors = document.querySelectorAll('link[data-texture-css]');
-          const anchor = anchors[anchors.length - 1] ?? document.getElementById('cr-texture-boot');
+          const anchor = anchors[anchors.length - 1] ?? document.getElementById('app-texture-boot');
           if (anchor) anchor.after(link);
           else document.head.prepend(link);
           await loaded;
@@ -488,8 +488,8 @@ async function applyCombo(page, paradigm, theme) {
 async function measureCombo(page, texture, color) {
   await page.evaluate(
     ({ p, t }) => {
-      localStorage.setItem('cr.paradigm', p);
-      localStorage.setItem('cr.theme', t);
+      localStorage.setItem('app.paradigm', p);
+      localStorage.setItem('app.theme', t);
     },
     { p: texture.id, t: color.id },
   );

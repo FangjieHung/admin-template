@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ScrollShadowDirective } from '@car-rental/ui';
+import { ScrollShadowDirective } from '@admin-template/ui';
 import { makeDemoItems } from '../../showcase/demo-data';
 import { DemoBlockComponent } from '../../showcase/demo-block.component';
 import { ApiSection, ShowcasePageComponent } from '../../showcase/showcase-page.component';

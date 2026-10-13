@@ -12,7 +12,7 @@ import {
   SAVED_VIEW_REPOSITORY,
   SavedViewsComponent,
   applyFilters,
-} from '@car-rental/ui';
+} from '@admin-template/ui';
 import { ADMIN_DATA_TABLE_LABELS } from '../../shared/ui/data-table-labels';
 import { ADMIN_FILTER_LABELS, ADMIN_SAVED_VIEWS_LABELS } from '../../shared/ui/list-view-labels';
 import { rangePickerLabelProviders } from '../../shared/ui/component-label-providers';

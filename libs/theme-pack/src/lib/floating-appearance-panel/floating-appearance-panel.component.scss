@@ -148,7 +148,7 @@
 }
 
 // 給 aria-describedby 用的鍵盤操作提示文字：畫面上不顯示，但不能用 display:none（那樣螢幕報讀器
-// 也讀不到）。position: fixed（不是 absolute）避免撐大任何有 overflow 的捲動容器（car-rental 之前
+// 也讀不到）。position: fixed（不是 absolute）避免撐大任何有 overflow 的捲動容器（這個專案之前
 // 就在別處踩過 .visually-hidden 用 absolute 撐爆捲動區的坑，這裡直接用 fixed 從根本避開）。
 .visually-hidden {
   position: fixed;

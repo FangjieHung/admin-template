@@ -1,6 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { ResponsivePanelComponent } from '@car-rental/ui';
+import { ResponsivePanelComponent } from '@admin-template/ui';
 import { ZH_TW } from '../../core/i18n/zh-tw';
 import { DEMO_CONTACTS } from '../../showcase/demo-data';
 import { DemoBlockComponent } from '../../showcase/demo-block.component';

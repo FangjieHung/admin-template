@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { AppearancePanelService, ThemeService, texture } from '@car-rental/theme-pack';
+import { AppearancePanelService, ThemeService, texture } from '@admin-template/theme-pack';
 import { ZH_TW } from '../../../core/i18n/zh-tw';
 import { provideHeaderTitle } from '../../../layout/header/header-title';
 

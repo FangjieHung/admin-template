@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 
-const AUTH_SESSION_KEY = 'cr.auth.session';
+const AUTH_SESSION_KEY = 'app.auth.session';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {

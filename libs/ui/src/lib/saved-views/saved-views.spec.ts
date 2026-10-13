@@ -62,7 +62,7 @@ describe('LocalStorageSavedViewRepository', () => {
       sharedWith: [],
     };
     expect(await repo.save(view)).toEqual({ persisted: true });
-    expect([...storage.data.keys()]).toEqual(['cr.savedViews.u1.items']);
+    expect([...storage.data.keys()]).toEqual(['app.savedViews.u1.items']);
     user = 'u2';
     expect(await repo.list('items')).toEqual([]);
     user = 'u1';
@@ -75,12 +75,12 @@ describe('LocalStorageSavedViewRepository', () => {
     expect(await new LocalStorageSavedViewRepository({ userId: () => 'u', storage: () => storage }).list('x')).toEqual([]);
 
     const broken = new FakeStorage();
-    broken.data.set('cr.savedViews.u.x', '{not json');
+    broken.data.set('app.savedViews.u.x', '{not json');
     expect(await new LocalStorageSavedViewRepository({ userId: () => 'u', storage: () => broken }).list('x')).toEqual([]);
 
     const mixed = new FakeStorage();
     mixed.data.set(
-      'cr.savedViews.u.x',
+      'app.savedViews.u.x',
       JSON.stringify([{ id: 'ok', name: 'A', state: DEFAULTS }, { id: 1, name: 'bad' }, 'junk', { id: 'nostate', name: 'B' }]),
     );
     const views = await new LocalStorageSavedViewRepository({ userId: () => 'u', storage: () => mixed }).list('x');

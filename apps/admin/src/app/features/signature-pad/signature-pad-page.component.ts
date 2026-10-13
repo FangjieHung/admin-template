@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { SignatureAsset, SignaturePadComponent } from '@car-rental/ui';
+import { SignatureAsset, SignaturePadComponent } from '@admin-template/ui';
 import { SIGNATURE_PAD_LABEL_PROVIDERS } from '../../shared/ui/component-label-providers';
 import { DemoBlockComponent } from '../../showcase/demo-block.component';
 import { ApiSection, ShowcasePageComponent } from '../../showcase/showcase-page.component';

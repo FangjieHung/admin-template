@@ -26,7 +26,7 @@
 3. **入口與登錄（按需質地，ADR 0010）**：新質地預設是按需質地，不編進 admin 主樣式。
    - 建立 `<id>/_index.scss`：依序 `@forward 'fonts'`（有字型才寫，必須在最前面）、`@forward 'tokens'`、`@forward 'recipes'`，照抄 `clay/_index.scss`。
    - 在 `apps/admin/project.json` 的 `build.options.styles` 加一筆 `{ "input": "libs/theme-pack/src/lib/styles/texture/<id>/_index.scss", "bundleName": "texture-<id>", "inject": false }`，建置後會輸出不帶 hash 的 `texture-<id>.css`。
-   - 在 `apps/admin/src/index.html` 開機腳本（`#cr-texture-boot`）的 `onDemandTextures` 陣列加上 `<id>`。
+   - 在 `apps/admin/src/index.html` 開機腳本（`#app-texture-boot`）的 `onDemandTextures` 陣列加上 `<id>`。
    - **不要**在 `apps/admin/src/styles.scss` `@use` 它；主樣式只放常駐質地（Material）。
 4. **選項與相容配色**：在 [`theme.token.ts`](../../theme/theme.token.ts) 的 `texture` 加一筆，並在 `TEXTURE_COMPATIBILITY` 填 `compatibleThemeIds`（白名單）與 `defaultThemeId`。新質地預設不相容任何配色，逐一以對比掃描（WCAG 4.5:1）＋目視確認後加入。`texture` 以外不用改任何 TS：不在 `RESIDENT_TEXTURE_IDS` 裡的質地自動按需載入。跑 `npx vitest run scripts --exclude '.claude/**' --exclude '**/node_modules/**'`，`texture-registration.spec.mjs` 會檢查第 3、4 步的四處是否一致。
 5. **質地準則**：依上方模板寫 `<id>/design-guideline.md`；「層次表現」必須和現有質地都不同，否則這個質地不該存在。

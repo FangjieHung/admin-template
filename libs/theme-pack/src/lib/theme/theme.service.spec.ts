@@ -49,23 +49,23 @@ describe('ThemeService', () => {
     svc.setTheme('midnight');
     expect(svc.theme()).toBe('midnight');
     expect(document.documentElement.dataset['theme']).toBe('midnight');
-    expect(localStorage.getItem('cr.theme')).toBe('midnight');
+    expect(localStorage.getItem('app.theme')).toBe('midnight');
   });
 
   it('setParadigm 同時改 signal、dataset、localStorage', async () => {
     await switchTo(svc, 'grid');
     expect(svc.paradigm()).toBe('grid');
     expect(document.documentElement.dataset['paradigm']).toBe('grid');
-    expect(localStorage.getItem('cr.paradigm')).toBe('grid');
+    expect(localStorage.getItem('app.paradigm')).toBe('grid');
 
     await switchTo(svc, 'material');
     expect(svc.paradigm()).toBe('material');
     expect(document.documentElement.dataset['paradigm']).toBe('material');
-    expect(localStorage.getItem('cr.paradigm')).toBe('material');
+    expect(localStorage.getItem('app.paradigm')).toBe('material');
   });
 
   it('init 從 localStorage 還原；無值用預設', async () => {
-    localStorage.setItem('cr.theme', 'midnight');
+    localStorage.setItem('app.theme', 'midnight');
     await svc.init();
     expect(svc.theme()).toBe('midnight');
     expect(svc.paradigm()).toBe('material'); // 無值 → 預設
@@ -76,7 +76,7 @@ describe('ThemeService', () => {
     await switchTo(svc, 'soft-ui'); // soft-ui 不相容 sandstone
     expect(svc.theme()).toBe('cool-grey'); // soft-ui 的預設配色
     expect(document.documentElement.dataset['theme']).toBe('cool-grey');
-    expect(localStorage.getItem('cr.theme')).toBe('cool-grey');
+    expect(localStorage.getItem('app.theme')).toBe('cool-grey');
   });
 
   it('ADR 0007：切換質地時，目前配色若仍相容，維持原本配色不變', async () => {
@@ -86,26 +86,26 @@ describe('ThemeService', () => {
   });
 
   it('ADR 0007：init 時 localStorage 存的組合不相容，自動校正為該質地的預設配色並持久化', async () => {
-    localStorage.setItem('cr.paradigm', 'soft-ui');
-    localStorage.setItem('cr.theme', 'verdant'); // soft-ui 不相容 verdant
+    localStorage.setItem('app.paradigm', 'soft-ui');
+    localStorage.setItem('app.theme', 'verdant'); // soft-ui 不相容 verdant
     const done = svc.init();
     settle('soft-ui', 'load');
     await done;
     expect(svc.paradigm()).toBe('soft-ui');
     expect(svc.theme()).toBe('cool-grey');
-    expect(localStorage.getItem('cr.theme')).toBe('cool-grey');
+    expect(localStorage.getItem('app.theme')).toBe('cool-grey');
   });
 
   it.each([
     ['removed-texture', 'verdant'],
     ['xyz', ''],
   ])('init 時 localStorage 存了不認得的質地 %s：退回預設質地、配色校正到相容值，並覆寫殘值', async (paradigm, theme) => {
-    localStorage.setItem('cr.paradigm', paradigm);
-    localStorage.setItem('cr.theme', theme);
+    localStorage.setItem('app.paradigm', paradigm);
+    localStorage.setItem('app.theme', theme);
     await svc.init();
     expect(svc.paradigm()).toBe('material');
     expect(document.documentElement.dataset['paradigm']).toBe('material');
-    expect(localStorage.getItem('cr.paradigm')).toBe('material');
+    expect(localStorage.getItem('app.paradigm')).toBe('material');
     expect(svc.compatibleThemes().map((t) => t.id)).toContain(svc.theme());
     expect(document.head.querySelector('link[data-texture-css]')).toBeNull();
   });
@@ -114,12 +114,12 @@ describe('ThemeService', () => {
     await switchTo(svc, 'grid');
     await svc.setParadigm('removed-texture');
     expect(svc.paradigm()).toBe('material');
-    expect(localStorage.getItem('cr.paradigm')).toBe('material');
+    expect(localStorage.getItem('app.paradigm')).toBe('material');
   });
 
   it('ADR 0007：init 時已存組合相容，維持原樣', async () => {
-    localStorage.setItem('cr.paradigm', 'soft-ui');
-    localStorage.setItem('cr.theme', 'midnight');
+    localStorage.setItem('app.paradigm', 'soft-ui');
+    localStorage.setItem('app.theme', 'midnight');
     const done = svc.init();
     settle('soft-ui', 'load');
     await done;
@@ -153,7 +153,7 @@ describe('ThemeService', () => {
       expect(svc.pendingParadigm()).toBeNull();
       expect(document.documentElement.dataset['paradigm']).toBe('clay');
       expect(document.documentElement.dataset['theme']).toBe('cool-grey'); // clay 不相容 sandstone
-      expect(localStorage.getItem('cr.paradigm')).toBe('clay');
+      expect(localStorage.getItem('app.paradigm')).toBe('clay');
     });
 
     it('新質地套用之後才移除舊質地的 <link>', async () => {
@@ -178,7 +178,7 @@ describe('ThemeService', () => {
 
       expect(svc.paradigm()).toBe('material');
       expect(document.documentElement.dataset['paradigm']).toBe('material');
-      expect(localStorage.getItem('cr.paradigm')).toBe('material');
+      expect(localStorage.getItem('app.paradigm')).toBe('material');
       expect(svc.theme()).toBe(DEFAULT_THEME);
       expect(textureLink('clay')).toBeNull();
       expect(textureLink('grid')).toBeNull();
@@ -210,7 +210,7 @@ describe('ThemeService', () => {
     });
 
     it('init：沒有開機腳本時由 init 載入，樣式載入完成前不完成（app 不渲染）', async () => {
-      localStorage.setItem('cr.paradigm', 'editorial');
+      localStorage.setItem('app.paradigm', 'editorial');
       let finished = false;
       const done = svc.init().then(() => (finished = true));
       await Promise.resolve();
@@ -222,8 +222,8 @@ describe('ThemeService', () => {
     });
 
     it('init：開機腳本已載入好的 <link> 直接沿用，不重複插入', async () => {
-      localStorage.setItem('cr.paradigm', 'clay');
-      localStorage.setItem('cr.theme', 'midnight');
+      localStorage.setItem('app.paradigm', 'clay');
+      localStorage.setItem('app.theme', 'midnight');
       const boot = document.createElement('link');
       boot.rel = 'stylesheet';
       boot.href = 'texture-clay.css';
@@ -238,7 +238,7 @@ describe('ThemeService', () => {
     });
 
     it('init：開機腳本載入失敗已退回 Material，第一次渲染後提示', async () => {
-      localStorage.setItem('cr.paradigm', 'material'); // 開機腳本的 onerror 已校正
+      localStorage.setItem('app.paradigm', 'material'); // 開機腳本的 onerror 已校正
       document.documentElement.setAttribute(TEXTURE_FALLBACK_ATTR, 'clay');
 
       await svc.init();
@@ -251,13 +251,13 @@ describe('ThemeService', () => {
     });
 
     it('init：init 自己載入失敗時退回 Material、覆寫 localStorage，渲染後提示', async () => {
-      localStorage.setItem('cr.paradigm', 'frosted');
-      localStorage.setItem('cr.theme', 'candy');
+      localStorage.setItem('app.paradigm', 'frosted');
+      localStorage.setItem('app.theme', 'candy');
       const done = svc.init();
       settle('frosted', 'error');
       await done;
       expect(svc.paradigm()).toBe('material');
-      expect(localStorage.getItem('cr.paradigm')).toBe('material');
+      expect(localStorage.getItem('app.paradigm')).toBe('material');
       expect(svc.theme()).toBe(DEFAULT_THEME); // material 不相容 candy
 
       TestBed.inject(ApplicationRef).tick();
