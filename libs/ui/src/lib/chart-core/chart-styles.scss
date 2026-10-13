@@ -1,0 +1,177 @@
+// 折線、長條、圓環的樣式：不封裝（ViewEncapsulation.None），由 lib-chart-styles 在第一張圖出現時載入一次，
+// 三個元件共用同一份（封裝的話每個元件各帶一份 figure、軸、提示框的樣式，選擇器還多一段屬性）。
+// 全部掛在 .lib-chart（三個元件的外層 class）底下，不會碰到別的元件。
+// 顏色只用語意 token：類別色 --app-chart-1…6（data-c）、格線 --app-chart-grid、軸文字 --app-chart-axis；
+// 線寬、點大小、長條圓角、提示框等造型是 --lib-chart-* 變數（var() 的第二個值是預設），質地只在 .lib-chart 上設變數
+// （CONTRACT.md「數字小卡與圖表」）。
+@use './chart' as chart;
+
+lib-chart-styles {
+  display: none;
+}
+
+.lib-line-chart,
+.lib-bar-chart,
+.lib-donut-chart {
+  position: relative;
+  display: block;
+  min-width: 0;
+  color: var(--mat-sys-on-surface);
+}
+
+.lib-chart {
+  @include chart.colors;
+  @include chart.frame;
+}
+
+// ---- 折線：線、面積、資料點。造型變數 --lib-chart-line-width／-line-filter／-point-size／-area-opacity／-area-dots ----
+.lib-line-chart {
+  .lc-line {
+    // color 給質地的 --lib-chart-line-filter 用（例：Cockpit 的 drop-shadow(… currentColor) 光跡）。
+    color: var(--lib-chart-c);
+    fill: none;
+    stroke: var(--lib-chart-c);
+    stroke-width: var(--lib-chart-line-width, 2px);
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    filter: var(--lib-chart-line-filter, none);
+  }
+
+  .lc-area {
+    fill: var(--lib-chart-c);
+    fill-opacity: var(--lib-chart-area-opacity, 0.12);
+    stroke: none;
+  }
+
+  .lc-area-dots {
+    opacity: var(--lib-chart-area-dots, 0);
+    stroke: none;
+  }
+
+  .lc-dot {
+    fill: var(--lib-chart-c);
+  }
+
+  .lc-marker {
+    fill: var(--lib-chart-c);
+    stroke: var(--lib-chart-marker-ring, var(--mat-sys-surface));
+    stroke-width: 1.5px;
+    transform-box: fill-box;
+    transform-origin: center;
+    scale: var(--lib-chart-point-size, 1);
+  }
+
+  .lc-marker--active {
+    stroke-width: 2px;
+  }
+}
+
+// ---- 長條：長條、數值標註、滑過的類別底色。造型變數 --lib-chart-bar-radius／-bar-stroke／-bar-stroke-width ----
+.lib-bar-chart {
+  .bc-rect {
+    fill: var(--lib-chart-c);
+    stroke: var(--lib-chart-bar-stroke, transparent);
+    stroke-width: var(--lib-chart-bar-stroke-width, 0px);
+    rx: var(--lib-chart-bar-radius, min(4px, var(--mat-sys-corner-small)));
+  }
+
+  &.lib-bar-chart--stacked .bc-rect {
+    stroke: var(--lib-chart-bar-stroke, var(--mat-sys-surface));
+    stroke-width: var(--lib-chart-bar-stroke-width, 1px);
+    rx: 0px;
+  }
+
+  .bc-value {
+    fill: var(--mat-sys-on-surface);
+    font-weight: 600;
+  }
+
+  .bc-band {
+    fill: var(--app-state-hover);
+    pointer-events: none;
+  }
+
+  .bc-hit--focus {
+    stroke: var(--app-focus-ring);
+    stroke-width: var(--app-focus-ring-width);
+  }
+}
+
+// ---- 圓環：扇形、中心文字、圖例的排法。造型變數 --lib-chart-slice-stroke／-slice-stroke-width ----
+.lib-donut-chart {
+  .dc-bar {
+    justify-content: flex-end;
+  }
+
+  .dc-body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+  }
+
+  .dc-ring {
+    position: relative;
+    flex: none;
+    max-width: 100%;
+  }
+
+  .dc-svg {
+    overflow: visible;
+  }
+
+  .dc-slice {
+    fill: var(--lib-chart-c);
+    stroke: var(--lib-chart-slice-stroke, transparent);
+    stroke-width: var(--lib-chart-slice-stroke-width, 0px);
+    stroke-linejoin: round;
+    outline: none;
+    cursor: pointer;
+    transition: d var(--app-motion-fast) var(--app-ease-standard);
+  }
+
+  .dc-slice--focus {
+    stroke: var(--app-focus-ring);
+    stroke-width: var(--app-focus-ring-width);
+  }
+
+  .dc-center {
+    position: absolute;
+    inset: 22%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.125rem;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .dc-center__label {
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--app-chart-axis);
+    font-size: 0.75rem;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dc-center__value {
+    color: var(--mat-sys-on-surface);
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.15;
+  }
+
+  .dc-center__detail {
+    color: var(--app-chart-axis);
+    font-size: 0.75rem;
+  }
+
+  .dc-legend {
+    flex: 1 1 12rem;
+    min-width: 0;
+  }
+}

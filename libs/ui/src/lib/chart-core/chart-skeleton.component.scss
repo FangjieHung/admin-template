@@ -1,0 +1,74 @@
+// 圖表的骨架：色塊用共用的 --app-skeleton-*（feedback-state/_skeleton-block.scss），減少動態時靜止。
+@use '../feedback-state/skeleton-block' as sk;
+@use './chart' as chart;
+
+@include sk.keyframes;
+
+:host {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.cs-sr {
+  @include chart.sr-only;
+}
+
+.cs-block {
+  @include sk.block;
+}
+
+.cs {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 6%;
+  padding: 0 2%;
+}
+
+.cs-bar {
+  flex: 1 1 0;
+}
+
+.cs-grid {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cs-rule {
+  border-top: 1px solid var(--app-chart-grid);
+}
+
+// 趨勢：一道從左下往右上的斜帶（骨架色塊裁成波形）。
+.cs-wave {
+  position: relative;
+  width: 100%;
+  height: 55%;
+  clip-path: polygon(0 80%, 18% 55%, 36% 66%, 54% 30%, 72% 42%, 100% 8%, 100% 22%, 72% 56%, 54% 44%, 36% 80%, 18% 69%, 0 94%);
+}
+
+.cs[data-shape='donut'] {
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0;
+}
+
+.cs-ring {
+  flex: none;
+  box-sizing: border-box;
+  border: 1.75rem solid var(--app-skeleton-bg);
+  border-radius: 50%;
+}
+
+.cs-lines {
+  display: grid;
+  flex: 1 1 auto;
+  gap: 0.75rem;
+}
+
+.cs-line {
+  height: 0.75rem;
+}

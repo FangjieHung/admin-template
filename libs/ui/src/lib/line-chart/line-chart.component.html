@@ -1,0 +1,132 @@
+<lib-chart-styles />
+<figure class="lib-chart__figure" [attr.aria-busy]="loading() ? 'true' : null">
+  <figcaption class="lib-chart__sr">{{ figureSummary() }}</figcaption>
+  @if (loading()) {
+    <lib-chart-skeleton shape="line" [height]="height()" [label]="labels.loading" />
+  } @else if (isEmpty()) {
+    <lib-empty-state [compact]="true" icon="show_chart" [message]="labels.noData" />
+  } @else {
+    <lib-chart-toolbar
+      [items]="legendItems()"
+      [mode]="series().length > 1 ? 'toggle' : 'static'"
+      [legendLabel]="labels.legend"
+      [toggleLabel]="labels.viewAsTable"
+      [tableView]="tableView()"
+      (itemClick)="toggleSeries($event)"
+      (toggle)="toggleTable()"
+    />
+    @let L = layout();
+    <div class="lib-chart__plot" [class.lib-chart__plot--off]="tableView()">
+      <span class="lib-chart__sr" [id]="uid + '-hint'">{{ labels.keyboardHint }}</span>
+      <svg
+        class="lib-chart__svg"
+        [attr.viewBox]="'0 0 ' + L.width + ' ' + L.height"
+        [attr.height]="L.height"
+        role="group"
+        [attr.aria-label]="labels.lineChart"
+        (pointermove)="onPointerMove($event)"
+        (pointerdown)="onPointerMove($event)"
+        (pointerleave)="onPointerLeave()"
+      >
+        @if (area()) {
+          <defs>
+            @for (m of L.lines; track m.id) {
+              <pattern [attr.id]="uid + '-dots-' + m.color" [attr.data-c]="m.color" width="4" height="4" patternUnits="userSpaceOnUse">
+                <circle class="lc-dot" cx="1" cy="1" r="0.9" />
+                <circle class="lc-dot" cx="3" cy="3" r="0.9" />
+              </pattern>
+            }
+          </defs>
+        }
+        <g class="lib-chart__grid" aria-hidden="true">
+          @for (t of L.yTicks; track $index) {
+            <line [attr.x1]="L.left" [attr.x2]="L.right" [attr.y1]="t.y" [attr.y2]="t.y" />
+          }
+        </g>
+        <g aria-hidden="true">
+          @for (t of L.yTicks; track $index) {
+            <text class="lib-chart__tick" [attr.x]="L.left - 8" [attr.y]="t.y" dy="0.32em" text-anchor="end">{{ t.text }}</text>
+          }
+          @for (l of L.xLabels; track $index) {
+            <text class="lib-chart__tick" data-axis="x" [attr.x]="l.x" [attr.y]="L.bottom + 18" [attr.text-anchor]="l.anchor">
+              {{ l.text }}
+            </text>
+          }
+        </g>
+        <line
+          class="lib-chart__baseline"
+          aria-hidden="true"
+          [attr.x1]="L.left"
+          [attr.x2]="L.right"
+          [attr.y1]="L.baseline"
+          [attr.y2]="L.baseline"
+        />
+        <g class="lib-chart__marks" aria-hidden="true">
+          @for (m of L.lines; track m.id) {
+            <g class="lc-series" [attr.data-c]="m.color" [attr.data-series]="m.id">
+              @if (m.area) {
+                <path class="lc-area" [attr.d]="m.area" />
+                <path class="lc-area-dots" [attr.d]="m.area" [attr.fill]="'url(#' + uid + '-dots-' + m.color + ')'" />
+              }
+              <path class="lc-line" [attr.d]="m.line" [attr.stroke-dasharray]="m.dash" />
+              @if (L.showMarkers) {
+                @for (p of m.points; track $index) {
+                  @if (p) {
+                    <path class="lc-marker" [attr.d]="marker(m.index, p)" />
+                  }
+                }
+              }
+            </g>
+          }
+        </g>
+        @if (tooltip(); as tip) {
+          <line
+            class="lib-chart__cursor"
+            aria-hidden="true"
+            [class.lib-chart__cursor--focus]="keyboardFocus()"
+            [attr.x1]="tip.x"
+            [attr.x2]="tip.x"
+            [attr.y1]="L.top"
+            [attr.y2]="L.bottom"
+          />
+          <g aria-hidden="true">
+            @for (m of L.lines; track m.id) {
+              @if (m.points[tip.index]; as p) {
+                <path class="lc-marker lc-marker--active" [attr.data-c]="m.color" [attr.d]="marker(m.index, p, true)" />
+              }
+            }
+          </g>
+        }
+        <g>
+          @for (x of L.xs; track $index) {
+            <rect
+              class="lib-chart__hit"
+              role="img"
+              [attr.data-point]="$index"
+              [attr.x]="x - L.gap / 2"
+              [attr.y]="L.top"
+              [attr.width]="L.gap"
+              [attr.height]="L.bottom - L.top"
+              [attr.tabindex]="$index === focusIndex() ? 0 : -1"
+              [attr.aria-label]="pointLabel($index)"
+              [attr.aria-describedby]="uid + '-hint'"
+              (focus)="onPointFocus($index, $event)"
+              (blur)="onPointBlur()"
+              (keydown)="onPointKeydown($event, $index, L.xs.length)"
+            />
+          }
+        </g>
+      </svg>
+      @if (tooltip(); as tip) {
+        <lib-chart-tooltip
+          [title]="tip.title"
+          [rows]="tip.rows"
+          [top]="0"
+          [left]="tip.flip ? null : tip.x + 12"
+          [right]="tip.flip ? L.width - tip.x + 12 : null"
+        />
+      }
+    </div>
+    <lib-chart-table [class.lib-chart__table--print]="!tableView()" [model]="table()" />
+  }
+</figure>

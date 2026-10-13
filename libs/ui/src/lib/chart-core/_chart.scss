@@ -1,0 +1,210 @@
+// 圖表共用的樣式片段。折線、長條、圓環的樣式集中在 chart-styles.scss（不封裝、只載入一次，避免每個元件各帶一份）；
+// 圖例、表格、骨架、數字小卡是一般封裝的元件，各自 @use 這裡的 mixin。
+// 顏色只用語意 token：類別色 --app-chart-1…6、格線 --app-chart-grid、軸文字 --app-chart-axis；
+// 線寬、點大小、長條圓角、提示框等造型是 --lib-chart-* 變數（var() 的第二個值是預設），質地只在 .lib-chart 上設變數
+// （CONTRACT.md「圖表」）。
+
+// 類別色：元素掛 data-c="1"…"6"，底下用 var(--lib-chart-c) 取顏色。
+@mixin colors {
+  @for $i from 1 through 6 {
+    [data-c='#{$i}'] {
+      --lib-chart-c: var(--app-chart-#{$i});
+    }
+  }
+}
+
+// 只給報讀器看的文字。host 要 position: relative（否則會跳出捲動容器撐出捲軸）。
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+// figure 外框、上方的圖例＋切換列、繪圖區、提示框（在 chart-styles.scss 的 .lib-chart 底下 @include）。
+@mixin frame {
+  .lib-chart__figure {
+    margin: 0;
+    min-width: 0;
+  }
+
+  .lib-chart__sr {
+    @include sr-only;
+  }
+
+  .lib-chart__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.75rem;
+    min-width: 0;
+  }
+
+  .lib-chart__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: auto;
+    font-size: 0.8125rem;
+  }
+
+  .lib-chart__toggle .material-symbols-rounded {
+    width: 1em;
+    height: 1em;
+    overflow: hidden;
+    font-size: 1.125rem;
+    line-height: 1;
+  }
+
+  .lib-chart__plot {
+    position: relative;
+    min-width: 0;
+  }
+
+  .lib-chart__svg {
+    display: block;
+    width: 100%;
+    overflow: visible;
+    font-size: var(--lib-chart-axis-size, 0.75rem);
+    font-variant-numeric: tabular-nums;
+  }
+
+  // 圖表收起時（以表格檢視）：畫面上只看表格；列印時兩者都印。
+  .lib-chart__plot--off {
+    display: none;
+  }
+
+  .lib-chart__table--print {
+    display: none;
+  }
+
+  @media print {
+    .lib-chart__plot--off {
+      display: block;
+    }
+
+    .lib-chart__table--print {
+      display: block;
+      margin-top: 0.75rem;
+    }
+
+    .lib-chart__toggle {
+      display: none;
+    }
+  }
+
+  // ---- 軸與格線 ----
+  .lib-chart__grid line {
+    stroke: var(--lib-chart-grid-color, var(--app-chart-grid));
+    stroke-width: var(--lib-chart-grid-width, 1px);
+    stroke-dasharray: var(--lib-chart-grid-dash, none);
+    shape-rendering: crispEdges;
+  }
+
+  // 只套在格線（裝飾線）：Sketch 的手繪抖動。資料線、長條、文字一律不套。
+  .lib-chart__grid {
+    filter: var(--lib-chart-grid-filter, none);
+  }
+
+  .lib-chart__baseline {
+    stroke: var(--lib-chart-baseline-color, var(--mat-sys-outline));
+    stroke-width: var(--lib-chart-baseline-width, 1px);
+    shape-rendering: crispEdges;
+  }
+
+  .lib-chart__tick {
+    fill: var(--app-chart-axis);
+  }
+
+  // ---- 提示框（滑過或鍵盤聚焦資料點時）----
+  .lib-chart__tooltip {
+    position: absolute;
+    top: 0;
+    z-index: 1;
+    min-width: 8rem;
+    max-width: 16rem;
+    padding: 0.5rem 0.75rem;
+    border: var(--lib-chart-tooltip-frame, 0 solid transparent);
+    border-radius: var(--lib-chart-tooltip-radius, var(--mat-sys-corner-small));
+    background: var(--lib-chart-tooltip-bg, var(--mat-sys-inverse-surface));
+    box-shadow: var(--lib-chart-tooltip-shadow, var(--mat-sys-level2));
+    color: var(--lib-chart-tooltip-fg, var(--mat-sys-inverse-on-surface));
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    pointer-events: none;
+  }
+
+  .lib-chart__tooltip-title {
+    margin: 0 0 0.25rem;
+    font-weight: 600;
+  }
+
+  .lib-chart__tooltip-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .lib-chart__tooltip-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .lib-chart__tooltip-value {
+    font-weight: 600;
+  }
+
+  // 提示框裡的色塊：外圈一道前景色細框，在反轉底色上也看得到。
+  .lib-chart__tooltip-swatch {
+    flex: none;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: min(2px, var(--mat-sys-corner-small));
+    background: var(--lib-chart-c);
+    box-shadow: 0 0 0 1px var(--lib-chart-tooltip-fg, var(--mat-sys-inverse-on-surface));
+  }
+
+  // 資料點的熱區：透明、可聚焦（焦點樣式畫在游標線上，不畫元素外框）。
+  .lib-chart__hit {
+    fill: transparent;
+    outline: none;
+    cursor: default;
+  }
+
+  .lib-chart__cursor {
+    stroke: var(--mat-sys-on-surface-variant);
+    stroke-width: 1px;
+    stroke-dasharray: 3 3;
+    pointer-events: none;
+  }
+
+  .lib-chart__cursor--focus {
+    stroke: var(--app-focus-ring);
+    stroke-width: var(--app-focus-ring-width);
+    stroke-dasharray: none;
+  }
+
+  // ---- 進場動畫：淡入；減少動態時不播 ----
+  .lib-chart__marks {
+    animation: lib-chart-enter var(--app-motion-slow) var(--app-ease-standard);
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+
+  @keyframes lib-chart-enter {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+}

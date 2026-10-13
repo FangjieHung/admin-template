@@ -1,0 +1,116 @@
+<lib-chart-styles />
+<figure class="lib-chart__figure" [attr.aria-busy]="loading() ? 'true' : null">
+  <figcaption class="lib-chart__sr">{{ figureSummary() }}</figcaption>
+  @if (loading()) {
+    <lib-chart-skeleton shape="bar" [height]="plotHeight()" [label]="labels.loading" />
+  } @else if (isEmpty()) {
+    <lib-empty-state [compact]="true" icon="bar_chart" [message]="labels.noData" />
+  } @else {
+    <lib-chart-toolbar
+      [items]="series().length > 1 ? legendItems() : []"
+      [legendLabel]="labels.legend"
+      [toggleLabel]="labels.viewAsTable"
+      [tableView]="tableView()"
+      (itemClick)="toggleSeries($event)"
+      (toggle)="toggleTable()"
+    />
+    @let L = layout();
+    <div class="lib-chart__plot" [class.lib-chart__plot--off]="tableView()">
+      <span class="lib-chart__sr" [id]="uid + '-hint'">{{ labels.keyboardHint }}</span>
+      <svg
+        class="lib-chart__svg"
+        [attr.viewBox]="'0 0 ' + L.width + ' ' + L.height"
+        [attr.height]="L.height"
+        role="group"
+        [attr.aria-label]="labels.barChart"
+        (pointermove)="onPointerMove($event)"
+        (pointerdown)="onPointerMove($event)"
+        (pointerleave)="onPointerLeave()"
+      >
+        <g class="lib-chart__grid" aria-hidden="true">
+          @for (t of L.valueTicks; track $index) {
+            @if (L.horizontal) {
+              <line [attr.x1]="t.pos" [attr.x2]="t.pos" [attr.y1]="L.top" [attr.y2]="L.bottom" />
+            } @else {
+              <line [attr.x1]="L.left" [attr.x2]="L.right" [attr.y1]="t.pos" [attr.y2]="t.pos" />
+            }
+          }
+        </g>
+        @if (active() !== null && L.bands[active()!]; as band) {
+          <rect class="bc-band" aria-hidden="true" [attr.x]="band.x" [attr.y]="band.y" [attr.width]="band.w" [attr.height]="band.h" />
+        }
+        <g aria-hidden="true">
+          @for (t of L.valueTicks; track $index) {
+            @if (L.horizontal) {
+              <text class="lib-chart__tick" [attr.x]="t.pos" [attr.y]="L.bottom + 16" text-anchor="middle">{{ t.text }}</text>
+            } @else {
+              <text class="lib-chart__tick" [attr.x]="L.left - 8" [attr.y]="t.pos" dy="0.32em" text-anchor="end">{{ t.text }}</text>
+            }
+          }
+          @for (c of L.categoryTexts; track $index) {
+            <text
+              class="lib-chart__tick bc-category"
+              data-axis="category"
+              [attr.x]="c.x"
+              [attr.y]="c.y"
+              [attr.dy]="L.horizontal ? '0.32em' : null"
+              [attr.text-anchor]="c.anchor"
+              [attr.transform]="c.rotate ? 'rotate(' + c.rotate + ' ' + c.x + ' ' + c.y + ')' : null"
+            >
+              @if (c.text !== c.full) {
+                <title>{{ c.full }}</title>
+              }
+              {{ c.text }}
+            </text>
+          }
+        </g>
+        <g class="lib-chart__marks" aria-hidden="true">
+          @for (b of L.bars; track b.key) {
+            <rect class="bc-rect" [attr.data-c]="b.color" [attr.data-series]="b.seriesId" [attr.x]="b.x" [attr.y]="b.y" [attr.width]="b.w" [attr.height]="b.h" />
+          }
+          @for (v of L.valueTexts; track v.key) {
+            <text class="bc-value ui-text-numeric" [attr.x]="v.x" [attr.y]="v.y" [attr.dy]="L.horizontal ? '0.32em' : null" [attr.text-anchor]="v.anchor">
+              {{ v.text }}
+            </text>
+          }
+        </g>
+        @if (L.horizontal) {
+          <line class="lib-chart__baseline" aria-hidden="true" [attr.x1]="L.zero" [attr.x2]="L.zero" [attr.y1]="L.top" [attr.y2]="L.bottom" />
+        } @else {
+          <line class="lib-chart__baseline" aria-hidden="true" [attr.x1]="L.left" [attr.x2]="L.right" [attr.y1]="L.zero" [attr.y2]="L.zero" />
+        }
+        <g>
+          @for (band of L.bands; track $index) {
+            <rect
+              class="lib-chart__hit"
+              role="img"
+              [class.bc-hit--focus]="keyboardFocus() && active() === $index"
+              [attr.data-point]="$index"
+              [attr.x]="band.x"
+              [attr.y]="band.y"
+              [attr.width]="band.w"
+              [attr.height]="band.h"
+              [attr.tabindex]="$index === focusIndex() ? 0 : -1"
+              [attr.aria-label]="pointLabel($index)"
+              [attr.aria-describedby]="uid + '-hint'"
+              (focus)="onPointFocus($index, $event)"
+              (blur)="onPointBlur()"
+              (keydown)="onPointKeydown($event, $index, L.bands.length)"
+            />
+          }
+        </g>
+      </svg>
+      @if (tooltip(); as tip) {
+        <lib-chart-tooltip
+          [title]="tip.title"
+          [rows]="tip.rows"
+          [top]="tip.above !== null ? null : L.horizontal ? tip.y + 4 : 0"
+          [bottom]="tip.above"
+          [left]="tip.flip ? null : L.horizontal ? L.left : tip.x + 12"
+          [right]="tip.flip ? L.width - tip.x + 12 : null"
+        />
+      }
+    </div>
+    <lib-chart-table [class.lib-chart__table--print]="!tableView()" [model]="table()" />
+  }
+</figure>

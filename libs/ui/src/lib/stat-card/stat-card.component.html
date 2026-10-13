@@ -1,0 +1,38 @@
+<span class="sc-label ui-text-caption">{{ label() }}</span>
+@if (loading()) {
+  <span class="sc-sr">{{ labels.loading }}</span>
+  <span class="sc-skeleton" aria-hidden="true">
+    <span class="sc-block sc-block--value"></span>
+    <span class="sc-block sc-block--line"></span>
+  </span>
+} @else {
+  <span class="sc-value">
+    <span class="sc-number ui-text-display" data-stat-value>{{ display() }}</span>
+    @if (unit()) {
+      <span class="sc-unit">{{ unit() }}</span>
+    }
+  </span>
+  @if (change(); as c) {
+    <span class="sc-change" data-stat-change [attr.data-tone]="c.tone" [attr.data-direction]="c.direction">
+      <span class="sc-arrow material-symbols-rounded" aria-hidden="true">{{ c.icon }}</span>
+      <span>{{ c.text }}</span>
+      @if (c.verdict) {
+        <span class="sc-sr">{{ c.verdict }}</span>
+      }
+    </span>
+  }
+  @if (spark(); as s) {
+    <svg
+      class="sc-spark"
+      data-stat-spark
+      role="img"
+      preserveAspectRatio="none"
+      [attr.viewBox]="sparkBox"
+      [attr.aria-label]="s.label"
+      [attr.data-c]="sparklineColor()"
+    >
+      <path class="sc-spark__area" [attr.d]="s.area" />
+      <path class="sc-spark__line" [attr.d]="s.d" />
+    </svg>
+  }
+}

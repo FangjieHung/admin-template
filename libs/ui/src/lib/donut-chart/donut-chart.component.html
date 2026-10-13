@@ -1,0 +1,64 @@
+<lib-chart-styles />
+<figure class="lib-chart__figure" [attr.aria-busy]="loading() ? 'true' : null">
+  <figcaption class="lib-chart__sr">{{ figureSummary() }}</figcaption>
+  @if (loading()) {
+    <lib-chart-skeleton shape="donut" [height]="size()" [label]="labels.loading" />
+  } @else if (isEmpty()) {
+    <lib-empty-state [compact]="true" icon="donut_large" [message]="labels.noData" />
+  } @else {
+    <lib-chart-toolbar class="dc-bar" [toggleLabel]="labels.viewAsTable" [tableView]="tableView()" (toggle)="toggleTable()" />
+    <div class="lib-chart__plot dc-body" [class.lib-chart__plot--off]="tableView()">
+      <span class="lib-chart__sr" [id]="uid + '-hint'">{{ labels.keyboardHint }}</span>
+      <div class="dc-ring" [style.width.px]="size()" [style.height.px]="size()">
+        <svg
+          class="lib-chart__svg dc-svg"
+          [attr.viewBox]="'0 0 ' + size() + ' ' + size()"
+          [attr.width]="size()"
+          [attr.height]="size()"
+          role="group"
+          [attr.aria-label]="labels.donutChart"
+        >
+          <g class="lib-chart__marks">
+            @for (arc of arcs(); track arc.id) {
+              <path
+                class="dc-slice"
+                role="img"
+                [class.dc-slice--active]="active() === arc.index || selected() === arc.id"
+                [class.dc-slice--focus]="keyboardFocus() && active() === arc.index"
+                [attr.data-c]="arc.color"
+                [attr.data-point]="arc.index"
+                [attr.d]="active() === arc.index || selected() === arc.id ? arc.big : arc.d"
+                [attr.tabindex]="arc.index === focusIndex() ? 0 : -1"
+                [attr.aria-label]="sliceLabel(arc.index)"
+                [attr.aria-describedby]="uid + '-hint'"
+                (pointerenter)="onSliceEnter(arc.index)"
+                (pointerleave)="onSliceLeave()"
+                (click)="toggleSelect(arc.id)"
+                (focus)="onPointFocus(arc.index, $event)"
+                (blur)="onPointBlur()"
+                (keydown)="onSliceKeydown($event, arc.index)"
+              />
+            }
+          </g>
+        </svg>
+        <div class="dc-center">
+          <span class="dc-center__label">{{ center().label }}</span>
+          <span class="dc-center__value ui-text-numeric">{{ center().value }}</span>
+          @if (center().detail) {
+            <span class="dc-center__detail ui-text-numeric">{{ center().detail }}</span>
+          }
+        </div>
+      </div>
+      <lib-chart-legend
+        class="dc-legend"
+        mode="select"
+        [column]="true"
+        [items]="legendItems()"
+        [label]="labels.legend"
+        (itemClick)="toggleSelect($event)"
+        (itemHover)="onLegendHover($event)"
+      />
+    </div>
+    <lib-chart-table [class.lib-chart__table--print]="!tableView()" [model]="table()" />
+  }
+</figure>
