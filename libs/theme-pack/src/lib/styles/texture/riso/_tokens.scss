@@ -1,0 +1,116 @@
+// Riso 孔版：孔版印刷（risograph）的文創刊物質地（ADR 0015）。造型 token，不定義配色；所有顏色由配色軸的語意 token 調出。
+// 孔版只有兩種特別色：主墨（--mat-sys-primary）與第二墨（--mat-sys-secondary），文字是墨色（--mat-sys-on-surface）。
+// 層次只靠「網點與疊印」：越前面的層，墨的覆蓋率越高——
+//   畫布：裸紙（只有極淡的紙張顆粒）
+//   卡片：紙＋主墨線框，右下一塊第二墨的稀網點（約 22% 覆蓋）
+//   浮起的面板（選單、下拉、日期選擇器、滑過的列）：第二墨 12% 平網＋50% 平網影
+//   對話框：主墨 10% 平網＋兩墨疊印的影（主墨 35% 疊在第二墨 60% 上）
+// 影子的偏移永遠是同一個 8px，前後只看網點／平網有多密，不看影子多長（和 Grid、Brutal 不同）。
+// 套色錯位（第二墨往左下錯開 2px 的一塊）只是裝飾，只放在色塊與按鈕上，永遠不放在文字上。
+:root[data-paradigm='riso'] {
+  // 輕微圓角：手工裁切的紙卡與圓頭印章。膠囊（999px）只留給狀態徽章與 chip。
+  --mat-sys-corner-small: 3px;
+  --mat-sys-corner-medium: 6px;
+  --mat-sys-corner-large: 8px;
+  --mat-sys-corner-extra-large: 12px;
+  --mat-sys-corner-full: 999px;
+
+  // ---- 兩種墨：顏色全部取自配色的語意 token ----
+  --riso-ink-a: var(--mat-sys-primary); // 主墨：線框、實心色塊
+  --riso-ink-b: var(--mat-sys-secondary); // 第二墨：網點、疊印、套色錯位（純裝飾，不承載文字）
+  --riso-line-w: 1.5px;
+  --riso-line: var(--riso-line-w) solid var(--riso-ink-a); // 卡片、選單、對話框、表格外框的平面墨線
+  --riso-rule: 1px solid color-mix(in srgb, var(--riso-ink-a) 45%, transparent); // 卡片標題列、表格列的細分隔
+
+  // ---- 各層的底：紙 → 紙 → 第二墨平網 → 主墨平網（文字放在平網上仍是實色墨字，對比由配色保證）----
+  --riso-paper: var(--mat-sys-background);
+  --riso-card: var(--mat-sys-surface);
+  --riso-raised: color-mix(in srgb, var(--riso-ink-b) 12%, var(--mat-sys-surface));
+  --riso-overlay: color-mix(in srgb, var(--riso-ink-a) 10%, var(--mat-sys-surface));
+  --riso-header: color-mix(in srgb, var(--riso-ink-a) 9%, var(--mat-sys-surface)); // 表頭：主墨 9% 平網
+
+  // ---- 網點（半色調）：第二墨的圓點陣列，45° 網角（兩層錯開半格的點陣），4px 網距。只畫在沒有文字的地方（卡片影、大標下方）----
+  --riso-dot-pitch: 4px;
+  --riso-dot-half: 2px;
+  --riso-screen-sparse:
+    radial-gradient(circle, var(--riso-ink-b) 0 0.75px, transparent 1.1px) 0 0 / var(--riso-dot-pitch) var(--riso-dot-pitch),
+    radial-gradient(circle, var(--riso-ink-b) 0 0.75px, transparent 1.1px) var(--riso-dot-half) var(--riso-dot-half) /
+      var(--riso-dot-pitch) var(--riso-dot-pitch); // 約 22% 覆蓋：卡片
+  --riso-screen-dense:
+    radial-gradient(circle, var(--riso-ink-b) 0 1.05px, transparent 1.4px) 0 0 / var(--riso-dot-pitch) var(--riso-dot-pitch),
+    radial-gradient(circle, var(--riso-ink-b) 0 1.05px, transparent 1.4px) var(--riso-dot-half) var(--riso-dot-half) /
+      var(--riso-dot-pitch) var(--riso-dot-pitch); // 約 43% 覆蓋：滑過的可點卡片
+  // 大標下的網點帶：字會壓在網點上，所以網點用第二墨 45% 的淡色（對文字墨在 4 套相容配色都 ≥ 5.2:1，
+  // 第二墨原色在 Candy 只有 1.89:1）。卡片影外側沒有字，用原色。
+  --riso-ink-b-tint: color-mix(in srgb, var(--riso-ink-b) 45%, var(--mat-sys-background));
+  --riso-screen-heading:
+    radial-gradient(circle, var(--riso-ink-b-tint) 0 1.1px, transparent 1.45px) 0 0 / 5px 5px,
+    radial-gradient(circle, var(--riso-ink-b-tint) 0 1.1px, transparent 1.45px) 2.5px 2.5px / 5px 5px;
+  --riso-offset: 8px; // 網點影的偏移：所有層都一樣
+
+  // ---- 套色錯位：第二墨往左下錯開。按下時錯位歸零（兩版對準）----
+  --riso-misreg: -2px 2px 0 0 var(--riso-ink-b);
+  --riso-misreg-hover: -3px 3px 0 0 var(--riso-ink-b);
+  --riso-misreg-pressed: 0 0 0 0 var(--riso-ink-b);
+
+  // ---- 紙張顆粒：fractal noise 當遮罩（只取透明度），顏色由下面的 --riso-grain-color 決定，所以 SVG 裡沒有任何色碼 ----
+  // feColorMatrix 只把雜訊最濃的一段留成不透明，其餘透明：看起來是稀疏的墨渣與纖維，不是一整片灰。
+  --riso-grain-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3.2 0 0 0 -1.7'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  --riso-grain-color: color-mix(in srgb, var(--mat-sys-on-surface) 9%, transparent);
+
+  // Material 的 level token：偏移固定 8px、0 模糊，越前面平網越密（第二墨 25／35／50%，對話框兩墨疊印）。
+  --mat-sys-level1: var(--riso-offset) var(--riso-offset) 0 0 color-mix(in srgb, var(--riso-ink-b) 25%, transparent);
+  --mat-sys-level2: var(--riso-offset) var(--riso-offset) 0 0 color-mix(in srgb, var(--riso-ink-b) 35%, transparent);
+  --mat-sys-level3: var(--riso-offset) var(--riso-offset) 0 0 color-mix(in srgb, var(--riso-ink-b) 50%, transparent);
+  --mat-sys-level4:
+    var(--riso-offset) var(--riso-offset) 0 0 color-mix(in srgb, var(--riso-ink-a) 35%, transparent),
+    var(--riso-offset) var(--riso-offset) 0 0 color-mix(in srgb, var(--riso-ink-b) 60%, transparent);
+
+  // Material 元件自己的 elevation token 沒設時用 M2 的固定黑影（不吃 level token），逐一指向平網影或 none。
+  @each $t in menu-container, select-container, autocomplete-container, timepicker-container,
+    datepicker-calendar-container
+  {
+    --mat-#{$t}-elevation-shadow: var(--mat-sys-level3);
+  }
+  --mat-dialog-container-elevation-shadow: var(--mat-sys-level4);
+  @each $t in fab-container, fab-small-container, fab-extended-container {
+    --mat-#{$t}-elevation-shadow: var(--riso-misreg);
+  }
+  // 浮起按鈕（protected）與展開面板的影子由 recipe 自己畫，這裡先歸零。
+  @each $t in expansion-container, sidenav-container, button-protected-container,
+    button-protected-hover-container, button-protected-focus-container,
+    button-protected-pressed-container, slide-toggle-handle
+  {
+    --mat-#{$t}-elevation-shadow: none;
+  }
+  --mat-card-elevated-container-elevation: var(--mat-sys-level1);
+
+  // 互動狀態：滑過／按下是第二墨的平網（疊印一層淡粉），選取是主墨 16% 平網。都是實色混色，文字仍是墨色。
+  --app-state-hover: color-mix(in srgb, var(--riso-ink-b) 12%, transparent);
+  --app-state-pressed: color-mix(in srgb, var(--riso-ink-b) 20%, transparent);
+  --app-state-selected: color-mix(in srgb, var(--riso-ink-a) 16%, transparent);
+  // 空狀態／錯誤狀態：主墨虛線框的便條（準則「空狀態」）。
+  --app-empty-bg: var(--mat-sys-surface);
+  --app-empty-frame: var(--riso-line-w) dashed var(--riso-ink-a);
+
+  // 字型：中文用裝置字；標題用 Bricolage Grotesque（_fonts.scss 按需載入）；英文內文用裝置的無襯線
+  // （不放 system-ui，免得中文被系統字搶走）；數字與等寬用全站已載入的 IBM Plex Mono（像打字機打上去的編號）。
+  --font-zh: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', system-ui, sans-serif;
+  --font-en: 'Bricolage Grotesque';
+  --font-display: var(--font-en), var(--font-zh);
+  --font-body: 'Helvetica Neue', 'Segoe UI', Roboto, Arial, var(--font-zh);
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  // Material 元件的字預設是 mat.theme() 的 Inter／Plus Jakarta Sans：大標（對話框標題等）改吃標題字 700，其餘吃內文字。
+  @each $role in display-large, display-medium, display-small, headline-large, headline-medium,
+    headline-small, title-large
+  {
+    --mat-sys-#{$role}-font: var(--font-display);
+    --mat-sys-#{$role}-weight: 700;
+  }
+  @each $role in title-medium, title-small, body-large, body-medium, body-small, label-large,
+    label-medium, label-small
+  {
+    --mat-sys-#{$role}-font: var(--font-body);
+  }
+}

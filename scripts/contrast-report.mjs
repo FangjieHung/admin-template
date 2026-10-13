@@ -74,6 +74,7 @@ const TEXTURES = [
   { id: 'ledger', label: 'Ledger 帳冊' },
   { id: 'cockpit', label: 'Cockpit 儀表艙' },
   { id: 'brutal', label: 'Brutal 新粗野' },
+  { id: 'riso', label: 'Riso 孔版' },
 ];
 
 const COLOR_THEMES = [

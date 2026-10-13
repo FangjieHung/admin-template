@@ -50,6 +50,11 @@ describe('theme-compatibility（ADR 0007，2026-09-27 定案清單）', () => {
       excluded: ['verdant', 'midnight', 'cool-grey', 'mist-ink', 'glacier-blue', 'graphite', 'oled', 'riso-duo'],
       defaultThemeId: 'signal',
     },
+    // ADR 0015 提案（待使用者定案）：只相容兩種墨分得開的淺色配色；Riso 雙色另進 Material、Grid、Editorial
+    riso: {
+      excluded: ['verdant', 'midnight', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue', 'graphite', 'oled'],
+      defaultThemeId: 'riso-duo',
+    },
   };
 
   it('每個質地都有一筆定案', () => {

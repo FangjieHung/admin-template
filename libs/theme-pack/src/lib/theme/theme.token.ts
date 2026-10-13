@@ -15,6 +15,7 @@ export const texture: ThemeOption[] = [
   { id: 'ledger', label: 'Ledger 帳冊' },
   { id: 'cockpit', label: 'Cockpit 儀表艙' },
   { id: 'brutal', label: 'Brutal 新粗野' },
+  { id: 'riso', label: 'Riso 孔版' },
 ];
 
 export const COLOR_THEMES: ThemeOption[] = [
@@ -79,7 +80,7 @@ export function resolveThemeId(id: string | null | undefined): string {
 // 2026-10-13 新增 Graphite、OLED 兩套深色配色與 Cockpit 質地（ADR 0012）：新增的格子於 2026-10-13 由使用者定案；
 // 兩套配色比照 Midnight 的相容範圍，再依美感排除（Aero 兩者都排除，OLED 另排除 Linen、Soft UI、Clay）。
 // 2026-10-13 新增 Signal 配色與 Brutal 質地（ADR 0014）：新增的格子是提案，待使用者定案。
-// 2026-10-13 新增 Riso 雙色配色（ADR 0015）：新增的格子是提案，待使用者定案。
+// 2026-10-13 新增 Riso 雙色配色與 Riso 質地（ADR 0015）：新增的格子是提案，待使用者定案。
 // 相容清單只存在這一處，settings 頁與之後的外觀浮動面板（ticket 03）都透過 ThemeService 讀取，不重抄清單。
 export interface TextureCompatibility {
   readonly compatibleThemeIds: readonly string[];
@@ -159,7 +160,14 @@ export const TEXTURE_COMPATIBILITY: Record<string, TextureCompatibility> = {
     compatibleThemeIds: ['sandstone', 'azure', 'candy', 'signal'],
     defaultThemeId: 'signal',
   },
-
+  // ADR 0015 提案（待使用者定案）：層次靠第二墨的網點與疊印，只相容「兩種墨分得開、第二墨讀得出是另一個顏色」的淺色配色
+  // （主墨對第二墨 ΔE ≥ 25、第二墨對文字墨 ΔE ≥ 20）。對比 12 格中 11 格合格（Cool Grey 的欄位邊界 2.78:1 不合格）；
+  // Verdant、Azure 的第二墨太接近文字墨（網點讀起來像髒污），Mist Ink、Glacier Blue 是單色墨，深色配色排除（孔版是印在紙上的）。
+  // Riso 雙色在其他質地只進 Material、Grid、Editorial（平面印刷感）；其餘排除的理由見 ADR 0015。
+  riso: {
+    compatibleThemeIds: ['sandstone', 'candy', 'signal', 'riso-duo'],
+    defaultThemeId: 'riso-duo',
+  },
 };
 
 /** 不認得的質地 id（已刪除的質地殘留在 localStorage、拼錯）一律退回 DEFAULT_PARADIGM。 */

@@ -1,0 +1,7 @@
+// 由 riso/_index.scss 第一行 @forward，跟著 texture-riso.css 按需載入（ADR 0010）：沒切到 Riso 的人連字型 CSS 都不下載。
+// 只載入標題用的 Bricolage Grotesque 700 一個字重（ADR 0015）：帶「墨阱」（ink trap，筆畫交角刻意挖掉一小塊，
+// 讓油墨滲開後字角仍清楚）的怪趣味怪誕體，是印刷工藝直接長在字形上的字，和 Noto Sans／系統無襯線、
+// Brutal 的 Space Grotesk（幾何、從等寬體改出來）、Cockpit 的 Barlow Condensed（窄體儀表字）都明顯不同；
+// 700 和蘋方、微軟正黑的粗體字重接近，中英混排的標題不會一邊粗一邊細。
+// 內文英文用裝置無襯線、數字等寬用全站已載入的 IBM Plex Mono、中文用裝置字，都不在這裡。
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700&display=swap');

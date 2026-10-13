@@ -1,0 +1,506 @@
+// Riso 孔版：兩種特別色疊印、紙張顆粒、網點、輕微套色錯位，像文創刊物（ADR 0015）。層次只靠「網點與疊印」：
+// 畫布（裸紙＋顆粒）→ 卡片（紙＋主墨線框＋右下一塊第二墨稀網點）→ 浮起的面板：選單、下拉、日期選擇器、
+// 展開中的面板標題、滑過的列（第二墨 12% 平網＋50% 平網影）→ 對話框（主墨 10% 平網＋兩墨疊印的影）。
+// 影子偏移永遠是 8px；越前面只代表墨越密。顏色一律取自 _tokens.scss 的 --riso-*（都由配色的語意 token 調出）。
+//
+// 可讀性規則（ADR 0015）：
+// 1. 文字永遠是單一實色墨：不加 text-shadow、不疊網點、不做套色錯位。
+// 2. 網點只畫在沒有文字的地方：卡片外側的影子、頁面大標（大字）下半截。資料密集的表面（表格、欄位）是平的。
+// 3. 紙張顆粒只在頁面底層（body），卡片、側欄、浮層都是不透明的實色，蓋住顆粒。
+// 4. 高對比（prefers-contrast: more、forced-colors）拿掉顆粒與網點；減少透明度時拿掉顆粒（它是半透明的疊層）。
+
+// 卡片要當網點影的定位基準：權重 0-0-0，元件自己寫的 position（外觀浮動面板是 fixed）一定贏。
+:where(:root[data-paradigm='riso'] .ui-card) {
+  position: relative;
+}
+:where(:root[data-paradigm='riso'] .topbar-heading h1) {
+  position: relative;
+}
+
+:root[data-paradigm='riso'] {
+  // ---- 紙：畫布是裸紙，顆粒是 body 上一層固定的雜訊遮罩（z-index -1：在根背景之上、所有內容之下）----
+  body {
+    background: var(--riso-paper);
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--riso-grain-color);
+    mask-image: var(--riso-grain-mask);
+    mask-size: 160px 160px;
+    mask-repeat: repeat;
+  }
+
+  // ---- 殼層：外框透明讓紙張顆粒透出來；側欄是一整版殼層色的滿版，右緣一條主墨線 ----
+  .app-shell,
+  .sidenav-container,
+  .content-area {
+    background: transparent;
+  }
+  .app-sidenav {
+    background: var(--app-shell-bg);
+    color: var(--app-shell-on);
+    border-right: var(--riso-line-w) solid var(--app-shell-on);
+    box-shadow: none;
+  }
+  .brand-mark,
+  .avatar {
+    border-radius: var(--mat-sys-corner-small);
+    box-shadow: var(--riso-misreg);
+  }
+  // 目前所在的選單項目：第二墨平網色塊（secondary-container）＋墨字，左下一道第二墨的套色錯位。
+  :is(.nav-link, .nav-sublink, .nav-flyout-item) {
+    border-radius: var(--mat-sys-corner-small);
+  }
+  :is(.nav-link, .nav-sublink, .nav-flyout-item).active {
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+    font-weight: 700;
+    box-shadow: var(--riso-misreg);
+    transform: none;
+  }
+  .nav-link.active .nav-icon {
+    color: inherit;
+  }
+  .nav-group-trigger {
+    border-radius: var(--mat-sys-corner-small);
+  }
+  .nav-flyout {
+    background: var(--riso-raised);
+    border: var(--riso-line);
+    border-radius: var(--mat-sys-corner-medium);
+    box-shadow: var(--mat-sys-level3);
+  }
+  .theme-pill {
+    border-radius: var(--mat-sys-corner-full);
+    border: var(--riso-line);
+    box-shadow: var(--riso-misreg);
+    font-family: var(--font-body);
+    font-weight: 700;
+  }
+
+  // ---- 卡片：紙＋1.5px 主墨線框；右下 8px 一塊第二墨的稀網點（偽元素，裁成 L 形，只露在卡片外側，絕不在文字下面）----
+  .ui-card {
+    background: var(--riso-card);
+    color: var(--mat-sys-on-surface);
+    border: var(--riso-line);
+    border-radius: var(--mat-sys-corner-large);
+    box-shadow: none;
+    // 有些卡片用 overflow: clip 裁內容（資料表卡片、骨架卡片）：放寬裁切邊，網點影才不會被裁掉。
+    overflow-clip-margin: calc(var(--riso-offset) + var(--riso-line-w));
+  }
+  .ui-card::after {
+    content: '';
+    position: absolute;
+    // 跟卡片外框（border-box）一樣大，往右下錯開 8px。
+    top: calc(var(--riso-offset) - var(--riso-line-w));
+    left: calc(var(--riso-offset) - var(--riso-line-w));
+    right: calc(-1 * (var(--riso-offset) + var(--riso-line-w)));
+    bottom: calc(-1 * (var(--riso-offset) + var(--riso-line-w)));
+    border-radius: inherit;
+    background: var(--riso-screen-sparse);
+    // 裁掉和卡片重疊的部分：只留右側與下緣的 L 形（卡片裡的文字下面永遠沒有網點）。
+    clip-path: polygon(
+      calc(100% - var(--riso-offset)) 0,
+      100% 0,
+      100% 100%,
+      0 100%,
+      0 calc(100% - var(--riso-offset)),
+      calc(100% - var(--riso-offset)) calc(100% - var(--riso-offset))
+    );
+    pointer-events: none;
+  }
+  .ui-card--inverse {
+    // 反轉卡：一整塊墨色滿版，左下一道第二墨的套色錯位（和其他卡片不一樣，刻意最搶眼）。
+    background: var(--mat-sys-inverse-surface);
+    color: var(--mat-sys-inverse-on-surface);
+    border-color: var(--mat-sys-inverse-surface);
+    box-shadow: var(--riso-misreg);
+  }
+  .ui-card-header {
+    border-bottom: var(--riso-rule);
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+  }
+  .ui-card--inverse .ui-card-header {
+    border-bottom-color: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 45%, transparent);
+  }
+  // 可點卡片：滑過時網點變密（墨更多＝更靠前），不位移；按下時回到稀網點。
+  .ui-card--clickable {
+    cursor: pointer;
+    transition: border-color var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .ui-card--clickable:hover::after {
+    background: var(--riso-screen-dense);
+  }
+  .ui-card--clickable:active::after {
+    background: var(--riso-screen-sparse);
+  }
+
+  // ---- 導覽膠囊、卡片分頁標籤：圓頭印章；目前項目是主墨實心塊＋套色錯位 ----
+  .ui-nav-pill {
+    padding: 8px 14px;
+    border-radius: var(--mat-sys-corner-full);
+    border: var(--riso-line);
+    font-size: 14px;
+    white-space: nowrap;
+    background: var(--riso-card);
+    color: var(--mat-sys-on-surface);
+    font-weight: 700;
+    transition:
+      background-color var(--app-motion-fast) var(--app-ease-standard),
+      box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .ui-nav-pill:hover {
+    background: var(--riso-raised);
+  }
+  .ui-nav-pill.is-active {
+    background: var(--mat-sys-primary);
+    color: var(--mat-sys-on-primary);
+    box-shadow: var(--riso-misreg);
+  }
+  .ui-nav-pill:active {
+    box-shadow: var(--riso-misreg-pressed);
+  }
+  .ui-card-titleNav__item.is-active {
+    background: var(--app-state-selected);
+    color: var(--mat-sys-on-surface);
+    box-shadow: inset 0 0 0 var(--riso-line-w) var(--riso-ink-a);
+  }
+
+  // 鍵盤焦點：2px 主色實線（--app-focus-ring），離 2px。與 Material 質地涵蓋同一批元素。
+  :is(
+    .theme-pill,
+    .ui-nav-pill,
+    .ui-card-titleNav__item,
+    .mat-mdc-button-base,
+    .ui-card--clickable,
+    .nav-link,
+    .nav-sublink,
+    .nav-group-trigger,
+    .nav-flyout-item
+  ):focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+
+  // ---- 按鈕：實心按鈕是一塊主墨，左下一道第二墨的套色錯位；滑過錯得多一點，按下時兩版對準（錯位歸零）----
+  .mat-mdc-button-base {
+    --mat-button-filled-container-shape: var(--mat-sys-corner-small);
+    --mat-button-outlined-container-shape: var(--mat-sys-corner-small);
+    --mat-button-protected-container-shape: var(--mat-sys-corner-small);
+    --mat-button-text-container-shape: var(--mat-sys-corner-small);
+    --mat-button-tonal-container-shape: var(--mat-sys-corner-small);
+    --mat-button-outlined-outline-color: var(--riso-ink-a);
+    --mat-button-outlined-outline-width: var(--riso-line-w);
+    --mat-button-protected-container-color: var(--riso-card);
+    --mat-button-protected-label-text-color: var(--mat-sys-primary);
+    --mat-button-tonal-container-color: var(--mat-sys-secondary-container);
+    --mat-button-tonal-label-text-color: var(--mat-sys-on-secondary-container);
+  }
+  .mat-mdc-icon-button {
+    --mat-icon-button-container-shape: var(--mat-sys-corner-full);
+  }
+  :is(.mat-mdc-unelevated-button, .mat-tonal-button):not(:disabled, .mat-mdc-button-disabled) {
+    box-shadow: var(--riso-misreg);
+  }
+  // 浮起按鈕：紙底＋主墨線框＋第二墨平網影（和卡片同一層）。
+  .mat-mdc-raised-button:not(:disabled, .mat-mdc-button-disabled) {
+    box-shadow:
+      inset 0 0 0 var(--riso-line-w) var(--riso-ink-a),
+      3px 3px 0 0 color-mix(in srgb, var(--riso-ink-b) 45%, transparent);
+  }
+  :is(.mat-mdc-unelevated-button, .mat-mdc-raised-button, .mat-tonal-button, .mat-mdc-outlined-button):not(
+      :disabled,
+      .mat-mdc-button-disabled
+    ) {
+    transition: box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  :is(.mat-mdc-unelevated-button, .mat-tonal-button):not(:disabled, .mat-mdc-button-disabled):hover {
+    box-shadow: var(--riso-misreg-hover);
+  }
+  :is(.mat-mdc-unelevated-button, .mat-tonal-button):not(:disabled, .mat-mdc-button-disabled):active {
+    box-shadow: var(--riso-misreg-pressed);
+  }
+  .mat-mdc-outlined-button:not(:disabled, .mat-mdc-button-disabled) {
+    background: var(--riso-card);
+  }
+  .mat-mdc-fab-base {
+    border-radius: var(--mat-sys-corner-full);
+  }
+  // Material 卡片（mat-card）：外框卡片 1.5px 主墨線；浮起卡片吃 level1 的平網影。
+  .mat-mdc-card {
+    --mat-card-outlined-outline-color: var(--riso-ink-a);
+    --mat-card-outlined-outline-width: var(--riso-line-w);
+    --mat-card-elevated-container-shape: var(--mat-sys-corner-large);
+    --mat-card-outlined-container-shape: var(--mat-sys-corner-large);
+  }
+  // Material 的篩選 chip：膠囊、1px 主墨框；選中的是第二墨平網色塊。
+  .mat-mdc-chip {
+    --mat-chip-container-shape: 999px;
+    --mat-chip-outline-color: var(--riso-ink-a);
+    --mat-chip-elevated-selected-container-color: var(--mat-sys-secondary-container);
+    --mat-chip-flat-selected-container-color: var(--mat-sys-secondary-container);
+    --mat-chip-selected-label-text-color: var(--mat-sys-on-secondary-container);
+  }
+
+  // ---- 欄位：白紙填寫格＋1.5px 欄位邊界（配色層的 --app-field-border）；聚焦時框換主色、加粗到 2px。
+  // 欄位是資料密集的表面：沒有網點、沒有套色錯位。----
+  .mat-mdc-form-field {
+    --mat-form-field-filled-container-color: var(--mat-sys-surface-container-lowest);
+    --mat-form-field-filled-active-indicator-height: 0;
+    --mat-form-field-filled-focus-active-indicator-height: 0;
+    --mat-form-field-outlined-container-shape: var(--mat-sys-corner-small);
+    --mat-form-field-outlined-outline-width: var(--riso-line-w);
+    --mat-form-field-outlined-focus-outline-width: 2px;
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    --app-field-shape: var(--mat-sys-corner-small);
+    --mat-form-field-filled-container-shape: var(--app-field-shape);
+    border: 1.5px solid var(--app-field-border); // 寬度同 --riso-line-w；lint:theme 要求欄位邊框值裡的 var() 只能是邊界色，所以寬度寫死
+    border-radius: var(--app-field-shape);
+    transition:
+      border-color var(--app-motion-fast) var(--app-ease-standard),
+      box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--filled:not(.mdc-text-field--disabled, .mdc-text-field--focused):hover {
+    border-color: var(--mat-sys-on-surface);
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--filled.mdc-text-field--focused {
+    border-color: var(--mat-sys-primary);
+    box-shadow: inset 0 0 0 0.5px var(--mat-sys-primary);
+  }
+  .mat-mdc-form-field-focus-overlay {
+    border-radius: inherit;
+  }
+  // 數字輸入（金額、數量、天數）：等寬字對齊（像打字機打上去的編號）。
+  input[type='number'].mat-mdc-input-element {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .ui-field-group {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+  }
+  .ui-field-group > *:not(:first-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    border-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  .ui-field-group > *:not(:last-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .ui-field-group > *:not(:first-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--riso-line-w);
+    background: var(--app-field-border);
+    z-index: 1;
+  }
+  // 開關：膠囊軌道，主墨框。
+  .mat-mdc-slide-toggle {
+    --mat-slide-toggle-track-outline-color: var(--riso-ink-a);
+    --mat-slide-toggle-selected-track-outline-color: var(--riso-ink-a);
+  }
+  // 分頁籤：3px 圓頭指示條，下緣一條細分隔。
+  .mat-mdc-tab-group,
+  .mat-mdc-tab-nav-bar {
+    --mat-tab-active-indicator-height: 3px;
+    --mat-tab-active-indicator-shape: 3px 3px 0 0;
+    --mat-tab-divider-color: color-mix(in srgb, var(--riso-ink-a) 45%, transparent);
+    --mat-tab-divider-height: 1px;
+  }
+
+  // ---- 浮層：越前面墨越多。選單、下拉、日期選擇器是第二墨平網（level3 影）；對話框是主墨平網（level4 兩墨疊印影）----
+  .mat-calendar,
+  .mat-datepicker-content {
+    --mat-datepicker-calendar-date-in-range-state-background-color: var(--app-calendar-range-fill);
+  }
+  .mat-datepicker-content {
+    --mat-datepicker-calendar-container-background-color: var(--riso-raised);
+    --mat-datepicker-calendar-container-text-color: var(--mat-sys-on-surface);
+    border: var(--riso-line);
+    border-radius: var(--mat-sys-corner-large) !important;
+    box-shadow: var(--mat-sys-level3) !important;
+  }
+  .mat-mdc-dialog-container {
+    --mat-dialog-container-color: var(--riso-overlay);
+    --mat-dialog-container-shape: var(--mat-sys-corner-large);
+    --mat-dialog-subhead-color: var(--mat-sys-on-surface);
+    --mat-dialog-supporting-text-color: var(--mat-sys-on-surface);
+    --mat-dialog-subhead-size: 1.5rem;
+    --mat-dialog-subhead-weight: 700;
+  }
+  .mat-mdc-dialog-surface {
+    border: var(--riso-line);
+    border-radius: var(--mat-sys-corner-large) !important;
+    box-shadow: var(--mat-sys-level4) !important;
+  }
+  .mat-mdc-dialog-title {
+    border-bottom: var(--riso-rule);
+  }
+  .mat-mdc-dialog-actions {
+    border-top: var(--riso-rule);
+  }
+  // 說明段落與下方欄位之間留白，浮動標籤（outlined 欄位的標籤浮在上框線上）才不會壓到說明文字。
+  .mat-mdc-dialog-content > p {
+    margin: 0 0 16px;
+  }
+  .mat-mdc-menu-panel,
+  .mat-mdc-select-panel,
+  .mat-mdc-autocomplete-panel {
+    --mat-menu-container-color: var(--riso-raised);
+    --mat-menu-container-shape: var(--mat-sys-corner-medium);
+    --mat-select-panel-background-color: var(--riso-raised);
+    --mat-autocomplete-background-color: var(--riso-raised);
+    border: var(--riso-line);
+  }
+  // 展開面板：放在卡片裡，本身不加影；收合時是一張紙卡，展開時標題列換第二墨平網（墨多一層＝往前一層）。
+  .mat-expansion-panel {
+    --mat-expansion-container-shape: var(--mat-sys-corner-large);
+    --mat-expansion-container-background-color: var(--riso-card);
+    border: var(--riso-line);
+    box-shadow: none;
+  }
+  .mat-expansion-panel:not(:last-child) {
+    margin-bottom: 10px;
+  }
+  .mat-expansion-panel.mat-expanded > .mat-expansion-panel-header {
+    background: var(--riso-raised);
+    border-bottom: var(--riso-rule);
+  }
+  .mat-mdc-snack-bar-container .mdc-snackbar__surface {
+    border-radius: var(--mat-sys-corner-medium) !important;
+    box-shadow: var(--riso-misreg) !important;
+  }
+
+  // ---- 表格：資料密集的表面，平的。表頭是主墨 9% 平網＋一條主墨線；滑過的列換第二墨平網 ----
+  .mat-mdc-table {
+    background: transparent !important;
+    border: var(--riso-line);
+  }
+  .mat-mdc-header-row {
+    background: var(--riso-header);
+  }
+  .mat-mdc-header-cell {
+    color: var(--mat-sys-on-surface);
+    border-bottom: var(--riso-line);
+    font-weight: 700;
+  }
+  // Admin 的資料表是 libs/ui 的 data-table（.dt-table）：只設元件暴露的外觀變數（CONTRACT.md「--dt-*」），不覆寫屬性。
+  .dt-table {
+    --dt-frame: var(--riso-line);
+    --dt-header-bg: var(--riso-header);
+    --dt-head-border-color: var(--riso-ink-a);
+    --dt-row-border-color: color-mix(in srgb, var(--riso-ink-a) 22%, transparent);
+    --dt-row-hover-bg: var(--riso-raised);
+  }
+  .dt-table th {
+    font-weight: 700;
+  }
+
+  // ---- 狀態徽章：膠囊、tone 色底、粗體小字；圓點是一顆實心墨點。文字一定寫出來，狀態不只靠顏色 ----
+  .ui-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.125rem;
+    white-space: nowrap;
+  }
+  .ui-chip__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+  @each $tone in positive, info, neutral, warning, danger {
+    .ui-chip--#{$tone} {
+      background: var(--app-#{$tone}-bg);
+      color: var(--app-#{$tone}-fg);
+      .ui-chip__dot {
+        background: var(--app-#{$tone}-dot);
+      }
+    }
+  }
+
+  // ---- 文字：標題用 Bricolage Grotesque 700；頁面大標下半截墊一條第二墨的網點帶（大字才墊，字本身仍是單一實色墨）----
+  .ui-text-numeric {
+    font-family: var(--font-mono), var(--font-zh);
+    font-variant-numeric: tabular-nums;
+  }
+  .ui-text-display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .topbar-heading h1,
+  .ui-text-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--mat-sys-on-surface);
+  }
+  // 大標的網點帶：偽元素在 h1 自己的層疊環境裡墊在字的下面（isolation），只蓋下半截、往右多出一點（輕微錯位）。
+  .topbar-heading h1 {
+    width: fit-content;
+    isolation: isolate;
+  }
+  .topbar-heading h1::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 0.1em;
+    right: -0.3em;
+    top: 50%;
+    bottom: 0;
+    background: var(--riso-screen-heading);
+    pointer-events: none;
+  }
+  .ui-text-subtitle {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--mat-sys-on-surface);
+  }
+  .ui-text-caption {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mat-sys-on-surface-variant);
+  }
+  .ui-card--inverse .ui-text-subtitle,
+  .ui-card--inverse .ui-text-caption {
+    color: inherit;
+  }
+
+  // ---- 高對比與減少透明度：網點、顆粒都是裝飾，拿掉後層次只剩平網色塊與墨線 ----
+  @media (prefers-contrast: more), (forced-colors: active) {
+    body::before,
+    .ui-card::after,
+    .topbar-heading h1::before {
+      content: none;
+    }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    body::before {
+      content: none;
+    }
+  }
+}
