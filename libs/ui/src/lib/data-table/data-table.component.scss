@@ -61,11 +61,16 @@
 //   --dt-row-hover-bg        可點列滑過／按下時的底色         預設 surface-container-high
 //   --dt-frozen-bg           固定欄在橫向捲動時的底色         預設 surface（= 多數質地的卡片底色）
 //   --dt-frozen-edge         固定欄右緣的分界（box-shadow）    預設 1px 0 0 0 outline-variant（畫在固定格右緣的 1px 偽元素上）
+//   --dt-font-size           表格字級                         預設 0.875rem
+//   --dt-cell-padding-inline 儲存格左右留白                   預設 1rem（勾選欄另計）
+//   --dt-row-stripe-bg       斑馬紋：偶數列疊一層的底色         預設 transparent（只有桌機表格形態；疊在滑過、提醒底色之上）
+//   --dt-selection-control-size 勾選欄的點擊熱區邊長          預設 2.75rem（44px）
+//   --dt-selection-padding-block 勾選欄上下留白（熱區已夠高時可歸零，避免撐高列）  預設同 --dt-cell-padding-block
 // 手機卡片版的外框仍是 outline-variant 四邊，只有下緣吃 --dt-row-border-color（照舊：以前 !important 的
 // border-bottom-color 也蓋到了卡片下緣）。
 .dt-table {
   width: 100%;
-  font-size: 0.875rem;
+  font-size: var(--dt-font-size, 0.875rem);
   border: var(--dt-frame, 0 solid);
 }
 
@@ -78,11 +83,11 @@
 .dt-table th {
   color: var(--mat-sys-on-surface-variant);
   font-weight: 500;
-  padding: var(--dt-cell-padding-block, 0.75rem) 1rem;
+  padding: var(--dt-cell-padding-block, 0.75rem) var(--dt-cell-padding-inline, 1rem);
 }
 
 .dt-table td {
-  padding: var(--dt-cell-padding-block, 0.75rem) 1rem;
+  padding: var(--dt-cell-padding-block, 0.75rem) var(--dt-cell-padding-inline, 1rem);
   color: inherit;
 }
 
@@ -98,6 +103,7 @@
   min-width: 3rem;
   padding-right: 0.5rem;
   padding-left: 1rem;
+  padding-block: var(--dt-selection-padding-block, var(--dt-cell-padding-block, 0.75rem));
 }
 
 // 勾選框外觀（尺寸、邊框、勾選底、焦點框）由 theme-pack 的 _choice-controls.scss 統一重畫，這裡只管位置。
@@ -111,13 +117,21 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: var(--dt-selection-control-size, 2.75rem);
+  height: var(--dt-selection-control-size, 2.75rem);
   cursor: pointer;
 }
 
 .dt-table tbody tr {
   border-bottom: 1px solid var(--dt-row-border-color, var(--mat-sys-outline-variant));
+}
+
+// 斑馬紋（Ledger 質地）：畫成 background-image 疊在列底色之上，不碰 background-color——滑過、提醒列
+// （.dt-row--danger／--warning）的底色照常生效，斑馬紋是半透明的一層蓋在上面。按下時拿掉，讓「按下」狀態層看得到。
+// 固定欄橫向捲動時自己有底色，另外在下方 .dt-wrap--scrolled 把同一層疊上去（--dt-row-stripe 由列傳給儲存格）。
+.dt-table tbody tr:nth-child(even):not(:active) {
+  --dt-row-stripe: linear-gradient(var(--dt-row-stripe-bg, transparent), var(--dt-row-stripe-bg, transparent));
+  background-image: var(--dt-row-stripe);
 }
 
 .dt-table tbody tr:last-child {
@@ -212,6 +226,7 @@
   .dt-frozen,
   .dt-frozen-select {
     background:
+      var(--dt-row-stripe, linear-gradient(transparent, transparent)),
       linear-gradient(var(--dt-row-tint, transparent), var(--dt-row-tint, transparent)),
       var(--dt-frozen-bg, var(--mat-sys-surface));
   }
@@ -336,6 +351,7 @@
     // 每列是一張卡片。這裡刻意不設 background：.dt-row--danger / --warning
     // 的提醒底色靠繼承生效，設了會把它們蓋掉。
     .dt-table tbody tr {
+      background-image: none; // 卡片版不畫斑馬紋（每列已是獨立卡片）
       border: 1px solid var(--mat-sys-outline-variant);
       border-bottom-color: var(--dt-row-border-color, var(--mat-sys-outline-variant));
       border-radius: var(--mat-sys-corner-medium, 12px);
