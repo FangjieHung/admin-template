@@ -5,7 +5,7 @@
       class="app-sidenav"
       [class.collapsed]="!isMobile && collapsed"
       [mode]="isMobile ? 'over' : 'side'"
-      [opened]="isMobile ? isSidenavOpen : true"
+      [opened]="!bare() && (isMobile ? isSidenavOpen : true)"
       (closedStart)="isSidenavOpen = false"
       (transitionend)="onSidenavTransitionEnd()"
     >
@@ -25,7 +25,9 @@
     </mat-sidenav>
 
     <mat-sidenav-content class="content-area">
+      <!-- 登入頁不套殼層（bare）：側欄收起、頁首與頁尾不顯示；router-outlet 維持同一個，頁面不會被建立兩次。 -->
       <app-header
+        [style.display]="bare() ? 'none' : null"
         [defaultTitle]="defaultTitle"
         (menuToggle)="toggleSidenav()"
       />
@@ -34,7 +36,7 @@
         <router-outlet />
       </main>
 
-      <app-footer />
+      <app-footer [style.display]="bare() ? 'none' : null" />
     </mat-sidenav-content>
   </mat-sidenav-container>
 

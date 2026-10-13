@@ -1,4 +1,5 @@
 import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { Location } from '@angular/common';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
@@ -19,6 +20,11 @@ import { HeaderTitleData } from './layout/header/header-title';
 import { FooterComponent } from './layout/footer/footer.component';
 import { isFillPageRoute } from './layout/fill-page';
 import { SHOWCASE_ENTRIES, SHOWCASE_GROUPS, showcaseRoute } from './showcase/showcase-registry';
+
+/** 不套殼層（側欄、頁首、頁尾）的頁面：登入。 */
+function isBarePage(url: string): boolean {
+  return url.split(/[?#]/)[0] === '/login';
+}
 
 function buildNavItems(): NavEntry[] {
   const t = ZH_TW_SHELL.nav;
@@ -86,6 +92,8 @@ export class App implements OnInit {
   protected readonly activeRoute = signal<string | null>(null);
   /** 目前頁面是「滿版頁」（路由 data 標記，見 layout/fill-page.ts）：主內容區撐滿頁首與頁尾之間的高度。 */
   protected readonly fillPage = signal(false);
+  /** 目前是不套殼層的頁面（登入）。第一次繪製前就用網址判斷，殼層才不會先閃一下。 */
+  protected readonly bare = signal(isBarePage(inject(Location).path()));
 
   protected readonly flyoutPositions: ConnectedPosition[] = [
     { originX: 'end', originY: 'top', overlayX: 'start', overlayY: 'top', offsetX: 8 },
@@ -146,6 +154,7 @@ export class App implements OnInit {
           breadcrumbs: activeGroup ? [{ label: activeGroup.label }] : [],
         };
         this.fillPage.set(isFillPageRoute(this.router.routerState.snapshot.root));
+        this.bare.set(isBarePage(url));
       });
   }
 

@@ -1,27 +1,99 @@
-<main class="login-page" aria-labelledby="login-title">
-  <section class="ui-card login-card p-4 sm:p-6">
-    <div class="brand-mark" aria-hidden="true">A</div>
-    <p class="ui-text-caption">{{ t.app.title }}</p>
-    <!-- 頁面唯一的 h1 在頁首（provideHeaderTitle，見 login-page.component.ts constructor）。 -->
-    <p id="login-title" class="ui-text-title">{{ t.loginPage.title }}</p>
-    <p class="login-note">
-      示範登入：不驗證帳號密碼，選一個示範帳號就以那個身分進入。每個帳號的角色不同，側欄與按鈕會跟著權限變化。
-      接上真正的身分驗證時換掉 AuthService。
-    </p>
-    <ul class="login-accounts" aria-labelledby="login-accounts-title">
-      <li id="login-accounts-title" class="ui-text-caption login-accounts__title">示範帳號</li>
-      @for (account of accounts(); track account.id) {
-        <li>
-          <button type="button" class="login-account" [attr.data-user-id]="account.id" (click)="enterAs(account.id)">
-            <span class="material-symbols-rounded login-account__icon" aria-hidden="true">account_circle</span>
-            <span class="login-account__text">
-              <span class="login-account__name">{{ account.name }}</span>
-              <span class="login-account__roles">{{ account.roles }}</span>
-            </span>
-            <span class="material-symbols-rounded login-account__go" aria-hidden="true">arrow_forward</span>
-          </button>
-        </li>
-      }
-    </ul>
+<!-- 登入頁不套殼層（app.ts 的 isBarePage），頁面自己放唯一的 h1。外層 <main> 由殼層提供。 -->
+<div class="login-page">
+  <section class="ui-card login-card p-4 sm:p-6" aria-labelledby="login-title">
+    <div class="login-brand">
+      <div class="brand-mark" aria-hidden="true">A</div>
+      <span class="ui-text-caption">{{ t.app.title }}</span>
+    </div>
+    <h1 id="login-title" class="ui-text-title login-title">{{ t.loginPage.title }}</h1>
+    <p class="login-lede">使用你的帳號登入後台。</p>
+
+    @if (errorText(); as err) {
+      <div class="login-error" role="alert" data-login-error [attr.data-reason]="error()">
+        <span class="material-symbols-rounded" aria-hidden="true">{{ error() === 'locked' ? 'lock' : 'error' }}</span>
+        <div>
+          <p class="login-error__title">{{ err.title }}</p>
+          <p class="login-error__detail">{{ err.detail }}</p>
+        </div>
+      </div>
+    }
+
+    <form class="login-form" [formGroup]="form" (ngSubmit)="submit()" novalidate [attr.aria-busy]="submitting() ? 'true' : null">
+      <mat-form-field appearance="outline" class="login-field">
+        <mat-label>帳號</mat-label>
+        <input
+          #usernameInput
+          matInput
+          formControlName="username"
+          autocomplete="username"
+          autocapitalize="none"
+          spellcheck="false"
+          [readonly]="submitting()"
+        />
+        <mat-error>請輸入帳號</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="login-field">
+        <mat-label>密碼</mat-label>
+        <input
+          #passwordInput
+          matInput
+          formControlName="password"
+          autocomplete="current-password"
+          [type]="showPassword() ? 'text' : 'password'"
+          [readonly]="submitting()"
+        />
+        <button
+          matIconButton
+          matSuffix
+          type="button"
+          class="login-reveal"
+          [attr.aria-label]="showPassword() ? '隱藏密碼' : '顯示密碼'"
+          [attr.aria-pressed]="showPassword()"
+          (click)="showPassword.set(!showPassword())"
+        >
+          <span class="material-symbols-rounded" aria-hidden="true">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+        </button>
+        <mat-error>請輸入密碼</mat-error>
+      </mat-form-field>
+
+      <div class="login-row">
+        <mat-checkbox formControlName="remember">記住我</mat-checkbox>
+        <button type="button" class="login-link" (click)="forgotPassword()">忘記密碼？</button>
+      </div>
+
+      <button matButton="filled" type="submit" class="login-submit" [disabled]="submitting()">
+        @if (submitting()) {
+          <mat-spinner diameter="18" aria-hidden="true" />
+          登入中…
+        } @else {
+          登入
+        }
+      </button>
+    </form>
+
+    <div class="login-demo">
+      <p class="ui-text-caption login-demo__title" id="login-demo-title">示範帳號</p>
+      <p class="login-demo__note">
+        密碼一律是 <code>{{ demoPassword }}</code>，點一下帳號就會填好表單。帳號輸入 <code>{{ lockedUsername }}</code> 示範帳號鎖定，密碼打錯示範帳密錯誤。
+      </p>
+      <ul class="login-demo__list" aria-labelledby="login-demo-title">
+        @for (account of accounts(); track account.username) {
+          <li>
+            <button
+              type="button"
+              class="login-account"
+              [attr.data-username]="account.username"
+              [attr.title]="account.name"
+              (click)="fill(account.username)"
+            >
+              <code>{{ account.username }}</code><span class="login-account__meta">{{ account.roles }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
   </section>
-</main>
+
+  <app-template-info class="login-info" [info]="info" />
+</div>
