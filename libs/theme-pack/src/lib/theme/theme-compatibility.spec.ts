@@ -55,6 +55,11 @@ describe('theme-compatibility（ADR 0007，2026-09-27 定案清單）', () => {
       excluded: ['verdant', 'midnight', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue', 'graphite', 'oled'],
       defaultThemeId: 'riso-duo',
     },
+    // ADR 0016 提案（待使用者定案）：淺色紙感配色＋Midnight（黑板／藍圖）
+    sketch: {
+      excluded: ['cool-grey', 'candy', 'graphite', 'oled'],
+      defaultThemeId: 'sandstone',
+    },
   };
 
   it('每個質地都有一筆定案', () => {

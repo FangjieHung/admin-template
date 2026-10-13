@@ -1,0 +1,7 @@
+// 由 sketch/_index.scss 第一行 @forward，跟著 texture-sketch.css 按需載入（ADR 0010）：沒切到 Sketch 的人連字型 CSS 都不下載。
+// 只載入標題用的 Kalam 700 一個字重（ADR 0016）：印刷體的手寫字（字母不連筆、字腔開闊、x 高度大），
+// 20–32px 的標題一眼讀得出來；Caveat 是連筆草寫、x 高度小，20px 時字母糊在一起；Patrick Hand 只有 400，
+// 和蘋方、微軟正黑的粗體標題放在一起會一邊粗一邊細。Kalam 沒有中文字形，標題裡的中文自動落到 --font-zh。
+// Google Fonts 依 unicode-range 拆檔，瀏覽器只下載拉丁字母那一份（天城文那份用不到就不下載）。
+// 內文英文用裝置無襯線、數字等寬用全站已載入的 IBM Plex Mono、中文用裝置字，都不在這裡。
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@700&display=swap');

@@ -1,0 +1,142 @@
+// Sketch 手繪：手繪草稿／白板筆記的質地（ADR 0016）。造型 token，不定義配色；所有顏色由配色軸的語意 token 調出。
+// 筆是文字墨（--mat-sys-on-surface），螢光筆是主色（--mat-sys-primary）；所有表面都是同一張紙（--mat-sys-surface）。
+// 層次只靠「手繪線條」——越前面的層，筆畫越粗、描的次數越多：
+//   畫布：紙＋極淡的點格（筆記本）
+//   卡片：一道 1.5px 的鋼筆線（文字墨 80%），不規則的手繪圓角
+//   浮起的面板（選單、下拉、日期選擇器、展開中的面板、滑過的可點卡片）：2px 麥克筆線（文字墨 100%）＋錯開 3px 再描一次
+//   對話框：2.5px 麥克筆線＋再描一次＋右下一小片 45° 鉛筆排線
+// 抖動（不規則圓角、波浪底線）只在卡片、按鈕、chip、對話框、頁面大標的裝飾上；表格、欄位、表單控制項永遠是直線（ADR 0016）。
+// 文字永遠不變形：不用 filter、不旋轉、不歪斜；手繪感全部由框線形狀與偽元素畫出來。
+:root[data-paradigm='sketch'] {
+  // 一般圓角（欄位、勾選框、表格、日曆格子這些「要直線」的地方用）：小而規則。手繪的不規則圓角另見 --sketch-wobble-*。
+  --mat-sys-corner-small: 4px;
+  --mat-sys-corner-medium: 8px;
+  --mat-sys-corner-large: 12px;
+  --mat-sys-corner-extra-large: 16px;
+  --mat-sys-corner-full: 999px;
+
+  // ---- 手繪的不規則圓角：每個角一長一短的橢圓（長的一邊用 %，短的一邊用 px），四條邊各自微微彎一下 ----
+  // 長邊用百分比、短邊用 px：圓角總和永遠不超過邊長（瀏覽器不會等比縮小成一顆橢圓），大卡片和小卡片的「彎的深度」一樣。
+  // -alt 是同一個形狀「重畫一次」的版本：滑過時換成它（像筆重新描一次），減少動態時與原形狀相同（見檔尾）。
+  --sketch-wobble-xs: 9px 3px 8px 4px / 4px 8px 3px 9px; // 狀態徽章（約 18px 高）
+  --sketch-wobble-sm: 32% 4px 28% 5px / 5px 36% 4px 40%; // 按鈕、導覽膠囊、篩選 chip、提示訊息
+  --sketch-wobble-sm-alt: 5px 30% 4px 34% / 38% 4px 34% 5px;
+  --sketch-wobble-md: 38% 6px 30% 7px / 7px 34% 6px 40%; // 選單、下拉、日期選擇器、側欄飛出選單、展開面板
+  --sketch-wobble-lg: 40% 8px 35% 10px / 10px 38% 8px 42%; // 卡片
+  --sketch-wobble-lg-alt: 9px 36% 10px 40% / 36% 9px 42% 8px;
+  --sketch-wobble-xl: 42% 10px 36% 12px / 12px 40% 10px 44%; // 對話框
+
+  // ---- 筆：顏色全部取自配色的語意 token ----
+  --sketch-ink: var(--mat-sys-on-surface); // 麥克筆（浮起的面板、對話框、強調）
+  --sketch-pen: color-mix(in srgb, var(--mat-sys-on-surface) 80%, transparent); // 鋼筆（卡片、按鈕外框）
+  --sketch-pen-w: 1.5px;
+  --sketch-marker-w: 2px;
+  --sketch-marker-heavy-w: 2.5px;
+  --sketch-rule: 1px solid color-mix(in srgb, var(--mat-sys-on-surface) 28%, transparent); // 卡片標題列、對話框標題列的細分隔（直線）
+  --sketch-paper: var(--mat-sys-background);
+  --sketch-card: var(--mat-sys-surface);
+
+  // 抖動的筆線：SVG 的 feTurbulence 雜訊＋feDisplacementMap 把一條平滑的框線推歪 ±2px（像手沒拿穩）。
+  // 只套在「不含文字」的偽元素上（卡片、對話框的外框線），文字與表格、欄位永遠不經過這個 filter。
+  // 濾鏡區域往外放 4%（卡片、對話框夠大，推歪的線不會被切掉）；不支援外部 SVG 濾鏡的瀏覽器會整個略過 filter，
+  // 退回同一個不規則圓角的平滑框線。SVG 只決定形狀，線的顏色是偽元素自己的 border-color（語意 token）。
+  --sketch-jitter: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='j' x='-4%25' y='-4%25' width='108%25' height='108%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.018' numOctaves='2' seed='7'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='4.5' xChannelSelector='R' yChannelSelector='G'/%3E%3C/filter%3E%3C/svg%3E#j");
+
+  // 「再描一次」：同一個形狀往右下錯開 3px 的第二道線。用兩層 box-shadow 畫：上層是紙色、縮 1.5px 的形狀，
+  // 下層是同位置的墨色形狀，疊起來只剩一圈 1.5px 的墨線；外側 box-shadow 不會畫在元素底下，所以只露在右緣與下緣。
+  // 紙色固定是 surface（這個質地所有表面都是同一張紙），box-shadow 不受 overflow 裁切，可以用在會捲動的選單上。
+  --sketch-retrace-offset: 3px;
+  --sketch-retrace:
+    var(--sketch-retrace-offset) var(--sketch-retrace-offset) 0 calc(-1 * var(--sketch-pen-w)) var(--mat-sys-surface),
+    var(--sketch-retrace-offset) var(--sketch-retrace-offset) 0 0 var(--sketch-pen);
+  --sketch-retrace-pressed:
+    0 0 0 calc(-1 * var(--sketch-pen-w)) var(--mat-sys-surface),
+    0 0 0 0 var(--sketch-pen);
+
+  // 鉛筆排線（只在對話框右下，偽元素，裁成 L 形，永遠不在文字下面）。
+  --sketch-hatch: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--mat-sys-on-surface) 38%, transparent) 0 1px,
+    transparent 1px 5px
+  );
+  --sketch-hatch-offset: 7px;
+
+  // 畫布的點格（筆記本）：文字墨 6%、22px 一格；只在頁面底層（body），卡片、側欄、浮層都是不透明的紙。
+  // 6% 是上限：畫布上的 12px 小字（麵包屑、頁尾）壓在點上時，最差像素對比在 Verdant／Mist Ink 仍要 ≥ 4.5:1（10% 時只剩 4.18）。
+  --sketch-dot: color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
+  --sketch-dot-grid: radial-gradient(circle at 1.5px 1.5px, var(--sketch-dot) 0 1.1px, transparent 1.5px) 0 0 / 22px 22px;
+
+  // 頁面大標下的手繪底線：SVG 只當遮罩（只取形狀），顏色是偽元素的背景（主色），所以 SVG 裡沒有任何色碼。
+  // preserveAspectRatio='none' 讓線拉滿標題寬度，vector-effect='non-scaling-stroke' 讓筆畫粗細不跟著被拉長。
+  --sketch-underline-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'%3E%3Cpath d='M3 7.5 C 30 4.5 62 9 98 6.2 S 162 3.6 197 6.8 M 12 10 C 60 8.4 120 9.6 176 8.6' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+
+  // Material 的 level token：沒有模糊陰影。level 1 是單筆的卡片（不畫影），level 2–4 是「再描一次」。
+  --mat-sys-level1: none;
+  --mat-sys-level2: var(--sketch-retrace);
+  --mat-sys-level3: var(--sketch-retrace);
+  --mat-sys-level4: var(--sketch-retrace);
+
+  // Material 元件自己的 elevation token 沒設時用 M2 的固定黑影（不吃 level token），逐一指向「再描一次」或 none。
+  @each $t in menu-container, select-container, autocomplete-container, timepicker-container,
+    datepicker-calendar-container
+  {
+    --mat-#{$t}-elevation-shadow: var(--sketch-retrace);
+  }
+  --mat-dialog-container-elevation-shadow: var(--sketch-retrace);
+  // FAB、浮起按鈕、展開面板、側欄、開關把手的影子由 recipe 自己畫（或不畫），這裡先歸零。
+  @each $t in fab-container, fab-small-container, fab-extended-container, expansion-container, sidenav-container,
+    button-protected-container, button-protected-hover-container, button-protected-focus-container,
+    button-protected-pressed-container, slide-toggle-handle
+  {
+    --mat-#{$t}-elevation-shadow: none;
+  }
+  --mat-card-elevated-container-elevation: none;
+
+  // 互動狀態：預設值（文字墨 8／12／16% 的疊色）就像鉛筆塗了一層，不覆寫。
+  // 空狀態／錯誤狀態：便利貼——紙底、1.5px 文字墨虛線框（準則「空狀態」）。
+  --app-empty-bg: var(--mat-sys-surface);
+  --app-empty-frame: var(--sketch-pen-w) dashed var(--sketch-pen);
+
+  // 字型：中文用裝置字；英文與數字的「標題」用 Kalam 700（_fonts.scss 按需載入，沒有中文字形，中文自動落到 --font-zh）；
+  // 英文內文用裝置的無襯線（不放 system-ui，免得中文被系統字搶走）；數字與等寬用全站已載入的 IBM Plex Mono。
+  --font-zh: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', system-ui, sans-serif;
+  --font-en: 'Kalam';
+  --font-display: var(--font-en), var(--font-zh);
+  --font-body: 'Helvetica Neue', 'Segoe UI', Roboto, Arial, var(--font-zh);
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  // Material 元件的字：20px 以上的大標（對話框標題等）用手寫字 700，其餘（含 16px 以下的 title-medium／small）用內文字。
+  @each $role in display-large, display-medium, display-small, headline-large, headline-medium,
+    headline-small, title-large
+  {
+    --mat-sys-#{$role}-font: var(--font-display);
+    --mat-sys-#{$role}-weight: 700;
+  }
+  @each $role in title-medium, title-small, body-large, body-medium, body-small, label-large,
+    label-medium, label-small
+  {
+    --mat-sys-#{$role}-font: var(--font-body);
+  }
+}
+
+// 高對比：抖動全部拉直（不規則圓角換回一般圓角）、筆線全部用 100% 文字墨；點格、排線、底線在 recipes.scss 拿掉。
+@media (prefers-contrast: more), (forced-colors: active) {
+  :root[data-paradigm='sketch'] {
+    --sketch-wobble-xs: var(--mat-sys-corner-full);
+    --sketch-wobble-sm: var(--mat-sys-corner-small);
+    --sketch-wobble-sm-alt: var(--mat-sys-corner-small);
+    --sketch-wobble-md: var(--mat-sys-corner-medium);
+    --sketch-wobble-lg: var(--mat-sys-corner-large);
+    --sketch-wobble-lg-alt: var(--mat-sys-corner-large);
+    --sketch-wobble-xl: var(--mat-sys-corner-large);
+    --sketch-pen: var(--mat-sys-on-surface);
+  }
+}
+
+// 減少動態：滑過時不「重畫」（-alt 與原形狀相同），形狀完全不動。
+@media (prefers-reduced-motion: reduce) {
+  :root[data-paradigm='sketch'] {
+    --sketch-wobble-sm-alt: var(--sketch-wobble-sm);
+    --sketch-wobble-lg-alt: var(--sketch-wobble-lg);
+  }
+}

@@ -1,0 +1,527 @@
+// Sketch 手繪：手繪草稿／白板筆記，適合原型、活動頁、內部工具的輕鬆感（ADR 0016）。層次只靠「手繪線條」：
+// 畫布（紙＋淡點格）→ 卡片（一道 1.5px 鋼筆線、不規則圓角）→ 浮起的面板：選單、下拉、日期選擇器、展開中的面板、
+// 滑過的可點卡片（2px 麥克筆線＋錯開 3px 再描一次）→ 對話框（2.5px 麥克筆線＋再描一次＋右下鉛筆排線）。
+// 所有表面都是同一張紙（surface）；前後只看筆畫多粗、描了幾次。顏色一律取自 _tokens.scss 的 --sketch-*（由配色的語意 token 調出）。
+//
+// 可讀性規則（ADR 0016）：
+// 1. 手寫字（Kalam）只用在 20px 以上的英文／數字標題；中文與內文一律是一般字型（Kalam 沒有中文字形，中文自動落到 --font-zh）。
+// 2. 表格線、欄位框、表單控制項永遠是直的、清楚的：抖動（不規則圓角、波浪線）只在卡片、按鈕、chip、對話框、頁面大標的裝飾上。
+// 3. 文字永遠不變形：不用 filter、transform、text-shadow；手繪的形狀只畫在框線與不含文字的偽元素上。
+// 4. 點格只在頁面底層（body），卡片、側欄、浮層都是不透明的紙蓋住它。
+// 5. 高對比（prefers-contrast: more、forced-colors）把抖動拉直（_tokens.scss），並拿掉點格、排線與手繪底線。
+
+// 卡片要當抖動筆線的定位基準、大標要當手繪底線的定位基準：權重 0-0-0，元件自己寫的 position（外觀浮動面板是 fixed）一定贏。
+:where(:root[data-paradigm='sketch'] .ui-card),
+:where(:root[data-paradigm='sketch'] .topbar-heading h1) {
+  position: relative;
+}
+
+:root[data-paradigm='sketch'] {
+  // ---- 紙：畫布是紙＋淡點格（筆記本）；外框透明讓點格透出來 ----
+  body {
+    background: var(--sketch-dot-grid), var(--sketch-paper);
+  }
+  .app-shell,
+  .sidenav-container,
+  .content-area {
+    background: transparent;
+  }
+
+  // ---- 殼層：側欄是殼層色的一整頁，右緣一條直的鋼筆線；目前所在的選單項目換成手繪圓角 ----
+  .app-sidenav {
+    background: var(--app-shell-bg);
+    color: var(--app-shell-on);
+    border-right: var(--sketch-pen-w) solid var(--app-shell-hairline);
+    box-shadow: none;
+  }
+  .brand-mark,
+  .avatar {
+    border-radius: var(--sketch-wobble-sm);
+  }
+  :is(.nav-link, .nav-sublink, .nav-flyout-item, .nav-group-trigger) {
+    border-radius: var(--sketch-wobble-sm);
+  }
+  .nav-flyout {
+    background: var(--sketch-card);
+    border: var(--sketch-marker-w) solid var(--sketch-ink);
+    border-radius: var(--sketch-wobble-md);
+    box-shadow: var(--sketch-retrace);
+  }
+  .theme-pill {
+    border-radius: var(--sketch-wobble-sm);
+    border: var(--sketch-pen-w) solid var(--sketch-pen);
+    font-family: var(--font-body);
+    font-weight: 700;
+  }
+
+  // ---- 卡片：紙＋一道 1.5px 鋼筆線、不規則圓角（單筆＝最底下那層紙上的東西）----
+  // 筆線畫在 ::before（不含文字）上，經過 --sketch-jitter 推歪；卡片自己的框是透明的，只負責佔位與裁切形狀。
+  .ui-card {
+    background: var(--sketch-card);
+    color: var(--mat-sys-on-surface);
+    border: var(--sketch-pen-w) solid transparent;
+    border-radius: var(--sketch-wobble-lg);
+    box-shadow: none;
+    // 有些卡片用 overflow: clip 裁內容（資料表卡片、骨架卡片）：放寬裁切邊，推歪的筆線與「再描一次」才不會被裁掉。
+    overflow-clip-margin: calc(var(--sketch-retrace-offset) + var(--sketch-pen-w) + 2px);
+  }
+  .ui-card::before {
+    content: '';
+    position: absolute;
+    inset: calc(-1 * var(--sketch-pen-w));
+    border: var(--sketch-pen-w) solid var(--sketch-pen);
+    border-radius: inherit;
+    filter: var(--sketch-jitter);
+    pointer-events: none;
+    transition: box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .ui-card--inverse {
+    // 反轉卡：一整塊墨色（邊緣也是推歪的），外面再描一次（刻意最搶眼）。
+    background: var(--mat-sys-inverse-surface);
+    color: var(--mat-sys-inverse-on-surface);
+  }
+  .ui-card--inverse::before {
+    border-color: var(--mat-sys-inverse-surface);
+    box-shadow: var(--sketch-retrace);
+  }
+  .ui-card-header {
+    border-bottom: var(--sketch-rule);
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+  }
+  .ui-card--inverse .ui-card-header {
+    border-bottom-color: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 40%, transparent);
+  }
+  // 可點卡片：滑過時往前一層——外面再描一次，形狀重畫（換成 -alt 的圓角）；不位移、不加陰影。按下時描線收回。
+  .ui-card--clickable {
+    cursor: pointer;
+    transition: border-radius var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .ui-card--clickable:hover {
+    border-radius: var(--sketch-wobble-lg-alt);
+  }
+  .ui-card--clickable:hover::before {
+    box-shadow: var(--sketch-retrace);
+  }
+  .ui-card--clickable:active::before {
+    box-shadow: var(--sketch-retrace-pressed);
+  }
+
+  // ---- 導覽膠囊、卡片分頁標籤：手繪的圓框；目前項目是主色實心＋再描一次 ----
+  .ui-nav-pill {
+    padding: 8px 14px;
+    border-radius: var(--sketch-wobble-sm);
+    border: var(--sketch-pen-w) solid var(--sketch-pen);
+    font-size: 14px;
+    white-space: nowrap;
+    background: var(--sketch-card);
+    color: var(--mat-sys-on-surface);
+    font-weight: 700;
+    transition:
+      border-radius var(--app-motion-fast) var(--app-ease-standard),
+      box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .ui-nav-pill:hover {
+    border-radius: var(--sketch-wobble-sm-alt);
+  }
+  .ui-nav-pill.is-active {
+    background: var(--mat-sys-primary);
+    color: var(--mat-sys-on-primary);
+    border-color: var(--sketch-ink);
+    box-shadow: var(--sketch-retrace);
+  }
+  .ui-nav-pill:active {
+    box-shadow: var(--sketch-retrace-pressed);
+  }
+  .ui-card-titleNav__item {
+    border-radius: var(--sketch-wobble-sm);
+  }
+  .ui-card-titleNav__item.is-active {
+    background: var(--app-state-selected);
+    color: var(--mat-sys-on-surface);
+    box-shadow: inset 0 0 0 var(--sketch-pen-w) var(--sketch-pen);
+  }
+
+  // 鍵盤焦點：2px 主色實線（--app-focus-ring），離 2px。外框跟著手繪圓角走。與 Material 質地涵蓋同一批元素。
+  :is(
+    .theme-pill,
+    .ui-nav-pill,
+    .ui-card-titleNav__item,
+    .mat-mdc-button-base,
+    .ui-card--clickable,
+    .nav-link,
+    .nav-sublink,
+    .nav-group-trigger,
+    .nav-flyout-item
+  ):focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+
+  // ---- 按鈕：手繪圓框。實心按鈕外面再描一次；滑過時形狀重畫，按下時描線收回（筆壓下去）----
+  .mat-mdc-button-base {
+    --mat-button-filled-container-shape: var(--sketch-wobble-sm);
+    --mat-button-outlined-container-shape: var(--sketch-wobble-sm);
+    --mat-button-protected-container-shape: var(--sketch-wobble-sm);
+    --mat-button-text-container-shape: var(--sketch-wobble-sm);
+    --mat-button-tonal-container-shape: var(--sketch-wobble-sm);
+    --mat-button-outlined-outline-color: var(--sketch-pen);
+    --mat-button-outlined-outline-width: var(--sketch-pen-w);
+    --mat-button-protected-container-color: var(--sketch-card);
+    --mat-button-protected-label-text-color: var(--mat-sys-primary);
+  }
+  .mat-mdc-icon-button {
+    --mat-icon-button-container-shape: var(--mat-sys-corner-full);
+  }
+  :is(.mat-mdc-unelevated-button, .mat-mdc-raised-button, .mat-tonal-button, .mat-mdc-outlined-button):not(
+      :disabled,
+      .mat-mdc-button-disabled
+    ) {
+    transition:
+      border-radius var(--app-motion-fast) var(--app-ease-standard),
+      box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  :is(.mat-mdc-unelevated-button, .mat-tonal-button):not(:disabled, .mat-mdc-button-disabled) {
+    box-shadow: var(--sketch-retrace);
+  }
+  // 浮起按鈕：紙底＋鋼筆框＋再描一次（和滑過的卡片同一層）。
+  .mat-mdc-raised-button:not(:disabled, .mat-mdc-button-disabled) {
+    box-shadow:
+      inset 0 0 0 var(--sketch-pen-w) var(--sketch-pen),
+      var(--sketch-retrace);
+  }
+  :is(.mat-mdc-unelevated-button, .mat-mdc-raised-button, .mat-tonal-button, .mat-mdc-outlined-button):not(
+      :disabled,
+      .mat-mdc-button-disabled
+    ):hover {
+    border-radius: var(--sketch-wobble-sm-alt);
+  }
+  :is(.mat-mdc-unelevated-button, .mat-tonal-button):not(:disabled, .mat-mdc-button-disabled):active {
+    box-shadow: var(--sketch-retrace-pressed);
+  }
+  .mat-mdc-outlined-button:not(:disabled, .mat-mdc-button-disabled) {
+    background: var(--sketch-card);
+  }
+  .mat-mdc-fab-base {
+    border-radius: var(--mat-sys-corner-full);
+    box-shadow: var(--sketch-retrace);
+  }
+  // Material 卡片（mat-card）：鋼筆框＋手繪圓角，和 .ui-card 一樣。
+  .mat-mdc-card {
+    --mat-card-outlined-outline-color: var(--sketch-pen);
+    --mat-card-outlined-outline-width: var(--sketch-pen-w);
+    --mat-card-elevated-container-shape: var(--sketch-wobble-lg);
+    --mat-card-outlined-container-shape: var(--sketch-wobble-lg);
+  }
+  .mat-mdc-card.mat-mdc-card:not(.mat-mdc-card-outlined) {
+    border: var(--sketch-pen-w) solid var(--sketch-pen);
+  }
+  // Material 的篩選 chip：手繪圓框；選中的是 secondary-container 色塊。
+  .mat-mdc-chip {
+    --mat-chip-container-shape-radius: var(--sketch-wobble-sm);
+    --mat-chip-outline-color: var(--sketch-pen);
+    --mat-chip-elevated-selected-container-color: var(--mat-sys-secondary-container);
+    --mat-chip-flat-selected-container-color: var(--mat-sys-secondary-container);
+    --mat-chip-selected-label-text-color: var(--mat-sys-on-secondary-container);
+  }
+
+  // ---- 欄位：直線！白紙填寫格＋1.5px 欄位邊界（配色層的 --app-field-border）、4px 規則圓角；聚焦時框換主色、加粗到 2px。
+  // 欄位是資料密集的表面：沒有抖動、沒有再描一次。----
+  .mat-mdc-form-field {
+    --mat-form-field-filled-container-color: var(--mat-sys-surface-container-lowest);
+    --mat-form-field-filled-active-indicator-height: 0;
+    --mat-form-field-filled-focus-active-indicator-height: 0;
+    --mat-form-field-outlined-container-shape: var(--mat-sys-corner-small);
+    --mat-form-field-outlined-outline-width: var(--sketch-pen-w);
+    --mat-form-field-outlined-focus-outline-width: 2px;
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    --app-field-shape: var(--mat-sys-corner-small);
+    --mat-form-field-filled-container-shape: var(--app-field-shape);
+    border: 1.5px solid var(--app-field-border); // 寬度同 --sketch-pen-w；lint:theme 要求欄位邊框值裡的 var() 只能是邊界色，所以寬度寫死
+    border-radius: var(--app-field-shape);
+    transition:
+      border-color var(--app-motion-fast) var(--app-ease-standard),
+      box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--filled:not(.mdc-text-field--disabled, .mdc-text-field--focused):hover {
+    border-color: var(--mat-sys-on-surface);
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--filled.mdc-text-field--focused {
+    border-color: var(--mat-sys-primary);
+    box-shadow: inset 0 0 0 0.5px var(--mat-sys-primary);
+  }
+  .mat-mdc-form-field-focus-overlay {
+    border-radius: inherit;
+  }
+  // 數字輸入（金額、數量、天數）：等寬字對齊。
+  input[type='number'].mat-mdc-input-element {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .ui-field-group {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+  }
+  .ui-field-group > *:not(:first-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    border-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  .ui-field-group > *:not(:last-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .ui-field-group > *:not(:first-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--sketch-pen-w);
+    background: var(--app-field-border);
+    z-index: 1;
+  }
+  // 開關：膠囊軌道（規則形狀，屬於表單控制項）。
+  .mat-mdc-slide-toggle {
+    --mat-slide-toggle-track-outline-color: var(--sketch-pen);
+    --mat-slide-toggle-selected-track-outline-color: var(--sketch-ink);
+  }
+  // 分頁籤：3px 圓頭指示條（像螢光筆劃一道），下緣一條直的細分隔。
+  .mat-mdc-tab-group,
+  .mat-mdc-tab-nav-bar {
+    --mat-tab-active-indicator-height: 3px;
+    --mat-tab-active-indicator-shape: 3px;
+    --mat-tab-divider-color: color-mix(in srgb, var(--mat-sys-on-surface) 28%, transparent);
+    --mat-tab-divider-height: 1px;
+  }
+
+  // ---- 浮層：越前面筆越粗、描得越多。選單、下拉、日期選擇器是 2px 麥克筆＋再描一次；對話框 2.5px＋再描一次＋排線 ----
+  .mat-calendar,
+  .mat-datepicker-content {
+    --mat-datepicker-calendar-date-in-range-state-background-color: var(--app-calendar-range-fill);
+  }
+  .mat-datepicker-content {
+    --mat-datepicker-calendar-container-background-color: var(--sketch-card);
+    --mat-datepicker-calendar-container-text-color: var(--mat-sys-on-surface);
+    border: var(--sketch-marker-w) solid var(--sketch-ink);
+    border-radius: var(--sketch-wobble-md) !important;
+    box-shadow: var(--sketch-retrace) !important;
+  }
+  .mat-mdc-dialog-container {
+    --mat-dialog-container-color: var(--sketch-card);
+    --mat-dialog-container-shape: var(--sketch-wobble-xl);
+    --mat-dialog-subhead-color: var(--mat-sys-on-surface);
+    --mat-dialog-supporting-text-color: var(--mat-sys-on-surface);
+    --mat-dialog-subhead-size: 1.5rem;
+    --mat-dialog-subhead-weight: 700;
+  }
+  // 對話框本身的框是透明的（只佔位）；2.5px 麥克筆線與「再描一次」畫在外層的 ::after（對話框本體會捲動，
+  // 它自己的偽元素超出內框就會被裁掉），經過 --sketch-jitter 推歪。
+  .mat-mdc-dialog-surface {
+    border: var(--sketch-marker-heavy-w) solid transparent;
+    border-radius: var(--sketch-wobble-xl) !important;
+    box-shadow: none !important;
+  }
+  .mat-mdc-dialog-inner-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: var(--sketch-marker-heavy-w) solid var(--sketch-ink);
+    border-radius: var(--sketch-wobble-xl);
+    box-shadow: var(--sketch-retrace);
+    filter: var(--sketch-jitter);
+    pointer-events: none;
+  }
+  // 鉛筆排線：畫在對話框外層（跟著開啟時的淡入），裁成右下的 L 形，只露在對話框外側，永遠不在文字下面。
+  .mat-mdc-dialog-inner-container {
+    position: relative;
+  }
+  .mat-mdc-dialog-inner-container::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: var(--sketch-hatch-offset) calc(-1 * var(--sketch-hatch-offset)) calc(-1 * var(--sketch-hatch-offset))
+      var(--sketch-hatch-offset);
+    border-radius: var(--sketch-wobble-xl);
+    background: var(--sketch-hatch);
+    clip-path: polygon(
+      calc(100% - var(--sketch-hatch-offset)) 0,
+      100% 0,
+      100% 100%,
+      0 100%,
+      0 calc(100% - var(--sketch-hatch-offset)),
+      calc(100% - var(--sketch-hatch-offset)) calc(100% - var(--sketch-hatch-offset))
+    );
+    pointer-events: none;
+  }
+  .mat-mdc-dialog-title {
+    border-bottom: var(--sketch-rule);
+  }
+  .mat-mdc-dialog-actions {
+    border-top: var(--sketch-rule);
+  }
+  // 說明段落與下方欄位之間留白，浮動標籤（outlined 欄位的標籤浮在上框線上）才不會壓到說明文字。
+  .mat-mdc-dialog-content > p {
+    margin: 0 0 16px;
+  }
+  .mat-mdc-menu-panel,
+  .mat-mdc-select-panel,
+  .mat-mdc-autocomplete-panel {
+    --mat-menu-container-color: var(--sketch-card);
+    --mat-menu-container-shape: var(--sketch-wobble-md);
+    --mat-select-panel-background-color: var(--sketch-card);
+    --mat-autocomplete-background-color: var(--sketch-card);
+    border: var(--sketch-marker-w) solid var(--sketch-ink);
+    box-shadow: var(--sketch-retrace);
+  }
+  .mat-mdc-select-panel,
+  .mat-mdc-autocomplete-panel {
+    border-radius: var(--sketch-wobble-md);
+  }
+  // 展開面板：放在卡片裡；收合時是一道鋼筆線，展開時換 2px 麥克筆並再描一次（往前一層）。
+  .mat-expansion-panel {
+    --mat-expansion-container-shape: var(--mat-sys-corner-large);
+    --mat-expansion-container-background-color: var(--sketch-card);
+    border: var(--sketch-pen-w) solid var(--sketch-pen);
+    border-radius: var(--sketch-wobble-md) !important;
+    box-shadow: none;
+    transition: box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .mat-expansion-panel:not(:last-child) {
+    margin-bottom: 12px;
+  }
+  .mat-expansion-panel.mat-expanded {
+    border: var(--sketch-marker-w) solid var(--sketch-ink);
+    box-shadow: var(--sketch-retrace);
+  }
+  .mat-expansion-panel.mat-expanded > .mat-expansion-panel-header {
+    border-bottom: var(--sketch-rule);
+  }
+  .mat-mdc-snack-bar-container .mdc-snackbar__surface {
+    border-radius: var(--sketch-wobble-sm) !important;
+    box-shadow: none !important;
+  }
+
+  // ---- 表格：資料密集的表面，全部直線、清楚。外框與表頭線是 1px 文字墨，列線是 outline-variant ----
+  .mat-mdc-table {
+    background: transparent !important;
+    border: 1px solid var(--mat-sys-outline);
+  }
+  .mat-mdc-header-cell {
+    color: var(--mat-sys-on-surface);
+    border-bottom: 1px solid var(--mat-sys-on-surface);
+    font-weight: 700;
+  }
+  // Admin 的資料表是 libs/ui 的 data-table（.dt-table）：只設元件暴露的外觀變數（CONTRACT.md「--dt-*」），不覆寫屬性。
+  .dt-table {
+    --dt-frame: 1px solid var(--mat-sys-outline);
+    --dt-head-border-color: var(--mat-sys-on-surface);
+  }
+  .dt-table th {
+    font-weight: 700;
+  }
+
+  // ---- 狀態徽章：手繪的小圓框、tone 色底、粗體小字；狀態一定寫成文字，不只靠顏色 ----
+  .ui-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: var(--sketch-wobble-xs);
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.125rem;
+    white-space: nowrap;
+  }
+  .ui-chip__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+  @each $tone in positive, info, neutral, warning, danger {
+    .ui-chip--#{$tone} {
+      background: var(--app-#{$tone}-bg);
+      color: var(--app-#{$tone}-fg);
+      .ui-chip__dot {
+        background: var(--app-#{$tone}-dot);
+      }
+    }
+  }
+
+  // ---- 文字：20px 以上的標題用 Kalam 700（中文落到裝置字）；頁面大標下面一道主色的手繪底線（偽元素，在字的下方，不壓字）----
+  .ui-text-numeric {
+    font-family: var(--font-mono), var(--font-zh);
+    font-variant-numeric: tabular-nums;
+  }
+  // 大數字（36px 的 hero number）是「數字標題」：用手寫字，像白板上寫的數字。
+  .ui-text-display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1.1;
+  }
+  .topbar-heading h1,
+  .ui-text-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--mat-sys-on-surface);
+  }
+  .topbar-heading h1 {
+    width: fit-content;
+  }
+  .topbar-heading h1::after {
+    content: '';
+    position: absolute;
+    left: -0.1em;
+    right: -0.15em;
+    bottom: -0.32em;
+    height: 0.36em;
+    background: var(--mat-sys-primary);
+    mask: var(--sketch-underline-mask) 0 0 / 100% 100% no-repeat;
+    pointer-events: none;
+  }
+  // 小節標（約 17px）在手寫字的易讀下限以下：用內文字的粗體。
+  .ui-text-subtitle {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--mat-sys-on-surface);
+  }
+  .ui-text-caption {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--mat-sys-on-surface-variant);
+  }
+  .ui-card--inverse .ui-text-subtitle,
+  .ui-card--inverse .ui-text-caption {
+    color: inherit;
+  }
+
+  // ---- 高對比：點格、排線、手繪底線都是裝飾，拿掉後層次只剩筆畫粗細（抖動在 _tokens.scss 拉直）----
+  @media (prefers-contrast: more), (forced-colors: active) {
+    body {
+      background: var(--sketch-paper);
+    }
+    // 抖動的筆線改回元素自己的直框（拿掉 filter 的偽元素）。
+    .ui-card,
+    .mat-mdc-dialog-surface {
+      border-color: var(--sketch-ink);
+    }
+    .ui-card--inverse {
+      border-color: var(--mat-sys-inverse-surface);
+    }
+    .ui-card::before,
+    .mat-mdc-dialog-inner-container::before,
+    .mat-mdc-dialog-inner-container::after,
+    .topbar-heading h1::after {
+      content: none;
+    }
+  }
+}

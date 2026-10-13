@@ -75,6 +75,7 @@ const TEXTURES = [
   { id: 'cockpit', label: 'Cockpit 儀表艙' },
   { id: 'brutal', label: 'Brutal 新粗野' },
   { id: 'riso', label: 'Riso 孔版' },
+  { id: 'sketch', label: 'Sketch 手繪' },
 ];
 
 const COLOR_THEMES = [

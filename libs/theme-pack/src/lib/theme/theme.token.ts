@@ -16,6 +16,7 @@ export const texture: ThemeOption[] = [
   { id: 'cockpit', label: 'Cockpit 儀表艙' },
   { id: 'brutal', label: 'Brutal 新粗野' },
   { id: 'riso', label: 'Riso 孔版' },
+  { id: 'sketch', label: 'Sketch 手繪' },
 ];
 
 export const COLOR_THEMES: ThemeOption[] = [
@@ -81,6 +82,7 @@ export function resolveThemeId(id: string | null | undefined): string {
 // 兩套配色比照 Midnight 的相容範圍，再依美感排除（Aero 兩者都排除，OLED 另排除 Linen、Soft UI、Clay）。
 // 2026-10-13 新增 Signal 配色與 Brutal 質地（ADR 0014）：新增的格子是提案，待使用者定案。
 // 2026-10-13 新增 Riso 雙色配色與 Riso 質地（ADR 0015）：新增的格子是提案，待使用者定案。
+// 2026-10-13 新增 Sketch 質地（ADR 0016）：新增的格子是提案，待使用者定案。
 // 相容清單只存在這一處，settings 頁與之後的外觀浮動面板（ticket 03）都透過 ThemeService 讀取，不重抄清單。
 export interface TextureCompatibility {
   readonly compatibleThemeIds: readonly string[];
@@ -167,6 +169,14 @@ export const TEXTURE_COMPATIBILITY: Record<string, TextureCompatibility> = {
   riso: {
     compatibleThemeIds: ['sandstone', 'candy', 'signal', 'riso-duo'],
     defaultThemeId: 'riso-duo',
+  },
+  // ADR 0016 提案（待使用者定案）：層次靠手繪線條（筆是文字墨），只要「深色的筆畫在紙上」讀得出來即可。對比 12 格全數合格。
+  // Cool Grey、Candy 依美感排除（冷灰紙像未完成的線框稿；糖果色塊搶走墨線，同 Material 排除 Candy）；
+  // 深色配色只留 Midnight（深藍底上的淺色筆線像黑板／藍圖），Graphite、OLED 排除（炭灰配橘、純黑上的筆線像發光的 UI 邊線，
+  // 不像手繪）。預設 Sandstone：暖色筆記紙＋棕墨。
+  sketch: {
+    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'mist-ink', 'glacier-blue', 'signal', 'riso-duo'],
+    defaultThemeId: 'sandstone',
   },
 };
 
