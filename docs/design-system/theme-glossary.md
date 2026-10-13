@@ -7,7 +7,7 @@
 | recipe | 某種質地對共用 `ui-*` class 與 Material 元件的具體造型規則 | card、form、datepicker、buttons、table、status、typography |
 | 語意 token | 元件可引用的顏色或造型變數；名稱表達用途而非特定色階 | `--mat-sys-*`、`--app-*`、字體變數 |
 | 底層色階 | 配色包內部組色的私有變數，不讓元件直接使用 | 例如 `--_sage-600` |
-| 組合矩陣 | 每種質地與每種配色的笛卡兒積；只有「相容」的格子保證能正常呈現與閱讀 | 10 × 10，共 100 格；目前 70 組相容（Ledger 的 7 組、Cockpit 的 3 組與 Graphite、OLED 進入既有質地的 13 組為 2026-10-13 提案，待定案，見 ADR 0011、0012） |
+| 組合矩陣 | 每種質地與每種配色的笛卡兒積；只有「相容」的格子保證能正常呈現與閱讀 | 10 × 10，共 100 格；目前 70 組相容（Ledger 的 7 組、Cockpit 的 3 組與 Graphite、OLED 進入既有質地的 13 組於 2026-10-13 由使用者定案，見 ADR 0011、0012） |
 | 相容配色 | 某個質地允許搭配的配色清單（白名單）；不在清單內的配色不會出現在該質地的選項中。新增配色時預設不相容，需逐一加入。質地是主軸：質地選項永遠全部顯示，配色依質地過濾（見 ADR 0007） | `theme.token.ts` 的 `TEXTURE_COMPATIBILITY`（2026-09-27 定案，見 ADR 0007） |
 | 預設配色 | 每個質地指定的一個相容配色；切換質地時若目前配色不相容，或載入時已存的組合不相容，就改用它 | 同上（`defaultThemeId`）；`ThemeService` 切換與載入時自動校正 |
 | 質地準則（design guideline） | 每個質地的設計準則文件，說明該質地的造型語言與禁忌；新增頁面或元件時必須參照 | `styles/texture/<id>/design-guideline.md`，10 份齊全；模板見 `styles/texture/README.md` |

@@ -1,6 +1,6 @@
 # ADR 0011：Ledger 帳冊質地（高密度）
 
-- 狀態：已實作；相容清單為提案，待使用者定案
+- 狀態：已實作；相容清單已定案（2026-10-13，使用者核可）
 - 日期：2026-10-13
 
 ## 背景
@@ -23,11 +23,11 @@
 4. **字型：不載入任何網頁字。** 英文內文用裝置無襯線（Helvetica Neue／Segoe UI／Roboto／Arial，不放 `system-ui` 以免中文被系統字搶走），中文接 `--font-zh`；Material 元件的 `--mat-sys-*-font` 一併指向內文字（否則會是 `mat.theme()` 的 Inter）。數字與等寬用全站 `index.html` 已載入的 IBM Plex Mono：`.ui-text-numeric`、`.ui-text-display`、數字輸入；`body` 全面 `tabular-nums`。所以沒有 `_fonts.scss`。
 5. **觸控尺寸**：互動元件可見尺寸全部 ≥ 24px（WCAG 2.5.8 AA）；按鈕、圖示按鈕、勾選欄、權限矩陣格子、選單項目 32–36px，未達 44px（2.5.5 AAA），記在質地準則。觸控為主的專案不建議預設用這個質地。
 
-## 相容配色（提案，待使用者定案）
+## 相容配色（定案：2026-10-13，使用者核可）
 
 對比掃描（`contrast-report.mjs --textures=ledger`，一般文字 4.5:1、欄位／UI 邊界 3:1，每格 25 組 pair）**8 格全數合格**。第一次掃描時 Verdant、Cool Grey 不合格（資料表偶數列上的勾選框外框 2.98／2.77:1，斑馬紋讓底色變深），已在表格內就地把 `--app-field-border` 改成 `--mat-sys-on-surface-variant` 修正（只限 `.dt-table`／`.mat-mdc-table`／`.pm`）。另量了掃描腳本沒涵蓋的表格文字：表頭字對表頭底最低 4.67:1（Verdant），內文對斑馬紋最低 6.75:1（Cool Grey），勾選框對斑馬紋最低 4.95:1。
 
-| 配色 | 最低 pair（比值／門檻） | 提案 |
+| 配色 | 最低 pair（比值／門檻） | 結果 |
 | --- | --- | --- |
 | Verdant | 欄位邊界 3.26／3 | 相容 |
 | Midnight | 勾選底 3.69／3、選取文字 4.52／4.5 | 相容（深色終端機感） |
@@ -38,7 +38,7 @@
 | Mist Ink | 欄位邊界 3.94／3 | 相容 |
 | Glacier Blue | 欄位邊界 3.42／3 | 相容 |
 
-白名單已寫進 `TEXTURE_COMPATIBILITY.ledger`（逐一列出 7 個）讓展示 app 先看得到；定案以那裡為準。
+白名單已寫進 `TEXTURE_COMPATIBILITY.ledger`（逐一列出 7 個）；2026-10-13 使用者核可、照原樣定案，之後以那裡為準。
 
 ## 後果
 

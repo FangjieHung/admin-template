@@ -73,7 +73,7 @@ export function resolveThemeId(id: string | null | undefined): string {
 
 // ADR 0007：質地是主軸，每個質地宣告自己的相容配色（白名單）與一個預設配色。
 // 清單於 2026-09-27 由設計定案（ticket 09），依據是美感；56 格對比已全數合格（ticket 15）。
-// 2026-10-13 新增 Graphite、OLED 兩套深色配色與 Cockpit 質地（ADR 0012）：新增的格子是提案，待使用者定案；
+// 2026-10-13 新增 Graphite、OLED 兩套深色配色與 Cockpit 質地（ADR 0012）：新增的格子於 2026-10-13 由使用者定案；
 // 兩套配色比照 Midnight 的相容範圍，再依美感排除（Aero 兩者都排除，OLED 另排除 Linen、Soft UI、Clay）。
 // 相容清單只存在這一處，settings 頁與之後的外觀浮動面板（ticket 03）都透過 ThemeService 讀取，不重抄清單。
 export interface TextureCompatibility {
@@ -123,14 +123,14 @@ export const TEXTURE_COMPATIBILITY: Record<string, TextureCompatibility> = {
     defaultThemeId: 'glacier-blue',
   },
   // 排除 Candy（ADR 0011）：8 格對比全數合格，Candy 是依美感排除——高彩度糖果色和帳冊的冷靜數字感衝突。
-  // 2026-10-13 提案，待使用者定案。
-  // Graphite、OLED 於 2026-10-13 依 ADR 0012 提案加入（對比全數合格），待使用者定案。
+  // 2026-10-13 由使用者定案。
+  // Graphite、OLED 於 2026-10-13 依 ADR 0012 加入（對比全數合格），同日由使用者定案。
   ledger: {
     compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue', 'graphite', 'oled'],
     defaultThemeId: 'azure',
   },
   // 深色優先（ADR 0012）：層次靠發光，只相容深色配色。淺色配色即使對比合格也排除——光暈在淺底上讀不出來。
-  // 2026-10-13 提案，待使用者定案。
+  // 2026-10-13 由使用者定案。
   cockpit: {
     compatibleThemeIds: ['midnight', 'graphite', 'oled'],
     defaultThemeId: 'graphite',

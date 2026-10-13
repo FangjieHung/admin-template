@@ -1,6 +1,6 @@
 # ADR 0012：Cockpit 儀表艙質地與 Graphite、OLED 兩套深色配色
 
-- 狀態：已實作；相容清單為提案，待使用者定案
+- 狀態：已實作；相容清單已定案（2026-10-13，使用者核可）
 - 日期：2026-10-13
 
 ## 背景
@@ -23,13 +23,13 @@
 7. **兩套深色配色的 token 範圍**：Midnight 有的全部（`--mat-sys-*` 顏色、`--app-*` 狀態／圖表／側欄／topbar／日曆範圍色、`--app-shadow-tint`、`--app-scrim`、`color-scheme: dark`），再加上 Midnight 沒蓋、但建置產物裡真的有元件引用的 `mat.theme()` 缺口。抽取方法：production build 後取 `styles-*.css` 的 `html{…}` 裡所有 `--mat-sys-*`（顏色 49 個），再到主樣式其餘部分、所有 JS chunk、所有 `texture-*.css` 找 `var(--mat-sys-x)`。有引用而 Midnight 沒蓋的有 5 個：`inverse-primary`（提示訊息的動作鈕）、`on-background`、`tertiary-container`、`neutral10`（下拉選單停用選項文字的基底）、`neutral-variant20`（側欄遮罩）。這 5 個加上 `tertiary`／`on-tertiary`／`on-tertiary-container` 寫進兩套配色；fixed 系列、`surface-dim/bright/tint`、`shadow`、`scrim` 等沒有任何元件引用的不寫（每個 token 都算進常駐的初始 bundle）。`mat.theme()` 輸出的是 `light-dark(淺, 深)`，沒蓋到的 token 會露出綠色調色盤的深色值，所以新元件開始引用某個沒蓋的 token 時要補上。
 8. **測試**：新增 `scripts/dark-palette.spec.mjs`，直接讀兩套配色的色碼，檢查 `color-scheme: dark` 與上述 5 個缺口、文字 4.5:1 與欄位邊界／主色 3:1（對畫布與每一階表面）、成對前景／底色 4.5:1、主色對每個狀態色與狀態色彼此的 CIEDE2000 ≥ 20、圖表 4 色彼此 ≥ 20 且對表面 ≥ 3:1。
 
-## 相容配色（提案，待使用者定案）
+## 相容配色（定案：2026-10-13，使用者核可）
 
 對比掃描（`contrast-report.mjs`，一般文字 4.5:1、欄位／UI 邊界 3:1，每格 25 組 pair）：Cockpit × 10 套配色、Graphite／OLED × 10 個質地，共 28 格（Cockpit × Graphite／OLED 重疊），**只有 Cockpit × Cool Grey 不合格**（欄位邊界 2.83:1，本來就排除）。
 
 **Cockpit × 每套配色**
 
-| 配色 | 最低 pair（比值／門檻） | 提案 |
+| 配色 | 最低 pair（比值／門檻） | 結果 |
 | --- | --- | --- |
 | Midnight | 資訊徽章 4.52／4.5、選取文字 4.52／4.5 | 相容 |
 | Graphite | 欄位邊界 3.24／3 | 相容，**預設** |
@@ -39,7 +39,7 @@
 
 **Graphite／OLED × 每個質地**（20 格全數合格）
 
-| 質地 | Graphite 最低 | OLED 最低 | 提案 |
+| 質地 | Graphite 最低 | OLED 最低 | 結果 |
 | --- | --- | --- | --- |
 | Material | 欄位邊界 4.55 | 欄位邊界 4.24 | 兩者相容 |
 | Linen | 4.55 | 4.24 | Graphite 相容；**OLED 排除**（紙張色階在純黑上幾乎沒有差，紙感消失） |
@@ -52,7 +52,7 @@
 | Ledger | 4.55 | 4.24 | 兩者相容 |
 | Cockpit | 3.24 | 3.52 | 兩者相容 |
 
-除了 Aero、OLED 另排除的三個，比照 Midnight 現有的相容範圍；Clay 原本只相容 Midnight、Cool Grey，這次多加 Graphite（暖灰上的黏土光影成立）。白名單已寫進 `TEXTURE_COMPATIBILITY`（逐一列出）讓展示 app 先看得到；定案以那裡為準。
+除了 Aero、OLED 另排除的三個，比照 Midnight 現有的相容範圍；Clay 原本只相容 Midnight、Cool Grey，這次多加 Graphite（暖灰上的黏土光影成立）。白名單已寫進 `TEXTURE_COMPATIBILITY`（逐一列出）；2026-10-13 使用者核可、照原樣定案，之後以那裡為準。
 
 ## 後果
 
