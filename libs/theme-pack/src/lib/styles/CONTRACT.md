@@ -83,11 +83,11 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 | 變數 | 預設（層 1） | 用途 | 目前狀態 |
 | --- | --- | --- | --- |
 | `--app-focus-ring` | `var(--mat-sys-primary)` | 焦點框顏色 | 已套用（全站 25 處） |
-| `--app-focus-ring-width` / `-offset` | `2px` / `2px` | 焦點框粗細／距離；各處現值不同時就地覆寫 | 已套用（clay 的 3px 只寫在 clay 自己的按鈕／輸入框規則內） |
+| `--app-focus-ring-width` / `-offset` | `2px` / `2px` | 焦點框粗細／距離；各處現值不同時就地覆寫 | 已套用（clay 的 3px 只寫在 clay 自己的按鈕／輸入框規則內；brutal 整個質地 3px，寫在質地層） |
 | `--app-border-emphasis` | `color-mix(in srgb, var(--mat-sys-outline-variant) 35%, transparent)` | 強調邊框／分隔線 | 已套用（linen；grid 的裝飾格線因公式形狀不同未收編，見 ADR 0008） |
-| `--app-field-border` | `var(--mat-sys-outline)`（Verdant 配色層：`color-mix(in srgb, var(--mat-sys-on-surface-variant) 68%, var(--mat-sys-outline))`） | 輸入欄位的可見邊界色，對欄位外側底色 ≥ 3:1（WCAG 1.4.11） | 已套用：material／linen 的 1px 底線、grid／editorial／frosted 的邊框、soft-ui／clay 與 page-toolbar 搜尋膠囊的 1px inset 細框、outlined 欄位外框（`component.scss`）；錯誤改 `--mat-sys-error`、停用改 `--app-disabled-bg`（`component.scss` 就地覆寫）；`lint:theme` 擋欄位邊框用其他顏色 |
+| `--app-field-border` | `var(--mat-sys-outline)`（Verdant 配色層：`color-mix(in srgb, var(--mat-sys-on-surface-variant) 68%, var(--mat-sys-outline))`） | 輸入欄位的可見邊界色，對欄位外側底色 ≥ 3:1（WCAG 1.4.11） | 已套用：material／linen 的 1px 底線、grid／editorial／frosted 的邊框、soft-ui／clay 與 page-toolbar 搜尋膠囊的 1px inset 細框、outlined 欄位外框（`component.scss`）；錯誤改 `--mat-sys-error`、停用改 `--app-disabled-bg`（`component.scss` 就地覆寫）；brutal 在 Material 欄位與勾選控制項本身就地覆寫成墨色 `--mat-sys-on-surface`（欄位放在飽和色塊上時配色層的值會掉到 3:1 以下，ADR 0014）；`lint:theme` 擋欄位邊框用其他顏色 |
 | （原生勾選框／單選鈕） | — | `input[type=checkbox\|radio]` 的外觀（第四批，`styles/_choice-controls.scss`，`appearance: none` 保留原生 input） | 未勾選外框 `--app-field-border`、底 `--mat-sys-surface`；滑過外框 `--mat-sys-on-surface`；勾選／半選底與外框 `--mat-sys-primary`、勾號／橫線／圓點 `--mat-sys-on-primary`；焦點 `--app-focus-ring`（`-width`／`-offset`）；錯誤外框 `--mat-sys-error`（`aria-invalid` 或 `ng-invalid.ng-touched`）；停用 `--app-disabled-fg`、勾號 `--mat-sys-surface`。尺寸 ≥ 18px、圓角 `min(4px, var(--mat-sys-corner-small))`（單選鈕 50%）；`forced-colors` 時退回原生外觀。mat-checkbox／mat-radio 的 MDC 顏色 token 指向同一組變數。soft-ui／clay 只在質地 recipe 加小內凹陰影。`lint:theme` 擋寫死顏色 |
-| `--app-state-hover` / `-pressed` / `-selected` | `color-mix(in srgb, var(--mat-sys-on-surface) 8%/12%/16%, transparent)` | 滑過／按下／選取的底色疊加 | hover：soft-ui、frosted；pressed：卡片分頁標籤按下、可點表格列按下（疊在 hover 底上）；selected：卡片分頁標籤目前項目（`app.scss`） |
+| `--app-state-hover` / `-pressed` / `-selected` | `color-mix(in srgb, var(--mat-sys-on-surface) 8%/12%/16%, transparent)` | 滑過／按下／選取的底色疊加 | hover：soft-ui、frosted；pressed：卡片分頁標籤按下、可點表格列按下（疊在 hover 底上）；selected：卡片分頁標籤目前項目（`app.scss`）；brutal 在質地層把 selected 改成實心的 `--mat-sys-primary-container` 色塊 |
 | `--app-shadow-tint` | `var(--mat-sys-on-surface)` | Material 陰影色調 | 已套用（material 質地的 `--mat-sys-level*`）；Midnight 配色層改近黑，`_combos.scss` 放大 material × midnight 的透明度 |
 | `--app-shell-hairline` / `-scrollbar` / `-hover` / `-subtle` | `color-mix(in srgb, var(--app-shell-on) 16%/24%/12%/8%, transparent)` | 深色側欄的細線、捲軸、滑過、淡底 | 已套用（`side-nav.component.scss`）；editorial 7%、frosted 9% 在質地層覆寫 `-hover` |
 | `--app-scrim` / `-blur` | `color-mix(in srgb, var(--mat-sys-inverse-surface) 45%, transparent)` / `0px` | 對話框、抽屜背後的遮罩 | 已套用（CDK `.cdk-overlay-dark-backdrop`、`libs/ui` responsive-panel 背板）；Midnight 改近黑 45%；frosted 霧化 6px（減少透明度時 0） |
@@ -96,7 +96,7 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 | `--app-disabled-fg` / `-bg` / `-opacity` | on-surface 38% / 12% / `0.38` | 停用狀態 | fg／bg 已套用（soft-ui、clay、frosted、editorial 的按鈕與膠囊）；material 等維持 Material 原生；`-opacity` 未使用 |
 | `--app-selection-bg` / `-fg` | `var(--mat-sys-primary-container)` / `var(--mat-sys-on-primary-container)` | 選取文字 | 已套用（`component.scss` 全域 `::selection`；深色側欄內改 shell-on 28% 底＋shell-on 字） |
 | `--app-skeleton-bg` / `-shine` / `-radius` / `-duration` | on-surface 8% / surface 60% / `var(--mat-sys-corner-small)` / `calc(var(--app-motion-loop) / 5)`（1.6s） | 載入骨架的色塊底色、閃光亮帶、圓角、閃光循環時長 | 已套用（`libs/ui` 的 `lib-skeleton`、`lib-data-table` 的載入列，共用 `feedback-state/_skeleton-block.scss`）；圓角跟著質地的 corner-small，目前沒有質地需要覆寫；Cockpit 在質地層把閃光改成 primary 12% 的掃描光；`prefers-reduced-motion` 時 loop 歸零，元件另寫 `animation: none` 停成純底色 |
-| `--app-empty-bg` / `-frame` / `-shadow` | `transparent` / `0 solid transparent` / `none` | 空狀態與錯誤狀態（`lib-empty-state`、`lib-error-state`）的外框：底色、框線（border 簡寫）、陰影 | 已套用；質地層覆寫：Linen 底色 `--mat-sys-surface-container-low`、Grid 框線 `1px dashed var(--mat-sys-outline-variant)`、Soft UI 陰影 `var(--soft-inset-small)`（各準則「空狀態」）；其餘質地維持「卡片內置中、不加色塊或框」 |
+| `--app-empty-bg` / `-frame` / `-shadow` | `transparent` / `0 solid transparent` / `none` | 空狀態與錯誤狀態（`lib-empty-state`、`lib-error-state`）的外框：底色、框線（border 簡寫）、陰影 | 已套用；質地層覆寫：Linen 底色 `--mat-sys-surface-container-low`、Grid 框線 `1px dashed var(--mat-sys-outline-variant)`、Soft UI 陰影 `var(--soft-inset-small)`、Brutal 底色 `--mat-sys-surface-container-low`＋框線 `2px dashed var(--mat-sys-on-surface)`（各準則「空狀態」）；其餘質地維持「卡片內置中、不加色塊或框」 |
 | `--app-z-sticky` / `--app-z-drawer` / `--app-z-floating` | `20` / `101` / `500` | 跨元件圖層順序（值不變） | 已套用（`responsive-panel`、`floating-appearance-panel`；`--app-z-sticky` 給頁內釘底的列）；CDK overlay 的 `1000` 只記錄於註解 |
 
 第二批（2026-09-27，會改變畫面）的決定與改前／改後對照見 ADR 0008「第二批」一節。
@@ -110,13 +110,13 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 
 | 變數 | 預設 | 用途 | 目前設定的質地 |
 | --- | --- | --- | --- |
-| `--dt-frame` | `0 solid`（無外框） | 表格外框（border 簡寫） | Grid：`1px solid var(--mat-sys-outline)` |
-| `--dt-head-border-color` | `var(--mat-sys-outline-variant)` | 表頭與內容的分隔線顏色 | Cockpit：`var(--cockpit-edge-strong)`；Ledger：`var(--mat-sys-outline)`（Grid 準則寫的 outline 加強從未生效，維持現狀，見 Grid 準則） |
+| `--dt-frame` | `0 solid`（無外框） | 表格外框（border 簡寫） | Grid：`1px solid var(--mat-sys-outline)`；Brutal：`2px solid var(--mat-sys-on-surface)` |
+| `--dt-head-border-color` | `var(--mat-sys-outline-variant)` | 表頭與內容的分隔線顏色 | Brutal：`var(--mat-sys-on-surface)`；Cockpit：`var(--cockpit-edge-strong)`；Ledger：`var(--mat-sys-outline)`（Grid 準則寫的 outline 加強從未生效，維持現狀，見 Grid 準則） |
 | `--dt-row-border-color` | `var(--mat-sys-outline-variant)` | 列與列之間的分隔線（手機卡片版的下緣也吃它） | Soft UI：`color-mix(in srgb, var(--mat-sys-outline) 22%, transparent)`；Ledger：`var(--mat-sys-outline-variant)` |
 | `--dt-col-divider` | `0 solid`（無欄線） | 欄線（儲存格右側 border 簡寫，最後一欄永遠沒有） | Grid：`1px solid var(--mat-sys-outline-variant)` |
 | `--dt-cell-padding-block` | `0.75rem`（手機卡片版 `0.3125rem`） | 儲存格上下留白，決定列高 | Soft UI `1rem`、Frosted `1.0625rem`、Clay `1.125rem`、Ledger `0.375rem`（手機卡片版一樣吃這個值） |
-| `--dt-header-bg` | `transparent` | 表頭列底色 | Ledger：on-surface 9% 混進 surface；Cockpit：`var(--mat-sys-surface-container)` |
-| `--dt-row-hover-bg` | `var(--mat-sys-surface-container-high)` | 可點列滑過／按下的底色（按下另疊 `--app-state-pressed`） | Ledger：primary 8% 混進 surface；Cockpit：primary 10% 混進 surface |
+| `--dt-header-bg` | `transparent` | 表頭列底色 | Ledger：on-surface 9% 混進 surface；Cockpit：`var(--mat-sys-surface-container)`；Brutal：`var(--mat-sys-primary-container)` |
+| `--dt-row-hover-bg` | `var(--mat-sys-surface-container-high)` | 可點列滑過／按下的底色（按下另疊 `--app-state-pressed`） | Ledger：primary 8% 混進 surface；Cockpit：primary 10% 混進 surface；Brutal：`var(--mat-sys-secondary-container)` |
 | `--dt-font-size` | `0.875rem` | 表格字級 | Ledger `0.8125rem`（13px） |
 | `--dt-cell-padding-inline` | `1rem` | 儲存格左右留白（勾選欄另計） | Ledger `0.625rem` |
 | `--dt-row-stripe-bg` | `transparent` | 斑馬紋：偶數列疊一層的底色（畫成 background-image，疊在滑過、提醒列的底色之上；按下時拿掉；固定欄捲動時一樣疊上；手機卡片版不畫） | Ledger：on-surface 6% |

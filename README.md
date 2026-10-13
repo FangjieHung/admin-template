@@ -3,7 +3,7 @@
 可以整個複製的 Angular 後台元件範本。不含任何業務邏輯：只有一組做好、寫好文件、會跟著主題變化的元件，以及一個把每個元件各種狀態排出來的**展示 app**。
 
 - `libs/ui`：通用元件（資料表、頁首工具列、進階篩選、已儲存檢視、雙月日期區間、響應式側板、狀態標籤、確認對話框、簽名板、語言切換、捲動陰影）。
-- `libs/theme-pack`：「質地 × 配色」雙軸主題（10 種質地、10 套配色）、外觀浮動面板、`ui-*` class 契約。
+- `libs/theme-pack`：「質地 × 配色」雙軸主題（11 種質地、11 套配色）、外觀浮動面板、`ui-*` class 契約。
 - `libs/access`：通用的權限層（功能 × 動作、預設與自訂角色、路由守門、依權限隱藏或停用按鈕、權限矩陣編輯器、示範用的「切換身分」）。不依賴 `libs/ui`。
 - `apps/admin`：展示 app。殼層（側欄、頁首、頁尾、外觀面板、設定頁）＋每個元件一頁（`/components/<id>`），首頁列出全部元件與規劃中的項目。
 - `libs/assets`：共用的 Tailwind 基準與 favicon。
@@ -77,7 +77,7 @@ npm start          # nx serve admin → http://localhost:4200/
 
 ## 雙軸主題系統
 
-**質地**管造型（圓角、陰影、字體、背景紋理、元件 recipe），**配色**管顏色；兩者各自切換。目前有 Material、Linen、Grid、Soft UI、Clay、Editorial、Frosted、Aero、Ledger、Cockpit 十種質地（Ledger 是高密度質地：視覺密度屬於質地，不另設切換軸，ADR 0011；Cockpit 是深色優先的儀表艙質地，層次靠發光，只相容深色配色，ADR 0012），Verdant、Midnight、Sandstone、Azure、Cool Grey、Candy、Mist Ink、Glacier Blue、Graphite、OLED 十套配色（Midnight、Graphite、OLED 是深色）。每個質地只開放相容的配色，清單只存在 `libs/theme-pack/src/lib/theme/theme.token.ts` 的 `TEXTURE_COMPATIBILITY`（ADR 0007）。
+**質地**管造型（圓角、陰影、字體、背景紋理、元件 recipe），**配色**管顏色；兩者各自切換。目前有 Material、Linen、Grid、Soft UI、Clay、Editorial、Frosted、Aero、Ledger、Cockpit、Brutal 十一種質地（Ledger 是高密度質地：視覺密度屬於質地，不另設切換軸，ADR 0011；Cockpit 是深色優先的儀表艙質地，層次靠發光，只相容深色配色，ADR 0012；Brutal 是新粗野海報質地，層次靠飽和色塊＋粗墨框，ADR 0014），Verdant、Midnight、Sandstone、Azure、Cool Grey、Candy、Mist Ink、Glacier Blue、Graphite、OLED、Signal 十一套配色（Midnight、Graphite、OLED 是深色；Signal 是高彩度的訊號色）。每個質地只開放相容的配色，清單只存在 `libs/theme-pack/src/lib/theme/theme.token.ts` 的 `TEXTURE_COMPATIBILITY`（ADR 0007）。
 
 - Material 是常駐質地，其餘質地是按需質地：各自編成 `texture-<id>.css`，切換時才下載（ADR 0010）。配色同理：Verdant 常駐，其餘配色各自編成 `color-<id>.css`（ADR 0013）。
 - 字型：專案不提供字型檔；中文一律用裝置的系統字，英文網頁字只在風格明顯不同時才從 Google Fonts 載入（CONTRACT.md「字體」）。
