@@ -91,4 +91,12 @@ export const routes: Routes = [
         (m) => m.CommissionPageComponent,
       ),
   },
+  // 清單元件示範（中性假資料，不在側欄）：之後若改由元件展示 app 承接，連同 features/component-demo 一起刪除。
+  {
+    path: 'dev/data-table',
+    loadComponent: () =>
+      import('./features/component-demo/data-table-demo-page.component').then(
+        (m) => m.DataTableDemoPageComponent,
+      ),
+  },
 ];

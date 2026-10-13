@@ -1,0 +1,15 @@
+// 表格上方：檢視切換器與已套用的篩選條件同一列，空間不夠時換行。
+.demo-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+// 寬表：讓 1440 的桌機也能看到橫向捲動與固定欄（手機卡片版不設，否則卡片會被撐寬）。
+@media (min-width: 641px) {
+  :host ::ng-deep .dt-table {
+    min-width: 82rem;
+  }
+}

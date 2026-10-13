@@ -13,4 +13,7 @@ export const ADMIN_DATA_TABLE_LABELS: DataTableLabels = {
   expandRow: ZH_TW.common.expandRow,
   collapseRow: ZH_TW.common.collapseRow,
   exportFailedText: ZH_TW.common.exportFailedText,
+  // 只有開了 [pageable]／[columnChooser] 的表格才會用到。
+  paging: ZH_TW.listView.paging,
+  columnChooser: ZH_TW.listView.columnChooser,
 };

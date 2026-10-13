@@ -179,6 +179,10 @@
     --mat-table-row-item-container-height: 52px;
     --mat-table-header-container-height: 48px;
   }
+  // libs/ui data-table 的固定欄：橫向捲動時要蓋住底下捲過去的欄，底色要跟本質地的卡片（surface-container-low）一樣。
+  .dt-table {
+    --dt-frozen-bg: var(--mat-sys-surface-container-low);
+  }
   // 表頭：小字 caption 樣式＋下方一條深色強調線；資料列之間 1px 髮絲線，不加欄線。
   .mat-mdc-header-row {
     border-bottom: 2px solid var(--mat-sys-on-surface) !important;

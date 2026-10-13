@@ -233,6 +233,8 @@
   .dt-table {
     --dt-cell-padding-block: 1rem;
     --dt-row-border-color: color-mix(in srgb, var(--mat-sys-outline) 22%, transparent);
+    // 固定欄在橫向捲動時的底色＝本質地的卡片底色（與畫布同色）。
+    --dt-frozen-bg: var(--mat-sys-background);
   }
   .mat-mdc-snack-bar-container .mdc-snackbar__surface {
     border-radius: var(--mat-sys-corner-medium) !important;
