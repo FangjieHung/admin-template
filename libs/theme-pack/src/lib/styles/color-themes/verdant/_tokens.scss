@@ -77,6 +77,14 @@
   --app-viz-3: var(--_teal-300);
   --app-viz-4: var(--_cream-300);
 
+  // 圖表類別色（ADR 0017）：1 是主色（鼠尾草綠），2 鏽橘、3 靛紫和它拉開色相與明度；4–6 青藍、玫瑰、橄欖。
+  --app-chart-1: var(--_sage-600);
+  --app-chart-2: #ac430e;
+  --app-chart-3: #4f459f;
+  --app-chart-4: #1488a2;
+  --app-chart-5: #ba5277;
+  --app-chart-6: #745e01;
+
   // app 側欄擴充色（M3 無「常駐深色導覽軌」token；保留 Verdant 招牌深色側欄外觀）
   --app-shell-bg: var(--_teal-900); /* 深色側欄背景（原 teal-900） */
   --app-shell-on: #ffffff; /* 側欄主要文字/nav（原 #fff） */

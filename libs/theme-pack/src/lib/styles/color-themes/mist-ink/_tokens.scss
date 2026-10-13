@@ -54,6 +54,14 @@
   --app-viz-3: #397196;
   --app-viz-4: #4a7e4c;
 
+  // 圖表類別色（ADR 0017）：低彩度墨色：1 灰藍，2 黃土、3 墨黑（主色）；前 3 色靠明度分開。4–6 墨綠、褪紅、灰紫。
+  --app-chart-1: #3d5a80;
+  --app-chart-2: #a67628;
+  --app-chart-3: #2b2b30;
+  --app-chart-4: #2b6339;
+  --app-chart-5: #a55159;
+  --app-chart-6: #623b6b;
+
   --app-shell-bg: var(--_paper);
   --app-shell-on: var(--_ink);
   --app-shell-on-muted: var(--_muted);

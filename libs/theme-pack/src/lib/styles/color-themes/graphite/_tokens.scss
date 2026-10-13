@@ -82,6 +82,14 @@
   --app-viz-3: #b58ef2;
   --app-viz-4: #a59e92;
 
+  // 圖表類別色（ADR 0017）：深色：1 主色琥珀橘，2 天藍、3 淺青；4–6 淡紫、檸檬黃、珊瑚紅。
+  --app-chart-1: #ff9a3c;
+  --app-chart-2: #2ea2e5;
+  --app-chart-3: #6ae5e0;
+  --app-chart-4: #df9bfc;
+  --app-chart-5: #e7e64b;
+  --app-chart-6: #e66d75;
+
   // 側欄：比畫布更深的石墨
   --app-shell-bg: var(--_g-950);
   --app-shell-on: var(--_g-100);

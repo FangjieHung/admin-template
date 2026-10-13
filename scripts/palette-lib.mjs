@@ -75,3 +75,38 @@ export function deltaE2000(c1, c2) {
   const Rt = -Math.sin(2 * dTh * rad) * Rc;
   return Math.sqrt((dL / Sl) ** 2 + (dC / Sc) ** 2 + (dH / Sh) ** 2 + Rt * (dC / Sc) * (dH / Sh));
 }
+
+// 色盲模擬（Machado, Oliveira & Fernandes 2009，嚴重度 1.0 的二色視），在線性 sRGB 上套矩陣。
+// chart-palette.spec.mjs 用它檢查前 3 個圖表類別色在紅色盲、綠色盲、藍色盲眼中也分得開（ADR 0017）。
+const CVD_MATRICES = {
+  protan: [
+    [0.152286, 1.052583, -0.204868],
+    [0.114503, 0.786281, 0.099216],
+    [-0.003882, -0.048116, 1.051998],
+  ],
+  deutan: [
+    [0.367322, 0.860646, -0.227968],
+    [0.280085, 0.672501, 0.047413],
+    [-0.01182, 0.04294, 0.968881],
+  ],
+  tritan: [
+    [1.255528, -0.076749, -0.178779],
+    [-0.078411, 0.930809, 0.147602],
+    [0.004733, 0.691367, 0.3039],
+  ],
+};
+export const CVD_KINDS = Object.keys(CVD_MATRICES);
+
+/** 把 {r,g,b}（0–255）換成某種二色視看到的顏色。 */
+export function simulateCvd({ r, g, b }, kind) {
+  const m = CVD_MATRICES[kind];
+  if (!m) throw new Error(`不認得的色盲類型：${kind}`);
+  const lin = (u) => (u <= 0.04045 ? u / 12.92 : ((u + 0.055) / 1.055) ** 2.4);
+  const gam = (u) => (u <= 0.0031308 ? 12.92 * u : 1.055 * u ** (1 / 2.4) - 0.055);
+  const v = [r, g, b].map((c) => lin(c / 255));
+  const [R, G, B] = m.map((row) => {
+    const x = row[0] * v[0] + row[1] * v[1] + row[2] * v[2];
+    return Math.round(gam(Math.min(1, Math.max(0, x))) * 255);
+  });
+  return { r: R, g: G, b: B };
+}

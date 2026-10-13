@@ -53,7 +53,8 @@
 | 用途         | Token                                                      |
 | ------------ | ---------------------------------------------------------- |
 | 狀態 tone    | `--app-{positive,info,neutral,warning,danger}-{bg,fg,dot}` |
-| 圖表／時間軸 | `--app-viz-1` … `--app-viz-4`                              |
+| 圖表         | `--app-chart-1` … `--app-chart-6`（類別色）、`--app-chart-grid`、`--app-chart-axis`、`--app-chart-positive`、`--app-chart-negative`（見下方「圖表」與 ADR 0017） |
+| 舊的視覺化色 | `--app-viz-1` … `--app-viz-4`（沒有元件使用；Frosted 背景光暈讀 `-2`。新圖表用 `--app-chart-*`） |
 | 深色側欄     | `--app-shell-bg`、`--app-shell-on`、`--app-shell-on-muted` |
 | 日曆範圍底色 | `--app-calendar-range-fill`                                |
 
@@ -98,6 +99,10 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 | `--app-skeleton-bg` / `-shine` / `-radius` / `-duration` | on-surface 8% / surface 60% / `var(--mat-sys-corner-small)` / `calc(var(--app-motion-loop) / 5)`（1.6s） | 載入骨架的色塊底色、閃光亮帶、圓角、閃光循環時長 | 已套用（`libs/ui` 的 `lib-skeleton`、`lib-data-table` 的載入列，共用 `feedback-state/_skeleton-block.scss`）；圓角跟著質地的 corner-small，目前沒有質地需要覆寫；Cockpit 在質地層把閃光改成 primary 12% 的掃描光；`prefers-reduced-motion` 時 loop 歸零，元件另寫 `animation: none` 停成純底色 |
 | `--app-empty-bg` / `-frame` / `-shadow` | `transparent` / `0 solid transparent` / `none` | 空狀態與錯誤狀態（`lib-empty-state`、`lib-error-state`）的外框：底色、框線（border 簡寫）、陰影 | 已套用；質地層覆寫：Linen 底色 `--mat-sys-surface-container-low`、Grid 框線 `1px dashed var(--mat-sys-outline-variant)`、Soft UI 陰影 `var(--soft-inset-small)`、Brutal 底色 `--mat-sys-surface-container-low`＋框線 `2px dashed var(--mat-sys-on-surface)`、Riso 底色 `--mat-sys-surface`＋框線 `1.5px dashed var(--mat-sys-primary)`、Sketch 底色 `--mat-sys-surface`＋框線 1.5px 文字墨 80% 虛線（各準則「空狀態」）；其餘質地維持「卡片內置中、不加色塊或框」 |
 | `--app-z-sticky` / `--app-z-drawer` / `--app-z-floating` | `20` / `101` / `500` | 跨元件圖層順序（值不變） | 已套用（`responsive-panel`、`floating-appearance-panel`；`--app-z-sticky` 給頁內釘底的列）；CDK overlay 的 `1000` 只記錄於註解 |
+
+| `--app-chart-1` … `-6` | primary、secondary、tertiary、`--app-info-dot`、`--app-warning-dot`、`--app-danger-dot`（退路；12 套配色都在配色層覆寫成色碼） | 圖表類別色：系列依序取用 | 已套用（`libs/ui` 的 stat-card、line／bar／donut-chart）；規則：對 surface／background／surface-container-low ≥ 3:1、兩兩 CIEDE2000 ≥ 15、前 3 色在三種色盲模擬下 ΔE ≥ 10（`scripts/chart-palette.spec.mjs`，ADR 0017）；只在配色層定義 |
+| `--app-chart-grid` / `-axis` | `var(--mat-sys-outline-variant)` / `var(--mat-sys-on-surface-variant)` | 格線（裝飾）／軸文字、刻度值、圖例文字（4.5:1） | 已套用；質地要換格線樣式時設 `--lib-chart-*`（見下方「圖表」），不覆寫這兩個變數 |
+| `--app-chart-positive` / `-negative` | `var(--app-positive-fg)` / `var(--app-danger-fg)` | 數字小卡的「變好／變差」（文字 4.5:1；`positiveIsGood=false` 時上升算變差） | 已套用（`lib-stat-card`） |
 
 第二批（2026-09-27，會改變畫面）的決定與改前／改後對照見 ADR 0008「第二批」一節。
 另外：圓角一律用 `--mat-sys-corner-*`（`999px` 膠囊、`50%` 圓形、`0` 除外）；轉場與關鍵影格動畫時長一律用 `--app-motion-*`。

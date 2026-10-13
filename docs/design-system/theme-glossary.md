@@ -4,6 +4,7 @@
 | --- | --- | --- |
 | 質地（texture / paradigm） | 與配色分離的造型軸，控制圓角、陰影、字體、背景紋理及元件 recipe | `data-paradigm`、`styles/texture/*`；Material、Linen、Grid、Soft UI、Clay、Editorial、Frosted、Aero、Ledger、Cockpit、Brutal、Riso、Sketch |
 | 配色（color-theme） | 與質地分離的色彩軸，提供語意化的介面色、狀態色和圖表色 | `data-theme`、`styles/color-themes/*`；Verdant、Midnight、Sandstone、Azure、Cool Grey、Candy、Mist Ink、Glacier Blue、Graphite、OLED、Signal、Riso 雙色（Midnight、Graphite、OLED 為深色配色；Signal 為高彩度淺色配色；Riso 雙色為兩種孔版特別色的淺色配色） |
+| 圖表色 | 配色軸提供的圖表類別色（6 色）與格線、軸文字、漲跌色；圖表元件依系列順序取用，質地只換線寬、點大小、長條圓角等造型 | `--app-chart-1…6`（每套配色的 `_tokens.scss`）、`--app-chart-grid`／`-axis`／`-positive`／`-negative`（`_semantic.scss`）；門檻：對卡片底色 ≥ 3:1、兩兩 CIEDE2000 ≥ 15、前 3 色色盲模擬後仍分得開，第 4 色起由線型與點標記補足（ADR 0017） |
 | recipe | 某種質地對共用 `ui-*` class 與 Material 元件的具體造型規則 | card、form、datepicker、buttons、table、status、typography |
 | 語意 token | 元件可引用的顏色或造型變數；名稱表達用途而非特定色階 | `--mat-sys-*`、`--app-*`、字體變數 |
 | 底層色階 | 配色包內部組色的私有變數，不讓元件直接使用 | 例如 `--_sage-600` |

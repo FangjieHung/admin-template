@@ -101,6 +101,21 @@
   // 第二批套用：component.scss 的全域 ::selection（深色側欄內另用 shell 色）。
   --app-selection-bg: var(--mat-sys-primary-container);
   --app-selection-fg: var(--mat-sys-on-primary-container);
+
+  // ---- 圖表（2026-10-14，ADR 0017）----
+  // 類別色 1–6：折線、長條、圓環依序取用。12 套配色都在自己的 _tokens.scss 覆寫成實際色碼
+  // （對卡片表面 ≥ 3:1、兩兩 CIEDE2000 ≥ 15、前 3 色在色盲模擬下也分得開，scripts/chart-palette.spec.mjs 檢查）；
+  // 這裡的預設只是新配色還沒調色時的退路。格線、軸文字、漲跌色接既有的語意 token，配色不必另外調。
+  --app-chart-1: var(--mat-sys-primary);
+  --app-chart-2: var(--mat-sys-secondary);
+  --app-chart-3: var(--mat-sys-tertiary);
+  --app-chart-4: var(--app-info-dot);
+  --app-chart-5: var(--app-warning-dot);
+  --app-chart-6: var(--app-danger-dot);
+  --app-chart-grid: var(--mat-sys-outline-variant); // 格線：裝飾，不需要 3:1
+  --app-chart-axis: var(--mat-sys-on-surface-variant); // 軸文字、刻度值：一般文字 4.5:1
+  --app-chart-positive: var(--app-positive-fg); // 數字小卡的「變好」（文字 4.5:1）
+  --app-chart-negative: var(--app-danger-fg); // 數字小卡的「變差」
 }
 
 @media (prefers-reduced-motion: reduce) {

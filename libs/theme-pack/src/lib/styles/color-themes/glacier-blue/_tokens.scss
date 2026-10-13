@@ -55,6 +55,14 @@
   --app-viz-3: #3f8376;
   --app-viz-4: #92749c;
 
+  // 圖表類別色（ADR 0017）：1 主色灰藍，2 琥珀、3 灰青；4–6 灰紫、酒紅、苔綠。
+  --app-chart-1: #405a8b;
+  --app-chart-2: #b17a21;
+  --app-chart-3: #32847a;
+  --app-chart-4: #985b93;
+  --app-chart-5: #822b31;
+  --app-chart-6: #476933;
+
   --app-shell-bg: #f7fbff;
   --app-shell-on: var(--_ink);
   --app-shell-on-muted: var(--_muted);

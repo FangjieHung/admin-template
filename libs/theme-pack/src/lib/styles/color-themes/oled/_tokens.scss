@@ -80,6 +80,14 @@
   --app-viz-3: #e9b62b;
   --app-viz-4: #e27ad0;
 
+  // 圖表類別色（ADR 0017）：純黑畫布：1 主色青，2 橘、3 紫；4–6 綠、粉、黃。
+  --app-chart-1: #35d3f2;
+  --app-chart-2: #fc9f30;
+  --app-chart-3: #a27dfa;
+  --app-chart-4: #6ccc56;
+  --app-chart-5: #fc93ac;
+  --app-chart-6: #fce765;
+
   // 側欄：和畫布一樣是純黑（沒有比 #000 更深的顏色），靠表面與文字亮度分區
   --app-shell-bg: var(--_k-0);
   --app-shell-on: var(--_k-900);

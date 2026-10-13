@@ -61,6 +61,14 @@
   --app-viz-3: #9b5f55;
   --app-viz-4: #785e94;
 
+  // 圖表類別色（ADR 0017）：卡片就是灰色畫布（#e0e5ec），顏色要比白底配色再深一些才有 3:1。1 主色藍紫，2 焦糖、3 青綠；4–6 酒紅、苔綠、深青。
+  --app-chart-1: #594fcf;
+  --app-chart-2: #9e6200;
+  --app-chart-3: #1d8071;
+  --app-chart-4: #881f3b;
+  --app-chart-5: #406113;
+  --app-chart-6: #115667;
+
   --app-shell-bg: var(--_clay);
   --app-shell-on: var(--_ink);
   --app-shell-on-muted: var(--_muted);

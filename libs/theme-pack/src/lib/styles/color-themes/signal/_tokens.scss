@@ -83,6 +83,14 @@
   --app-viz-3: #00857a;
   --app-viz-4: #b5179e;
 
+  // 圖表類別色（ADR 0017）：訊號色：1 主色訊號藍，2 橘、3 青綠；4–6 洋紅、綠、緋紅。
+  --app-chart-1: #2438e8;
+  --app-chart-2: #d55c13;
+  --app-chart-3: #098777;
+  --app-chart-4: #b83d8e;
+  --app-chart-5: #227702;
+  --app-chart-6: #b0062d;
+
   // 側欄：一整塊墨黑
   --app-shell-bg: var(--_ink);
   --app-shell-on: #ffffff;

@@ -64,6 +64,14 @@
   --app-viz-3: var(--_ink-600);
   --app-viz-4: var(--_slate-500);
 
+  // 圖表類別色（ADR 0017）：深色畫布：全部偏亮。1 主色亮藍，2 琥珀、3 青綠；4–6 粉紫、淡黃、珊瑚。
+  --app-chart-1: #6f95f4;
+  --app-chart-2: #ffbe46;
+  --app-chart-3: #3debd5;
+  --app-chart-4: #fd8fdb;
+  --app-chart-5: #dfe192;
+  --app-chart-6: #e17363;
+
   // app 側欄擴充色（M3 無「常駐深色導覽軌」token；midnight 側欄比 surface 更深）
   --app-shell-bg: var(--_ink-900); /* 側欄：最深，比 surface 更深 */
   --app-shell-on: var(--_slate-100); /* 側欄主要文字：亮 */
