@@ -262,10 +262,10 @@ For more information on using the Angular CLI, including detailed command refere
    - 可自由使用 CSS（包括 `backdrop-filter`、`inset` 陰影等），但顏色一定要綁 token
    - 新增或修改 `_tokens.scss` 裡的造型 token（圓角、陰影、字體等）
 
-3. **註冊到全域**
-   - 編輯 `libs/theme-pack/src/lib/styles/texture/_registry.scss`
-   - 新增一行：`@forward '新質地名稱/tokens';`
-   - 若新增了 recipe 檔，也在該檔頭部用 `@use` 引入
+3. **登錄為按需質地**（ADR 0010；完整步驟見 `libs/theme-pack/src/lib/styles/texture/README.md`「新增一種質地」）
+   - 建立 `新質地名稱/_index.scss`，`@forward` 它的 tokens 與 recipes（有字型時先 `@forward 'fonts'`）
+   - 在 `apps/admin/project.json` 的 `styles` 加一筆 `bundleName: "texture-新質地名稱"`、`inject: false` 的入口
+   - 在 `apps/admin/src/index.html` 開機腳本的 `onDemandTextures` 加上 id
 
 4. **新增到質地清單**
    - 編輯 `libs/theme-pack/src/lib/theme/theme.token.ts`
@@ -298,7 +298,7 @@ For more information on using the Angular CLI, including detailed command refere
 
 3. **（可選）清理未用資源**
    - 若只用一個質地，可刪除 `libs/theme-pack/src/lib/styles/texture/` 下的其他資料夾
-   - 同時編輯 `libs/theme-pack/src/lib/styles/texture/_registry.scss`，移除對應的 `@forward` 行
+   - 同時移除 `apps/admin/project.json` 的 `texture-<id>` 樣式入口與 `index.html` 開機腳本裡的 id（見 `docs/guides/theme-pruning.md`）
    - 若只用一個配色，可刪除 `libs/theme-pack/src/lib/styles/color-themes/` 下的其他資料夾
    - 同時編輯 `libs/theme-pack/src/lib/styles/color-themes/_registry.scss`，移除對應的 `@forward` 行
 
@@ -325,7 +325,7 @@ Runtime 主題切換能力隨時可重新啟用，無需修改架構。
 
 **A. Runtime 可切換配色**（app 內要放主題切換器，如 admin）：
 ```scss
-@use 'theme-pack/src/lib/styles/texture/registry' as *;
+@use 'theme-pack/src/lib/styles/texture/material' as *; // 常駐質地；其餘質地按需載入（ADR 0010）
 @use 'theme-pack/src/lib/styles/color-themes/registry' as *; // 全部配色都編進去，供切換
 @use 'theme-pack/src/lib/styles/component';
 ```
@@ -334,7 +334,7 @@ Runtime 主題切換能力隨時可重新啟用，無需修改架構。
 
 **B. Build-time 鎖死單一配色**（不放切換器，如 booking／affiliate）：
 ```scss
-@use 'theme-pack/src/lib/styles/texture/registry' as *;
+@use 'theme-pack/src/lib/styles/texture/material' as *;
 @use 'theme-pack/src/lib/styles/color-themes/verdant/tokens' as *; // 只編進去這一個配色
 @use 'theme-pack/src/lib/styles/component';
 ```

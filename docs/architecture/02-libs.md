@@ -198,7 +198,7 @@ admin 的建單第四步（`/orders/new` 的「合約」步驟）與訂單詳情
 
 別名 `@car-rental/theme-pack`。質地（Paradigm，管造型：圓角/陰影/字體）×
 配色（Color-theme，管顏色）兩軸可自由組合，目前提供 Material/Linen/Grid/Soft UI/Clay/Editorial/Frosted/Aero 質地與
-Verdant/Midnight/Sandstone/Azure/Cool Grey/Candy/Mist Ink/Glacier Blue 配色。Admin 載入完整 registry 並提供設定頁切換；
+Verdant/Midnight/Sandstone/Azure/Cool Grey/Candy/Mist Ink/Glacier Blue 配色。Admin 常駐 Material 質地與全部配色，其餘質地切換時才下載各自的 `texture-<id>.css`（ADR 0010），並提供設定頁切換；
 booking 與 affiliate 雖引用 theme-pack 的樣式，但各自只編入一套固定配色，沒有開放執行期換膚。
 
 詳細設計、樣式規則（禁止寫死顏色、`.ui-*` class 契約等）、新增配色/質地的步驟，

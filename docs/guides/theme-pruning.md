@@ -44,18 +44,19 @@ grep -rn "texture/<id>\|color-themes/<id>\|data-theme=\"<id>\"\|data-paradigm=\"
 | --- | --- | --- |
 | 1 | `libs/theme-pack/src/lib/styles/texture/<id>/` | 不要的質地整個資料夾刪掉（連同它的 `design-guideline.md`） |
 | 2 | `libs/theme-pack/src/lib/styles/color-themes/<id>/` | 不要的配色整個資料夾刪掉 |
-| 3 | `texture/_registry.scss`、`color-themes/_registry.scss` | 刪掉對應的 `@forward` |
-| 4 | `apps/admin/src/styles.scss` | 刪掉已刪質地的字型 `@use`（例如 `texture/clay/fonts`、`texture/editorial/fonts`）。**這通常是第一個 build 錯誤** |
+| 3 | `color-themes/_registry.scss` | 刪掉對應的 `@forward`。質地沒有 registry 了（2026-10-13 起按需載入，ADR 0010），改做第 4 步 |
+| 4 | `apps/admin/project.json` ＋ `apps/admin/src/index.html` | 已刪質地的 `texture-<id>` 樣式入口（`build.options.styles` 裡 `inject: false` 那幾筆）刪掉，**這通常是第一個 build 錯誤**；`index.html` 開機腳本（`#cr-texture-boot`）的 `onDemandTextures` 刪掉同一個 id，刪了配色就從 `colorThemes` 刪掉。只留 Material 時 `onDemandTextures` 寫成空陣列 `[]`。質地字型在各自的 `_index.scss`，跟著資料夾一起刪，不用另外處理 |
 | 5 | `apps/affiliate/src/styles.scss` ＋ `apps/affiliate/src/index.html` | 若刪了 Midnight：scss 的 `color-themes/midnight/tokens` 與 HTML 的 `data-theme="midnight"` **兩處都要改**成保留的配色；只改一處會 build 失敗或整頁沒顏色 |
 | 5b | `apps/booking/src/styles.scss`、`apps/affiliate/src/styles.scss` | 這兩個前台只 `@use` `texture/material`（2026-09-28 起，不載入整份質地清單）。若新專案的前台要用 Material 以外的質地，把這行換成該質地，並改 `index.html` 的 `data-paradigm` |
 | 6 | `libs/theme-pack/src/lib/styles/_combos.scss` | 刪掉引用已刪 id 的組合規則。**檔案本身要留著**，三個 app 都 `@use` 它 |
 | 7 | 保留的質地／配色 `_tokens.scss` | 刪掉只為已刪配色寫的覆寫（例如 Midnight 的陰影、遮罩，Candy 的側欄淡底），若它們寫在保留的檔案裡 |
 | 8 | `libs/theme-pack/src/lib/theme/theme.token.ts` | `texture`、`COLOR_THEMES` 只留要的；`TEXTURE_COMPATIBILITY` 只留保留質地的那幾筆，每筆的 `compatibleThemeIds` 只列保留的配色，`defaultThemeId` 一定要在清單內；確認 `DEFAULT_PARADIGM`、`DEFAULT_THEME` 指向保留的 id |
-| 9 | `scripts/contrast-report.mjs` | 這支腳本有**第二份**質地與配色清單（它是 `.mjs`，沒有 import TS），要同步縮減，否則會去量已不存在的組合 |
+| 9 | `scripts/contrast-report.mjs` | 這支腳本有**另一份**質地與配色清單（它是 `.mjs`，沒有 import TS），要同步縮減，否則會去量已不存在的組合 |
+| 9b | 只留一個、而且不是 Material 的質地 | 把它改成常駐質地：`DEFAULT_PARADIGM` 改成它（`RESIDENT_TEXTURE_IDS` 跟著變），`apps/admin/src/styles.scss` 的 `texture/material` 換成 `texture/<id>`，刪掉它在 `project.json` 的 `texture-<id>` 入口與開機腳本裡的 id，`index.html` 的 `data-paradigm` 改成它 |
 | 10 | 設定頁 `apps/admin/src/app/features/settings/pages/settings-page.component.{html,ts,scss}` | 見第 4 節 |
 | 11 | spec | `theme-compatibility.spec.ts` 的 `DECISIONS` 改成保留的組合；`theme.service.spec.ts`、`settings-page.component.spec.ts` 裡寫死已刪 id（soft-ui、midnight、cool-grey…）的案例要改寫。**建議改成讀清單長度或清單第一筆**，之後增減就不用再改 spec |
 
-⚠️ **build 綠燈不代表刪乾淨**：第 1–7 步做完 build 就會過，但 `theme.token.ts` 若沒改，設定頁會繼續列出已經沒有樣式的選項。TS 清單與 SCSS 資料夾之間沒有編譯期連結，第 8、9 步一定要做。
+⚠️ **build 綠燈不代表刪乾淨**：第 1–7 步做完 build 就會過，但 `theme.token.ts` 若沒改，設定頁會繼續列出已經沒有樣式的選項。TS 清單與 SCSS 資料夾之間沒有編譯期連結，第 8、9 步一定要做。`npx vitest run scripts --exclude '.claude/**' --exclude '**/node_modules/**'` 裡的 `texture-registration.spec.mjs` 會比對 `texture/` 資料夾、`theme.token.ts`、`project.json`、開機腳本四處的質地清單，漏改哪一處就會紅。
 
 ---
 
@@ -104,7 +105,7 @@ grep -n "resolveParadigmId" libs/theme-pack/src/lib/theme/theme.service.ts
 
 ## 6. 為什麼不建議把顏色寫死在 `:root`
 
-保留雙軸機制時，之後加回一套配色只要：新增 `color-themes/<id>/` 資料夾、registry 加一行、`theme.token.ts` 加一筆，設定頁自動出現。
+保留雙軸機制時，之後加回一套配色只要：新增 `color-themes/<id>/` 資料夾、registry 加一行、`theme.token.ts` 加一筆、admin `index.html` 開機腳本的 `colorThemes` 加上 id，設定頁自動出現。
 
 改成寫死要處理：
 
@@ -121,7 +122,7 @@ grep -n "resolveParadigmId" libs/theme-pack/src/lib/theme/theme.service.ts
 
 以 Material + Grid × Verdant + Cool Grey 為例（依 2026-09-27 定案，這 4 格全部相容）：
 
-- 質地刪 5 個、配色刪 6 套；registry 各留 2 組。
+- 質地刪 5 個（Grid 是按需質地，`project.json` 與開機腳本只留它一筆）、配色刪 6 套；配色 registry 留 2 組。
 - 相容清單：`material: { compatibleThemeIds: ['verdant', 'cool-grey'], defaultThemeId: 'verdant' }`，`grid` 同樣寫法。
 - 設定頁用第 4 節的隱藏寫法，兩列會自動顯示。注意舊 spec 有「相容配色數 < 全部配色數」的斷言，全部相容時一定會紅。
 - 浮動面板可留可刪。留的話，它的 spec 裡點 midnight、soft-ui、斷言 sandstone 被隱藏的案例要重寫。
@@ -155,9 +156,9 @@ grep -n "resolveParadigmId" libs/theme-pack/src/lib/theme/theme.service.ts
 
 ## 附錄：演練踩到的坑
 
-1. 只刪 SCSS 資料夾與 registry，build 照樣綠，設定頁卻繼續列出已沒有樣式的選項。
+1. 只刪 SCSS 資料夾與 registry（現在是 `project.json` 的入口），build 照樣綠，設定頁卻繼續列出已沒有樣式的選項。
 2. affiliate 固定用 Midnight：被刪的配色不只 admin 在用，scss 與 `index.html` 兩處都要改。
-3. admin `styles.scss` 開頭的質地字型 `@use` 是第一個 build 錯誤。
+3. admin `styles.scss` 開頭的質地字型 `@use` 是第一個 build 錯誤（2026-10-13 起字型移進各質地的 `_index.scss`，第一個錯誤改成 `project.json` 裡找不到 `texture-<id>` 的入口檔）。
 4. 瀏覽器裡舊的質地設定不會退回預設（2026-09-28 已修，見第 5 節）。
 5. 浮動面板有一條獨立的 tsconfig path alias，只刪 barrel export 會漏。
 6. `contrast-report.mjs` 有第二份重複的清單。

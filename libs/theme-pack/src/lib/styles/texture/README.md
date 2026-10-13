@@ -22,9 +22,13 @@
 ## 新增一種質地
 
 1. **造型 token**：建立 `<id>/_tokens.scss`，在 `:root[data-paradigm='<id>']` 下定義全部圓角、陰影、字體 token（清單見 CONTRACT.md「可用 token」）。缺一個就會退回別的質地的值。同時檢查 CONTRACT.md「用途變數」表：`--app-focus-ring-width`、`--app-border-emphasis`、`--app-state-hover/-pressed/-selected`、`--app-shadow-tint` 若這個質地的現值跟第 1 層預設不同，也要在這裡覆寫（分層規則見 ADR 0008），不要在 `recipes.scss` 裡重新寫一份 `color-mix()`／寫死值。
-2. **recipe**：建立 `<id>/recipes.scss`，用同一個選擇器包住，覆蓋 CONTRACT.md 的全部 `ui-*` class 與 Material 元件（卡片、表單、日期選擇器、按鈕、表格、對話框、狀態徽章、文字樣式）。需要額外字型時仿照 `clay/_fonts.scss`。
-3. **登錄**：在 [`_registry.scss`](./_registry.scss) 加上 `@forward '<id>/tokens'` 與 `@forward '<id>/recipes'`。
-4. **選項與相容配色**：在 [`theme.token.ts`](../../theme/theme.token.ts) 的 `texture` 加一筆，並填 `compatibleThemes`（白名單）與 `defaultTheme`。新質地預設不相容任何配色，逐一以對比掃描（WCAG 4.5:1）＋目視確認後加入。
+2. **recipe**：建立 `<id>/recipes.scss`，用同一個選擇器包住，覆蓋 CONTRACT.md 的全部 `ui-*` class 與 Material 元件（卡片、表單、日期選擇器、按鈕、表格、對話框、狀態徽章、文字樣式）。需要額外字型時仿照 `clay/_fonts.scss`。recipe 是純 CSS，不能用 Tailwind 的 `@apply`（按需質地的檔案不經過 Tailwind，見 ADR 0010）。
+3. **入口與登錄（按需質地，ADR 0010）**：新質地預設是按需質地，不編進 admin 主樣式。
+   - 建立 `<id>/_index.scss`：依序 `@forward 'fonts'`（有字型才寫，必須在最前面）、`@forward 'tokens'`、`@forward 'recipes'`，照抄 `clay/_index.scss`。
+   - 在 `apps/admin/project.json` 的 `build.options.styles` 加一筆 `{ "input": "libs/theme-pack/src/lib/styles/texture/<id>/_index.scss", "bundleName": "texture-<id>", "inject": false }`，建置後會輸出不帶 hash 的 `texture-<id>.css`。
+   - 在 `apps/admin/src/index.html` 開機腳本（`#cr-texture-boot`）的 `onDemandTextures` 陣列加上 `<id>`。
+   - **不要**在 `apps/admin/src/styles.scss` `@use` 它；主樣式只放常駐質地（Material）。
+4. **選項與相容配色**：在 [`theme.token.ts`](../../theme/theme.token.ts) 的 `texture` 加一筆，並在 `TEXTURE_COMPATIBILITY` 填 `compatibleThemeIds`（白名單）與 `defaultThemeId`。新質地預設不相容任何配色，逐一以對比掃描（WCAG 4.5:1）＋目視確認後加入。`texture` 以外不用改任何 TS：不在 `RESIDENT_TEXTURE_IDS` 裡的質地自動按需載入。跑 `npx vitest run scripts --exclude '.claude/**' --exclude '**/node_modules/**'`，`texture-registration.spec.mjs` 會檢查第 3、4 步的四處是否一致。
 5. **質地準則**：依上方模板寫 `<id>/design-guideline.md`；「層次表現」必須和現有質地都不同，否則這個質地不該存在。
 6. **截圖驗收**：Admin 的儀表板、資料表、建單表單、日曆、對話框，在新質地 × 每個相容配色下各截一張；`npm run lint:theme` 通過。
-7. **文件**：更新 `theme-glossary.md` 的質地列表與根目錄 `README.md`「雙軸主題系統」一節。
+7. **文件**：更新 `theme-glossary.md` 的質地列表與根目錄 `README.md`「雙軸主題系統」一節；`scripts/contrast-report.mjs` 的 `TEXTURES` 清單也要加上新質地。
