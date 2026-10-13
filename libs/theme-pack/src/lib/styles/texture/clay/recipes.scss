@@ -136,6 +136,10 @@
     background: linear-gradient(135deg, color-mix(in srgb, var(--mat-sys-primary) 96%, var(--mat-sys-surface)), var(--mat-sys-primary));
     color: var(--mat-sys-on-primary);
   }
+  // 危險按鈕（.ui-btn--danger）：同一種黏土漸層，換成錯誤色（共用規則在 component.scss，這裡權重更高）。
+  .mat-mdc-button-base.mat-mdc-unelevated-button.ui-btn--danger.ui-btn--danger:not(:disabled) {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--mat-sys-error) 96%, var(--mat-sys-surface)), var(--mat-sys-error));
+  }
   @media (hover: hover) {
     :is(.theme-pill, .ui-nav-pill, .ui-card-titleNav__item, .mat-mdc-raised-button, .mat-mdc-unelevated-button, .mat-mdc-outlined-button, .mat-mdc-icon-button):not(:disabled):hover {
       transform: translateY(-4px);

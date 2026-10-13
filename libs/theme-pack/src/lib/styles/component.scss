@@ -69,3 +69,14 @@ body {
 .mat-mdc-text-field-wrapper.mdc-text-field--disabled {
   --app-field-border: var(--app-disabled-bg);
 }
+
+// 危險動作的實心按鈕（CONTRACT.md `.ui-btn--danger`）：刪除帳號、確認對話框的危險確認鈕。
+// Clay、Editorial、Frosted、Aero 的 recipe 直接改實心按鈕的 background，不讀 Material 的
+// --mat-button-filled-container-color，所以在這裡用較高的權重（0-6-0，重複 class）蓋回錯誤色；
+// 要換造型（例如 Clay 的漸層）的質地在自己的 recipe 再寫一條更高的。停用時維持各質地的停用樣式。
+:root .mat-mdc-button-base.mat-mdc-unelevated-button.ui-btn--danger.ui-btn--danger:not(:disabled) {
+  --mat-button-filled-container-color: var(--mat-sys-error);
+  --mat-button-filled-label-text-color: var(--mat-sys-on-error);
+  background: var(--mat-sys-error);
+  color: var(--mat-sys-on-error);
+}

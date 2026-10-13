@@ -25,6 +25,7 @@
 | `.ui-text-numeric`              | 數字文字（金額、日期、時間、數量、單號）：預設 `tabular-nums`；Grid、Ledger、Cockpit、Riso、Sketch 另換 `--font-mono`（中文接 `--font-zh`）。元件不要自己寫 `font-variant-numeric`，在 template 加這個 class（`component.scss`）；data-table 的 `align: 'end'` 欄自動掛上 |
 | `.ui-chip` + `.ui-chip--{tone}` | 狀態徽章 + tone 變體（tone：`positive`/`info`/`neutral`/`warning`/`danger`）      |
 | `.ui-btn`                       | 按鈕（未來擴充：`--sm`/`--md`/`--lg` × `--solid`/`--outline`/`--ghost`/`--text`） |
+| `.ui-btn--danger`               | 危險動作的實心按鈕：加在 `matButton="filled"` 上，底 `--mat-sys-error`、字 `--mat-sys-on-error`（共用規則在 `component.scss`，權重高過各質地的實心按鈕 recipe；Clay 在 recipe 換成錯誤色漸層）。確認對話框 `tone: 'danger'` 的確認鈕也用它 |
 | `.ui-table`                     | 表格（未來擴充）                                                                  |
 | `.ui-field-group`               | 相連欄位群組：中間圓角歸零、接縫補 hairline divider（僅 `appearance="fill"`）     |
 
