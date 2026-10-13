@@ -1,0 +1,120 @@
+<ng-template appHeaderToolbar>
+  <app-template-info [info]="info" />
+</ng-template>
+
+@switch (state()) {
+  @case ('not-found') {
+    <section class="ui-card p-4 sm:p-6 ticket-missing" data-state="not-found">
+      <lib-empty-state
+        kind="no-results"
+        icon="search_off"
+        [message]="'找不到工單 ' + ticketId"
+        detail="這張工單可能已被刪除，或網址打錯了。"
+        actionLabel="回到工單列表"
+        (action)="backToList()"
+      />
+    </section>
+  }
+  @case ('error') {
+    <section class="ui-card p-4 sm:p-6" data-state="error">
+      <lib-error-state message="工單載入失敗" hint="請確認網路連線後再試一次。" (retry)="load()" />
+    </section>
+  }
+  @default {
+    <lib-detail-layout class="ticket-detail" [loading]="state() === 'loading'" asideLabel="工單摘要" [compactTitle]="compactTitle()">
+      <a libDetailBack class="ticket-back" routerLink="/templates/tickets" [queryParams]="listParams">
+        <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>返回工單列表
+      </a>
+      <h2 libDetailTitle class="ui-text-title">{{ ticket()?.title }}</h2>
+      <div libDetailMeta>
+        @if (ticket(); as t) {
+          <lib-status-chip [status]="statusTones[t.status]" [label]="statusLabels[t.status]" />
+          <span class="ui-text-numeric">{{ t.id }}</span>
+          <span>申請人 {{ requesterName() }}</span>
+          <span>建立於 <span class="ui-text-numeric">{{ formatCreatedAt(t.createdAt) }}</span></span>
+        }
+      </div>
+
+      <div libDetailActions>
+        <a *libCan="'ticket:edit'" matButton="filled" routerLink="edit" data-action="edit">
+          <span class="material-symbols-rounded" aria-hidden="true">edit</span>編輯
+        </a>
+        <button
+          *libCan="'ticket:edit'"
+          type="button"
+          matButton="outlined"
+          libDetailSecondary
+          data-action="assign"
+          [disabled]="busy()"
+          (click)="assign()"
+        >
+          <span class="material-symbols-rounded" aria-hidden="true">person_add</span>指派
+        </button>
+        @if (ticket()?.status === 'closed') {
+          <button
+            *libCan="'ticket:edit'"
+            type="button"
+            matButton="outlined"
+            libDetailSecondary
+            data-action="reopen"
+            [disabled]="busy()"
+            (click)="reopen()"
+          >
+            <span class="material-symbols-rounded" aria-hidden="true">replay</span>重新開啟
+          </button>
+        } @else {
+          <button
+            *libCan="'ticket:edit'"
+            type="button"
+            matButton="outlined"
+            libDetailSecondary
+            data-action="close"
+            [disabled]="busy()"
+            (click)="close()"
+          >
+            <span class="material-symbols-rounded" aria-hidden="true">task_alt</span>關閉工單
+          </button>
+        }
+        <button type="button" libDetailOverflow (click)="copyLink()">
+          <span class="material-symbols-rounded" aria-hidden="true">link</span>複製連結
+        </button>
+        <button *libCan="'ticket:delete'" type="button" libDetailOverflow data-action="delete" (click)="remove()">
+          <span class="material-symbols-rounded" aria-hidden="true">delete</span>刪除工單
+        </button>
+      </div>
+
+      <nav mat-tab-nav-bar libDetailTabs [tabPanel]="ticketPanel" aria-label="工單內容">
+        <a mat-tab-link [active]="tab() === 'overview'" (click)="tab.set('overview')" data-tab="overview">概覽</a>
+        <a mat-tab-link [active]="tab() === 'activity'" (click)="tab.set('activity')" data-tab="activity">
+          活動紀錄（{{ activity().length }}）
+        </a>
+      </nav>
+
+      <mat-tab-nav-panel #ticketPanel>
+        @if (tab() === 'overview') {
+          <section class="ui-card p-4 sm:p-6" aria-labelledby="ticket-overview-title">
+            <h3 id="ticket-overview-title" class="ui-text-subtitle">描述</h3>
+            <p class="ticket-description">{{ ticket()?.description || '（沒有描述）' }}</p>
+            <lib-description-list [items]="overviewItems()" [columns]="2" />
+          </section>
+        } @else {
+          <section class="ui-card p-4 sm:p-6" aria-labelledby="ticket-activity-title" data-panel="activity">
+            <h3 id="ticket-activity-title" class="ui-text-subtitle ticket-section-title">活動紀錄</h3>
+            <lib-activity-timeline [entries]="activity()" [kinds]="kinds" [loading]="state() === 'loading'" [headingLevel]="4" />
+          </section>
+        }
+      </mat-tab-nav-panel>
+
+      <section libDetailAside class="ui-card p-4 sm:p-6" aria-labelledby="ticket-summary-title">
+        <h3 id="ticket-summary-title" class="ui-text-subtitle">摘要</h3>
+        <lib-description-list [items]="summaryItems()" (copied)="onCopied($event.text)">
+          <ng-template libDescriptionValue="status" let-item>
+            @if (ticket(); as t) {
+              <lib-status-chip [status]="statusTones[t.status]" [label]="'' + item.value" />
+            }
+          </ng-template>
+        </lib-description-list>
+      </section>
+    </lib-detail-layout>
+  }
+}
