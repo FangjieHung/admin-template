@@ -1,0 +1,11 @@
+<span class="lib-feedback-panel__icon material-symbols-rounded" aria-hidden="true">{{ resolvedIcon() }}</span>
+<p class="lib-feedback-panel__message ui-text-subtitle">{{ message() }}</p>
+@if (detail()) {
+  <p class="lib-feedback-panel__detail ui-text-caption">{{ detail() }}</p>
+}
+@if (actionLabel()) {
+  <div class="lib-feedback-panel__actions">
+    <button type="button" [matButton]="buttonAppearance()" (click)="action.emit()">{{ actionLabel() }}</button>
+  </div>
+}
+<ng-content />

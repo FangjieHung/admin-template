@@ -1,0 +1,42 @@
+<span class="lib-async-state__live" aria-live="polite">{{ announcement() }}</span>
+@switch (status()) {
+  @case ('loading') {
+    @if (loadingTpl(); as tpl) {
+      <ng-container [ngTemplateOutlet]="tpl.template" />
+    } @else {
+      <lib-skeleton [variant]="skeleton()" [count]="skeletonCount()" [columns]="skeletonColumns()" />
+    }
+  }
+  @case ('empty') {
+    @if (emptyTpl(); as tpl) {
+      <ng-container [ngTemplateOutlet]="tpl.template" />
+    } @else {
+      <lib-empty-state
+        [message]="emptyMessage()"
+        [detail]="emptyDetail()"
+        [kind]="emptyKind()"
+        [icon]="emptyIcon()"
+        [actionLabel]="emptyActionLabel()"
+        [compact]="compact()"
+        (action)="emptyAction.emit()"
+      />
+    }
+  }
+  @case ('error') {
+    @if (errorTpl(); as tpl) {
+      <ng-container [ngTemplateOutlet]="tpl.template" />
+    } @else {
+      <lib-error-state
+        [message]="errorMessage()"
+        [hint]="errorHint()"
+        [detail]="errorDetail()"
+        [retryable]="retryable()"
+        [compact]="compact()"
+        (retry)="retry.emit()"
+      />
+    }
+  }
+  @default {
+    <ng-content />
+  }
+}

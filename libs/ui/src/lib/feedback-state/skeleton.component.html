@@ -1,0 +1,66 @@
+<span class="sk-sr-only">{{ a11yLabel() }}</span>
+<div class="sk-body" aria-hidden="true">
+  @switch (variant()) {
+    @case ('table') {
+      <div class="sk-table" [style.--sk-cols]="cols().length">
+        <div class="sk-table__row sk-table__row--head">
+          @for (c of cols(); track c) {
+            <span class="sk-block sk-line sk-line--head" [style.width]="cellWidth(0, c + 1)"></span>
+          }
+        </div>
+        @for (r of items(); track r) {
+          <div class="sk-table__row">
+            @for (c of cols(); track c) {
+              <span class="sk-block sk-line" [style.width]="cellWidth(r, c)"></span>
+            }
+          </div>
+        }
+      </div>
+    }
+    @case ('card') {
+      <div class="sk-grid">
+        @for (i of items(); track i) {
+          <div class="ui-card sk-card">
+            <span class="sk-block sk-media"></span>
+            <div class="sk-card__text">
+              <span class="sk-block sk-line sk-line--title" style="width: 70%"></span>
+              <span class="sk-block sk-line" style="width: 92%"></span>
+              <span class="sk-block sk-line" style="width: 45%"></span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+    @case ('list') {
+      <div class="sk-list">
+        @for (i of items(); track i) {
+          <div class="sk-list__item">
+            <span class="sk-block sk-avatar"></span>
+            <div class="sk-list__text">
+              <span class="sk-block sk-line sk-line--title" [style.width]="cellWidth(i, 0)"></span>
+              <span class="sk-block sk-line" [style.width]="lineWidth(i + 1, 0)"></span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+    @case ('kpi') {
+      <div class="sk-grid sk-grid--kpi">
+        @for (i of items(); track i) {
+          <div class="ui-card sk-kpi">
+            <span class="sk-block sk-line" style="width: 45%"></span>
+            <span class="sk-block sk-value"></span>
+            <span class="sk-block sk-line sk-line--small" style="width: 30%"></span>
+          </div>
+        }
+      </div>
+    }
+    @default {
+      <div class="sk-text">
+        @for (i of items(); track i) {
+          <span class="sk-block sk-line" [style.width]="lineWidth(i, items().length)"></span>
+        }
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,54 @@
+// 骨架色塊的共用樣式：lib-skeleton 與 lib-data-table 的載入列都用它（各自 @use，封裝後各有一份）。
+// 顏色、圓角、閃光時長都是用途變數（_semantic.scss 的 --app-skeleton-*），質地要不同時在質地層覆寫。
+// 閃光是無限循環的裝飾動畫：時長 --app-skeleton-duration = --app-motion-loop / 5（1.6s），
+// prefers-reduced-motion 時 --app-motion-loop 歸零，這裡另外明寫 animation: none 停在靜止的底色。
+
+@mixin block {
+  display: block;
+  border-radius: var(--app-skeleton-radius);
+  background-color: var(--app-skeleton-bg);
+  // 300% 寬的漸層，從左外側掃到右外側：background-position 100% → 0%。
+  background-image: linear-gradient(
+    90deg,
+    transparent 33%,
+    var(--app-skeleton-shine) 50%,
+    transparent 67%
+  );
+  background-size: 300% 100%;
+  background-repeat: no-repeat;
+  background-position: 100% 0;
+  animation: lib-skeleton-shimmer var(--app-skeleton-duration) linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    background-image: none;
+  }
+}
+
+// 靜止版（減少動態，或使用端關掉動畫）：只留底色。
+@mixin static {
+  animation: none;
+  background-image: none;
+}
+
+@mixin keyframes {
+  @keyframes lib-skeleton-shimmer {
+    from {
+      background-position: 100% 0;
+    }
+
+    to {
+      background-position: 0% 0;
+    }
+  }
+}
+
+// 只給報讀器看的文字。用 absolute 時，元件 host 必須 position: relative，否則會跳出捲動容器撐出捲軸。
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+  clip-path: inset(50%);
+}

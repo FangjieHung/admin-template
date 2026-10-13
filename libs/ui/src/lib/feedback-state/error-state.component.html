@@ -1,0 +1,32 @@
+<span class="lib-feedback-panel__icon material-symbols-rounded" aria-hidden="true">{{ icon() }}</span>
+<div role="alert" class="lib-error-state__alert">
+  <p class="lib-feedback-panel__message ui-text-subtitle">{{ message() }}</p>
+  @if (hint()) {
+    <p class="lib-feedback-panel__detail ui-text-caption">{{ hint() }}</p>
+  }
+</div>
+@if (retryable() || detail()) {
+  <div class="lib-feedback-panel__actions">
+    @if (retryable()) {
+      <button type="button" matButton="filled" class="lib-error-state__retry" (click)="retry.emit()">
+        {{ retryText() }}
+      </button>
+    }
+    @if (detail()) {
+      <button
+        type="button"
+        matButton
+        class="lib-error-state__toggle"
+        [attr.aria-expanded]="detailOpen()"
+        [attr.aria-controls]="detailId"
+        (click)="toggleDetail()"
+      >
+        {{ toggleText() }}
+      </button>
+    }
+  </div>
+}
+@if (detail() && detailOpen()) {
+  <pre class="lib-feedback-panel__technical" [id]="detailId">{{ detail() }}</pre>
+}
+<ng-content />

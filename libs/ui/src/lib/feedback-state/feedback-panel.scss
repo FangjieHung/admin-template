@@ -1,0 +1,87 @@
+// lib-empty-state 與 lib-error-state 共用的版面：置中的圖示、一行說明、補充文字、動作。
+// 底色、框線、內凹陰影由質地決定（_semantic.scss 的 --app-empty-*，各質地 _tokens.scss 覆寫），
+// 字體交給 .ui-text-subtitle／.ui-text-caption 的質地 recipe。
+
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+  padding: 2.5rem 1.5rem;
+  border: var(--app-empty-frame);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--app-empty-bg);
+  box-shadow: var(--app-empty-shadow);
+  color: var(--mat-sys-on-surface);
+  text-align: center;
+}
+
+:host(.lib-feedback-panel--compact) {
+  padding: 1.5rem 1rem;
+}
+
+.lib-feedback-panel__icon {
+  display: block;
+  // 圖示字型載不到時 ligature 名稱不會撐開版面（Material Symbols 本來就是 1em 見方）。
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+  font-size: 2.75rem;
+  line-height: 1;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+:host(.lib-feedback-panel--compact) .lib-feedback-panel__icon {
+  font-size: 2rem;
+}
+
+:host(.lib-error-state) .lib-feedback-panel__icon {
+  color: var(--mat-sys-error);
+}
+
+.lib-error-state__alert {
+  display: grid;
+  justify-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.lib-feedback-panel__message {
+  max-width: 48ch;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.lib-feedback-panel__detail {
+  max-width: 56ch;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.lib-feedback-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
+}
+
+.lib-feedback-panel__technical {
+  box-sizing: border-box;
+  width: min(100%, 40rem);
+  max-height: 12rem;
+  margin: 0.5rem 0 0;
+  padding: 0.75rem 1rem;
+  overflow: auto;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-small);
+  background: var(--mat-sys-surface-container-low);
+  color: var(--mat-sys-on-surface-variant);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  text-align: start;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
