@@ -95,6 +95,22 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '找不到頁面（404）與沒有權限兩個錯誤頁樣板：說明發生什麼事、可以怎麼辦，以及「回首頁」。',
     source: 'libs/access（沒有權限的守門）、apps/admin/src/app/features/errors',
   },
+  'ticket-list': {
+    summary: '工單列表樣板：頁首工具列（搜尋、狀態）、進階篩選、已儲存檢視、資料表（分頁、排序、欄位選擇、多選批次操作），篩選與頁碼同步到網址。',
+    source: 'libs/ui（data-table、page-toolbar、filter、saved-views）、apps/admin/src/app/features/tickets/ticket-list',
+  },
+  'ticket-detail': {
+    summary: '工單詳情樣板：詳情頁版型、描述清單、活動紀錄，編輯、指派、關閉、刪除都會記進活動紀錄；找不到工單有專屬畫面。',
+    source: 'libs/ui（detail-layout、description-list、activity-timeline）、apps/admin/src/app/features/tickets/ticket-detail',
+  },
+  'ticket-form': {
+    summary: '工單表單樣板：分段表單、欄位驗證與錯誤摘要、底部固定的操作列，未存檔離開會先確認；新增與編輯共用。',
+    source: 'libs/ui（relation-select、confirm-dialog、toast）、apps/admin/src/app/features/tickets/ticket-form',
+  },
+  'login': {
+    summary: '登入樣板：帳號密碼、顯示密碼、記住我、送出中與錯誤訊息（帳密錯誤、帳號鎖定）；示範帳號登入後切換成對應的身分。',
+    source: 'libs/access（示範身分）、apps/admin/src/app/features/auth',
+  },
 };
 
 export function detailOf(id: string): ShowcaseDetail {
@@ -126,10 +142,6 @@ export const PLANNED_ITEMS: readonly PlannedItem[] = [
   { title: '樹狀選單與樹狀表', kind: '元件', priority: 'P2', summary: '組織架構、分類。' },
   { title: '列印與 PDF 版面', kind: '元件', priority: 'P2', summary: '單據可列印、可寄送。' },
   { title: '富文字、留言與 @提及', kind: '元件', priority: 'P2', summary: '備註與內部協作。' },
-  { title: '登入', kind: '頁面樣板', priority: 'P0', summary: '帳號密碼表單與錯誤狀態（不含真正的驗證）。' },
-  { title: '列表頁', kind: '頁面樣板', priority: 'P0', summary: '頁首工具列＋資料表＋進階篩選＋已儲存檢視的組合。' },
-  { title: '詳情頁', kind: '頁面樣板', priority: 'P0', summary: '套用詳情頁版型的一筆示範資料。' },
-  { title: '表單頁', kind: '頁面樣板', priority: 'P0', summary: '分段表單、驗證與操作列。' },
   { title: '儀表板', kind: '頁面樣板', priority: 'P1', summary: '數字小卡、圖表與待辦清單。' },
   { title: '設定頁', kind: '頁面樣板', priority: 'P1', summary: '分組設定項與儲存提示。' },
   { title: '空白頁', kind: '頁面樣板', priority: 'P1', summary: '只有殼層的起點。' },

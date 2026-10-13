@@ -27,9 +27,17 @@ describe('展示目錄', () => {
     expect(PLANNED_ITEMS.some((p) => p.kind === '頁面樣板')).toBe(true);
   });
 
+  it('展示頁有 load（路由 /components/<id>）；頁面樣板改給 path（路由自己宣告），兩者剛好一個', () => {
+    for (const entry of SHOWCASE_ENTRIES) {
+      expect(!!entry.load !== !!entry.path).toBe(true);
+    }
+  });
+
   for (const entry of SHOWCASE_ENTRIES) {
+    const load = entry.load;
+    if (!load) continue;
     it(`${entry.title}（/components/${entry.id}）可以渲染，並有用途說明與示範區塊`, async () => {
-      const component = await entry.load();
+      const component = await load();
       const fixture = TestBed.createComponent(component);
       fixture.detectChanges();
       await fixture.whenStable();

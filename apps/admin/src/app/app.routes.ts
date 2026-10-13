@@ -17,13 +17,17 @@ export const routes: Routes = [
     loadComponent: () => import('./features/home/home-page.component').then((m) => m.HomePageComponent),
   },
   // 每個元件一頁：/components/<id>，清單在 showcase-registry.ts。
-  ...SHOWCASE_ENTRIES.map(
-    (entry): Route => ({
-      path: `components/${entry.id}`,
-      loadComponent: entry.load,
-      ...guarded(entry.access),
-      ...(entry.guardUnsaved ? { canDeactivate: [unsavedChangesGuard] } : {}),
-    }),
+  ...SHOWCASE_ENTRIES.flatMap((entry): Route[] =>
+    entry.load
+      ? [
+          {
+            path: `components/${entry.id}`,
+            loadComponent: entry.load,
+            ...guarded(entry.access),
+            ...(entry.guardUnsaved ? { canDeactivate: [unsavedChangesGuard] } : {}),
+          },
+        ]
+      : [],
   ),
   // 「權限控制」展示頁的路由守門示範：每個示範功能一頁，需要該功能的「檢視」。
   ...DEMO_FEATURES.map(
@@ -34,6 +38,11 @@ export const routes: Routes = [
       ...guarded(permissionOf(feature.id, 'view')),
     }),
   ),
+  // 頁面樣板：工單的列表、詳情、表單（權限與離開提醒在 tickets.routes.ts）。
+  {
+    path: 'templates/tickets',
+    loadChildren: () => import('./features/tickets/tickets.routes').then((m) => m.TICKET_ROUTES),
+  },
   {
     path: 'templates',
     loadComponent: () =>

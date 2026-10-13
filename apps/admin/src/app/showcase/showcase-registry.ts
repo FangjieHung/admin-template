@@ -26,12 +26,15 @@ export const SHOWCASE_GROUPS: readonly ShowcaseGroup[] = [
 ];
 
 export interface ShowcaseEntry {
-  /** 網址片段：`/components/<id>`。 */
+  /** 網址片段：`/components/<id>`（有 `path` 時只當識別）。 */
   id: string;
   title: string;
   group: ShowcaseGroupId;
   icon: string;
-  load: () => Promise<Type<unknown>>;
+  /** 展示頁：路由 `/components/<id>` 由這份清單產生。 */
+  load?: () => Promise<Type<unknown>>;
+  /** 頁面樣板：路由自己宣告在 app.routes.ts，這裡只給側欄與首頁連過去的網址（不含開頭的 /）。 */
+  path?: string;
   /** 需要的權限：沒有時側欄不列出、直接開網址顯示「沒有權限」頁（libs/access）。 */
   access?: AccessCheck;
   /** 頁面有未儲存的變更時，離開前先確認（頁面實作 HasUnsavedChanges）。 */
@@ -194,8 +197,13 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     icon: 'error',
     load: () => import('../features/error-pages/error-pages-page.component').then((m) => m.ErrorPagesPageComponent),
   },
+  // 工單的列表、詳情、表單三頁串成一個流程（features/tickets，路由在 tickets.routes.ts）。
+  { id: 'ticket-list', title: '列表頁', group: 'templates', icon: 'list_alt', path: 'templates/tickets', access: 'ticket:view' },
+  { id: 'ticket-detail', title: '詳情頁', group: 'templates', icon: 'article', path: 'templates/tickets/TK-2048', access: 'ticket:view' },
+  { id: 'ticket-form', title: '表單頁', group: 'templates', icon: 'edit_document', path: 'templates/tickets/TK-2048/edit', access: 'ticket:edit' },
+  { id: 'login', title: '登入', group: 'templates', icon: 'login', path: 'login' },
 ];
 
 export function showcaseRoute(entry: ShowcaseEntry): string {
-  return `/components/${entry.id}`;
+  return entry.path ? `/${entry.path}` : `/components/${entry.id}`;
 }

@@ -16,7 +16,7 @@ import { provideHeaderTitle } from '../../layout/header/header-title';
       <h2 id="templates-title" class="ui-text-subtitle">頁面樣板</h2>
       <p class="templates__lede">
         頁面樣板是用通用元件組成的整頁示範（登入、列表、詳情、表單…），新專案複製一頁、換掉示範資料就能開始。
-        已完成的樣板（角色與權限、錯誤頁）在側欄的「頁面樣板」群組；下面是還在規劃中的。
+        已完成的樣板（工單的列表、詳情、表單，登入，角色與權限，錯誤頁）在側欄的「頁面樣板」群組；下面是還在規劃中的。
       </p>
       <ul class="templates__list">
         @for (item of templates; track item.title) {
