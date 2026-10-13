@@ -1,6 +1,6 @@
 # ADR 0014：Brutal 新粗野質地與 Signal 訊號色配色
 
-- 狀態：已實作；相容清單是**提案，待使用者定案**
+- 狀態：已實作；相容清單 2026-10-13 由使用者定案
 - 日期：2026-10-13
 
 ## 背景
@@ -22,13 +22,13 @@
 5. **Signal 訊號色（`signal`，淺色）**：暖紙畫布 `#fbf2dc`、白卡片、墨黑文字與框線 `#141414`（次要文字 `#4a4438`）、墨黑側欄。**主色是訊號藍 `#2438e8`，不是訊號黃或訊號紅**：主色同時是焦點框、勾選框、連結與文字按鈕的顏色，要對每一階表面 ≥ 3:1——黃色在淺底上做不到（`#ffd60a` 對白只有 1.41:1；訊號藍對畫布 6.71:1），紅色又會和「危險」撞色。訊號黃 `#ffd60a` 改當面積最大的色塊 `primary-container`（對話框、選取、目前項目、表頭、螢光筆），粉紅 `#ffb3df` 是 `secondary-container`（選單、下拉、日期選擇器），薄荷 `#8deadf` 是 `tertiary-container`。狀態色：正向綠（圓點 `#13a14b`）、資訊青綠（`#0898a8`，避開主色的藍）、警示橘（`#ff8a00`，避開黃色色塊）、危險紅（`#ee2b24`）；`error` 加深到 `#a8000c`，放在三塊色塊上都 ≥ 4.5:1。CIEDE2000：主色對各狀態圓點與文字最低 26.8（資訊文字），狀態圓點彼此最低 26.2（警示對危險），三塊色塊彼此、色塊對畫布／卡片最低 23.3，圖表 4 色彼此最低 23.3。token 範圍比照 Graphite：一般淺色配色有的全部，加上 ADR 0012 列出的 5 個 `mat.theme()` 缺口與 tertiary 一組，`color-scheme: light`。
 6. **測試**：新增 `scripts/signal-palette.spec.mjs`（比照 `dark-palette.spec.mjs`）：文字 4.5:1、欄位邊界與主色 3:1 對畫布、每一階表面**與三塊色塊**都要成立；成對前景／底色 4.5:1；主色對狀態色、狀態色彼此、色塊彼此、圖表色彼此 CIEDE2000 ≥ 20。兩支 spec 共用的讀色碼與色差函式抽到 `scripts/palette-lib.mjs`。
 
-## 相容配色（提案，待使用者定案）
+## 相容配色
 
 對比掃描（`contrast-report.mjs`，一般文字 4.5:1、欄位／UI 邊界 3:1，每格 25 組 pair）：Brutal × 11 套配色、Signal × 11 個質地，共 21 格（Brutal × Signal 重疊），**全數合格**。
 
 **Brutal × 每套配色**
 
-| 配色 | 文字最低（門檻 4.5） | UI 邊界最低（門檻 3） | 提案 |
+| 配色 | 文字最低（門檻 4.5） | UI 邊界最低（門檻 3） | 結果 |
 | --- | --- | --- | --- |
 | Signal | 警示 chip 6.70 | 勾選框勾選底 5.30 | 相容，**預設** |
 | Candy | 側欄使用者狀態 4.62 | 欄位邊界 3.84 | 相容（紫／粉／淡紫三塊色塊都夠飽和） |
@@ -44,11 +44,11 @@
 
 **Signal × 每個質地**（文字最低都是警示 chip 6.70）
 
-| 質地 | UI 邊界最低 | 提案 |
+| 質地 | UI 邊界最低 | 結果 |
 | --- | --- | --- |
 | Brutal | 勾選框勾選底 5.30 | 相容 |
 | Material | 欄位邊界 5.38 | 相容 |
-| Grid | 欄位滑過 5.38 | 相容（實線框＋硬影撐得住高彩度） |
+| Grid | 欄位滑過 5.38 | **排除**（使用者定案，2026-10-13：對比合格，但 Grid 的框線加 Signal 的飽和色塊太像 Brutal，留給 Brutal 獨有） |
 | Editorial | 勾選框外框 5.76 | 相容（藍黃配墨黑像雜誌版面） |
 | Linen | 5.38 | **排除**（同 Candy：飽和色塊蓋掉紙張色階） |
 | Soft UI | 5.38 | **排除**（墨黑側欄與飽和色壓過浮雕的柔和光影） |
@@ -58,11 +58,11 @@
 | Ledger | 5.38 | **排除**（同 Candy：高彩度和帳冊的冷靜數字感衝突） |
 | Cockpit | 欄位邊界 4.60 | **排除**（深色優先質地，淺色配色一律排除） |
 
-提案已寫進 `TEXTURE_COMPATIBILITY`（逐一列出）與 `theme-compatibility.spec.ts`；使用者定案後改這兩處與本節的狀態即可。
+相容清單已於 2026-10-13 由使用者定案，並寫進 `TEXTURE_COMPATIBILITY`（逐一列出）與 `theme-compatibility.spec.ts`。
 
 ## 後果
 
-- 組合矩陣 11 × 11 = 121 格，相容 77 組（原 70 組＋Brutal 4＋Signal 進 Material、Grid、Editorial 3）。
+- 組合矩陣 11 × 11 = 121 格，相容 77 組（原 70 組＋Brutal 4＋Signal 進 Material、Grid、Editorial 3）；2026-10-13 定案時把 Grid × Signal 拿掉，Signal 只進 Material、Editorial，實際少 1 組。
 - Bundle：`texture-brutal.css` 19.13 kB／gzip 3.30 kB（Cockpit 17.17 kB）、`color-signal.css` 2.41 kB／gzip 0.77 kB，都是按需檔案。Admin 初始 bundle 582.84 → 583.05 kB（+0.21 kB）：`main.js` 539.46 → 539.67 kB（`theme.token.ts` 的兩筆選項與白名單），`styles.css` 43.38 kB 不變。其他按需質地與配色的 CSS 逐位元組不變。
 - `--app-field-border` 在 Brutal 是實例覆寫（決策 4）：之後新增的 Material 表單元件會自動吃到；自己畫邊框的原生欄位（`libs/ui` 的篩選面板、分頁列等）放在 `surface-container-high` 浮層上，維持配色層的值。
-- 驗收截圖：Material 元件總覽（Brutal × Signal／Candy／Sandstone／Azure；Material、Grid、Editorial × Signal）、首頁、資料表、載入／空白／錯誤、角色與權限頁與對話框（Brutal × Signal），以及 Grid × Signal 對 Brutal × Signal 的並排圖。
+- 驗收截圖：Material 元件總覽（Brutal × Signal／Candy／Sandstone／Azure；Material、Grid、Editorial × Signal；Grid × Signal 於定案時排除）、首頁、資料表、載入／空白／錯誤、角色與權限頁與對話框（Brutal × Signal），以及 Grid × Signal 對 Brutal × Signal 的並排圖。

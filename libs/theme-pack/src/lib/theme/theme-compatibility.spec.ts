@@ -26,7 +26,7 @@ describe('theme-compatibility（ADR 0007，2026-09-27 定案清單）', () => {
   const DECISIONS: Record<string, { excluded: string[]; defaultThemeId: string }> = {
     material: { excluded: ['candy'], defaultThemeId: 'verdant' },
     linen: { excluded: ['candy', 'oled', 'signal', 'riso-duo'], defaultThemeId: 'sandstone' },
-    grid: { excluded: [], defaultThemeId: 'verdant' },
+    grid: { excluded: ['signal'], defaultThemeId: 'verdant' },
     'soft-ui': { excluded: ['sandstone', 'verdant', 'oled', 'signal', 'riso-duo'], defaultThemeId: 'cool-grey' },
     clay: {
       excluded: ['verdant', 'sandstone', 'azure', 'candy', 'mist-ink', 'glacier-blue', 'oled', 'signal', 'riso-duo'],
@@ -38,24 +38,24 @@ describe('theme-compatibility（ADR 0007，2026-09-27 定案清單）', () => {
       excluded: ['verdant', 'midnight', 'sandstone', 'candy', 'graphite', 'oled', 'signal', 'riso-duo'],
       defaultThemeId: 'glacier-blue',
     },
-    // ADR 0011 提案（待使用者定案）；Graphite、OLED 的格子是 ADR 0012 提案（待使用者定案）
+    // ADR 0011；Graphite、OLED 的格子是 ADR 0012（2026-10-13 由使用者定案）
     ledger: { excluded: ['candy', 'signal', 'riso-duo'], defaultThemeId: 'azure' },
-    // ADR 0012 提案（待使用者定案）：只相容深色配色
+    // ADR 0012（2026-10-13 由使用者定案）：只相容深色配色
     cockpit: {
       excluded: ['verdant', 'sandstone', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue', 'signal', 'riso-duo'],
       defaultThemeId: 'graphite',
     },
-    // ADR 0014 提案（待使用者定案）：只相容保有彩度的淺色配色；Signal 另進 Material、Grid、Editorial（Riso 雙色是 ADR 0015 提案）
+    // ADR 0014（2026-10-13 由使用者定案）：只相容保有彩度的淺色配色；Signal 另進 Material、Editorial（Grid × Signal 依美感排除，太像 Brutal）
     brutal: {
       excluded: ['verdant', 'midnight', 'cool-grey', 'mist-ink', 'glacier-blue', 'graphite', 'oled', 'riso-duo'],
       defaultThemeId: 'signal',
     },
-    // ADR 0015 提案（待使用者定案）：只相容兩種墨分得開的淺色配色；Riso 雙色另進 Material、Grid、Editorial
+    // ADR 0015（2026-10-13 由使用者定案）：只相容兩種墨分得開的淺色配色；Riso 雙色另進 Material、Grid、Editorial
     riso: {
       excluded: ['verdant', 'midnight', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue', 'graphite', 'oled'],
       defaultThemeId: 'riso-duo',
     },
-    // ADR 0016 提案（待使用者定案）：淺色紙感配色＋Midnight（黑板／藍圖）
+    // ADR 0016（2026-10-13 由使用者定案）：淺色紙感配色＋Midnight（黑板／藍圖）
     sketch: {
       excluded: ['cool-grey', 'candy', 'graphite', 'oled'],
       defaultThemeId: 'sandstone',

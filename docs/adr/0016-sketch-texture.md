@@ -1,6 +1,6 @@
 # ADR 0016：Sketch 手繪質地
 
-- 狀態：已實作；相容清單是**提案，待使用者定案**
+- 狀態：已實作；相容清單 2026-10-13 由使用者定案
 - 日期：2026-10-13
 
 ## 背景
@@ -33,11 +33,11 @@
    5. **高對比**（`prefers-contrast: more`、`forced-colors: active`）：不規則圓角全部換回一般圓角、筆線改 100% 文字墨，拿掉抖動濾鏡（改回元素自己的直框）、點格、排線與手繪底線。**減少動態**：滑過時不重畫（`-alt` 等於原形狀），轉場時長本來就由 `--app-motion-fast` 歸零。
 5. **字型：只多載一個標題用的 Kalam 700**，放在 `sketch/_fonts.scss`，跟著 `texture-sketch.css` 按需下載（Google Fonts 依 unicode-range 拆檔，只下載拉丁字母那份）。選它的理由：印刷體的手寫字（字母不連筆、字腔開闊、x 高度大），20–32px 一眼讀得出來；Caveat 是連筆草寫、x 高度小，20px 時字母糊在一起；Patrick Hand 只有 400 一個字重，和蘋方、微軟正黑的粗體中文標題放在一起一邊粗一邊細。英文內文用裝置無襯線（同 Brutal、Riso），數字輸入與 `.ui-text-numeric` 用全站已載入的 IBM Plex Mono。
 
-## 相容配色（提案，待使用者定案）
+## 相容配色
 
 對比掃描（`contrast-report.mjs`，一般文字 4.5:1、欄位／UI 邊界 3:1，每格 25 組 pair）：Sketch × 12 套配色**全數合格**。Sketch 的層次只靠「深色的筆畫在紙上」，不依賴第二色，所以相容與否主要看美感：紙感、低彩度、筆線讀得出來。
 
-| 配色 | 文字最低（門檻 4.5） | UI 邊界最低（門檻 3） | 提案 |
+| 配色 | 文字最低（門檻 4.5） | UI 邊界最低（門檻 3） | 結果 |
 | --- | --- | --- | --- |
 | Sandstone | 側欄選取文字 4.89 | 欄位邊界 4.62 | 相容，**預設**（暖色筆記紙＋棕墨，最像筆記本） |
 | Verdant | 警示 chip 4.78 | 欄位邊界 3.26 | 相容（米白紙＋綠色螢光筆） |
@@ -52,11 +52,11 @@
 | Graphite | 側欄選取文字 6.91 | 勾選框外框 4.55 | **排除**（炭灰底配橘，筆線讀起來像 UI 的亮邊而不是手繪） |
 | OLED | 狀態徽章 6.93 | 勾選框外框 4.24 | **排除**（純黑上的淺色筆線像發光邊線，和 Cockpit 混淆） |
 
-提案已寫進 `TEXTURE_COMPATIBILITY`（逐一列出）與 `theme-compatibility.spec.ts`；使用者定案後改這兩處與本節的狀態即可。
+相容清單已於 2026-10-13 由使用者定案，並寫進 `TEXTURE_COMPATIBILITY`（逐一列出）與 `theme-compatibility.spec.ts`。
 
 ## 後果
 
-- 組合矩陣 13 × 12 = 156 格，相容 92 組（原 84 組＋Sketch 8）。
+- 組合矩陣 13 × 12 = 156 格，原相容 92 組（原 84 組＋Sketch 8）；2026-10-13 定案時把 Grid × Signal 拿掉，現為 91 組。
 - Bundle：`texture-sketch.css` 22.12 kB／gzip 3.60 kB（Riso 20.86 kB），按需檔案。Admin 初始 bundle 583.26 → 583.44 kB（+0.18 kB）：`main.js` 539.88 → 540.07 kB（`theme.token.ts` 的一筆選項與白名單），主樣式 `styles.css` 逐位元組不變；其他按需質地與配色的 CSS 逐位元組不變。文件裡避免直接寫出會被 Tailwind 當成 utility 的 CSS 值（見 ADR 0015）。
 - 卡片的抖動筆線是 `.ui-card::before`：Sketch 下卡片自己不能再用 `::before`，也不能用 `overflow: hidden`（會裁掉抖出框外的線；`overflow: clip` 可以，質地用 `overflow-clip-margin` 放寬了裁切邊）。卡片的定位基準用權重 0-0-0 的 `:where()` 給，元件自己寫的定位方式一定贏。
 - 對話框的筆線與排線畫在 `.mat-mdc-dialog-inner-container` 的兩個偽元素上，跟著開啟時的淡入；對話框本體從 0.8 倍放大的 150ms 內，外框線與本體會短暫不同步。
