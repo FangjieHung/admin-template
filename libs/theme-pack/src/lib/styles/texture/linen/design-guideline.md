@@ -20,7 +20,7 @@
 | 陰影 level1–4 | `--mat-sys-level1` … `-level4` | 全部 `none` | — | 已全部改為 `none` |
 | 邊線 | `--mat-sys-outline-variant` | 1px，淡 | 卡片、對話框、選單、表格列線 | 對話框、選單、datepicker 已補 1px 淡框 |
 | 字體 display | `--font-display` | 無襯線（與 body 同字族，靠字重與字級區分） | 頁面大標、大數字 | 已改為 `var(--font-body)`（無襯線） |
-| 字體 body | `--font-body` | Inter ＋ Noto Sans TC | 內文、小節標、表格、表單 | — |
+| 字體 body | `--font-body` | Inter ＋ 系統中文字（`--font-zh`） | 內文、小節標、表格、表單 | — |
 | 字體 mono | `--font-mono` | IBM Plex Mono | 代碼類資料 | — |
 | 視覺密度 | Material 預設 | 表格列高 52px | 表格、表單 | — |
 | 背景紋理 | 作用在 `body`、`.sidenav-container` | 橫＋直兩向細線交織成布紋，線色 `--mat-sys-outline-variant` 約 20% 起調；一眼看得出是布，但文字對比仍 ≥ 4.5:1 | 只在頁面底層，卡片等表面維持實色 | 已加直線、加深到 20% |

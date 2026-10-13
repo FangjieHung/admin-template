@@ -16,7 +16,7 @@
 | 面板 / 側欄 | `--aero-panel` / `--aero-rail` | surface 64% / 72% 透明 | 卡片、表單、導覽 |
 | 邊線 | `--aero-edge` | surface 亮邊，1px | 面板、卡片、次要按鈕 |
 | 背景模糊 | `backdrop-filter` | 16–26px | 面板；減少透明度時停用 |
-| 字體 | `--font-display` / `--font-body` | Plus Jakarta Sans / DM Sans，中文接 Noto Sans TC | 標題、內文 |
+| 字體 | `--font-display` / `--font-body` | Plus Jakarta Sans / DM Sans，中文接系統中文字（`--font-zh`） | 標題、內文 |
 | 視覺密度 | `--dt-cell-padding-block` | 0.875rem | 資料表 |
 
 ## 層次表現

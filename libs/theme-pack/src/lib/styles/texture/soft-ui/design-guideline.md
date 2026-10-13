@@ -23,8 +23,8 @@
 | 陰影 level4 | `--mat-sys-level4` | 同上 16px／28px | （recipe 未直接使用） | — |
 | 內凹陰影 | `--soft-inset-small`／`--soft-inset`／`--soft-inset-deep` | 3／6／10px 的內陰影（暗在左上、亮在右下） | 按下、選中的膠囊與導覽、狀態徽章／輸入框／聚焦中的輸入框 | — |
 | 邊線 | — | **無**（所有卡片、按鈕、對話框 `border: 0`）；表格列之間 1px `--mat-sys-outline` 22% | 表格列線 | — |
-| 字體 display | `--font-display` | Plus Jakarta Sans ＋ Noto Sans TC | 大數字、頁面標題（`.ui-text-display`／`-title`） | — |
-| 字體 body | `--font-body` | DM Sans → Inter ＋ Noto Sans TC | 內文、小節標、表單 | — |
+| 字體 display | `--font-display` | Plus Jakarta Sans ＋ 系統中文字（`--font-zh`） | 大數字、頁面標題（`.ui-text-display`／`-title`） | — |
+| 字體 body | `--font-body` | DM Sans → Inter ＋ 系統中文字（`--font-zh`） | 內文、小節標、表單 | — |
 | 字體 mono | `--font-mono` | IBM Plex Mono | 代碼類資料 | — |
 | 視覺密度 | `--mat-table-row-item-container-height` | 52px（見已知問題：目前沒作用到 Admin 表格） | 表格 | — |
 | 背景紋理 | — | 無；畫布、側欄、卡片全部是 `--mat-sys-background` 同一色 | — | — |

@@ -24,8 +24,8 @@
 | 按鈕陰影 | `--clay-shadow-button` | 帶主色的投影 ＋ 內側邊光 | 所有按鈕、導覽膠囊、品牌標、頭像 | — |
 | 按下陰影 | `--clay-shadow-pressed` | 全內陰影 | 按下中的按鈕、輸入框、側欄選中項、使用者卡 | — |
 | 邊線 | — | **無**（`border: 0`），邊緣由內側高光描出 | — | — |
-| 字體 display | `--font-display` | **Nunito**（700–900，`_fonts.scss` 載入）＋ Noto Sans TC | `h1–h4`、`.section-title`、`.ui-text-*`、`.stat-card__value` | — |
-| 字體 body | `--font-body` | **DM Sans**（`_fonts.scss` 載入）→ Inter ＋ Noto Sans TC | 內文、表單 | — |
+| 字體 display | `--font-display` | **Nunito**（700–900，`_fonts.scss` 載入）＋ 系統中文字（`--font-zh`） | `h1–h4`、`.section-title`、`.ui-text-*`、`.stat-card__value` | — |
+| 字體 body | `--font-body` | **DM Sans**（`_fonts.scss` 載入）→ Inter ＋ 系統中文字（`--font-zh`） | 內文、表單 | — |
 | 字體 mono | `--font-mono` | IBM Plex Mono | 代碼類資料 | — |
 | 字重 | — | 標題 800–900、caption 700，整體偏粗 | 文字樣式 | — |
 | 視覺密度 | `--mat-table-row-item-container-height` | 56px（見已知問題：目前沒作用到 Admin 表格）；按鈕與圖示按鈕最小 44px | 表格、按鈕 | — |

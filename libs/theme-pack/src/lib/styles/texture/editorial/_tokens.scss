@@ -14,7 +14,7 @@
   // 側欄滑過／目前項目：比全站預設（12%）淡，維持編輯式的安靜層次（原 recipes 的 7% 混色）。
   --app-shell-hover: color-mix(in srgb, var(--app-shell-on) 7%, transparent);
 
-  --font-zh: 'Noto Sans TC', system-ui, sans-serif;
+  --font-zh: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', system-ui, sans-serif;
   // 英文襯線：額外載入的輕量網頁字（Lora，見 _fonts.scss）；中文襯線只用系統內建（未安裝則退回 --font-zh 的無襯線）。
   --font-en: 'Lora', 'Songti TC', var(--font-zh), serif;
   --font-display: var(--font-en);

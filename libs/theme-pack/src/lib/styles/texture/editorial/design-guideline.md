@@ -21,8 +21,8 @@
 | 陰影 level4 | `--mat-sys-level4` | `none` | 對話框、選單 | 已於 ticket 07 實作，改由髮絲框＋遮罩界定 |
 | 邊線（髮絲線） | `--mat-sys-outline-variant` | 1px | 區塊分隔線、對話框與選單外框、表格列線 | 已於 ticket 07 實作（對話框標題下、動作列上、表格列間） |
 | 強調線 | `--mat-sys-on-surface` | 1px（大標下方可 2px） | 頁面大標下方、表頭下方 | 已於 ticket 07 實作：`.topbar` 底線 2px、`.mat-mdc-header-row` 底線 2px |
-| 字體 display | `--font-display` | 襯線：英文載入 **Lora**（Google Fonts，400/500/600/700，見 `_fonts.scss`）；中文用系統內建襯線（`"Songti TC"`），沒有則退回 `--font-zh`（Noto Sans TC 等無襯線），不下載中文襯線字檔 | 頁面大標（`.topbar-heading h1`）、卡片／表單標題（`.ui-text-subtitle`）、對話框標題（`[mat-dialog-title]`）、大數字（`.ui-text-display`） | 已於 ticket 07 實作 |
-| 字體 body | `--font-body` | Helvetica Neue ＋ Noto Sans TC | 內文、表格、表單、按鈕 | — |
+| 字體 display | `--font-display` | 襯線：英文載入 **Lora**（Google Fonts，400/500/600/700，見 `_fonts.scss`）；中文用系統內建襯線（`"Songti TC"`），沒有則退回 `--font-zh`（裝置的無襯線中文字），不下載中文襯線字檔 | 頁面大標（`.topbar-heading h1`）、卡片／表單標題（`.ui-text-subtitle`）、對話框標題（`[mat-dialog-title]`）、大數字（`.ui-text-display`） | 已於 ticket 07 實作 |
+| 字體 body | `--font-body` | Helvetica Neue ＋ 系統中文字（`--font-zh`） | 內文、表格、表單、按鈕 | — |
 | 字體 mono | `--font-mono` | IBM Plex Mono | 代碼類資料 | — |
 | 視覺密度 | `--mat-table-row-item-container-height` | 表格列高 52px；內文行高 1.6 | 表格、內文 | — |
 | 背景紋理 | — | 無，純色畫布（`--mat-sys-surface`） | 頁面底層 | — |
@@ -76,7 +76,7 @@
 
 ## 實作紀錄（ticket 07，2026-09-26）
 
-- 英文襯線最終選用 **Lora**（Google Fonts，`wght@400;500;600;700`），透過 `editorial/_fonts.scss` 用 `@import url(...)` 載入 CSS，仿照 `clay/_fonts.scss` 的作法；在 `apps/admin/src/styles.scss` 與 clay 字型並列 `@use`。中文沿用系統襯線 `"Songti TC"`，退回鏈為 `--font-zh`（Noto Sans TC/sans-serif），不下載任何 CJK 襯線檔。字重只到 700：原本 `.ui-text-display`／`.ui-text-title`／`.topbar-heading h1` 的 `font-weight: 800` 一併降為 700，避免瀏覽器對未載入字重做假粗體。
+- 英文襯線最終選用 **Lora**（Google Fonts，`wght@400;500;600;700`），透過 `editorial/_fonts.scss` 用 `@import url(...)` 載入 CSS，仿照 `clay/_fonts.scss` 的作法；在 `apps/admin/src/styles.scss` 與 clay 字型並列 `@use`。中文沿用系統襯線 `"Songti TC"`，退回鏈為 `--font-zh`（裝置的無襯線中文字），不下載任何 CJK 襯線檔。字重只到 700：原本 `.ui-text-display`／`.ui-text-title`／`.topbar-heading h1` 的 `font-weight: 800` 一併降為 700，避免瀏覽器對未載入字重做假粗體。
 - 對話框圓角除了 `.mat-mdc-dialog-surface { border-radius: var(--mat-sys-corner-extra-large) !important }`，另外加了 `.cdk-overlay-pane .mat-mdc-dialog-surface` 的同值覆寫（specificity 0-4-0）作為保險，防止 Material 質地那份 `[data-paradigm='material'] .mat-mdc-dialog-surface`（0-2-0 + !important）規則同時載入時搶贏。
 - 修正圓角 token 對應：對話框改用 `--mat-sys-corner-extra-large`、選單／日期選擇器改用 `--mat-sys-corner-large`（原本兩者共用 `-large`，與造型規格表不符，但目標值都是 0，視覺上無差異）。
 - 新增「強調線」：`.topbar` 加 `border-bottom: 2px solid var(--mat-sys-on-surface)`；`.mat-mdc-header-row` 同樣加 2px 底線；`.mat-mdc-row` 之間 1px `--mat-sys-outline-variant` 髮絲線（最後一列不畫）。

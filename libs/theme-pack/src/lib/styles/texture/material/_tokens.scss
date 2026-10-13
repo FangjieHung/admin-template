@@ -16,7 +16,7 @@
   --mat-sys-level4: 0 16px 40px color-mix(in srgb, var(--app-shadow-tint) 10%, transparent);
 
   // 字體：中英分軌（spec §6）。中文固定、英文依質地。
-  --font-zh: 'Noto Sans TC', system-ui, sans-serif;
+  --font-zh: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', system-ui, sans-serif;
   --font-en: 'Plus Jakarta Sans', 'Inter';
   --font-display: var(--font-en), var(--font-zh);
   --font-body: 'Inter', var(--font-zh);

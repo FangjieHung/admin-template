@@ -129,7 +129,14 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 
 ### 字體（質地包提供，中英分軌）
 
-`--font-zh`（中文固定 Noto）、`--font-en`（英文依質地）、`--font-display`、`--font-body`、`--font-mono`
+`--font-zh`（中文，裝置的系統字）、`--font-en`（英文依質地）、`--font-display`、`--font-body`、`--font-mono`
+
+字型規則（每個質地都一樣）：
+
+- **專案不提供任何字型檔**（不放 `.woff2`／`.ttf`，也不用 `@font-face` 指向本地檔案）。
+- **中文一律用裝置自己的字型**：`--font-zh: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', system-ui, sans-serif`（macOS／iOS 蘋方、Windows 微軟正黑、Linux／Android 思源黑體）。不從 Google Fonts 載入 Noto Sans TC 等中文網頁字。`apps/admin/src/styles.scss` 的 `mat.theme()` `plain-family`／`brand-family` 用同一組中文字。
+- **英文網頁字只從 Google Fonts 載入，而且只在風格明顯不同於 Noto Sans／系統無襯線時才載**（例如 Editorial 的 Lora、Clay 的 Nunito）。按需質地的英文字放在該質地的 `_fonts.scss`，跟著 `texture-<id>.css` 一起下載；Material 常駐用的 Inter、Plus Jakarta Sans、IBM Plex Mono 在 admin `index.html` 的 `<link>`。
+- 寫字體時先放英文字族、再接 `var(--font-zh)`，例：`--font-body: 'Inter', var(--font-zh);`。
 
 ### 間距
 

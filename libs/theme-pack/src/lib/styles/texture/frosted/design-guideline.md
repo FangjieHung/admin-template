@@ -25,8 +25,8 @@
 | 面板色 | `--frost-panel` | `--mat-sys-surface` 88% 透明 | 卡片、對話框、選單、次要按鈕 | — |
 | 邊線 | `--frost-border` | 1px，`--mat-sys-outline-variant` 45% 混 surface（極淡的霧邊） | 卡片、對話框、選單、次要按鈕、側欄右緣（欄位改用 `--app-field-border`，見「表單」） | — |
 | 背景模糊 | `backdrop-filter` | 卡片 `blur(20px) saturate(1.08)`、側欄 18px、對話框／選單 20px；對話框遮罩 `--app-scrim-blur` 6px | 所有面板 | `prefers-reduced-transparency: reduce` 時全部關掉 |
-| 字體 display | `--font-display` | Plus Jakarta Sans ＋ Noto Sans TC（字距 -0.035em） | 頁面大標、`.ui-text-display`／`-title` | — |
-| 字體 body | `--font-body` | Plus Jakarta Sans ＋ Noto Sans TC（與 display 同字族） | 內文、小節標、表單 | — |
+| 字體 display | `--font-display` | Plus Jakarta Sans ＋ 系統中文字（`--font-zh`）（字距 -0.035em） | 頁面大標、`.ui-text-display`／`-title` | — |
+| 字體 body | `--font-body` | Plus Jakarta Sans ＋ 系統中文字（`--font-zh`）（與 display 同字族） | 內文、小節標、表單 | — |
 | 字體 mono | `--font-mono` | IBM Plex Mono | 代碼類資料 | — |
 | 視覺密度 | `--mat-table-row-item-container-height` | 54px（見已知問題：目前沒作用到 Admin 表格）；按鈕與圖示按鈕最小 44px | 表格、按鈕 | — |
 | 背景紋理 | `.app-shell` 背景 | 無紋理；頂端中央一團 `--mat-sys-primary` 42% 的橢圓光暈，右上一團 `--app-viz-2` 12% 的淡光，底色 `--mat-sys-background` | 頁面底層 | — |

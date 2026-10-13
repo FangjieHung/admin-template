@@ -4,5 +4,6 @@
   // --breakpoint-xs: 24rem;
   // --spacing-page: 1.5rem;
 
-  --font-display: "Noto Sans TC", "Noto Serif TC", "sans-serif";
+  // 中文用裝置的系統字（範本不提供字型檔），與 theme-pack 各質地的 --font-zh 一致。
+  --font-display: "PingFang TC", "Microsoft JhengHei", "Noto Sans CJK TC", system-ui, sans-serif;
 }

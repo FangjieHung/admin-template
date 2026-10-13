@@ -24,8 +24,9 @@ html {
         tertiary: mat.$cyan-palette,
       ),
       typography: (
-        plain-family: 'Inter, "Noto Sans TC", system-ui, sans-serif',
-        brand-family: '"Plus Jakarta Sans", "Noto Sans TC", system-ui, sans-serif',
+        // 中文一律用裝置的系統字（不提供字型檔）：與各質地 --font-zh 同一組。
+        plain-family: 'Inter, "PingFang TC", "Microsoft JhengHei", "Noto Sans CJK TC", system-ui, sans-serif',
+        brand-family: '"Plus Jakarta Sans", "PingFang TC", "Microsoft JhengHei", "Noto Sans CJK TC", system-ui, sans-serif',
       ),
       density: 0,
     )

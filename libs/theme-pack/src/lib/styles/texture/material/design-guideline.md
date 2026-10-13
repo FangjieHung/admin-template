@@ -22,8 +22,8 @@ Google 風的親切工作台：大圓角、白色卡片輕輕浮在畫布上，�
 | 陰影 level3 | `--mat-sys-level3` | `0 8px 24px` 約 7% | 選單、日期選擇器、下拉清單 | — |
 | 陰影 level4 | `--mat-sys-level4` | `0 16px 40px` 約 10% | 對話框 | — |
 | 邊線 | `--mat-sys-outline-variant` | 1px hairline，幾乎看不見 | 卡片外框 | — |
-| 字體 display | `--font-display` | Plus Jakarta Sans ＋ Noto Sans TC | 頁面大標、大數字、小節標 | — |
-| 字體 body | `--font-body` | Inter ＋ Noto Sans TC | 內文、表格、表單 | — |
+| 字體 display | `--font-display` | Plus Jakarta Sans ＋ 系統中文字（`--font-zh`） | 頁面大標、大數字、小節標 | — |
+| 字體 body | `--font-body` | Inter ＋ 系統中文字（`--font-zh`） | 內文、表格、表單 | — |
 | 字體 mono | `--font-mono` | IBM Plex Mono | 訂單編號、車牌等代碼 | — |
 | 視覺密度 | Material 預設 | 表格列高 52px、欄位 56px | 表格、表單 | — |
 | 背景紋理 | — | 無，純色畫布 | 頁面底層 | — |
