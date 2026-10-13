@@ -6,7 +6,7 @@
 
 新增或修改 `libs/ui` 的元件、`apps/admin` 的展示頁或殼層之前，先讀完：
 
-- 12 份質地準則：`libs/theme-pack/src/lib/styles/texture/{material,linen,grid,soft-ui,clay,editorial,frosted,aero,ledger,cockpit,brutal,riso}/design-guideline.md`
+- 13 份質地準則：`libs/theme-pack/src/lib/styles/texture/{material,linen,grid,soft-ui,clay,editorial,frosted,aero,ledger,cockpit,brutal,riso,sketch}/design-guideline.md`
 - 術語：`docs/design-system/theme-glossary.md`
 - 可用 token 與 `ui-*` class：`libs/theme-pack/src/lib/styles/CONTRACT.md`
 

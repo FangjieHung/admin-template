@@ -77,7 +77,7 @@ npm start          # nx serve admin → http://localhost:4200/
 
 ## 雙軸主題系統
 
-**質地**管造型（圓角、陰影、字體、背景紋理、元件 recipe），**配色**管顏色；兩者各自切換。目前有 Material、Linen、Grid、Soft UI、Clay、Editorial、Frosted、Aero、Ledger、Cockpit、Brutal、Riso 十二種質地（Ledger 是高密度質地：視覺密度屬於質地，不另設切換軸，ADR 0011；Cockpit 是深色優先的儀表艙質地，層次靠發光，只相容深色配色，ADR 0012；Brutal 是新粗野海報質地，層次靠飽和色塊＋粗墨框，ADR 0014；Riso 是孔版印刷的文創刊物質地，層次靠網點與疊印，ADR 0015），Verdant、Midnight、Sandstone、Azure、Cool Grey、Candy、Mist Ink、Glacier Blue、Graphite、OLED、Signal、Riso 雙色十二套配色（Midnight、Graphite、OLED 是深色；Signal 是高彩度的訊號色；Riso 雙色是中藍＋螢光粉兩種孔版特別色）。每個質地只開放相容的配色，清單只存在 `libs/theme-pack/src/lib/theme/theme.token.ts` 的 `TEXTURE_COMPATIBILITY`（ADR 0007）。
+**質地**管造型（圓角、陰影、字體、背景紋理、元件 recipe），**配色**管顏色；兩者各自切換。目前有 Material、Linen、Grid、Soft UI、Clay、Editorial、Frosted、Aero、Ledger、Cockpit、Brutal、Riso、Sketch 十三種質地（Ledger 是高密度質地：視覺密度屬於質地，不另設切換軸，ADR 0011；Cockpit 是深色優先的儀表艙質地，層次靠發光，只相容深色配色，ADR 0012；Brutal 是新粗野海報質地，層次靠飽和色塊＋粗墨框，ADR 0014；Riso 是孔版印刷的文創刊物質地，層次靠網點與疊印，ADR 0015；Sketch 是手繪草稿／白板筆記質地，層次靠手繪線條的粗細與描的次數，表格與欄位維持直線，ADR 0016），Verdant、Midnight、Sandstone、Azure、Cool Grey、Candy、Mist Ink、Glacier Blue、Graphite、OLED、Signal、Riso 雙色十二套配色（Midnight、Graphite、OLED 是深色；Signal 是高彩度的訊號色；Riso 雙色是中藍＋螢光粉兩種孔版特別色）。每個質地只開放相容的配色，清單只存在 `libs/theme-pack/src/lib/theme/theme.token.ts` 的 `TEXTURE_COMPATIBILITY`（ADR 0007）。
 
 - Material 是常駐質地，其餘質地是按需質地：各自編成 `texture-<id>.css`，切換時才下載（ADR 0010）。配色同理：Verdant 常駐，其餘配色各自編成 `color-<id>.css`（ADR 0013）。
 - 字型：專案不提供字型檔；中文一律用裝置的系統字，英文網頁字只在風格明顯不同時才從 Google Fonts 載入（CONTRACT.md「字體」）。
