@@ -1,0 +1,77 @@
+<div class="signature-pad" [class.signature-pad--disabled]="disabled()">
+  <div class="signature-pad__mode-switch" role="group" [attr.aria-label]="labels.drawTab + '/' + labels.typeTab">
+    <button
+      type="button"
+      mat-stroked-button
+      class="signature-pad__mode-btn"
+      [class.is-active]="mode() === 'draw'"
+      [attr.aria-pressed]="mode() === 'draw'"
+      [disabled]="disabled()"
+      (click)="switchMode('draw')"
+    >
+      {{ labels.drawTab }}
+    </button>
+    <button
+      type="button"
+      mat-stroked-button
+      class="signature-pad__mode-btn"
+      [class.is-active]="mode() === 'type'"
+      [attr.aria-pressed]="mode() === 'type'"
+      [disabled]="disabled()"
+      (click)="switchMode('type')"
+    >
+      {{ labels.typeTab }}
+    </button>
+  </div>
+
+  @if (mode() === 'draw') {
+    <canvas
+      #canvas
+      class="signature-pad__canvas"
+      width="480"
+      height="160"
+      tabindex="0"
+      [attr.aria-disabled]="disabled() || null"
+      [attr.aria-label]="labels.canvasAriaLabel"
+      (pointerdown)="onPointerDown($event)"
+      (pointermove)="onPointerMove($event)"
+      (pointerup)="onPointerUp()"
+      (pointerleave)="onPointerUp()"
+      (pointercancel)="onPointerUp()"
+    ></canvas>
+    @if (!hasDrawing()) {
+      <p class="signature-pad__hint">{{ labels.emptyDrawHint }}</p>
+    }
+  } @else {
+    <mat-form-field class="signature-pad__typed-field">
+      <mat-label>{{ labels.typedNameLabel }}</mat-label>
+      <input
+        matInput
+        [value]="typedName()"
+        [disabled]="disabled()"
+        (input)="onTypedNameInputEvent($event)"
+        [placeholder]="labels.typedNamePlaceholder"
+      />
+    </mat-form-field>
+  }
+
+  <button type="button" mat-button (click)="clear()" [disabled]="disabled() || !hasSignatureInput()">
+    {{ labels.clear }}
+  </button>
+
+  @if (requireAcknowledge()) {
+    <mat-checkbox [checked]="acknowledged()" [disabled]="disabled()" (change)="onAcknowledgeChange($event)">
+      {{ labels.acknowledge }}
+    </mat-checkbox>
+  }
+
+  @if (labels.notice) {
+    <p class="signature-pad__notice">{{ labels.notice }}</p>
+  }
+
+  @if (showConfirmButton()) {
+    <button type="button" mat-flat-button [disabled]="!canConfirm()" (click)="confirm()">
+      {{ submitting() ? labels.signing : labels.confirmSign }}
+    </button>
+  }
+</div>

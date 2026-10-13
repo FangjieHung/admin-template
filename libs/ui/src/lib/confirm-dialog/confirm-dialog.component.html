@@ -1,0 +1,16 @@
+@if (data.title) {
+  <h2 mat-dialog-title>{{ data.title }}</h2>
+}
+<div mat-dialog-content class="confirm-dialog__content">{{ data.message }}</div>
+<div mat-dialog-actions align="end">
+  <button mat-button type="button" [mat-dialog-close]="false">{{ cancelLabel }}</button>
+  <button
+    matButton="filled"
+    type="button"
+    class="confirm-dialog__confirm"
+    [class.confirm-dialog__confirm--danger]="tone === 'danger'"
+    [mat-dialog-close]="true"
+  >
+    {{ confirmLabel }}
+  </button>
+</div>

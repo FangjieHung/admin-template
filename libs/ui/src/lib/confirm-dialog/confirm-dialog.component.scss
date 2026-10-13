@@ -1,0 +1,13 @@
+:host {
+  display: block;
+}
+
+.confirm-dialog__content {
+  color: var(--mat-sys-on-surface);
+}
+
+// 不可復原的動作：確認鈕改用錯誤色（Material 22 的 color="warn" 已不再改變 M3 按鈕顏色）。
+.confirm-dialog__confirm--danger {
+  --mat-button-filled-container-color: var(--mat-sys-error);
+  --mat-button-filled-label-text-color: var(--mat-sys-on-error);
+}

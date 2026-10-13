@@ -1,0 +1,54 @@
+/*
+ * 寬度由外層容器決定（對話框內會撐滿），不在這裡寫死上限；
+ * 畫布高度可由外層用 --lib-signature-pad-canvas-height 覆寫（例如對話框內加大，方便手指簽名）。
+ */
+:host {
+  display: block;
+}
+
+.signature-pad {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.signature-pad__mode-switch {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.signature-pad__mode-btn.is-active {
+  font-weight: 600;
+}
+
+.signature-pad__canvas {
+  width: 100%;
+  height: var(--lib-signature-pad-canvas-height, 10rem);
+  border: 1px dashed var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-small);
+  touch-action: none;
+  background: var(--mat-sys-surface);
+  cursor: crosshair;
+}
+
+/* 簽名說明與附註統一在內文下一階（0.875rem）。 */
+.signature-pad__hint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.signature-pad__typed-field {
+  width: 100%;
+}
+
+.signature-pad__notice {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--app-warning-fg);
+}
+
+.signature-pad--disabled .signature-pad__canvas {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

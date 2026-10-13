@@ -1,0 +1,17 @@
+<nav class="language-switcher" [attr.aria-label]="label()">
+  @if (showIcon()) {
+    <span class="material-symbols-rounded language-switcher__icon" aria-hidden="true">language</span>
+  }
+  @for (option of i18n.locales; track option.id) {
+    <button
+      type="button"
+      class="language-switcher__option"
+      [class.language-switcher__option--active]="i18n.locale() === option.id"
+      [attr.aria-pressed]="i18n.locale() === option.id"
+      [attr.lang]="option.htmlLang"
+      (click)="i18n.setLocale(option.id)"
+    >
+      {{ option.nativeName }}
+    </button>
+  }
+</nav>

@@ -1,0 +1,44 @@
+:host {
+  display: block;
+}
+
+.language-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0;
+  font-size: 0.875rem;
+}
+
+.language-switcher__icon {
+  font-size: 1.125rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.language-switcher__option {
+  min-height: 2rem;
+  padding: 0 0.625rem;
+  border: 0;
+  border-radius: var(--mat-sys-corner-full);
+  background: transparent;
+  color: var(--mat-sys-on-surface-variant);
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--mat-sys-surface-container-high);
+  }
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+}
+
+.language-switcher__option--active {
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+  font-weight: 600;
+}
