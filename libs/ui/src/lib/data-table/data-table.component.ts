@@ -24,6 +24,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { DataTableCellContext, DataTableCellDirective } from './data-table-cell.directive';
 import { DataTableColumnChooserComponent } from './data-table-column-chooser.component';
 import { DataTablePagerComponent } from './data-table-pager.component';
+import { EmptyStateComponent, EmptyStateKind } from '../feedback-state/empty-state.component';
 import { exportRows, exportTableElement } from './data-table-export';
 import {
   cellValue,
@@ -39,6 +40,7 @@ import {
 import {
   DataTableBatchActionsDirective,
   DataTableBodyDirective,
+  DataTableEmptyDirective,
   DataTableHeadDirective,
 } from './data-table-slot.directives';
 import {
@@ -55,6 +57,7 @@ type ResolvedColumn<T> = DataTableColumn<T> & { primary: boolean };
 
 /** 與 scss 的手機斷點一致：卡片版改用「載入更多」，不顯示分頁鈕。 */
 const COMPACT_QUERY = '(max-width: 640px)';
+const SKELETON_WIDTHS = [72, 54, 86, 46, 64, 78, 58];
 
 @Component({
   selector: 'lib-data-table',
@@ -64,6 +67,7 @@ const COMPACT_QUERY = '(max-width: 640px)';
     MatTooltipModule,
     DataTableColumnChooserComponent,
     DataTablePagerComponent,
+    EmptyStateComponent,
   ],
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
@@ -85,7 +89,16 @@ export class DataTableComponent<T> {
   readonly mobile = input<DataTableMobileMode | null>(null);
   readonly exportName = input('export');
   readonly showExport = input(true);
+  /** 沒有資料時的說明（一行）。顯示成 `lib-empty-state`；要放動作鈕時改用 `<ng-template dtEmpty>`。 */
   readonly emptyText = input('');
+  /** 空狀態的補充文字。 */
+  readonly emptyDetail = input('');
+  /** `no-data`：還沒有資料；`no-results`：篩選後沒有結果（圖示不同）。 */
+  readonly emptyKind = input<EmptyStateKind>('no-data');
+  /** 載入中：保留表頭，內容換成骨架列（不顯示空狀態、匯出與分頁）。 */
+  readonly loading = input(false);
+  /** 載入中顯示幾列骨架。 */
+  readonly loadingRows = input(5);
   readonly labels = input.required<DataTableLabels>();
   readonly selectable = input(false);
   /** 有些清單可批次選取／匯出，但不應提供通用的破壞性刪除操作。 */
@@ -118,6 +131,7 @@ export class DataTableComponent<T> {
   protected readonly headDirective = contentChild(DataTableHeadDirective);
   protected readonly bodyDirective = contentChild(DataTableBodyDirective);
   protected readonly batchActionsDirective = contentChild(DataTableBatchActionsDirective<T>);
+  protected readonly emptyDirective = contentChild(DataTableEmptyDirective);
 
   private readonly selectedIds = signal<ReadonlySet<unknown>>(new Set());
 
@@ -281,7 +295,15 @@ export class DataTableComponent<T> {
     return chooser as DataTableColumnChooserLabels;
   });
 
-  protected readonly isEmpty = computed(() => !this.isCustom() && this.rows().length === 0);
+  protected readonly isLoading = computed(() => this.loading() && !this.isCustom());
+  protected readonly isEmpty = computed(() => !this.isCustom() && !this.loading() && this.rows().length === 0);
+  protected readonly skeletonRows = computed(() =>
+    Array.from({ length: Math.max(1, Math.floor(this.loadingRows())) }, (_, i) => i),
+  );
+  /** 骨架列每格的寬度固定輪替（不用亂數，每次一樣）。 */
+  protected skeletonWidth(row: number, col: number): string {
+    return `${SKELETON_WIDTHS[(row * 3 + col) % SKELETON_WIDTHS.length]}%`;
+  }
 
   protected cellContext(row: T): DataTableCellContext<T> {
     return { $implicit: row };
@@ -414,7 +436,7 @@ export class DataTableComponent<T> {
 
   private readonly tableEl = viewChild<ElementRef<HTMLTableElement>>('tableEl');
 
-  protected readonly canExport = computed(() => this.showExport() && !this.isEmpty());
+  protected readonly canExport = computed(() => this.showExport() && !this.isEmpty() && !this.isLoading());
 
   /** 匯出目前顯示的欄位（順序同畫面）與篩選＋排序後的「全部」資料列——不是只有這一頁。 */
   protected async runExport(): Promise<void> {

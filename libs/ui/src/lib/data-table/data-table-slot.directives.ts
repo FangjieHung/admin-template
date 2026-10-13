@@ -16,6 +16,15 @@ export class DataTableBodyDirective {
   readonly template = inject<TemplateRef<unknown>>(TemplateRef);
 }
 
+/**
+ * 沒有資料時改顯示這段內容（取代 emptyText 的預設空狀態），通常放一個帶動作的 `<lib-empty-state>`，
+ * 例如篩選後沒有結果時的「清除篩選」。
+ */
+@Directive({ selector: 'ng-template[dtEmpty]' })
+export class DataTableEmptyDirective {
+  readonly template = inject<TemplateRef<unknown>>(TemplateRef);
+}
+
 /** 批次操作工具列內容，template context 的 $implicit 為目前已選資料。 */
 @Directive({ selector: 'ng-template[dtBatchActions]' })
 export class DataTableBatchActionsDirective<T = unknown> {

@@ -172,6 +172,8 @@ export interface DataTableLabels {
    * 錯誤字串（甚至是英文的 dynamic import 失敗訊息）直接餵給使用者。
    */
   exportFailedText: string;
+  /** 開啟 [loading] 時報讀器念的文字，例：「載入中」（畫面上看不到）。沒給時只標 aria-busy。 */
+  loading?: string;
   /** 開啟 [pageable] 時必填。 */
   paging?: DataTablePagingLabels;
   /** 開啟 [columnChooser] 時必填。 */

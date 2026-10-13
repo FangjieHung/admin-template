@@ -9,6 +9,7 @@ import { DataTableCellDirective } from './data-table-cell.directive';
 import {
   DataTableBatchActionsDirective,
   DataTableBodyDirective,
+  DataTableEmptyDirective,
   DataTableHeadDirective,
 } from './data-table-slot.directives';
 import { rowsToAoa } from './data-table-export';
@@ -833,5 +834,120 @@ describe('DataTableComponent 匯出接線', () => {
     (el.querySelector('.dt-export-btn') as HTMLButtonElement).click();
     await fixture.whenStable();
     expect(fixture.componentInstance.lastError?.message).toBe('boom');
+  });
+});
+
+@Component({
+  imports: [DataTableComponent, DataTableEmptyDirective],
+  template: `
+    <lib-data-table
+      [columns]="columns"
+      [rows]="rows()"
+      [labels]="labels"
+      [loading]="loading()"
+      [loadingRows]="3"
+      [selectable]="true"
+      [pageable]="true"
+      emptyText="還沒有工單"
+      emptyDetail="建立後會出現在這裡"
+      [emptyKind]="kind()"
+    >
+      @if (customEmpty()) {
+        <ng-template dtEmpty><button type="button" class="clear-filters">清除篩選</button></ng-template>
+      }
+    </lib-data-table>
+  `,
+})
+class StatesHostComponent {
+  readonly labels: DataTableLabels = {
+    ...LABELS,
+    loading: '載入中',
+    paging: {
+      nav: '分頁', pageSizeLabel: '每頁筆數', pageSizeOption: '每頁 {size} 筆', range: '{from}–{to} / {total}',
+      pageOf: '{page}/{pages}', firstPage: '第一頁', prevPage: '上一頁', nextPage: '下一頁', lastPage: '最後一頁',
+      loadMore: '載入更多', shownOf: '{shown}/{total}',
+    },
+  };
+  readonly columns: DataTableColumn<Row>[] = [
+    { key: 'name', label: '單號', primary: true },
+    { key: 'status', label: '狀態' },
+    { key: 'mileage', label: '里程', align: 'end' },
+  ];
+  readonly rows = signal<Row[]>([{ id: 'v1', name: 'ABC-123', status: 'available', mileage: 12000 }]);
+  readonly loading = signal(true);
+  readonly kind = signal<'no-data' | 'no-results'>('no-data');
+  readonly customEmpty = signal(false);
+}
+
+describe('DataTableComponent 載入與空狀態', () => {
+  let fixture: ReturnType<typeof TestBed.createComponent<StatesHostComponent>>;
+  let el: HTMLElement;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [StatesHostComponent] }).compileComponents();
+    fixture = TestBed.createComponent(StatesHostComponent);
+    await fixture.whenStable();
+    el = fixture.nativeElement as HTMLElement;
+  });
+
+  it('loading：保留表頭、內容換成 n 列骨架，aria-busy 與報讀器文字；不顯示匯出與分頁', () => {
+    const table = el.querySelector('table') as HTMLTableElement;
+    expect(table.getAttribute('aria-busy')).toBe('true');
+    expect(Array.from(table.querySelectorAll('thead th')).map((th) => th.textContent?.trim()).filter(Boolean)).toEqual([
+      '單號',
+      '狀態',
+      '里程',
+    ]);
+    const rows = table.querySelectorAll('tbody tr');
+    expect(rows).toHaveLength(3);
+    for (const tr of Array.from(rows)) {
+      expect(tr.classList).toContain('dt-skeleton-row');
+      expect(tr.getAttribute('aria-hidden')).toBe('true');
+      expect(tr.querySelectorAll('.dt-skeleton')).toHaveLength(3);
+    }
+    expect(el.textContent).not.toContain('ABC-123');
+    expect(el.querySelector('.dt-sr-only')?.textContent).toBe('載入中');
+    expect(el.querySelector('.dt-export-btn')).toBeNull();
+    expect(el.querySelector('lib-data-table-pager')).toBeNull();
+    expect((el.querySelector('.dt-batch-select-all input') as HTMLInputElement).disabled).toBe(true);
+  });
+
+  it('loading 時 rows 為空也不顯示空狀態', async () => {
+    fixture.componentInstance.rows.set([]);
+    await fixture.whenStable();
+    expect(el.querySelector('lib-empty-state')).toBeNull();
+    expect(el.querySelectorAll('.dt-skeleton-row')).toHaveLength(3);
+  });
+
+  it('載入完成後顯示資料，aria-busy 拿掉', async () => {
+    fixture.componentInstance.loading.set(false);
+    await fixture.whenStable();
+    expect(el.querySelector('table')?.hasAttribute('aria-busy')).toBe(false);
+    expect(el.querySelector('.dt-skeleton-row')).toBeNull();
+    expect(el.textContent).toContain('ABC-123');
+    expect(el.querySelector('.dt-sr-only')).toBeNull();
+    expect(el.querySelector('lib-data-table-pager')).toBeTruthy();
+  });
+
+  it('emptyText 對應到 lib-empty-state（說明、補充文字、kind）', async () => {
+    fixture.componentInstance.loading.set(false);
+    fixture.componentInstance.rows.set([]);
+    await fixture.whenStable();
+    const empty = el.querySelector('lib-empty-state.dt-empty') as HTMLElement;
+    expect(empty.textContent).toContain('還沒有工單');
+    expect(empty.textContent).toContain('建立後會出現在這裡');
+    expect(empty.dataset['kind']).toBe('no-data');
+    fixture.componentInstance.kind.set('no-results');
+    await fixture.whenStable();
+    expect((el.querySelector('lib-empty-state') as HTMLElement).dataset['kind']).toBe('no-results');
+  });
+
+  it('dtEmpty 取代預設空狀態', async () => {
+    fixture.componentInstance.loading.set(false);
+    fixture.componentInstance.rows.set([]);
+    fixture.componentInstance.customEmpty.set(true);
+    await fixture.whenStable();
+    expect(el.querySelector('lib-empty-state')).toBeNull();
+    expect(el.querySelector('.dt-empty .clear-filters')?.textContent).toBe('清除篩選');
   });
 });

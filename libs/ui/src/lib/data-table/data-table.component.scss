@@ -1,5 +1,27 @@
+@use '../feedback-state/skeleton-block' as sk;
+
+@include sk.keyframes;
+
 :host {
+  // dt-sr-only 是 absolute：host 當定位基準，不讓它跳出外層捲動容器。
+  position: relative;
   display: block;
+}
+
+.dt-sr-only {
+  @include sk.sr-only;
+}
+
+// 載入中的骨架列：色塊樣式與 lib-skeleton 共用（--app-skeleton-*）。
+.dt-skeleton {
+  @include sk.block;
+  height: 0.75rem;
+  min-width: 1.5rem;
+  max-width: 100%;
+}
+
+.dt-align-end .dt-skeleton {
+  margin-inline-start: auto;
 }
 
 .dt-wrap {
@@ -243,10 +265,10 @@
   // 也不受影響——tabular-nums 只在有數字字符時才會改變字寬。
 }
 
+// 空狀態（lib-empty-state 或 dtEmpty 的內容）與上方工具列留一點距離。
 .dt-empty {
-  font-size: 0.875rem;
-  color: var(--mat-sys-on-surface-variant);
-  padding: 0.75rem 1rem;
+  display: block;
+  margin-top: 0.75rem;
 }
 
 // 桌機所有欄位本就可見，展開鈕僅在手機出現

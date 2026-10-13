@@ -7,6 +7,7 @@
           class="dt-selection-checkbox"
           [checked]="allSelected()"
           [indeterminate]="partiallySelected()"
+          [disabled]="isLoading()"
           [attr.aria-label]="allSelected() ? labels().deselectAll : labels().selectAll"
           (change)="toggleAllSelection()"
         />
@@ -82,10 +83,25 @@
   [class.dt-wrap--scrolled]="scrolledX()"
   (scroll)="onWrapScroll($event)"
 >
+  @if (isLoading() && labels().loading) {
+    <span class="dt-sr-only">{{ labels().loading }}</span>
+  }
   @if (isEmpty()) {
-    <p class="dt-empty">{{ emptyText() }}</p>
+    @if (emptyDirective(); as empty) {
+      <div class="dt-empty">
+        <ng-container [ngTemplateOutlet]="empty.template" />
+      </div>
+    } @else if (emptyText()) {
+      <lib-empty-state
+        class="dt-empty"
+        [message]="emptyText()"
+        [detail]="emptyDetail()"
+        [kind]="emptyKind()"
+        [compact]="true"
+      />
+    }
   } @else {
-    <table class="dt-table" #tableEl>
+    <table class="dt-table" #tableEl [attr.aria-busy]="isLoading() ? 'true' : null">
       @if (isCustom()) {
         <thead>
           <ng-container [ngTemplateOutlet]="headDirective()!.template" />
@@ -104,6 +120,7 @@
                     class="dt-selection-checkbox"
                     [checked]="allSelected()"
                     [indeterminate]="partiallySelected()"
+                    [disabled]="isLoading()"
                     [attr.aria-label]="allSelected() ? labels().deselectAll : labels().selectAll"
                     (change)="toggleAllSelection()"
                   />
@@ -151,6 +168,28 @@
           </tr>
         </thead>
         <tbody>
+          @if (isLoading()) {
+            @for (i of skeletonRows(); track i) {
+              <tr class="dt-skeleton-row" aria-hidden="true">
+                @if (selectable()) {
+                  <td class="dt-selection-cell" [class.dt-frozen-select]="frozenActive()" data-label=""></td>
+                }
+                @for (col of resolvedColumns(); track col.key; let c = $index) {
+                  <td
+                    [attr.data-label]="col.label"
+                    [class]="'dt-align-' + (col.align ?? 'start')"
+                    [class.is-secondary]="!col.primary"
+                    [class.dt-frozen]="frozenActive() && col.key === frozenKey()"
+                  >
+                    <span class="dt-skeleton" [style.width]="skeletonWidth(i, c)"></span>
+                  </td>
+                }
+                @if (hasSecondary()) {
+                  <td class="dt-expand-cell"></td>
+                }
+              </tr>
+            }
+          } @else {
           @for (row of displayRows(); track rowId()(row)) {
             <tr
               [class]="rowClass()(row)"
@@ -213,13 +252,14 @@
               }
             </tr>
           }
+          }
         </tbody>
       }
     </table>
   }
 </div>
 
-@if (pageable() && !isCustom() && !isEmpty()) {
+@if (pageable() && !isCustom() && !isEmpty() && !isLoading()) {
   <lib-data-table-pager
     [labels]="pagingLabels()"
     [total]="total()"
