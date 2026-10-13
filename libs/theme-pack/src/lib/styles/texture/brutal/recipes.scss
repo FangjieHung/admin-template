@@ -250,7 +250,8 @@
     --mat-form-field-filled-container-color: var(--mat-sys-surface-container-lowest);
     --mat-form-field-filled-active-indicator-height: 0;
     --mat-form-field-filled-focus-active-indicator-height: 0;
-    --mat-form-field-outlined-container-shape: 0;
+    // 要寫 0px：MDC 用 max(16px, <shape>) 算左右內距，沒有單位的 0 會讓整條宣告失效，outline 欄位的字就貼著框。
+    --mat-form-field-outlined-container-shape: 0px;
     --mat-form-field-outlined-outline-width: 2px;
     --mat-form-field-outlined-focus-outline-width: 3px;
   }
