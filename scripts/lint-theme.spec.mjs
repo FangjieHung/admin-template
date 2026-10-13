@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdtempSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { collectThemedAppRoots } from './lint-theme.mjs';
@@ -196,8 +196,13 @@ describe('lint-theme：原生勾選框、單選鈕（batch 4）', () => {
     expect(run(dir).code).toBe(0);
   });
 
-  it('預設掃描範圍包含 libs/ui、libs/booking-flow、libs/contract-signing', async () => {
-    const { SHARED_UI_LIBS } = await import('./lint-theme.mjs');
-    expect(SHARED_UI_LIBS).toEqual(expect.arrayContaining(['libs/ui/src', 'libs/booking-flow/src', 'libs/contract-signing/src']));
+  it('預設掃描範圍包含 libs/ui 與有套主題的 admin app，而且每個路徑都存在', async () => {
+    const { SHARED_UI_LIBS, collectThemedAppRoots } = await import('./lint-theme.mjs');
+    expect(SHARED_UI_LIBS).toContain('libs/ui/src');
+    expect(SHARED_UI_LIBS).not.toContain('libs/theme-pack/src');
+    expect(collectThemedAppRoots('apps')).toEqual(['apps/admin/src']);
+    for (const root of [...SHARED_UI_LIBS, ...collectThemedAppRoots('apps')]) {
+      expect(existsSync(root)).toBe(true);
+    }
   });
 });

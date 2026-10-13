@@ -5,26 +5,26 @@
 //   node scripts/contrast-report.mjs [--base-url=http://localhost:5231] [--out=<dir>]
 //
 // 前置：
-//   1. 另開一個終端機跑 `npx nx serve admin --port=5231`（或用 --base-url 指到你自己的埠）。
+//   1. 另開一個終端機跑 `npx nx serve admin --port=5231`，或對 production build 開一個靜態伺服器
+//      （例如 `npx nx build admin --output-path=<dir>` 後對 <dir>/browser 起 SPA 伺服器），用 --base-url 指過去。
 //   2. `npm install`（本機需要 playwright-core，已加入 devDependencies；不會下載瀏覽器，
 //      直接借用系統已安裝的 Google Chrome，走 CDP 連線，繞開「headless Chrome 連不到
 //      localhost」的 Bash sandbox 限制 — 因為是長駐 Playwright session 而非一次性 CLI）。
 //
 // 輸出（預設 .scratch/theme-compat-panel/reports/，可用 --out 覆寫；不寫進 repo 的 dist/）：
-//   - contrast-matrix.json   原始量測數據（56 格 x 多組 pair）
+//   - contrast-matrix.json   原始量測數據（64 格 x 多組 pair）
 //   - contrast-report.md     文字報告（每格數值 + 合格標記 + 不合格清單）
-//   - contrast-report.html   56 格矩陣，紅色標示不合格，滑鼠可看每格最差 pair
-//   - screenshots/<texture>__<color>.png   56 張代表畫面截圖（screenshot wall）
+//   - contrast-report.html   64 格矩陣，紅色標示不合格，滑鼠可看每格最差 pair
+//   - screenshots/<texture>__<color>.png   64 張代表畫面截圖（screenshot wall）
 //
 // 量測方法：見 scripts/contrast-lib.mjs 開頭的 alpha compositing 說明。
-// 量測畫面：目前固定用 /dashboard（同時涵蓋月曆＋側欄），因為它一頁內就有全部內容區
-// pair（頁面底色文字、卡片底色文字、次要文字、狀態徽章/chip、focus 外框、主要按鈕）
-// 加上側欄 pair（品牌名稱/副標、選中與未選中選單文字、使用者名稱/狀態、收合箭頭圖示），
-// 可在單一畫面把 56 組合跑完；尚未擴充到 orders 列表頁/order-create/dialog 做交叉驗證，
-// 這點在報告最後的「已知限制」列出。
-// 例外：輸入欄位邊界（input_border_on_surface）另外到建單頁、訂單列表、優惠券對話框量（FIELD_PAGES）；
-// 第四批的欄位狀態（field_hover_border／field_focus_indicator／field_error_border）與原生勾選框、單選鈕
-// （check_*）也在那些畫面量，見 measureStatePairs。
+// 量測畫面：展示 app 的「Material 元件總覽」（/components/material）。它是質地的測試台，一頁內就有
+// 全部內容區 pair（頁首標題、卡片底色文字、次要文字、徽章、狀態 chip、focus 外框、主要按鈕）加上
+// 側欄 pair（品牌名稱/副標、選中與未選中選單文字、使用者名稱/狀態、收合箭頭圖示），
+// 可在單一畫面把 64 組合（8 質地 × 8 配色）跑完。
+// 例外：輸入欄位邊界（input_border_on_surface）另外量 Material 元件總覽的所有欄位、資料表頁（展開搜尋膠囊）、
+// 總覽頁開出的對話框（FIELD_PAGES）；欄位狀態（field_hover_border／field_focus_indicator／field_error_border）
+// 與原生勾選框、單選鈕（check_*）也在那些畫面量，見 measureStatePairs。
 
 import { chromium } from 'playwright-core';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -70,6 +70,7 @@ const TEXTURES = [
   { id: 'clay', label: 'Clay 立體軟陶' },
   { id: 'editorial', label: 'Editorial 編輯式極簡' },
   { id: 'frosted', label: 'Frosted 霧光玻璃' },
+  { id: 'aero', label: 'Aero 雲霧玻璃' },
 ];
 
 const COLOR_THEMES = [
@@ -98,8 +99,8 @@ const PAIRS = [
   {
     key: 'primary_on_page_bg',
     label: '主要文字 on 頁面底色',
-    selector: '.ui-text-title',
-    kind: 'large', // 月曆標題是大字級標題
+    selector: '.topbar-heading h1',
+    kind: 'large', // 頁首大標題
   },
   {
     key: 'primary_on_card_surface',
@@ -110,7 +111,7 @@ const PAIRS = [
   {
     key: 'secondary_on_surface',
     label: '次要文字(on-surface-variant) on 底色',
-    selector: '.calendar-view__muted',
+    selector: '.demo-block__description',
     kind: 'normal',
   },
   {
@@ -134,12 +135,12 @@ const PAIRS = [
   {
     key: 'primary_button_label',
     label: '主要按鈕文字 on 按鈕底色',
-    selector: '.dashboard-new-order',
+    selector: '[data-contrast-target="primary-button"]',
     kind: 'normal',
   },
   // 側欄(side-nav) pairs：Soft UI 曾出現側欄底色被畫亮、文字卻維持白色的真實回歸
   // （側欄底色來自質地 recipe，文字色來自配色 token，兩邊各自獨立設定，容易脫鉤）。
-  // 7 種質地都要覆蓋到，因此併入主 PAIRS 清單，56 格全跑。
+  // 每種質地都要覆蓋到，因此併入主 PAIRS 清單，所有格子全跑。
   {
     key: 'sidenav_brand_name',
     label: '側欄品牌名稱 on 側欄底色',
@@ -159,8 +160,8 @@ const PAIRS = [
     // 也帶 .nav-link class，且未收合時有 3 個 span(icon/label/caret)，
     // span:last-child 在該情境會選到 caret 圖示而非文字 label。改用
     // `> span:not(.material-symbols-rounded)` 精準鎖定純文字 label span
-    // （icon 與 caret 皆帶 material-symbols-rounded class），/dashboard 本身是
-    // 非群組的一般連結，此差異不影響「選中」這格量到的元素。
+    // （icon 與 caret 皆帶 material-symbols-rounded class）。/components/material 時亮起的是「總覽」
+    // 群組按鈕，量到的是它的文字 label。
     selector: '.nav-link.active > span:not(.material-symbols-rounded)',
     kind: 'normal',
   },
@@ -168,7 +169,7 @@ const PAIRS = [
     key: 'sidenav_nav_idle_label',
     label: '側欄選單項目(未選中) 文字 on 底色',
     // 同上原因，改用 `> span:not(.material-symbols-rounded)`；DOM 首個符合的未選中
-    // .nav-link 是群組觸發按鈕(如「商品」)，測到的是它的文字 label，而非展開箭頭。
+    // .nav-link 是群組觸發按鈕(如「資料呈現」)，測到的是它的文字 label，而非展開箭頭。
     selector: '.nav-link:not(.active) > span:not(.material-symbols-rounded)',
     kind: 'normal',
   },
@@ -224,7 +225,7 @@ const PAIRS = [
     kind: 'ui',
     page: 'states',
   },
-  // 原生勾選框／單選鈕（libs/ui data-table、派車「可用車輛」單選）：
+  // 原生勾選框／單選鈕（libs/ui data-table 的列選取、Material 元件總覽的原生 input）：
   {
     key: 'check_unchecked_border',
     label: '勾選框／單選鈕未勾選外框 on 外側底色',
@@ -251,12 +252,13 @@ const PAIRS = [
   },
 ];
 
-// 欄位邊界量測的畫面：建單頁、訂單列表（展開搜尋膠囊＋篩選列）、優惠券新增對話框。
+// 欄位邊界量測的畫面：Material 元件總覽（outline／fill 各種狀態的欄位）、資料表頁（展開搜尋膠囊）、
+// 總覽頁開出的對話框（有一個必填欄位）。
 const FIELD_PAGES = [
-  { key: 'create', path: '/orders/new', root: 'body' },
+  { key: 'create', path: '/components/material', root: 'body' },
   {
     key: 'list',
-    path: '/orders',
+    path: '/components/data-table',
     root: 'body',
     setup: async (page) => {
       // 展開搜尋膠囊後輸入一個字再移開焦點：有內容時 blur 不會收合，才量得到靜止狀態的膠囊邊界。
@@ -268,10 +270,10 @@ const FIELD_PAGES = [
   },
   {
     key: 'dialog',
-    path: '/coupons',
+    path: '/components/material',
     root: '.mat-mdc-dialog-surface',
     setup: async (page) => {
-      await page.locator('app-page-toolbar [mat-flat-button]').first().click();
+      await page.locator('[data-contrast-target="open-dialog"]').first().click();
       await page.waitForSelector('.mat-mdc-dialog-surface');
       await page.waitForTimeout(600);
     },
@@ -279,7 +281,7 @@ const FIELD_PAGES = [
 ];
 
 // focus 外框：另外處理（需要先 focus 才量得到）
-const FOCUS_TARGET_SELECTOR = '.dashboard-new-order';
+const FOCUS_TARGET_SELECTOR = '[data-contrast-target="primary-button"]';
 
 async function extractPairData(page, selector) {
   return page.evaluate((sel) => {
@@ -495,7 +497,7 @@ async function measureCombo(page, texture, color) {
   );
   await page.reload({ waitUntil: 'networkidle', timeout: 20000 });
   // ThemeService.init() 會把不相容的組合校正成預設配色（ADR 0007）；
-  // 報告要量「所有」56 格，所以載入後直接蓋回要量的屬性。
+  // 報告要量「所有」格子（含不相容的組合），所以載入後直接蓋回要量的屬性。
   await applyCombo(page, texture.id, color.id);
   await page.waitForTimeout(600); // 讓 texture 的進場動畫/字型穩定
 
@@ -776,8 +778,8 @@ async function measureStatePairs(page, texture, color, results) {
     }
   };
 
-  // 1. 建單頁：欄位滑過、第一個欄位鍵盤焦點；可用車輛單選（選租期後出現，選一台）。
-  await page.goto(`${BASE_URL}/orders/new`, { waitUntil: 'networkidle', timeout: 20000 });
+  // 1. Material 元件總覽：欄位滑過、第一個欄位鍵盤焦點；原生勾選框與單選鈕（_choice-controls.scss）。
+  await page.goto(`${BASE_URL}/components/material`, { waitUntil: 'networkidle', timeout: 20000 });
   await setCombo();
   await installProbe(page);
   let n = await page.evaluate(() => window.__crProbe.tag('body'));
@@ -789,25 +791,14 @@ async function measureStatePairs(page, texture, color, results) {
     if (ok) await focusField('create', 0, rest0);
     await page.evaluate(() => document.activeElement?.blur());
   }
-  await page.click('lib-dual-month-range-picker input');
-  await page.waitForTimeout(300);
-  await page.click('button[aria-label="October 5, 2026"]');
-  await page.click('button[aria-label="October 8, 2026"]');
-  await page.waitForTimeout(300);
-  await page.keyboard.press('Escape');
-  await page.waitForTimeout(200);
-  if (await page.locator('.avl__radio').count()) {
+  if (await page.locator('.ov-native input').count()) {
     await page.mouse.move(1, 899);
-    await measureChecks('create', '.avl__radio');
-    await page.locator('.avl__radio').nth(1).click();
-    await page.waitForTimeout(150);
-    await page.evaluate(() => document.activeElement?.blur());
-    await page.mouse.move(1, 899);
-    await measureChecks('create', '.avl__radio:checked');
+    await measureChecks('create', '.ov-native input:not(:disabled):not(:checked)');
+    await measureChecks('create', '.ov-native input:not(:disabled):checked');
   }
 
-  // 2. 訂單列表：篩選列欄位滑過；data-table 勾選框（未勾選 → 勾第一列，表頭變半選）；勾選框鍵盤焦點框。
-  await page.goto(`${BASE_URL}/orders`, { waitUntil: 'networkidle', timeout: 20000 });
+  // 2. 資料表頁：搜尋膠囊滑過；data-table 勾選框（未勾選 → 勾第一列，表頭變半選）；勾選框鍵盤焦點框。
+  await page.goto(`${BASE_URL}/components/data-table`, { waitUntil: 'networkidle', timeout: 20000 });
   await setCombo();
   await installProbe(page);
   await page.click('.search__toggle');
@@ -835,11 +826,11 @@ async function measureStatePairs(page, texture, color, results) {
     }
   }
 
-  // 3. 優惠券對話框：欄位滑過、Tab 到下一欄的焦點、必填欄位清空後離開的錯誤狀態。
-  await page.goto(`${BASE_URL}/coupons`, { waitUntil: 'networkidle', timeout: 20000 });
+  // 3. 總覽頁的對話框：欄位滑過、Tab 到下一欄的焦點、必填欄位清空後離開的錯誤狀態。
+  await page.goto(`${BASE_URL}/components/material`, { waitUntil: 'networkidle', timeout: 20000 });
   await setCombo();
   await installProbe(page);
-  await page.locator('app-page-toolbar [mat-flat-button]').first().click();
+  await page.locator('[data-contrast-target="open-dialog"]').first().click();
   await page.waitForSelector('.mat-mdc-dialog-surface');
   await page.waitForTimeout(300);
   n = await page.evaluate(() => window.__crProbe.tag('.mat-mdc-dialog-surface'));
@@ -930,7 +921,7 @@ async function main() {
     for (const color of ACTIVE_COLORS) {
       done += 1;
       process.stdout.write(`[${done}/${total}] ${texture.id} x ${color.id} ... `);
-      await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'networkidle', timeout: 20000 });
+      await page.goto(`${BASE_URL}/components/material`, { waitUntil: 'networkidle', timeout: 20000 });
       const results = await measureCombo(page, texture, color);
       const shotName = `${texture.id}__${color.id}.png`;
       await page.screenshot({ path: join(SCREENSHOT_DIR, shotName) });
@@ -996,11 +987,11 @@ function renderMarkdown(matrix) {
   lines.push('');
   lines.push('## 已知限制');
   lines.push('');
-  lines.push('- 量測畫面固定為 `/dashboard`（含月曆），尚未擴充到訂單列表、order-create 表單、dialog 做交叉驗證。');
+  lines.push('- 一般 pair 的量測畫面固定為 `/components/material`（Material 元件總覽），每個 selector 量第一個符合的元素。');
   lines.push('- alpha compositing 只合成純色數值，不模擬 `backdrop-filter: blur()` 的取樣效果；背景若非純色/低頻漸層，合成結果為近似值。');
-  lines.push('- focus 外框量測固定用「新增訂單」主要按鈕；若不同質地對 outlined 按鈕/連結有不同 focus 樣式，未逐一覆蓋。');
-  lines.push('- `input_border_on_surface`：量建單頁、訂單列表（展開搜尋＋篩選列）、優惠券新增對話框上所有可見、非停用、非 focus 的欄位，取最低值；每欄依序取 outlined 外框 → wrapper 邊框 → inset 細框 → Material 底線（疊在填色上）→ 填色，對欄位外側底色（見 note）。滑過／焦點／錯誤另見下一條。');
-  lines.push('- 第四批的狀態 pair：`field_hover_border`（建單頁、訂單列表、優惠券對話框每個欄位逐一滑過）、`field_focus_indicator`（真的送 Tab：建單頁第一個欄位、對話框 Tab 到下一欄；outline、MDC 主色底線與「和靜止時不同」的邊框／細框／outlined 外框中取對比最高者，另記錄它對靜止邊界的比值，不設門檻）、`field_error_border`（對話框必填欄位輸入後清空、Tab 離開）、`check_*`（data-table 勾選框與派車可用車輛單選：未勾選外框、勾選／半選底、記號對勾選底、Tab 到勾選框的焦點框）。轉場凍結、量終點狀態；原生外觀（appearance 不是 none）的控制項略過。');
+  lines.push('- focus 外框量測固定用總覽頁的 Filled 主要按鈕；若不同質地對 outlined 按鈕/連結有不同 focus 樣式，未逐一覆蓋。');
+  lines.push('- `input_border_on_surface`：量 Material 元件總覽、資料表頁（展開搜尋）、總覽頁對話框上所有可見、非停用、非 focus 的欄位，取最低值；每欄依序取 outlined 外框 → wrapper 邊框 → inset 細框 → Material 底線（疊在填色上）→ 填色，對欄位外側底色（見 note）。滑過／焦點／錯誤另見下一條。');
+  lines.push('- 第四批的狀態 pair：`field_hover_border`（總覽頁、資料表頁、對話框每個欄位逐一滑過）、`field_focus_indicator`（真的送 Tab：總覽頁第一個欄位、對話框 Tab 到下一欄；outline、MDC 主色底線與「和靜止時不同」的邊框／細框／outlined 外框中取對比最高者，另記錄它對靜止邊界的比值，不設門檻）、`field_error_border`（對話框必填欄位輸入後清空、Tab 離開）、`check_*`（data-table 勾選框與總覽頁的原生勾選框／單選鈕：未勾選外框、勾選／半選底、記號對勾選底、Tab 到勾選框的焦點框）。轉場凍結、量終點狀態；原生外觀（appearance 不是 none）的控制項略過。');
   lines.push('- `selection_text`／`selection_text_sidenav`：直接用計算後的變數值合成，不實際拖曳選取文字。');
   return lines.join('\n');
 }
@@ -1050,7 +1041,7 @@ function renderHtml(matrix) {
   h1 { font-size: 18px; }
 </style></head>
 <body>
-<h1>質地 x 配色相容性對比矩陣（7 x 8 = 56 格）</h1>
+<h1>質地 x 配色相容性對比矩陣（${byTexture.size} x ${matrix.length / Math.max(byTexture.size, 1)} = ${matrix.length} 格）</h1>
 <p>紅底 = 至少一組 pair 未達 WCAG 門檻（一般文字 4.5:1 / 大字或 UI 邊界 3:1）。每格顯示最差的 pair 與其比值，點圖可放大截圖。</p>
 <table>
 <tr><th></th>${header}</tr>

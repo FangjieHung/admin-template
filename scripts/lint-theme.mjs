@@ -200,9 +200,23 @@ export function runLint(scanRoots) {
   return violations;
 }
 
-// 預設掃描範圍：theme-pack、所有有套主題的 app，加上 app 會載入、有自己元件樣式的共用 lib
-// （第四批納入 libs/ui、libs/booking-flow、libs/contract-signing；納入時的既有違規已逐一改成變數）。
-export const SHARED_UI_LIBS = ['libs/ui/src', 'libs/booking-flow/src', 'libs/contract-signing/src'];
+/**
+ * 有自己元件樣式的共用 lib：`libs/<name>/src` 底下有 .scss 或元件 .ts 的都算（theme-pack 另外列）。
+ * 用掃描而不是寫死清單：新專案刪掉或新增 lib 時不必回來改這支腳本。
+ */
+export function collectSharedUiLibs(libsDir = 'libs') {
+  const roots = [];
+  if (!existsSync(libsDir)) return roots;
+  for (const name of readdirSync(libsDir).sort()) {
+    if (name === 'theme-pack') continue;
+    const src = join(libsDir, name, 'src');
+    if (existsSync(src)) roots.push(src);
+  }
+  return roots;
+}
+
+// 預設掃描範圍：theme-pack、所有有套主題的 app，加上 app 會載入、有自己元件樣式的共用 lib（目前是 libs/ui）。
+export const SHARED_UI_LIBS = collectSharedUiLibs('libs');
 const DEFAULT_ROOTS = ['libs/theme-pack/src', ...SHARED_UI_LIBS, ...collectThemedAppRoots('apps')];
 
 // 直接執行時：掃預設範圍（或 CLI 指定的路徑）

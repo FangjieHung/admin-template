@@ -32,11 +32,21 @@ import { detailOf } from '../../showcase/showcase-catalog';
 
 @Component({
   selector: 'app-overview-dialog',
-  imports: [MatDialogModule, MatButtonModule],
+  imports: [MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule, ReactiveFormsModule],
   template: `
     <h2 mat-dialog-title>對話框標題</h2>
     <div mat-dialog-content>
       <p>{{ data }}</p>
+      <!-- 對話框裡的欄位：對比掃描在這裡量欄位滑過、焦點與錯誤狀態。 -->
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>名稱（必填）</mat-label>
+        <input matInput [formControl]="name" required />
+        <mat-error>請輸入名稱</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>備註</mat-label>
+        <input matInput />
+      </mat-form-field>
     </div>
     <div mat-dialog-actions align="end">
       <button matButton type="button" mat-dialog-close>取消</button>
@@ -46,6 +56,7 @@ import { detailOf } from '../../showcase/showcase-catalog';
 })
 export class OverviewDialogComponent {
   protected readonly data = inject<string>(MAT_DIALOG_DATA);
+  protected readonly name = new FormControl('', { nonNullable: true, validators: [Validators.required] });
 }
 
 const ENTRY = detailOf('material');
@@ -173,7 +184,7 @@ export class MaterialOverviewPageComponent {
   }
 
   protected openDialog(): void {
-    this.dialog.open(OverviewDialogComponent, { data: '對話框的內容。外框、圓角、陰影與遮罩都由質地決定。', width: '360px' });
+    this.dialog.open(OverviewDialogComponent, { data: '對話框的內容。外框、圓角、陰影與遮罩都由質地決定。', width: '400px' });
   }
 
   protected openSnackBar(): void {

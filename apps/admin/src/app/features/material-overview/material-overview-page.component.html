@@ -5,7 +5,8 @@
       @for (b of buttonVariants; track b.variant) {
         <div class="ov-stack">
           <span class="ov-label">{{ b.label }}</span>
-          <button type="button" [matButton]="b.variant">{{ b.label }}</button>
+          <!-- data-contrast-target：scripts/contrast-report.mjs 量主要按鈕文字與焦點框用的固定掛勾。 -->
+          <button type="button" [matButton]="b.variant" [attr.data-contrast-target]="b.variant === 'filled' ? 'primary-button' : null">{{ b.label }}</button>
           <button type="button" [matButton]="b.variant" disabled>停用</button>
           <button type="button" [matButton]="b.variant">
             <span class="material-symbols-rounded ov-btn-icon" aria-hidden="true">add</span>新增
@@ -234,7 +235,7 @@
         </button>
       </mat-menu>
       <button type="button" matButton="outlined" matTooltip="這是工具提示">滑過看提示</button>
-      <button type="button" matButton="tonal" (click)="openDialog()">開啟對話框</button>
+      <button type="button" matButton="tonal" data-contrast-target="open-dialog" (click)="openDialog()">開啟對話框</button>
       <button type="button" matButton="tonal" (click)="openSnackBar()">顯示提示訊息</button>
     </div>
   </app-demo-block>
