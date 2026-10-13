@@ -1,10 +1,12 @@
-import { Component, inject, input, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
+import { AccessService, IdentitySwitcherService } from '@admin-template/access';
 import { AuthService } from '../../core/auth/auth.service';
+import { IdentitySwitcherSlotComponent } from '../identity-switcher/identity-switcher-slot.component';
 import { ZH_TW_SHELL } from '../../core/i18n/zh-tw-shell';
 import { NavEntry, NavGroup, NavLeaf, isNavGroup } from './nav-item.model';
 
@@ -16,6 +18,7 @@ import { NavEntry, NavGroup, NavLeaf, isNavGroup } from './nav-item.model';
     MatMenuModule,
     MatTooltipModule,
     OverlayModule,
+    IdentitySwitcherSlotComponent,
   ],
   templateUrl: './side-nav.component.html',
   styleUrl: './side-nav.component.scss',
@@ -24,6 +27,15 @@ export class SideNavComponent {
   protected readonly t = ZH_TW_SHELL;
   protected readonly isNavGroup = isNavGroup;
   protected readonly auth = inject(AuthService);
+  private readonly access = inject(AccessService);
+  protected readonly identitySwitcher = inject(IdentitySwitcherService);
+
+  /** 使用者卡片：目前身分的名字與角色（libs/access）。 */
+  protected readonly currentName = computed(() => this.access.currentUser()?.name ?? this.t.layout.signedOut);
+  protected readonly currentRoles = computed(() =>
+    this.access.currentUser() ? this.access.currentRoles().map((r) => r.name).join('、') || this.t.layout.noRoles : '',
+  );
+  protected readonly initial = computed(() => this.currentName().slice(0, 1));
 
   readonly navItems = input.required<NavEntry[]>();
   readonly collapsed = input.required<boolean>();

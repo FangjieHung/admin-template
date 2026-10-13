@@ -117,12 +117,20 @@
   </nav>
 
   <div class="sidenav-footer">
-    <button [matMenuTriggerFor]="menu" class="user-card">
-      <div class="avatar">A</div>
+    <!-- 「切換身分」小工具（示範用）：開關在 /settings 與 /components/access-control（IdentitySwitcherService）。
+         關著時不載入（@defer），Initial bundle 不含它。 -->
+    @defer (when identitySwitcher.visible()) {
+      @if (identitySwitcher.visible()) {
+        <app-identity-switcher-slot class="identity-switcher" [compact]="collapsed()" />
+      }
+    }
+
+    <button [matMenuTriggerFor]="menu" class="user-card" [attr.aria-label]="currentName() + (currentRoles() ? '（' + currentRoles() + '）' : '')">
+      <div class="avatar" aria-hidden="true">{{ initial() }}</div>
       @if (!collapsed()) {
-        <div>
-          <strong>{{ t.layout.adminUser }}</strong>
-          <p>{{ t.layout.loggedIn }}</p>
+        <div aria-hidden="true">
+          <strong>{{ currentName() }}</strong>
+          <p>{{ currentRoles() }}</p>
         </div>
       }
     </button>

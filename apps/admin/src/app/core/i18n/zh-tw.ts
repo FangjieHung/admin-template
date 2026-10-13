@@ -73,6 +73,16 @@ export const ZH_TW = {
     signing: '處理中…',
     notice: '示範用簽名，只存在這個分頁的記憶體裡，不具法律效力',
   },
+  // 權限矩陣（lib-permission-matrix）：{feature}、{action} 會被換成功能與動作名稱。
+  permissionMatrix: {
+    feature: '功能',
+    cell: '{feature}：{action}',
+    toggleRow: '{feature}：全部動作',
+    toggleColumn: '所有功能：{action}',
+    granted: '有',
+    notGranted: '沒有',
+    notApplicable: '不適用',
+  },
   // /settings 頁首標題。
   settingsPage: {
     title: '設定',

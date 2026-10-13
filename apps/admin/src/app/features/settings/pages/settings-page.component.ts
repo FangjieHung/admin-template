@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { AppearancePanelService, ThemeService, texture } from '@admin-template/theme-pack';
+import { IdentitySwitcherService } from '@admin-template/access';
 import { ZH_TW } from '../../../core/i18n/zh-tw';
 import { provideHeaderTitle } from '../../../layout/header/header-title';
 
@@ -19,6 +20,8 @@ export class SettingsPageComponent {
   protected readonly colorThemes = this.theme.compatibleThemes;
   // ticket 03：外觀浮動面板開關；狀態放在共用 service，跟 app shell 掛的浮動面板同步。
   protected readonly appearancePanel = inject(AppearancePanelService);
+  // 「切換身分」小工具開關（libs/access），同樣跟側欄裡的小工具共用一份狀態。
+  protected readonly identitySwitcher = inject(IdentitySwitcherService);
 
   constructor() {
     // /settings 不在側欄選單裡，由頁面自己設定標題。
@@ -38,5 +41,9 @@ export class SettingsPageComponent {
 
   protected onAppearancePanelToggle(event: MatSlideToggleChange): void {
     this.appearancePanel.setVisible(event.checked);
+  }
+
+  protected onIdentitySwitcherToggle(event: MatSlideToggleChange): void {
+    this.identitySwitcher.setVisible(event.checked);
   }
 }

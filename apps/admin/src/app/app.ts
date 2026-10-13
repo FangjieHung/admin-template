@@ -1,10 +1,11 @@
-import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import { MatSidenavContainer, MatSidenavModule } from '@angular/material/sidenav';
 import { Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
 import { AppearancePanelService } from '@admin-template/theme-pack';
+import { AccessService, rerunGuardsOnAccessChange } from '@admin-template/access';
 // 面板元件單獨走這條深路徑（不經過 barrel），讓 @defer 能把它與
 // @angular/cdk/drag-drop 拆進獨立 chunk——barrel（index.ts）同時匯出 AppearancePanelService，
 // 若跟它共用同一個 import 語句／模組，AppearancePanelService 的 eager 使用會拖著整個 barrel
@@ -12,7 +13,7 @@ import { AppearancePanelService } from '@admin-template/theme-pack';
 import { FloatingAppearancePanelComponent } from '@admin-template/theme-pack/floating-appearance-panel';
 import { ZH_TW_SHELL } from './core/i18n/zh-tw-shell';
 import { SideNavComponent } from './layout/side-nav/side-nav.component';
-import { NavEntry, NavGroup, isNavGroup } from './layout/side-nav/nav-item.model';
+import { NavEntry, NavGroup, filterNav, isNavGroup } from './layout/side-nav/nav-item.model';
 import { HeaderComponent } from './layout/header/header.component';
 import { HeaderTitleData } from './layout/header/header-title';
 import { FooterComponent } from './layout/footer/footer.component';
@@ -21,7 +22,7 @@ import { SHOWCASE_ENTRIES, SHOWCASE_GROUPS, showcaseRoute } from './showcase/sho
 
 function buildNavItems(): NavEntry[] {
   const t = ZH_TW_SHELL.nav;
-  const groups: NavEntry[] = SHOWCASE_GROUPS.map((group) => ({
+  return SHOWCASE_GROUPS.map((group) => ({
     label: group.label,
     icon: group.icon,
     children: [
@@ -30,10 +31,12 @@ function buildNavItems(): NavEntry[] {
         route: showcaseRoute(entry),
         label: entry.title,
         icon: entry.icon,
+        ...(entry.access ? { access: entry.access } : {}),
       })),
+      // 還沒做的頁面樣板列在 /templates。
+      ...(group.id === 'templates' ? [{ route: '/templates', label: t.plannedTemplates, icon: 'pending' }] : []),
     ],
   }));
-  return [...groups, { route: '/templates', label: t.templates, icon: 'web', badge: t.planned }];
 }
 
 @Component({
@@ -52,10 +55,17 @@ function buildNavItems(): NavEntry[] {
 export class App implements OnInit {
   protected readonly t = ZH_TW_SHELL;
 
-  /** 側欄：總覽群組（首頁＋展示目錄的 overview 項目）、各元件群組，最後是規劃中的頁面樣板。 */
-  protected readonly navItems: NavEntry[] = buildNavItems();
+  private readonly access = inject(AccessService);
+  private readonly allNavItems: NavEntry[] = buildNavItems();
 
-  private readonly navLeaves = this.navItems.flatMap((entry) =>
+  /**
+   * 側欄：總覽群組（首頁＋展示目錄的 overview 項目）、各元件群組，頁面樣板群組最後是規劃中的樣板。
+   * 目前身分沒有「檢視」權限的頁面不列出（libs/access），換身分時自動更新。
+   */
+  protected readonly navItems = computed(() => filterNav(this.allNavItems, (check) => this.access.can(check)));
+
+  // 目前位置（頁首標題、側欄亮哪一項）用完整清單比對，跟權限過濾無關。
+  private readonly navLeaves = this.allNavItems.flatMap((entry) =>
     isNavGroup(entry) ? entry.children : [entry],
   );
 
@@ -87,6 +97,11 @@ export class App implements OnInit {
   // 面板開關的 signal 讓 app.html 的 @defer 決定要不要載入面板本身（含拖曳模組）。
   protected readonly appearancePanel = inject(AppearancePanelService);
 
+  constructor() {
+    // 換身分或改角色後重新檢查目前這一頁的權限（沒有權限 ↔ 原頁面）。
+    rerunGuardsOnAccessChange();
+  }
+
   ngOnInit(): void {
     this.breakpointObserver.observe(['(max-width: 900px)']).subscribe((result) => {
       this.isMobile = result.matches;
@@ -111,7 +126,7 @@ export class App implements OnInit {
           this.navLeaves.find((item) => item.matchPrefixes?.some((p) => url.startsWith(p)));
 
         const activeGroup = active
-          ? this.navItems.find(
+          ? this.allNavItems.find(
               (entry): entry is NavGroup => isNavGroup(entry) && entry.children.includes(active),
             )
           : undefined;

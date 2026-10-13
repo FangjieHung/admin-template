@@ -28,3 +28,66 @@
   font-size: 0.875rem;
   color: var(--mat-sys-on-surface-variant);
 }
+
+.login-accounts {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.login-accounts__title {
+  margin: 0;
+}
+
+.login-account {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 52px;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--app-motion-fast) var(--app-ease-standard);
+
+  &:hover {
+    background: var(--app-state-hover);
+  }
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+}
+
+.login-account__icon {
+  font-size: 1.75rem;
+  color: var(--mat-sys-primary);
+}
+
+.login-account__text {
+  display: grid;
+  line-height: 1.35;
+}
+
+.login-account__name {
+  font-weight: 600;
+}
+
+.login-account__roles {
+  font-size: 0.8125rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.login-account__go {
+  margin-inline-start: auto;
+  color: var(--mat-sys-on-surface-variant);
+}

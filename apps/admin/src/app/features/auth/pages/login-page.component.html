@@ -4,7 +4,24 @@
     <p class="ui-text-caption">{{ t.app.title }}</p>
     <!-- 頁面唯一的 h1 在頁首（provideHeaderTitle，見 login-page.component.ts constructor）。 -->
     <p id="login-title" class="ui-text-title">{{ t.loginPage.title }}</p>
-    <p class="login-note">示範登入：不驗證帳號密碼，按下按鈕就進入展示 app。接上真正的身分驗證時換掉 AuthService。</p>
-    <button matButton="filled" type="button" (click)="enterSystem()">進入系統</button>
+    <p class="login-note">
+      示範登入：不驗證帳號密碼，選一個示範帳號就以那個身分進入。每個帳號的角色不同，側欄與按鈕會跟著權限變化。
+      接上真正的身分驗證時換掉 AuthService。
+    </p>
+    <ul class="login-accounts" aria-labelledby="login-accounts-title">
+      <li id="login-accounts-title" class="ui-text-caption login-accounts__title">示範帳號</li>
+      @for (account of accounts(); track account.id) {
+        <li>
+          <button type="button" class="login-account" [attr.data-user-id]="account.id" (click)="enterAs(account.id)">
+            <span class="material-symbols-rounded login-account__icon" aria-hidden="true">account_circle</span>
+            <span class="login-account__text">
+              <span class="login-account__name">{{ account.name }}</span>
+              <span class="login-account__roles">{{ account.roles }}</span>
+            </span>
+            <span class="material-symbols-rounded login-account__go" aria-hidden="true">arrow_forward</span>
+          </button>
+        </li>
+      }
+    </ul>
   </section>
 </main>

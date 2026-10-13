@@ -50,4 +50,21 @@
       <p class="ui-text-caption">開啟後，每一頁角落會出現一顆按鈕，可即時切換質地與配色。</p>
     </div>
   </div>
+
+  <div class="appearance-settings demo-settings" aria-labelledby="demo-tools-title">
+    <div>
+      <p class="ui-text-caption">示範</p>
+      <h2 id="demo-tools-title" class="ui-text-subtitle">示範工具</h2>
+    </div>
+
+    <!-- 「切換身分」小工具開關：跟外觀浮動面板同一個做法（IdentitySwitcherService ＋ 側欄裡的 @defer）。 -->
+    <div class="theme-row identity-switcher-toggle">
+      <mat-slide-toggle [checked]="identitySwitcher.visible()" (change)="onIdentitySwitcherToggle($event)">
+        顯示「切換身分」小工具
+      </mat-slide-toggle>
+      <p class="ui-text-caption">
+        開啟後，側欄下方會出現目前的身分與角色，點一下就能換成其他示範帳號，立刻看到側欄與按鈕跟著權限變化。
+      </p>
+    </div>
+  </div>
 </section>

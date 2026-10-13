@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
+import { AccessService, provideAccess } from '@admin-template/access';
 import { App } from './app';
+import { DEMO_ACCESS_CONFIG } from './core/access/demo-access';
 import { FILL_PAGE_DATA_KEY } from './layout/fill-page';
 import { NavEntry, NavGroup, isNavGroup } from './layout/side-nav/nav-item.model';
 import { SHOWCASE_ENTRIES, SHOWCASE_GROUPS } from './showcase/showcase-registry';
@@ -11,9 +13,11 @@ class BlankComponent {}
 
 describe('App（展示 app 的殼層）', () => {
   beforeEach(async () => {
+    localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
+        provideAccess(DEMO_ACCESS_CONFIG),
         provideRouter([
           { path: '', pathMatch: 'full', component: BlankComponent },
           ...SHOWCASE_ENTRIES.map((e) => ({ path: `components/${e.id}`, component: BlankComponent })),
@@ -44,17 +48,39 @@ describe('App（展示 app 的殼層）', () => {
     expect(brand).toContain('元件範本');
   });
 
-  it('側欄：每個展示分組一個群組，最後是標「規劃中」的頁面樣板', () => {
-    const navItems: NavEntry[] = TestBed.createComponent(App).componentInstance['navItems'];
+  it('側欄：每個展示分組一個群組；頁面樣板群組最後一項是規劃中的樣板', () => {
+    const navItems: NavEntry[] = TestBed.createComponent(App).componentInstance['navItems']();
 
-    expect(navItems.map((entry) => entry.label)).toEqual([...SHOWCASE_GROUPS.map((g) => g.label), '頁面樣板']);
+    expect(navItems.map((entry) => entry.label)).toEqual(SHOWCASE_GROUPS.map((g) => g.label));
     expect(groupOf(navItems, '總覽')?.children.map((c) => c.route)).toEqual(['/', '/components/material']);
-    expect(navItems.at(-1)).toEqual({ route: '/templates', label: '頁面樣板', icon: 'web', badge: '規劃中' });
-    // 每個展示頁都出現在側欄裡，而且只出現一次。
+    expect(groupOf(navItems, '頁面樣板')?.children.at(-1)).toEqual({ route: '/templates', label: '規劃中的樣板', icon: 'pending' });
+    // 每個展示頁都出現在側欄裡（系統管理員看得到全部），而且只出現一次。
     const routes = navItems.flatMap((e) => (isNavGroup(e) ? e.children : [e])).map((l) => l.route);
     for (const entry of SHOWCASE_ENTRIES) {
       expect(routes.filter((r) => r === `/components/${entry.id}`)).toHaveLength(1);
     }
+  });
+
+  it('側欄依權限過濾：沒有「設定・檢視」的主管、成員看不到「角色與權限」，換身分立刻更新', async () => {
+    const fixture = TestBed.createComponent(App);
+    const access = TestBed.inject(AccessService);
+    await fixture.whenStable();
+    const templateChildren = () =>
+      groupOf(fixture.componentInstance['navItems'](), '頁面樣板')?.children.map((c) => c.label) ?? [];
+
+    expect(templateChildren()).toContain('角色與權限');
+    access.signIn('u-manager');
+    expect(templateChildren()).not.toContain('角色與權限');
+    expect(templateChildren()).toContain('錯誤頁');
+    access.signIn('u-viewer');
+    expect(templateChildren()).toContain('角色與權限');
+
+    access.signIn('u-member');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.user-card')?.textContent).toContain('王小明');
+    expect(el.querySelector('.user-card')?.textContent).toContain('成員');
   });
 
   it('首頁：頁首標題「首頁」、麵包屑「總覽」，側欄亮「首頁」', async () => {

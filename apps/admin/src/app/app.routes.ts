@@ -1,5 +1,14 @@
-import { Routes } from '@angular/router';
-import { SHOWCASE_ENTRIES } from './showcase/showcase-registry';
+import { Route, Routes } from '@angular/router';
+import { ACCESS_DATA_KEY, accessGuard, permissionOf, unsavedChangesGuard } from '@admin-template/access';
+import { DEMO_FEATURES } from './core/access/demo-access';
+import { SHOWCASE_ENTRIES, ShowcaseEntry } from './showcase/showcase-registry';
+
+/** 受權限保護的路由：沒有權限顯示「沒有權限」頁；換身分時重新檢查（runGuardsAndResolvers）。 */
+function guarded(access: ShowcaseEntry['access']): Partial<Route> {
+  return access
+    ? { canActivate: [accessGuard], data: { [ACCESS_DATA_KEY]: access }, runGuardsAndResolvers: 'always' }
+    : {};
+}
 
 export const routes: Routes = [
   {
@@ -8,7 +17,23 @@ export const routes: Routes = [
     loadComponent: () => import('./features/home/home-page.component').then((m) => m.HomePageComponent),
   },
   // 每個元件一頁：/components/<id>，清單在 showcase-registry.ts。
-  ...SHOWCASE_ENTRIES.map((entry) => ({ path: `components/${entry.id}`, loadComponent: entry.load })),
+  ...SHOWCASE_ENTRIES.map(
+    (entry): Route => ({
+      path: `components/${entry.id}`,
+      loadComponent: entry.load,
+      ...guarded(entry.access),
+      ...(entry.guardUnsaved ? { canDeactivate: [unsavedChangesGuard] } : {}),
+    }),
+  ),
+  // 「權限控制」展示頁的路由守門示範：每個示範功能一頁，需要該功能的「檢視」。
+  ...DEMO_FEATURES.map(
+    (feature): Route => ({
+      path: `access-demo/${feature.id}`,
+      loadComponent: () =>
+        import('./features/access-control/access-demo-page.component').then((m) => m.AccessDemoPageComponent),
+      ...guarded(permissionOf(feature.id, 'view')),
+    }),
+  ),
   {
     path: 'templates',
     loadComponent: () =>
@@ -26,7 +51,16 @@ export const routes: Routes = [
         (m) => m.SettingsPageComponent,
       ),
   },
-  // 舊網址（清單元件示範頁）與其他不認得的網址一律回首頁。
+  // 沒有權限（accessGuard 導過來，網址列維持原本的網址）。
+  {
+    path: 'forbidden',
+    loadComponent: () => import('./features/errors/forbidden-page.component').then((m) => m.ForbiddenPageComponent),
+  },
+  // 舊網址（清單元件示範頁）。
   { path: 'dev/data-table', redirectTo: 'components/data-table' },
-  { path: '**', redirectTo: '' },
+  // 其他不認得的網址：找不到頁面。
+  {
+    path: '**',
+    loadComponent: () => import('./features/errors/not-found-page.component').then((m) => m.NotFoundPageComponent),
+  },
 ];

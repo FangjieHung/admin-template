@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { AppearancePanelService, COLOR_THEMES, ThemeService, texture } from '@admin-template/theme-pack';
+import { IdentitySwitcherService } from '@admin-template/access';
 import { ZH_TW } from '../../../core/i18n/zh-tw';
 import { HeaderTitleSlot } from '../../../layout/header/header-title';
 import { SettingsPageComponent } from './settings-page.component';
@@ -126,7 +127,7 @@ describe('SettingsPageComponent', () => {
     const panel = TestBed.inject(AppearancePanelService);
     expect(panel.visible()).toBe(false);
 
-    const toggle = fixture.nativeElement.querySelector('mat-slide-toggle button') as HTMLButtonElement;
+    const toggle = fixture.nativeElement.querySelector('.appearance-panel-toggle mat-slide-toggle button') as HTMLButtonElement;
     toggle.click();
     fixture.detectChanges();
 
@@ -138,7 +139,23 @@ describe('SettingsPageComponent', () => {
     const fixture = TestBed.createComponent(SettingsPageComponent);
     fixture.detectChanges();
 
-    const toggle = fixture.nativeElement.querySelector('mat-slide-toggle button') as HTMLButtonElement;
+    const toggle = fixture.nativeElement.querySelector('.appearance-panel-toggle mat-slide-toggle button') as HTMLButtonElement;
+    expect(toggle.getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('「切換身分」小工具開關：切換會更新 IdentitySwitcherService，並存在 app.identitySwitcher', () => {
+    const fixture = TestBed.createComponent(SettingsPageComponent);
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('顯示「切換身分」小工具');
+    const service = TestBed.inject(IdentitySwitcherService);
+    expect(service.visible()).toBe(false);
+
+    const toggle = fixture.nativeElement.querySelector('.identity-switcher-toggle mat-slide-toggle button') as HTMLButtonElement;
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(service.visible()).toBe(true);
+    expect(localStorage.getItem('app.identitySwitcher')).toBe('1');
     expect(toggle.getAttribute('aria-checked')).toBe('true');
   });
 });

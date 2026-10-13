@@ -10,6 +10,8 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { TEXTURE_FALLBACK_NOTIFIER, ThemeService } from '@admin-template/theme-pack';
+import { provideAccess } from '@admin-template/access';
+import { DEMO_ACCESS_CONFIG } from './core/access/demo-access';
 
 /**
  * ADR 0010：按需質地載入失敗、退回 Material 時的提示。theme-pack 不依賴 libs/ui，只透過這個 token 通知，
@@ -31,5 +33,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideAppInitializer(() => inject(ThemeService).init()),
     TEXTURE_FALLBACK_TOAST,
+    // 權限（libs/access 的核心 barrel 很小：模型、服務、守門、指令）。示範用的功能、角色、使用者在 demo-access.ts。
+    provideAccess(DEMO_ACCESS_CONFIG),
   ],
 };

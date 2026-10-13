@@ -10,7 +10,7 @@
       (transitionend)="onSidenavTransitionEnd()"
     >
       <app-side-nav
-        [navItems]="navItems"
+        [navItems]="navItems()"
         [collapsed]="collapsed"
         [isMobile]="isMobile"
         [openGroupLabel]="openGroupLabel"

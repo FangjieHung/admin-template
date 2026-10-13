@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { provideAccess } from '@admin-template/access';
 import { AuthService } from '../../core/auth/auth.service';
+import { DEMO_ACCESS_CONFIG } from '../../core/access/demo-access';
 import { SideNavComponent } from './side-nav.component';
 import { NavEntry } from './nav-item.model';
 
@@ -37,6 +39,7 @@ describe('SideNavComponent', () => {
     await TestBed.configureTestingModule({
       imports: [SideNavComponent],
       providers: [
+        provideAccess(DEMO_ACCESS_CONFIG),
         provideRouter([]),
         { provide: AuthService, useValue: { logout: vi.fn() } },
       ],
