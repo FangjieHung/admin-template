@@ -5,3 +5,5 @@ export * from './lib/data-table/data-table.component';
 export * from './lib/responsive-panel/responsive-panel.component';
 export * from './lib/dual-month-range-picker/dual-month-range-picker-labels';
 export * from './lib/dual-month-range-picker/dual-month-range-picker.component';
+export * from './lib/data-table/data-table-query';
+export * from './lib/data-table/data-table-column-chooser.component';

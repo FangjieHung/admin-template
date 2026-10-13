@@ -89,7 +89,7 @@ export class VehiclesPageComponent {
       exportValue: (v) => this.t.vehicle.statusLabels[v.status],
     },
     { key: 'mileage', label: this.t.vehicle.mileage, align: 'end' },
-    { key: 'actions', label: this.t.common.actions, exportSkip: true },
+    { key: 'actions', virtual: true, label: this.t.common.actions, exportSkip: true },
   ];
 
   readonly searchQuery = signal('');

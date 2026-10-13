@@ -53,7 +53,7 @@ export class MembersPageComponent {
     },
     { key: 'idNumber', label: this.t.member.idNumber, exportValue: (c) => c.idNumber ?? '—' },
     { key: 'note', label: this.t.member.note, exportValue: (c) => c.note ?? '' },
-    { key: 'actions', label: this.t.common.actions, exportSkip: true },
+    { key: 'actions', virtual: true, label: this.t.common.actions, exportSkip: true },
   ];
 
   onExportFailed(e: Error): void {

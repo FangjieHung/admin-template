@@ -56,15 +56,17 @@ export class PartnerAccountComponent {
   }
 
   readonly commissionColumns: DataTableColumn<CommissionLine>[] = [
-    { key: 'bookingId', label: '訂單編號', primary: true, exportValue: (l) => l.booking.id },
+    { key: 'bookingId', virtual: true, label: '訂單編號', primary: true, exportValue: (l) => l.booking.id },
     {
       key: 'period',
+      virtual: true,
       label: '租期',
       exportValue: (l) => `${l.booking.startTime.slice(0, 10)} ~ ${l.booking.endTime.slice(0, 10)}`,
     },
     { key: 'days', label: '天數', align: 'end' },
     {
       key: 'rentalSubtotal',
+      virtual: true,
       label: '租金小計',
       align: 'end',
       exportValue: (l) => l.booking.priceBreakdown?.rentalSubtotal ?? '',

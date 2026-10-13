@@ -18,7 +18,7 @@ const columns: DataTableColumn<Row>[] = [
   { key: 'name', label: '名稱' },
   { key: 'price', label: '單價' },
   { key: 'unit', label: '計價單位', exportValue: (r) => (r.unit === 'day' ? '每日' : '每趟') },
-  { key: 'actions', label: '操作', exportSkip: true },
+  { key: 'actions', label: '操作', virtual: true, exportSkip: true },
 ];
 
 describe('exportFileName', () => {

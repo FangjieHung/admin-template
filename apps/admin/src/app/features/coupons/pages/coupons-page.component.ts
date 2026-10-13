@@ -76,11 +76,11 @@ export class CouponsPageComponent {
           : this.t.common.all,
     },
     {
-      key: 'period',
+      key: 'period', virtual: true,
       label: `${this.t.coupon.validFrom} - ${this.t.coupon.validTo}`,
       exportValue: (c) => `${c.validFrom} ~ ${c.validTo}`,
     },
-    { key: 'actions', label: this.t.common.actions, exportSkip: true },
+    { key: 'actions', virtual: true, label: this.t.common.actions, exportSkip: true },
   ];
 
   readonly selectedCoupons = signal<readonly Coupon[]>([]);

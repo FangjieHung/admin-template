@@ -48,12 +48,12 @@ export class PricingPageComponent {
       primary: true,
       exportValue: (p) => this.t.vehicle.typeLabels[p.appliesToCategory],
     },
-    { key: 'weekday', label: this.t.pricing.weekday, align: 'end', exportValue: (p) => p.dayTypeRates.weekday },
-    { key: 'weekend', label: this.t.pricing.weekend, align: 'end', exportValue: (p) => p.dayTypeRates.weekend },
-    { key: 'holiday', label: this.t.pricing.holiday, align: 'end', exportValue: (p) => p.dayTypeRates.holiday },
-    { key: 'peak', label: this.t.pricing.peak, align: 'end', exportValue: (p) => p.dayTypeRates.peak },
+    { key: 'weekday', virtual: true, label: this.t.pricing.weekday, align: 'end', exportValue: (p) => p.dayTypeRates.weekday },
+    { key: 'weekend', virtual: true, label: this.t.pricing.weekend, align: 'end', exportValue: (p) => p.dayTypeRates.weekend },
+    { key: 'holiday', virtual: true, label: this.t.pricing.holiday, align: 'end', exportValue: (p) => p.dayTypeRates.holiday },
+    { key: 'peak', virtual: true, label: this.t.pricing.peak, align: 'end', exportValue: (p) => p.dayTypeRates.peak },
     { key: 'tiers', label: this.t.pricing.tiers, exportValue: (p) => this.tiersSummary(p) },
-    { key: 'actions', label: this.t.common.actions, exportSkip: true },
+    { key: 'actions', virtual: true, label: this.t.common.actions, exportSkip: true },
   ];
 
   onExportFailed(e: Error): void {

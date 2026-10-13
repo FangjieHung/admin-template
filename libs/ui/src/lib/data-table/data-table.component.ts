@@ -2,13 +2,18 @@ import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   TemplateRef,
+  afterRenderEffect,
   computed,
   contentChild,
   contentChildren,
   effect,
+  inject,
   input,
+  linkedSignal,
+  model,
   output,
   signal,
   untracked,
@@ -17,25 +22,51 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DataTableCellContext, DataTableCellDirective } from './data-table-cell.directive';
+import { DataTableColumnChooserComponent } from './data-table-column-chooser.component';
 import { exportRows, exportTableElement } from './data-table-export';
+import {
+  cellValue,
+  clampPage,
+  formatLabel,
+  frozenColumnKey,
+  isSortableColumn,
+  nextSort,
+  normalizeColumnPrefs,
+  orderColumns,
+  pageCount,
+  pageRange,
+  pageSlice,
+  sortRows,
+} from './data-table-query';
 import {
   DataTableBatchActionsDirective,
   DataTableBodyDirective,
   DataTableHeadDirective,
 } from './data-table-slot.directives';
-import { DataTableColumn, DataTableLabels, DataTableMobileMode } from './data-table.types';
+import {
+  DataTableColumn,
+  DataTableColumnChooserLabels,
+  DataTableColumnPrefs,
+  DataTableLabels,
+  DataTableMobileMode,
+  DataTablePagingLabels,
+  DataTableSort,
+} from './data-table.types';
 
 type ResolvedColumn<T> = DataTableColumn<T> & { primary: boolean };
 
+/** 與 scss 的手機斷點一致：卡片版改用「載入更多」，不顯示分頁鈕。 */
+const COMPACT_QUERY = '(max-width: 640px)';
+
 @Component({
   selector: 'lib-data-table',
-  imports: [NgTemplateOutlet, MatButtonModule, MatTooltipModule],
+  imports: [NgTemplateOutlet, MatButtonModule, MatTooltipModule, DataTableColumnChooserComponent],
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DataTableComponent<T> {
-  readonly columns = input<DataTableColumn<T>[]>([]);
+  readonly columns = input<readonly DataTableColumn<T>[]>([]);
   readonly rows = input<readonly T[]>([]);
   // 下方拋出的字串是刻意保留的 developer diagnostics（開發期設定錯誤，不是使用者可見文案）：
   // 呼叫端忘記傳 [rowId] 或 dtHead/dtBody 沒有成對提供，此時應直接在開發環境炸出明確訊息，
@@ -59,6 +90,22 @@ export class DataTableComponent<T> {
   readonly rowClickable = input(false);
   readonly rowClass = input<(row: T) => string>(() => '');
 
+  // ---- 進階功能（全部預設關閉：沒開的清單畫面與行為與以前完全相同）----
+
+  /** 分頁：桌機底部分頁列；手機卡片版改成「載入更多」。 */
+  readonly pageable = input(false);
+  readonly pageSizeOptions = input<readonly number[]>([25, 50, 100]);
+  readonly pageSize = model(25);
+  /** 目前頁碼（從 0 起算）。資料變少時元件會自動夾在最後一頁。 */
+  readonly page = model(0);
+  /** 點欄位標題排序：遞增 → 遞減 → 不排序，單欄。 */
+  readonly sortable = input(false);
+  readonly sort = model<DataTableSort | null>(null);
+  /** 欄位選擇面板：顯示／隱藏、拖曳或上下移調整順序、恢復預設。 */
+  readonly columnChooser = input(false);
+  /** null＝預設欄位。使用者排回預設時也會回到 null。 */
+  readonly columnPrefs = model<DataTableColumnPrefs | null>(null);
+
   readonly selectionChange = output<readonly T[]>();
   readonly batchDelete = output<readonly T[]>();
   readonly rowClick = output<T>();
@@ -72,7 +119,7 @@ export class DataTableComponent<T> {
 
   protected readonly selectedRows = computed<readonly T[]>(() => {
     const ids = this.selectedIds();
-    return this.rows().filter((row) => ids.has(this.rowId()(row)));
+    return this.processedRows().filter((row) => ids.has(this.rowId()(row)));
   });
 
   protected readonly selectedCount = computed(() => this.selectedRows().length);
@@ -86,6 +133,9 @@ export class DataTableComponent<T> {
     const count = this.selectedCount();
     return count > 0 && count < this.rows().length;
   });
+
+  /** 手機斷點（matchMedia）；測試環境沒有 matchMedia 時視為桌機。 */
+  protected readonly isCompact = signal(false);
 
   constructor() {
     effect(() => {
@@ -116,6 +166,27 @@ export class DataTableComponent<T> {
         this.selectionChange.emit(rows.filter((row) => nextIds.has(this.rowId()(row))));
       }
     });
+
+    if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+      const mql = window.matchMedia(COMPACT_QUERY);
+      this.isCompact.set(mql.matches);
+      const onChange = (e: MediaQueryListEvent) => this.isCompact.set(e.matches);
+      mql.addEventListener('change', onChange);
+      inject(DestroyRef).onDestroy(() => mql.removeEventListener('change', onChange));
+    }
+
+    // 固定欄前面若有勾選欄，固定欄的 left 要等於勾選欄的實際寬度（勾選欄寬度由內容撐出，量了才準）。
+    afterRenderEffect({
+      earlyRead: () => {
+        if (!this.frozenActive() || !this.selectable()) return 0;
+        this.displayRows();
+        const th = this.tableEl()?.nativeElement.querySelector('thead .dt-selection-head');
+        return th ? th.getBoundingClientRect().width : 0;
+      },
+      write: (width) => {
+        this.tableEl()?.nativeElement.style.setProperty('--dt-frozen-offset', `${width()}px`);
+      },
+    });
   }
 
   /** dtHead 存在即進入逃生門模式：不讀 columns、不注入 data-label、不生卡片。 */
@@ -140,12 +211,92 @@ export class DataTableComponent<T> {
     return map;
   });
 
-  /** 沒有任何欄位標 primary 時，第一欄自動視為 primary，避免手機卡片整張空白。 */
+  /** 所有欄位依偏好排好（含隱藏的），欄位選擇面板用。 */
+  protected readonly orderedColumns = computed(() =>
+    orderColumns(this.columns(), this.columnChooser() ? this.columnPrefs() : null),
+  );
+
+  /** 沒有任何欄位標 primary 時，第一個顯示的欄位自動視為 primary，避免手機卡片整張空白。 */
   protected readonly resolvedColumns = computed<ResolvedColumn<T>[]>(() => {
-    const cols = this.columns();
-    const hasPrimary = cols.some((c) => c.primary);
-    return cols.map((col, i) => ({ ...col, primary: hasPrimary ? !!col.primary : i === 0 }));
+    const visible = this.orderedColumns()
+      .filter((c) => !c.hidden)
+      .map((c) => c.column);
+    const hasPrimary = visible.some((c) => c.primary);
+    return visible.map((col, i) => ({ ...col, primary: hasPrimary ? !!col.primary : i === 0 }));
   });
+
+  protected readonly frozenKey = computed(() => frozenColumnKey(this.columns()));
+
+  /** 固定欄存在且正在顯示。 */
+  protected readonly frozenActive = computed(() => {
+    const key = this.frozenKey();
+    return key !== null && this.resolvedColumns().some((c) => c.key === key);
+  });
+
+  /** 篩選後（由使用端給的 rows）再排序的完整資料：匯出與分頁都從這裡取，匯出永遠是全部，不是這一頁。 */
+  protected readonly processedRows = computed<readonly T[]>(() =>
+    this.sortable() ? sortRows(this.rows(), this.columns(), this.sort()) : this.rows(),
+  );
+
+  protected readonly total = computed(() => this.processedRows().length);
+
+  protected readonly currentPage = computed(() => clampPage(this.page(), this.total(), this.pageSize()));
+
+  protected readonly pageTotal = computed(() => pageCount(this.total(), this.pageSize()));
+
+  /** 卡片版用「載入更多」：已載入幾頁。排序、每頁筆數或資料換了就回到第一頁。 */
+  private readonly loadedPages = linkedSignal({
+    source: () => [this.sort(), this.pageSize(), this.rows()] as const,
+    computation: () => 1,
+  });
+
+  protected readonly loadMoreMode = computed(
+    () => this.pageable() && this.isCompact() && this.mobileMode() === 'cards',
+  );
+
+  /** 實際渲染的資料列。 */
+  protected readonly displayRows = computed<readonly T[]>(() => {
+    const rows = this.processedRows();
+    if (!this.pageable()) return rows;
+    const size = this.pageSize();
+    if (this.loadMoreMode()) return rows.slice(0, this.loadedPages() * size);
+    return pageSlice(rows, this.currentPage(), size);
+  });
+
+  protected readonly pagingLabels = computed<DataTablePagingLabels>(() => {
+    const paging = this.labels().paging;
+    if (this.pageable() && !paging) {
+      throw new Error('DataTable：開啟 [pageable] 時 labels.paging 為必填');
+    }
+    return paging as DataTablePagingLabels;
+  });
+
+  protected readonly chooserLabels = computed(() => {
+    const chooser = this.labels().columnChooser;
+    if (this.columnChooser() && !chooser) {
+      throw new Error('DataTable：開啟 [columnChooser] 時 labels.columnChooser 為必填');
+    }
+    return chooser as DataTableColumnChooserLabels;
+  });
+
+  protected readonly rangeText = computed(() => {
+    const { from, to } = pageRange(this.currentPage(), this.pageSize(), this.total());
+    return formatLabel(this.pagingLabels().range, { from, to, total: this.total() });
+  });
+
+  protected readonly pageOfText = computed(() =>
+    formatLabel(this.pagingLabels().pageOf, { page: this.currentPage() + 1, pages: this.pageTotal() }),
+  );
+
+  protected readonly shownText = computed(() =>
+    formatLabel(this.pagingLabels().shownOf, { shown: this.displayRows().length, total: this.total() }),
+  );
+
+  protected readonly canLoadMore = computed(() => this.displayRows().length < this.total());
+
+  protected pageSizeText(size: number): string {
+    return formatLabel(this.pagingLabels().pageSizeOption, { size });
+  }
 
   protected readonly isEmpty = computed(() => !this.isCustom() && this.rows().length === 0);
 
@@ -159,6 +310,14 @@ export class DataTableComponent<T> {
 
   private readonly expandedIds = signal<ReadonlySet<unknown>>(new Set());
 
+  /** 表格橫向捲過時才畫固定欄的底色與分界（沒捲時跟其他欄一樣透明，畫面與以前一致）。 */
+  protected readonly scrolledX = signal(false);
+
+  protected onWrapScroll(event: Event): void {
+    const scrolled = (event.target as HTMLElement).scrollLeft > 0;
+    if (scrolled !== this.scrolledX()) this.scrolledX.set(scrolled);
+  }
+
   protected isExpanded(row: T): boolean {
     return this.expandedIds().has(this.rowId()(row));
   }
@@ -169,7 +328,7 @@ export class DataTableComponent<T> {
 
   protected rowSelectionLabel(row: T): string {
     const firstColumn = this.resolvedColumns()[0];
-    const visibleValue = firstColumn ? this.valueOf(row, firstColumn.key) : '';
+    const visibleValue = firstColumn ? this.valueOf(row, firstColumn) : '';
     const rowIdentifier = String(this.rowId()(row));
     const parts = [this.labels().selectRow];
     if (visibleValue) parts.push(visibleValue);
@@ -222,9 +381,51 @@ export class DataTableComponent<T> {
     this.batchDelete.emit(this.selectedRows());
   }
 
-  protected valueOf(row: T, key: string): string {
-    const value = (row as Record<string, unknown>)[key];
+  protected valueOf(row: T, col: DataTableColumn<T>): string {
+    const value = cellValue(col, row);
     return value === null || value === undefined ? '' : String(value);
+  }
+
+  // ---- 排序 ----
+
+  protected isColumnSortable(col: DataTableColumn<T>): boolean {
+    return this.sortable() && isSortableColumn(col);
+  }
+
+  protected ariaSort(col: DataTableColumn<T>): 'ascending' | 'descending' | 'none' | null {
+    if (!this.isColumnSortable(col)) return null;
+    const sort = this.sort();
+    if (!sort || sort.key !== col.key) return 'none';
+    return sort.direction === 'asc' ? 'ascending' : 'descending';
+  }
+
+  protected toggleSort(col: DataTableColumn<T>): void {
+    if (!this.isColumnSortable(col)) return;
+    this.sort.set(nextSort(this.sort(), col.key));
+    this.page.set(0);
+  }
+
+  // ---- 分頁 ----
+
+  protected goToPage(page: number): void {
+    this.page.set(clampPage(page, this.total(), this.pageSize()));
+  }
+
+  protected onPageSizeChange(event: Event): void {
+    const size = Number((event.target as HTMLSelectElement).value);
+    if (!Number.isFinite(size) || size <= 0) return;
+    this.pageSize.set(size);
+    this.page.set(0);
+  }
+
+  protected loadMore(): void {
+    this.loadedPages.update((n) => n + 1);
+  }
+
+  // ---- 欄位 ----
+
+  protected onColumnPrefsChange(prefs: DataTableColumnPrefs | null): void {
+    this.columnPrefs.set(normalizeColumnPrefs(this.columns(), prefs));
   }
 
   /** 匯出失敗（多半是 xlsx 動態載入失敗）時通知使用端顯示 snackbar。 */
@@ -234,6 +435,7 @@ export class DataTableComponent<T> {
 
   protected readonly canExport = computed(() => this.showExport() && !this.isEmpty());
 
+  /** 匯出目前顯示的欄位（順序同畫面）與篩選＋排序後的「全部」資料列——不是只有這一頁。 */
   protected async runExport(): Promise<void> {
     try {
       if (this.isCustom()) {
@@ -243,7 +445,7 @@ export class DataTableComponent<T> {
         }
         await exportTableElement(el, this.exportName());
       } else {
-        await exportRows(this.columns(), this.rows(), this.exportName());
+        await exportRows(this.resolvedColumns(), this.processedRows(), this.exportName());
       }
     } catch (e) {
       this.exportFailed.emit(e as Error);
@@ -252,7 +454,7 @@ export class DataTableComponent<T> {
 
   protected async runSelectedExport(): Promise<void> {
     try {
-      await exportRows(this.columns(), this.selectedRows(), `${this.exportName()}-selected`);
+      await exportRows(this.resolvedColumns(), this.selectedRows(), `${this.exportName()}-selected`);
     } catch (e) {
       this.exportFailed.emit(e as Error);
     }

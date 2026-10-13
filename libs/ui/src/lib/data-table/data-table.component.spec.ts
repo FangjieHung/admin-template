@@ -424,7 +424,7 @@ describe('DataTableComponent 展開／收合', () => {
 class CustomHostComponent {
   readonly labels = LABELS;
   // 逃生門模式下應被忽略
-  readonly columns: DataTableColumn<unknown>[] = [{ key: 'ignored', label: '不該出現' }];
+  readonly columns: DataTableColumn<{ ignored: string }>[] = [{ key: 'ignored', label: '不該出現' }];
 }
 
 describe('DataTableComponent 逃生門模式', () => {

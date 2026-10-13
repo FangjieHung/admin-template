@@ -24,7 +24,7 @@ describe('DataTableColumn', () => {
   });
 
   it('exportSkip 為 true 時，代表此欄不納入匯出（例如 actions 欄）', () => {
-    const column: DataTableColumn<Row> = { key: 'actions', label: '操作', exportSkip: true };
+    const column: DataTableColumn<Row> = { key: 'actions', label: '操作', virtual: true, exportSkip: true };
     expect(column.exportSkip).toBe(true);
   });
 

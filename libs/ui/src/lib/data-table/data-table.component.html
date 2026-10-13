@@ -66,8 +66,22 @@
     }
     </div>
   }
+
+  @if (columnChooser() && !isCustom()) {
+    <lib-data-table-column-chooser
+      class="dt-toolbar-end"
+      [columns]="orderedColumns()"
+      [labels]="chooserLabels()"
+      (prefsChange)="onColumnPrefsChange($event)"
+    />
+  }
 </div>
-<div class="dt-wrap" [class.dt-wrap--scroll]="mobileMode() === 'scroll'">
+<div
+  class="dt-wrap"
+  [class.dt-wrap--scroll]="mobileMode() === 'scroll'"
+  [class.dt-wrap--scrolled]="scrolledX()"
+  (scroll)="onWrapScroll($event)"
+>
   @if (isEmpty()) {
     <p class="dt-empty">{{ emptyText() }}</p>
   } @else {
@@ -83,7 +97,7 @@
         <thead>
           <tr>
             @if (selectable()) {
-              <th scope="col" class="dt-selection-head">
+              <th scope="col" class="dt-selection-head" [class.dt-frozen-select]="frozenActive()">
                 <label class="dt-selection-control">
                   <input
                     type="checkbox"
@@ -97,7 +111,39 @@
               </th>
             }
             @for (col of resolvedColumns(); track col.key) {
-              <th scope="col" [class]="'dt-align-' + (col.align ?? 'start') + (col.align === 'end' ? ' ui-text-numeric' : '')">{{ col.label }}</th>
+              <th
+                scope="col"
+                [class]="'dt-align-' + (col.align ?? 'start') + (col.align === 'end' ? ' ui-text-numeric' : '')"
+                [class.dt-frozen]="frozenActive() && col.key === frozenKey()"
+                [attr.aria-sort]="ariaSort(col)"
+              >
+                @if (isColumnSortable(col)) {
+                  <button
+                    type="button"
+                    class="dt-sort-btn"
+                    [class.is-sorted]="sort()?.key === col.key"
+                    (click)="toggleSort(col)"
+                  >
+                    <span>{{ col.label }}</span>
+                    <svg
+                      class="dt-sort-icon"
+                      [class.dt-sort-icon--desc]="sort()?.key === col.key && sort()?.direction === 'desc'"
+                      viewBox="0 0 24 24"
+                      width="16"
+                      height="16"
+                      aria-hidden="true"
+                    >
+                      @if (sort()?.key === col.key) {
+                        <path d="M12 19V5M6 11l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" />
+                      } @else {
+                        <path d="M8 9l4-4 4 4M8 15l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" />
+                      }
+                    </svg>
+                  </button>
+                } @else {
+                  {{ col.label }}
+                }
+              </th>
             }
             @if (hasSecondary()) {
               <th scope="col" class="dt-expand-head"></th>
@@ -105,7 +151,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (row of rows(); track rowId()(row)) {
+          @for (row of displayRows(); track rowId()(row)) {
             <tr
               [class]="rowClass()(row)"
               [class.is-expanded]="isExpanded(row)"
@@ -116,7 +162,12 @@
               (keydown.space)="onRowKeydown(row, $event)"
             >
               @if (selectable()) {
-                <td class="dt-selection-cell" data-label="" (click)="$event.stopPropagation()">
+                <td
+                  class="dt-selection-cell"
+                  [class.dt-frozen-select]="frozenActive()"
+                  data-label=""
+                  (click)="$event.stopPropagation()"
+                >
                   <label class="dt-selection-control">
                     <input
                       type="checkbox"
@@ -133,6 +184,7 @@
                   [attr.data-label]="col.label"
                   [class]="'dt-align-' + (col.align ?? 'start') + (col.align === 'end' ? ' ui-text-numeric' : '')"
                   [class.is-secondary]="!col.primary"
+                  [class.dt-frozen]="frozenActive() && col.key === frozenKey()"
                 >
                   @if (cellTemplates().get(col.key); as tpl) {
                     <ng-container
@@ -140,7 +192,7 @@
                       [ngTemplateOutletContext]="cellContext(row)"
                     />
                   } @else {
-                    {{ valueOf(row, col.key) }}
+                    {{ valueOf(row, col) }}
                   }
                 </td>
               }
@@ -166,3 +218,71 @@
     </table>
   }
 </div>
+
+@if (pageable() && !isCustom() && !isEmpty()) {
+  @if (loadMoreMode()) {
+    <div class="dt-pager dt-pager--more">
+      <span class="dt-pager__range ui-text-numeric" aria-live="polite">{{ shownText() }}</span>
+      @if (canLoadMore()) {
+        <button type="button" matButton="tonal" class="dt-load-more" (click)="loadMore()">
+          {{ pagingLabels().loadMore }}
+        </button>
+      }
+    </div>
+  } @else {
+    <nav class="dt-pager" [attr.aria-label]="pagingLabels().nav">
+      <label class="dt-pager__size">
+        <span class="dt-visually-hidden">{{ pagingLabels().pageSizeLabel }}</span>
+        <select class="dt-pager__select" (change)="onPageSizeChange($event)">
+          @for (size of pageSizeOptions(); track size) {
+            <option [value]="size" [selected]="size === pageSize()">{{ pageSizeText(size) }}</option>
+          }
+        </select>
+      </label>
+      <span class="dt-pager__range ui-text-numeric" aria-live="polite">{{ rangeText() }}</span>
+      <span class="dt-pager__buttons">
+        <button
+          type="button"
+          class="dt-pager__btn"
+          [disabled]="currentPage() === 0"
+          [attr.aria-label]="pagingLabels().firstPage"
+          [matTooltip]="pagingLabels().firstPage"
+          (click)="goToPage(0)"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M17 18l-6-6 6-6M7 6v12" fill="none" stroke="currentColor" stroke-width="2" /></svg>
+        </button>
+        <button
+          type="button"
+          class="dt-pager__btn"
+          [disabled]="currentPage() === 0"
+          [attr.aria-label]="pagingLabels().prevPage"
+          [matTooltip]="pagingLabels().prevPage"
+          (click)="goToPage(currentPage() - 1)"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" /></svg>
+        </button>
+        <span class="dt-pager__page ui-text-numeric">{{ pageOfText() }}</span>
+        <button
+          type="button"
+          class="dt-pager__btn"
+          [disabled]="currentPage() >= pageTotal() - 1"
+          [attr.aria-label]="pagingLabels().nextPage"
+          [matTooltip]="pagingLabels().nextPage"
+          (click)="goToPage(currentPage() + 1)"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" stroke-width="2" /></svg>
+        </button>
+        <button
+          type="button"
+          class="dt-pager__btn"
+          [disabled]="currentPage() >= pageTotal() - 1"
+          [attr.aria-label]="pagingLabels().lastPage"
+          [matTooltip]="pagingLabels().lastPage"
+          (click)="goToPage(pageTotal() - 1)"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M7 6l6 6-6 6M17 6v12" fill="none" stroke="currentColor" stroke-width="2" /></svg>
+        </button>
+      </span>
+    </nav>
+  }
+}

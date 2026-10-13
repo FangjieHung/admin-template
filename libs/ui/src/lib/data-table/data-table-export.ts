@@ -1,3 +1,4 @@
+import { exportCellValue } from './data-table-query';
 import { DataTableColumn } from './data-table.types';
 
 export function exportFileName(name: string, date: Date = new Date()): string {
@@ -8,16 +9,14 @@ export function exportFileName(name: string, date: Date = new Date()): string {
 
 /** 把資料列轉成 SheetJS 的 aoa（array of arrays）：第一列是標題。 */
 export function rowsToAoa<T>(
-  columns: DataTableColumn<T>[],
+  columns: readonly DataTableColumn<T>[],
   rows: readonly T[],
 ): (string | number)[][] {
   const cols = columns.filter((c) => !c.exportSkip);
   const header = cols.map((c) => c.label);
   const body = rows.map((row) =>
     cols.map((col) => {
-      const raw = col.exportValue
-        ? col.exportValue(row)
-        : (row as Record<string, unknown>)[col.key];
+      const raw = exportCellValue(col, row);
       if (raw === null || raw === undefined) return '';
       return typeof raw === 'number' ? raw : String(raw);
     }),
@@ -38,7 +37,7 @@ async function writeWorkbook(XLSX: XlsxModule, sheet: unknown, name: string): Pr
  * 日後若加上分頁或虛擬捲動也不會變成「只匯出當前頁」。
  */
 export async function exportRows<T>(
-  columns: DataTableColumn<T>[],
+  columns: readonly DataTableColumn<T>[],
   rows: readonly T[],
   name: string,
 ): Promise<void> {

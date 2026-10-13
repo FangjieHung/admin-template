@@ -45,7 +45,7 @@ export class AddOnsPageComponent {
       label: this.t.addOn.unit,
       exportValue: (a) => this.t.addOn.unitLabels[a.unit],
     },
-    { key: 'actions', label: this.t.common.actions, exportSkip: true },
+    { key: 'actions', virtual: true, label: this.t.common.actions, exportSkip: true },
   ];
 
   readonly selectedAddOns = signal<readonly AddOn[]>([]);

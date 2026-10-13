@@ -44,7 +44,7 @@ export class PrepQueueDialogComponent {
     { key: 'returnedAt', label: this.t.prep.columns.returnedAt },
     { key: 'returnBranchId', label: this.t.prep.columns.returnBranchId },
     { key: 'nextPickupAt', label: this.t.prep.columns.nextPickupAt, primary: true },
-    { key: 'actions', label: this.t.common.actions, primary: true, exportSkip: true },
+    { key: 'actions', virtual: true, label: this.t.common.actions, primary: true, exportSkip: true },
   ];
 
   readonly rows = computed<PrepQueueRow[]>(() => {

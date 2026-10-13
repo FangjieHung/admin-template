@@ -1,0 +1,110 @@
+<button
+  #trigger
+  type="button"
+  matButton="text"
+  class="dt-chooser-trigger"
+  cdkOverlayOrigin
+  #origin="cdkOverlayOrigin"
+  aria-haspopup="dialog"
+  [attr.aria-expanded]="open()"
+  (click)="toggle()"
+>
+  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+    <path d="M4 5h16M4 12h16M4 19h16M9 3v4M15 10v4M7 17v4" fill="none" stroke="currentColor" stroke-width="2" />
+  </svg>
+  {{ labels().trigger }}
+</button>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="open()"
+  [cdkConnectedOverlayPositions]="positions"
+  [cdkConnectedOverlayHasBackdrop]="true"
+  cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+  (backdropClick)="close(false)"
+  (detach)="close(false)"
+  (attach)="onAttach()"
+  (overlayKeydown)="onOverlayKeydown($event)"
+>
+  <div #panel class="dt-chooser" role="dialog" [attr.aria-label]="labels().title">
+    <div class="dt-chooser__head">
+      <span class="dt-chooser__title">{{ labels().title }}</span>
+      <button
+        type="button"
+        class="dt-chooser__icon-btn"
+        [attr.aria-label]="labels().close"
+        (click)="close()"
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" />
+        </svg>
+      </button>
+    </div>
+
+    <ul class="dt-chooser__list" cdkDropList (cdkDropListDropped)="drop($event)">
+      @for (item of columns(); track item.column.key; let i = $index) {
+        <li class="dt-chooser__item" cdkDrag [cdkDragDisabled]="item.frozen" cdkDragLockAxis="y">
+          <span
+            class="dt-chooser__handle"
+            cdkDragHandle
+            [class.is-disabled]="item.frozen"
+            [attr.title]="item.frozen ? null : format(labels().dragHandle, item.column.label)"
+            aria-hidden="true"
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18">
+              <path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+            </svg>
+          </span>
+          <label class="dt-chooser__label">
+            <input
+              type="checkbox"
+              [checked]="!item.hidden"
+              [disabled]="!item.hideable"
+              (change)="toggleHidden(item)"
+            />
+            <span>{{ item.column.label }}</span>
+          </label>
+          @if (item.frozen) {
+            <span class="dt-chooser__frozen">{{ labels().frozen }}</span>
+          } @else {
+            <span class="dt-chooser__moves">
+              <button
+                type="button"
+                class="dt-chooser__icon-btn"
+                data-move="-1"
+                [attr.data-key]="item.column.key"
+                [disabled]="!canMove(i, -1)"
+                [attr.aria-label]="format(labels().moveUp, item.column.label)"
+                (click)="move(i, -1)"
+              >
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="dt-chooser__icon-btn"
+                data-move="1"
+                [attr.data-key]="item.column.key"
+                [disabled]="!canMove(i, 1)"
+                [attr.aria-label]="format(labels().moveDown, item.column.label)"
+                (click)="move(i, 1)"
+              >
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" />
+                </svg>
+              </button>
+            </span>
+          }
+        </li>
+      }
+    </ul>
+
+    <div class="dt-chooser__foot">
+      <button type="button" matButton="text" class="dt-chooser__reset" (click)="reset()">
+        {{ labels().reset }}
+      </button>
+    </div>
+  </div>
+</ng-template>

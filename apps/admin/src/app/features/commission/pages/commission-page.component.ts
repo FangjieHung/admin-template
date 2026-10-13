@@ -43,7 +43,7 @@ export class CommissionPageComponent {
     { key: 'bookingId', label: this.t.commission.bookingId, primary: true },
     { key: 'vehicleLabel', label: this.t.commission.vehicleLabel, primary: true },
     {
-      key: 'period',
+      key: 'period', virtual: true,
       label: this.t.commission.period,
       // 匯出保留原始 ISO 字串（機器可讀），畫面顯示才用共用格式（dtCell 負責）。
       exportValue: (r) => `${r.startTime} ~ ${r.endTime}`,

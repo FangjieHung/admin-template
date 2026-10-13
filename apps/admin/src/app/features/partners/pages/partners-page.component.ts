@@ -51,7 +51,7 @@ export class PartnersPageComponent {
       exportValue: (p) =>
         `${this.t.partner.commissionTypeLabels[p.commission.type]}（${p.commission.value}）`,
     },
-    { key: 'actions', label: this.t.common.actions, exportSkip: true },
+    { key: 'actions', virtual: true, label: this.t.common.actions, exportSkip: true },
   ];
 
   onExportFailed(e: Error): void {

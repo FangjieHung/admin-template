@@ -152,8 +152,8 @@ export class OrdersPageComponent {
       exportValue: (b) => this.t.order.statusLabels[b.status],
     },
     // 4.1：待補項數（數字徽章，0 不顯示）；規則與訂單詳情的待補卡同一套。
-    { key: 'incomplete', label: this.t.order.incomplete, exportValue: (b) => this.incompleteOf(b).length },
-    { key: 'actions', label: this.t.common.actions, exportSkip: true },
+    { key: 'incomplete', virtual: true, label: this.t.order.incomplete, exportValue: (b) => this.incompleteOf(b).length },
+    { key: 'actions', virtual: true, label: this.t.common.actions, exportSkip: true },
   ];
 
   onExportFailed(e: Error): void {
