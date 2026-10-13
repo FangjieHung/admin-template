@@ -1,0 +1,117 @@
+// 權限矩陣：只用語意 token。勾選框外觀交給全域的原生勾選框樣式（theme-pack _choice-controls.scss），
+// 框線、字級交給質地（Grid 的格線感來自 outline-variant 的 hairline；Editorial 靠字級與留白）。
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.pm-scroll {
+  overflow-x: auto;
+}
+
+.pm {
+  width: 100%;
+  min-width: 34rem;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface);
+}
+
+.pm-caption {
+  padding-bottom: 0.5rem;
+  text-align: start;
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+thead th {
+  padding: 0.5rem 0.5rem 0.625rem;
+  font-weight: 600;
+  color: var(--mat-sys-on-surface-variant);
+  white-space: nowrap;
+}
+
+.pm-corner,
+.pm-row-head {
+  text-align: start;
+}
+
+.pm-col-head,
+.pm-cell {
+  width: 1%;
+  min-width: 4.5rem;
+  text-align: center;
+}
+
+.pm-row-head {
+  padding: 0 0.75rem 0 0;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pm--readonly .pm-row-head {
+  padding-block: 0.75rem;
+}
+
+// 標頭與列首的批次切換：勾選框在左、文字在右，整塊都是點擊熱區（≥ 44px 高）。
+.pm-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.pm-toggle--col {
+  flex-direction: column;
+  gap: 0.25rem;
+  justify-content: center;
+}
+
+// 每格的點擊熱區撐滿儲存格（44 × 44 以上），不只是 18px 的方塊。
+.pm-hit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+tbody tr:hover {
+  background: var(--app-state-hover);
+}
+
+.pm-na {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.pm-mark {
+  font-size: 1.25rem;
+  vertical-align: middle;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.pm-mark--on {
+  color: var(--mat-sys-primary);
+}
+
+.pm-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+td {
+  position: relative;
+}

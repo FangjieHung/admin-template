@@ -1,0 +1,37 @@
+<button
+  type="button"
+  class="ids-trigger"
+  [matMenuTriggerFor]="menu"
+  [attr.aria-label]="labels().trigger + '：' + currentName() + (currentRoles() ? '（' + currentRoles() + '）' : '')"
+>
+  <span class="material-symbols-rounded ids-icon" aria-hidden="true">badge</span>
+  <span class="ids-text" aria-hidden="true">
+    <span class="ids-name">{{ currentName() }}</span>
+    @if (currentRoles()) {
+      <span class="ids-roles">{{ currentRoles() }}</span>
+    }
+  </span>
+  <span class="material-symbols-rounded ids-caret" aria-hidden="true">expand_more</span>
+</button>
+
+<mat-menu #menu="matMenu" xPosition="before">
+  <p class="ids-menu-title" aria-hidden="true">{{ labels().menuTitle }}</p>
+  @for (entry of entries(); track entry.user.id) {
+    <button
+      mat-menu-item
+      type="button"
+      role="menuitemradio"
+      [attr.aria-checked]="entry.current"
+      [attr.data-user-id]="entry.user.id"
+      (click)="select(entry.user.id)"
+    >
+      <span class="material-symbols-rounded ids-radio" aria-hidden="true">{{
+        entry.current ? 'radio_button_checked' : 'radio_button_unchecked'
+      }}</span>
+      <span class="ids-item">
+        <span class="ids-item-name">{{ entry.user.name }}</span>
+        <span class="ids-item-roles">{{ entry.roles }}</span>
+      </span>
+    </button>
+  }
+</mat-menu>

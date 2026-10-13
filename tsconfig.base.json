@@ -15,6 +15,15 @@
       ],
       "@admin-template/ui": [
         "./libs/ui/src/index.ts"
+      ],
+      "@admin-template/access": [
+        "./libs/access/src/index.ts"
+      ],
+      "@admin-template/access/permission-matrix": [
+        "./libs/access/src/lib/permission-matrix/index.ts"
+      ],
+      "@admin-template/access/identity-switcher": [
+        "./libs/access/src/lib/identity-switcher/identity-switcher.component.ts"
       ]
     }
   }

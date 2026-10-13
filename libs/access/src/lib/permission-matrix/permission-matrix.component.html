@@ -1,0 +1,83 @@
+<div class="pm-scroll">
+  <table class="pm" [class.pm--readonly]="readonly()">
+    @if (caption()) {
+      <caption class="pm-caption">{{ caption() }}</caption>
+    }
+    <thead>
+      <tr>
+        <th scope="col" class="pm-corner">{{ labels.feature }}</th>
+        @for (col of columns(); track col.action; let c = $index) {
+          <th scope="col" class="pm-col-head" [attr.data-action]="col.action">
+            @if (readonly()) {
+              {{ col.label }}
+            } @else {
+              <label class="pm-toggle pm-toggle--col">
+                <input
+                  type="checkbox"
+                  [attr.data-r]="0"
+                  [attr.data-c]="c + 1"
+                  [checked]="col.state === 'all'"
+                  [indeterminate]="col.state === 'some'"
+                  [attr.aria-label]="fill(labels.toggleColumn, '', col.label)"
+                  (change)="onColumn(col.action)"
+                />
+                <span aria-hidden="true">{{ col.label }}</span>
+              </label>
+            }
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of rows(); track row.feature.id; let r = $index) {
+        <tr [attr.data-feature]="row.feature.id">
+          <th scope="row" class="pm-row-head">
+            @if (readonly()) {
+              {{ row.feature.label }}
+            } @else {
+              <label class="pm-toggle">
+                <input
+                  type="checkbox"
+                  [attr.data-r]="r + 1"
+                  [attr.data-c]="0"
+                  [checked]="row.state === 'all'"
+                  [indeterminate]="row.state === 'some'"
+                  [attr.aria-label]="fill(labels.toggleRow, row.feature.label)"
+                  (change)="onRow(row.feature)"
+                />
+                <span aria-hidden="true">{{ row.feature.label }}</span>
+              </label>
+            }
+          </th>
+          @for (cell of row.cells; track cell.action; let c = $index) {
+            <td class="pm-cell" [attr.data-action]="cell.action">
+              @if (cell.permission; as permission) {
+                @if (readonly()) {
+                  <span class="material-symbols-rounded pm-mark" [class.pm-mark--on]="cell.checked" aria-hidden="true">{{
+                    cell.checked ? 'check' : 'remove'
+                  }}</span>
+                  <span class="pm-sr">{{ cell.checked ? labels.granted : labels.notGranted }}</span>
+                } @else {
+                  <label class="pm-hit">
+                    <input
+                      type="checkbox"
+                      [attr.data-r]="r + 1"
+                      [attr.data-c]="c + 1"
+                      [attr.data-permission]="permission"
+                      [checked]="cell.checked"
+                      [attr.aria-label]="fill(labels.cell, row.feature.label, columns()[c].label)"
+                      (change)="onCell(permission, $event)"
+                    />
+                  </label>
+                }
+              } @else {
+                <span class="pm-na" aria-hidden="true">—</span>
+                <span class="pm-sr">{{ labels.notApplicable }}</span>
+              }
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

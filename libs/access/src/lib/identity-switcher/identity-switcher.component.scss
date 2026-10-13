@@ -1,0 +1,105 @@
+// 「切換身分」：頁首右側的一顆按鈕＋選單。只用語意 token；按鈕外框跟頁首搜尋膠囊一樣用 hairline。
+:host {
+  display: inline-flex;
+  min-width: 0;
+}
+
+.ids-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  min-height: 44px;
+  max-width: 18rem;
+  padding: 0.25rem 0.5rem 0.25rem 0.75rem;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 999px;
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color var(--app-motion-fast) var(--app-ease-standard);
+
+  &:hover {
+    background: var(--app-state-hover);
+  }
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+}
+
+.ids-icon {
+  font-size: 1.25rem;
+  color: var(--mat-sys-primary);
+}
+
+.ids-caret {
+  font-size: 1.125rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.ids-text {
+  display: grid;
+  min-width: 0;
+  line-height: 1.25;
+  text-align: start;
+}
+
+.ids-name,
+.ids-roles {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ids-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.ids-roles {
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// 窄螢幕只留圖示與目前角色，名字收進無障礙名稱。
+@media (max-width: 600px) {
+  .ids-name {
+    display: none;
+  }
+
+  .ids-trigger {
+    max-width: 9rem;
+  }
+}
+
+.ids-menu-title {
+  margin: 0;
+  padding: 0.5rem 1rem 0.25rem;
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.ids-radio {
+  margin-inline-end: 0.75rem;
+  font-size: 1.25rem;
+  vertical-align: middle;
+  color: var(--mat-sys-primary);
+}
+
+.ids-item {
+  display: inline-grid;
+  vertical-align: middle;
+  line-height: 1.3;
+}
+
+.ids-item-name {
+  font-weight: 600;
+}
+
+.ids-item-roles {
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+}
