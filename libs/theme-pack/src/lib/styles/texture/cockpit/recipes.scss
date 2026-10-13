@@ -1,0 +1,405 @@
+// Cockpit 儀表艙：數字像刻度、狀態一眼看出亮暗。層次只靠發光（ADR 0012）：
+// 畫布最暗（四周一圈極淡的暗角）→ 卡片亮一階、只有一條帶主色的髮絲亮邊 → 選單、日期選擇器亮兩階＋柔光 →
+// 對話框最亮＋最大的光暈。啟用、選取、焦點狀態再加一圈小而亮的光。沒有往下投的影子、沒有紋理。
+// 光的顏色一律是 --mat-sys-primary 調出來的（_tokens.scss 的 --cockpit-*）；轉場只用 --app-motion-fast，減少動態時歸零。
+:root[data-paradigm='cockpit'] {
+  body {
+    background: var(--mat-sys-background);
+    font-variant-numeric: tabular-nums;
+  }
+
+  // ---- 殼層：畫布四周一圈極淡的暗角，像儀表板的面板邊緣（顏色取配色的陰影色調，深色配色是近黑）----
+  .app-shell {
+    background:
+      radial-gradient(ellipse 120% 100% at 50% 35%, transparent 55%, color-mix(in srgb, var(--app-shadow-tint) 35%, transparent) 100%),
+      var(--mat-sys-background);
+  }
+  .sidenav-container,
+  .content-area {
+    background: transparent;
+  }
+  .app-sidenav {
+    background: var(--app-shell-bg);
+    color: var(--app-shell-on);
+    border-right: 1px solid var(--cockpit-edge);
+    box-shadow: none;
+  }
+  .brand-mark,
+  .avatar {
+    border-radius: var(--mat-sys-corner-medium);
+  }
+  // 目前所在的選單項目：亮起來——主色淡底＋左側一條主色指示線＋小光暈；不位移。
+  :is(.nav-link, .nav-sublink, .nav-flyout-item).active {
+    background: color-mix(in srgb, var(--mat-sys-primary) 14%, transparent);
+    color: var(--app-shell-on);
+    box-shadow:
+      inset 3px 0 0 var(--mat-sys-primary),
+      var(--cockpit-glow-1);
+    transform: none;
+  }
+  .nav-link.active .nav-icon {
+    color: var(--mat-sys-primary);
+  }
+  :is(.nav-link, .nav-sublink, .nav-flyout-item, .nav-group-trigger) {
+    transition:
+      background-color var(--app-motion-fast) var(--app-ease-standard),
+      box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .nav-flyout {
+    background: var(--mat-sys-surface-container-high);
+    border: 1px solid var(--cockpit-edge-strong);
+    border-radius: var(--mat-sys-corner-large);
+    box-shadow: var(--cockpit-glow-2);
+  }
+  .theme-pill {
+    border-radius: var(--mat-sys-corner-small);
+    border: 1px solid var(--cockpit-edge);
+    box-shadow: none;
+    font-family: var(--font-body);
+  }
+
+  // ---- 卡片：亮一階的面板＋髮絲亮邊；可點卡片滑過時再亮一階、外面一圈光 ----
+  .ui-card,
+  .stat-card {
+    background: var(--mat-sys-surface);
+    color: var(--mat-sys-on-surface);
+    border: 1px solid var(--cockpit-edge);
+    border-radius: var(--mat-sys-corner-large);
+    // 頂端一條 1px 的內側反光（面板上緣被頂燈照到），不是投影。
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--mat-sys-on-surface) 5%, transparent);
+  }
+  .ui-card--inverse {
+    // 反轉卡在這個質地是一塊「點亮的顯示面板」：主色容器底＋強亮邊＋光暈，不是一整塊淺色。
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+    border: 1px solid var(--cockpit-edge-strong);
+    border-radius: var(--mat-sys-corner-large);
+    box-shadow: var(--cockpit-glow-2);
+  }
+  .ui-card-header {
+    border-bottom: 1px solid var(--cockpit-edge);
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+  }
+  .ui-card--clickable {
+    cursor: pointer;
+    transition:
+      background-color var(--app-motion-fast) var(--app-ease-standard),
+      border-color var(--app-motion-fast) var(--app-ease-standard),
+      box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .ui-card--clickable:hover,
+  .stat-card:hover {
+    background-color: var(--mat-sys-surface-container);
+    border-color: var(--cockpit-edge-strong);
+    box-shadow: var(--cockpit-glow-2);
+    transform: none;
+  }
+
+  // ---- 導覽膠囊、卡片分頁標籤：啟用中的那一顆亮起來 ----
+  .ui-nav-pill {
+    border-radius: var(--mat-sys-corner-small);
+    color: var(--mat-sys-on-surface-variant);
+    border: 1px solid transparent;
+    transition:
+      background-color var(--app-motion-fast) var(--app-ease-standard),
+      box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .ui-nav-pill:hover {
+    background: var(--app-state-hover);
+    color: var(--mat-sys-on-surface);
+  }
+  .ui-nav-pill.is-active,
+  .ui-card-titleNav__item.is-active {
+    background: var(--cockpit-lit);
+    color: var(--mat-sys-on-surface);
+    border-color: var(--cockpit-edge-strong);
+    box-shadow: var(--cockpit-glow-active);
+  }
+
+  // 鍵盤焦點：2px 主色實線（--app-focus-ring）外面再一圈亮光。與 Material 質地涵蓋同一批元素。
+  :is(
+      .theme-pill,
+      .ui-nav-pill,
+      .ui-card-titleNav__item,
+      .mat-mdc-button-base,
+      .ui-card--clickable,
+      .nav-link,
+      .nav-sublink,
+      .nav-group-trigger,
+      .nav-flyout-item
+    ):focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+    box-shadow: var(--cockpit-glow-active);
+  }
+
+  // ---- 按鈕：小圓角方鍵。實心主要按鈕是一顆亮著的指示燈（靜止就有小光暈），滑過再亮 ----
+  .mat-mdc-button-base {
+    --mat-button-filled-container-shape: var(--mat-sys-corner-small);
+    --mat-button-outlined-container-shape: var(--mat-sys-corner-small);
+    --mat-button-protected-container-shape: var(--mat-sys-corner-small);
+    --mat-button-text-container-shape: var(--mat-sys-corner-small);
+    --mat-button-tonal-container-shape: var(--mat-sys-corner-small);
+    --mat-button-outlined-outline-color: var(--cockpit-edge-strong);
+    --mat-button-protected-container-color: var(--mat-sys-surface-container-high);
+    transition: box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .mat-mdc-icon-button {
+    --mat-icon-button-container-shape: var(--mat-sys-corner-small);
+  }
+  .mat-mdc-unelevated-button:not(:disabled) {
+    box-shadow: var(--cockpit-glow-1);
+  }
+  :is(.mat-mdc-unelevated-button, .mat-mdc-outlined-button, .mat-mdc-raised-button):not(:disabled):hover {
+    box-shadow: var(--cockpit-glow-active);
+  }
+  .mat-mdc-raised-button:not(:disabled) {
+    box-shadow: var(--mat-sys-level1);
+  }
+
+  // ---- 欄位：凹進去的讀數窗（最暗的 container-lowest 底）＋1px 實線框（--app-field-border）；
+  //      聚焦時框換主色、外面亮一圈 ----
+  .mat-mdc-form-field {
+    --mat-form-field-filled-container-color: var(--mat-sys-surface-container-lowest);
+    --mat-form-field-filled-active-indicator-height: 0;
+    --mat-form-field-filled-focus-active-indicator-height: 0;
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    --app-field-shape: var(--mat-sys-corner-small);
+    --mat-form-field-filled-container-shape: var(--app-field-shape);
+    border: 1px solid var(--app-field-border);
+    border-radius: var(--app-field-shape);
+    transition:
+      border-color var(--app-motion-fast) var(--app-ease-standard),
+      box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--filled.mdc-text-field--focused {
+    border-color: var(--mat-sys-primary);
+    box-shadow:
+      inset 0 0 0 1px var(--mat-sys-primary),
+      var(--cockpit-glow-active);
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
+    --mat-form-field-outlined-container-shape: var(--mat-sys-corner-small);
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--outlined.mdc-text-field--focused {
+    box-shadow: var(--cockpit-glow-active);
+    border-radius: var(--mat-sys-corner-small);
+  }
+  .mat-mdc-form-field-focus-overlay {
+    border-radius: inherit;
+  }
+  // 數字輸入（金額、數量、天數）：等寬字，像儀表上的讀數。
+  input[type='number'].mat-mdc-input-element {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .ui-field-group {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+  }
+  .ui-field-group > *:not(:first-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left: 0;
+  }
+  .ui-field-group > *:not(:last-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .ui-field-group > *:not(:first-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--app-field-border);
+    z-index: 1;
+  }
+
+  // 原生勾選框／單選鈕：勾選後像亮起的指示燈（顏色仍由 _choice-controls.scss 決定，這裡只加光暈）。
+  input:where([type='checkbox'], [type='radio']):not(:where(.mdc-checkbox__native-control, .mdc-radio__native-control)):is(:checked, [type='checkbox']:indeterminate):not(:disabled) {
+    box-shadow: 0 0 6px color-mix(in srgb, var(--mat-sys-primary) 55%, transparent);
+  }
+  // 分頁籤底線：亮起的指示線
+  .mat-mdc-tab .mdc-tab-indicator__content--underline {
+    box-shadow: 0 0 8px color-mix(in srgb, var(--mat-sys-primary) 70%, transparent);
+  }
+
+  // ---- 浮層：越前面越亮。選單、下拉、日期選擇器是 container-high ＋ level3；對話框是 container-highest ＋ level4 ----
+  .mat-calendar,
+  .mat-datepicker-content {
+    --mat-datepicker-calendar-date-in-range-state-background-color: var(--app-calendar-range-fill);
+  }
+  .mat-datepicker-content {
+    --mat-datepicker-calendar-container-background-color: var(--mat-sys-surface-container-high);
+    border-radius: var(--mat-sys-corner-large) !important;
+    box-shadow: var(--mat-sys-level3) !important;
+  }
+  .mat-mdc-dialog-container {
+    --mat-dialog-container-color: var(--mat-sys-surface-container-highest);
+    --mat-dialog-subhead-size: 1.375rem;
+    --mat-dialog-subhead-weight: 600;
+  }
+  .mat-mdc-dialog-surface {
+    border-radius: var(--mat-sys-corner-extra-large) !important;
+    box-shadow: var(--mat-sys-level4) !important;
+  }
+  .mat-mdc-dialog-title {
+    letter-spacing: 0.02em;
+  }
+  // 說明段落與下方欄位之間留白，浮動標籤（outlined 欄位的標籤浮在上框線上）才不會壓到說明文字。
+  .mat-mdc-dialog-content > p {
+    margin: 0 0 16px;
+  }
+  .mat-mdc-menu-panel,
+  .mat-mdc-select-panel,
+  .mat-mdc-autocomplete-panel {
+    --mat-menu-container-color: var(--mat-sys-surface-container-high);
+    --mat-select-panel-background-color: var(--mat-sys-surface-container-high);
+    --mat-autocomplete-background-color: var(--mat-sys-surface-container-high);
+    border-radius: var(--mat-sys-corner-large) !important;
+  }
+  // 展開面板：收合時是一塊有亮邊的卡片；展開時亮邊變強、外面一圈光。
+  .mat-expansion-panel {
+    --mat-expansion-container-shape: var(--mat-sys-corner-large);
+    --mat-expansion-container-background-color: var(--mat-sys-surface);
+    border: 1px solid var(--cockpit-edge);
+    box-shadow: none;
+    transition:
+      border-color var(--app-motion-fast) var(--app-ease-standard),
+      box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .mat-expansion-panel.mat-expanded {
+    border-color: var(--cockpit-edge-strong);
+    box-shadow: var(--cockpit-glow-1);
+  }
+  .mat-mdc-snack-bar-container .mdc-snackbar__surface {
+    border-radius: var(--mat-sys-corner-medium) !important;
+    box-shadow: var(--mat-sys-level3) !important;
+  }
+
+  // ---- 表格：表頭是一條亮一階的標示帶（窄體字），列與列之間是暗的細線；滑過的列亮起來 ----
+  .mat-mdc-table {
+    background: transparent !important;
+  }
+  .mat-mdc-header-row {
+    background: var(--mat-sys-surface-container);
+  }
+  .mat-mdc-header-cell {
+    border-bottom: 1px solid var(--cockpit-edge-strong);
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  // Admin 的資料表是 libs/ui 的 data-table（.dt-table）：只設元件暴露的外觀變數（CONTRACT.md「--dt-*」），不覆寫屬性。
+  .dt-table {
+    --dt-header-bg: var(--mat-sys-surface-container);
+    --dt-head-border-color: var(--cockpit-edge-strong);
+    --dt-row-border-color: var(--mat-sys-outline-variant);
+    --dt-row-hover-bg: color-mix(in srgb, var(--mat-sys-primary) 10%, var(--mat-sys-surface));
+  }
+  .dt-table th {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  // ---- 狀態徽章：暗底亮字，圓點是一顆亮著的 LED ----
+  .ui-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: var(--mat-sys-corner-small);
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.125rem;
+    white-space: nowrap;
+  }
+  .ui-chip__dot {
+    width: 0.4375rem;
+    height: 0.4375rem;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+  @each $tone in positive, info, neutral, warning, danger {
+    .ui-chip--#{$tone} {
+      background: var(--app-#{$tone}-bg);
+      color: var(--app-#{$tone}-fg);
+      border: 1px solid color-mix(in srgb, var(--app-#{$tone}-fg) 35%, transparent);
+      .ui-chip__dot {
+        background: var(--app-#{$tone}-dot);
+        box-shadow: 0 0 6px var(--app-#{$tone}-dot);
+      }
+    }
+  }
+  // 中性狀態沒有亮燈：不發光，一眼和其他四種分開。
+  .ui-chip--neutral .ui-chip__dot {
+    box-shadow: none;
+  }
+
+  // ---- 文字：標題用窄體；數字一律等寬，大數字像儀表讀數（微光＋底下一排刻度） ----
+  .ui-text-numeric {
+    font-family: var(--font-mono), var(--font-zh);
+    font-variant-numeric: tabular-nums;
+  }
+  .ui-text-display {
+    width: fit-content;
+    padding-bottom: 0.3em;
+    font-family: var(--font-mono), var(--font-zh);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 0.45em color-mix(in srgb, var(--mat-sys-primary) 35%, transparent);
+    // 刻度：每 0.25em 一條細刻線，底下一條基線；刻度只是裝飾，數字本身照常是文字色。
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--mat-sys-primary) 65%, transparent) 0 1px,
+        transparent 1px 0.25em
+      ),
+      linear-gradient(
+        color-mix(in srgb, var(--mat-sys-primary) 45%, transparent),
+        color-mix(in srgb, var(--mat-sys-primary) 45%, transparent)
+      );
+    background-size:
+      100% 0.14em,
+      100% 1px;
+    background-position:
+      left bottom,
+      left bottom;
+    background-repeat: no-repeat;
+  }
+  .topbar-heading h1,
+  .ui-text-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--mat-sys-on-surface);
+  }
+  .ui-text-subtitle {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.35;
+    color: var(--mat-sys-on-surface);
+  }
+  .ui-text-caption {
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--mat-sys-on-surface-variant);
+  }
+  .ui-card--inverse .ui-text-subtitle,
+  .ui-card--inverse .ui-text-caption {
+    color: inherit;
+  }
+}

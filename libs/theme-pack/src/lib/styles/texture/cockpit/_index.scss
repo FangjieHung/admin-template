@@ -1,0 +1,7 @@
+// src/styles/texture/cockpit/_index.scss
+// 按需質地（ADR 0010）：cockpit 的完整輸出（造型 token + 全部元件 recipe），在 apps/admin/project.json 以
+// `bundleName: texture-cockpit`、`inject: false` 編成獨立的 texture-cockpit.css，切到這個質地時才由 ThemeService 載入。
+// 字型 CSS 跟著這份按需載入：沒用到這個質地的人不會下載 Barlow Condensed（ADR 0012）。
+@forward 'fonts';
+@forward 'tokens';
+@forward 'recipes';

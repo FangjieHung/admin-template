@@ -40,6 +40,11 @@ describe('theme-compatibility（ADR 0007，2026-09-27 定案清單）', () => {
     },
     // ADR 0011 提案（待使用者定案）；Graphite、OLED 的格子是 ADR 0012 提案（待使用者定案）
     ledger: { excluded: ['candy'], defaultThemeId: 'azure' },
+    // ADR 0012 提案（待使用者定案）：只相容深色配色
+    cockpit: {
+      excluded: ['verdant', 'sandstone', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue'],
+      defaultThemeId: 'graphite',
+    },
   };
 
   it('每個質地都有一筆定案', () => {

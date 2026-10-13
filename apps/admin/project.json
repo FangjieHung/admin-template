@@ -70,6 +70,11 @@
             "input": "libs/theme-pack/src/lib/styles/texture/ledger/_index.scss",
             "bundleName": "texture-ledger",
             "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/texture/cockpit/_index.scss",
+            "bundleName": "texture-cockpit",
+            "inject": false
           }
         ],
         "stylePreprocessorOptions": { "includePaths": ["libs"] },

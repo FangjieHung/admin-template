@@ -72,6 +72,7 @@ const TEXTURES = [
   { id: 'frosted', label: 'Frosted 霧光玻璃' },
   { id: 'aero', label: 'Aero 雲霧玻璃' },
   { id: 'ledger', label: 'Ledger 帳冊' },
+  { id: 'cockpit', label: 'Cockpit 儀表艙' },
 ];
 
 const COLOR_THEMES = [

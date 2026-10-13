@@ -1,0 +1,4 @@
+// 由 cockpit/_index.scss 第一行 @forward，跟著 texture-cockpit.css 按需載入（ADR 0010）：沒切到 Cockpit 的人連字型 CSS 都不下載。
+// 只載入標題用的窄體 Barlow Condensed（ADR 0012：飛航儀表板、路牌標示一路的窄體無襯線，與 Noto Sans／系統字明顯不同）。
+// 內文英文用裝置無襯線、數字用全站已載入的 IBM Plex Mono、中文用裝置字，都不在這裡。
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=swap');

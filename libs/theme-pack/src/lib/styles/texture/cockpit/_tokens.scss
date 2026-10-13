@@ -1,0 +1,74 @@
+// Cockpit 儀表艙：深色優先的飛航儀表質地（ADR 0012）。造型 token，不定義配色；所有顏色由配色軸的語意 token 調出。
+// 層次只靠「發光（亮度）」：越前面的表面越亮一階，外面多一圈主色的柔光；靜止的卡片只有一條帶主色的髮絲亮邊，
+// 沒有任何往下投的影子。選取、啟用、焦點狀態再亮一級。只相容深色配色（發光在淺色底上讀不出來）。
+:root[data-paradigm='cockpit'] {
+  // 中小圓角：儀表的面板與按鍵，4–8px
+  --mat-sys-corner-small: 4px;
+  --mat-sys-corner-medium: 6px;
+  --mat-sys-corner-large: 8px;
+  --mat-sys-corner-extra-large: 8px;
+  --mat-sys-corner-full: 6px; // 膠囊類元件（開關軌道、FAB）也是圓角方鍵，不是整顆膠囊
+
+  // ---- 發光：顏色全部由 --mat-sys-primary 調出 ----
+  // 髮絲亮邊：outline-variant 裡混一點主色，像面板邊緣被背光照亮的一條線（靜止卡片、欄位群組、表格外框）。
+  --cockpit-edge: color-mix(in srgb, var(--mat-sys-primary) 22%, var(--mat-sys-outline-variant));
+  // 強亮邊：浮起的面板（選單、日期選擇器、對話框）與啟用中的元件。
+  --cockpit-edge-strong: color-mix(in srgb, var(--mat-sys-primary) 50%, var(--mat-sys-outline-variant));
+  // 外光暈（box-shadow 只有模糊、沒有偏移，所以是一圈光，不是影子）：1 → 3 越前面越大越亮。
+  --cockpit-glow-1: 0 0 12px color-mix(in srgb, var(--mat-sys-primary) 22%, transparent);
+  --cockpit-glow-2: 0 0 20px color-mix(in srgb, var(--mat-sys-primary) 28%, transparent);
+  --cockpit-glow-3: 0 0 36px color-mix(in srgb, var(--mat-sys-primary) 34%, transparent);
+  // 啟用／選取／焦點：小而亮的光，像亮起的指示燈。
+  --cockpit-glow-active: 0 0 14px color-mix(in srgb, var(--mat-sys-primary) 50%, transparent);
+  // 被選中的底色：主色 16%（比 hover 的中性疊加亮，而且帶顏色）。
+  --cockpit-lit: color-mix(in srgb, var(--mat-sys-primary) 16%, transparent);
+
+  // Material 的 level token 換成「亮邊＋光暈」：level1 只有亮邊（靜止的浮起元件），2–4 逐級加大光暈。
+  --mat-sys-level1: 0 0 0 1px var(--cockpit-edge);
+  --mat-sys-level2: 0 0 0 1px var(--cockpit-edge), var(--cockpit-glow-1);
+  --mat-sys-level3: 0 0 0 1px var(--cockpit-edge-strong), var(--cockpit-glow-2);
+  --mat-sys-level4: 0 0 0 1px var(--cockpit-edge-strong), var(--cockpit-glow-3);
+
+  // Material 元件自己的 elevation token 沒設時用 M2 的固定黑影（不吃 level token），逐一指向光暈或 none。
+  @each $t in menu-container, select-container, autocomplete-container, timepicker-container, datepicker-calendar-container
+  {
+    --mat-#{$t}-elevation-shadow: var(--mat-sys-level3);
+  }
+  --mat-dialog-container-elevation-shadow: var(--mat-sys-level4);
+  @each $t in fab-container, fab-small-container, fab-extended-container, button-protected-hover-container,
+    button-protected-focus-container
+  {
+    --mat-#{$t}-elevation-shadow: var(--mat-sys-level2);
+  }
+  @each $t in expansion-container, sidenav-container, button-protected-container, button-protected-pressed-container,
+    slide-toggle-handle
+  {
+    --mat-#{$t}-elevation-shadow: none;
+  }
+  --mat-card-elevated-container-elevation: var(--mat-sys-level1);
+
+  // 互動狀態：滑過維持中性疊加，選取改成帶主色的亮底（「亮起來」）。
+  --app-state-hover: color-mix(in srgb, var(--mat-sys-on-surface) 7%, transparent);
+  --app-state-selected: var(--cockpit-lit);
+  --app-border-emphasis: var(--cockpit-edge);
+  // 載入骨架的閃光改成一道主色的掃描光（預設是表面色 60%，在深色底上是一道「暗」帶）。
+  --app-skeleton-shine: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+
+  // 字型：中文用裝置字；標題用 Barlow Condensed（窄體，飛航儀表板／路牌標示的字感，_fonts.scss 按需載入）；
+  // 英文內文用裝置的無襯線（不放 system-ui，免得中文被系統字搶走）；數字與等寬用全站已載入的 IBM Plex Mono。
+  --font-zh: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', system-ui, sans-serif;
+  --font-en: 'Barlow Condensed';
+  --font-display: var(--font-en), var(--font-zh);
+  --font-body: 'Helvetica Neue', 'Segoe UI', Roboto, Arial, var(--font-zh);
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  // Material 元件的字預設是 mat.theme() 的 Inter／Plus Jakarta Sans：大標（對話框標題等）改吃標題窄體，其餘吃內文字。
+  @each $role in display-large, display-medium, display-small, headline-large, headline-medium, headline-small, title-large
+  {
+    --mat-sys-#{$role}-font: var(--font-display);
+  }
+  @each $role in title-medium, title-small, body-large, body-medium, body-small, label-large, label-medium, label-small
+  {
+    --mat-sys-#{$role}-font: var(--font-body);
+  }
+}
