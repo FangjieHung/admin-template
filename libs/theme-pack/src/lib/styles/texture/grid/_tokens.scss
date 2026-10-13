@@ -18,4 +18,6 @@
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 
   --mat-button-tonal-horizontal-padding: 0.875rem;
+  // 空狀態／錯誤狀態：卡片內畫 1px 虛線框（準則「空狀態」）。
+  --app-empty-frame: 1px dashed var(--mat-sys-outline-variant);
 }

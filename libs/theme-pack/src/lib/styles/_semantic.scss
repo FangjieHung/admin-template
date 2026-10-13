@@ -81,6 +81,22 @@
   // （clay 背景光暈漂浮 8s；另一顆 10s、-2s 起跑以它的 1.25 倍／-0.25 倍換算，值不變）。
   --app-motion-loop: 8s;
 
+  // ---- 載入骨架（2026-10-13，三態與提示）----
+  // libs/ui 的 lib-skeleton 與 lib-data-table 載入列的色塊。底色是墨色 8%（淺色配色是淡灰、Midnight 是淡白），
+  // 閃光是表面色 60% 的一道亮帶；圓角跟著質地的 corner-small（Grid／Editorial 2px、Material 10px）。
+  // 閃光時長 = 循環動畫節奏的 1/5（1.6s）；減少動態時 --app-motion-loop 歸零，元件另外寫 animation: none。
+  --app-skeleton-bg: color-mix(in srgb, var(--mat-sys-on-surface) 8%, transparent);
+  --app-skeleton-shine: color-mix(in srgb, var(--mat-sys-surface) 60%, transparent);
+  --app-skeleton-radius: var(--mat-sys-corner-small);
+  --app-skeleton-duration: calc(var(--app-motion-loop) / 5);
+
+  // ---- 空狀態、錯誤狀態的外框（2026-10-13）----
+  // lib-empty-state／lib-error-state 共用。預設不加底色、框線與陰影（Material、Editorial、Clay、Frosted、Aero 準則
+  // 都是「卡片內置中、不另加色塊或框」）；Linen 的色塊、Grid 的虛線框、Soft UI 的淺內凹在各質地 _tokens.scss 覆寫。
+  --app-empty-bg: transparent;
+  --app-empty-frame: 0 solid transparent;
+  --app-empty-shadow: none;
+
   // ---- 選取文字 ----
   // 第二批套用：component.scss 的全域 ::selection（深色側欄內另用 shell 色）。
   --app-selection-bg: var(--mat-sys-primary-container);

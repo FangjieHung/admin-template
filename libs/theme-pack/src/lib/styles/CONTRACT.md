@@ -95,6 +95,8 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 | `--app-motion-loop` | `8s` | 無限循環的裝飾動畫（時長本身是節奏，不套三檔） | 已套用（clay 背景光暈：`8s`、另一顆 `× 1.25`＝10s、起跑 `× -0.25`＝-2s）；`prefers-reduced-motion` 時歸零，用到的 recipe 另寫 `animation: none` 停掉 |
 | `--app-disabled-fg` / `-bg` / `-opacity` | on-surface 38% / 12% / `0.38` | 停用狀態 | fg／bg 已套用（soft-ui、clay、frosted、editorial 的按鈕與膠囊）；material 等維持 Material 原生；`-opacity` 未使用 |
 | `--app-selection-bg` / `-fg` | `var(--mat-sys-primary-container)` / `var(--mat-sys-on-primary-container)` | 選取文字 | 已套用（`component.scss` 全域 `::selection`；深色側欄內改 shell-on 28% 底＋shell-on 字） |
+| `--app-skeleton-bg` / `-shine` / `-radius` / `-duration` | on-surface 8% / surface 60% / `var(--mat-sys-corner-small)` / `calc(var(--app-motion-loop) / 5)`（1.6s） | 載入骨架的色塊底色、閃光亮帶、圓角、閃光循環時長 | 已套用（`libs/ui` 的 `lib-skeleton`、`lib-data-table` 的載入列，共用 `feedback-state/_skeleton-block.scss`）；圓角跟著質地的 corner-small，目前沒有質地需要覆寫；`prefers-reduced-motion` 時 loop 歸零，元件另寫 `animation: none` 停成純底色 |
+| `--app-empty-bg` / `-frame` / `-shadow` | `transparent` / `0 solid transparent` / `none` | 空狀態與錯誤狀態（`lib-empty-state`、`lib-error-state`）的外框：底色、框線（border 簡寫）、陰影 | 已套用；質地層覆寫：Linen 底色 `--mat-sys-surface-container-low`、Grid 框線 `1px dashed var(--mat-sys-outline-variant)`、Soft UI 陰影 `var(--soft-inset-small)`（各準則「空狀態」）；其餘質地維持「卡片內置中、不加色塊或框」 |
 | `--app-z-sticky` / `--app-z-drawer` / `--app-z-floating` | `20` / `101` / `500` | 跨元件圖層順序（值不變） | 已套用（`responsive-panel`、`floating-appearance-panel`；`--app-z-sticky` 給頁內釘底的列）；CDK overlay 的 `1000` 只記錄於註解 |
 
 第二批（2026-09-27，會改變畫面）的決定與改前／改後對照見 ADR 0008「第二批」一節。
@@ -126,6 +128,11 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 面板底 `--mat-sys-surface-container-high`、hairline `--mat-sys-outline-variant`、圓角 `--mat-sys-corner-medium`、陰影 `--mat-sys-level3`（與 dual-month-range-picker 同一組），
 原生欄位邊界 `--app-field-border`、滑過 `--app-state-hover`、目前項目 `--app-state-selected`、焦點 `--app-focus-ring`、停用 `--app-disabled-fg`；
 條件 chips 用 `.ui-chip.ui-chip--neutral`、「已修改」用 `.ui-chip.ui-chip--info`，外觀交給各質地的 chip recipe。沒有新增質地要設的變數。
+
+#### 三態與提示訊息（`libs/ui` feedback-state、toast）
+
+- 骨架、空狀態、錯誤只用上面的 `--app-skeleton-*`、`--app-empty-*` 與語意 token；說明文字用 `.ui-text-subtitle`、補充文字用 `.ui-text-caption`，字體交給質地 recipe。圖示是 Material Symbols，空狀態 `--mat-sys-on-surface-variant`、錯誤 `--mat-sys-error`。
+- 提示訊息（`ToastService`）的外框就是 MatSnackBar：底色 inverse-surface、圓角與陰影吃各質地既有的 snackbar recipe（`.mat-mdc-snack-bar-container .mdc-snackbar__surface`）。類型徽章用狀態語意一對：成功 `--app-positive-bg/-fg`、資訊 `--app-info-*`、警告 `--app-warning-*`、錯誤 `--app-danger-*`；關閉鈕 `--mat-sys-inverse-on-surface`，動作鈕沿用 snackbar 的 `--mat-sys-inverse-primary`。沒有新增質地要設的變數。
 
 ### 字體（質地包提供，中英分軌）
 

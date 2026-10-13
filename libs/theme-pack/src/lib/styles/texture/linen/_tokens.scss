@@ -20,4 +20,6 @@
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 
   --mat-button-tonal-horizontal-padding: 1rem;
+  // 空狀態／錯誤狀態：卡片內放一塊 surface-container-low 色塊（準則「空狀態」）。
+  --app-empty-bg: var(--mat-sys-surface-container-low);
 }

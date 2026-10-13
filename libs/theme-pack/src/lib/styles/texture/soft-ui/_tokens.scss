@@ -42,4 +42,6 @@
   --font-body: 'DM Sans', 'Inter', var(--font-zh);
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
   --mat-button-tonal-horizontal-padding: 1rem;
+  // 空狀態／錯誤狀態：放進淺內凹的區域，當作「空的凹槽」（準則「空狀態」）。
+  --app-empty-shadow: var(--soft-inset-small);
 }
