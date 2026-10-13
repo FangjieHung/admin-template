@@ -172,11 +172,33 @@ grep -n "resolveParadigmId" libs/theme-pack/src/lib/theme/theme.service.ts
 3. `scripts/contrast-report.mjs` 的量測頁是 `/components/material` 與 `/components/data-table`（`PAIRS` 的 selector、`FIELD_PAGES`、`measureStatePairs`）：改成新專案裡有同樣元素（頁首標題、卡片、主要按鈕、欄位、勾選框、對話框）的頁面，或保留 Material 元件總覽頁當測試台（建議）。
 4. 照第 10 節驗收。
 
+### 9.3 刪除整個權限層（`libs/access`）
+
+不需要權限（或要改用後端回傳的選單、自己的守門）時，`libs/access` 可以整個拿掉。`libs/ui` 不依賴它，元件不受影響。
+
+| # | 位置 | 動作 |
+| --- | --- | --- |
+| 1 | `libs/access/` | 整個資料夾刪掉 |
+| 2 | `tsconfig.base.json` | 刪掉 `@admin-template/access`、`@admin-template/access/permission-matrix`、`@admin-template/access/identity-switcher` 三個路徑別名 |
+| 3 | `apps/admin/src/app/app.config.ts`、`core/access/` | 刪掉 `provideAccess(...)` 與示範設定 `demo-access.ts` |
+| 4 | `apps/admin/src/app/app.routes.ts` | 刪掉 `guarded()`、`canDeactivate: [unsavedChangesGuard]`、`access-demo/*` 與 `forbidden` 路由（`**` 的找不到頁面可以留著） |
+| 5 | `apps/admin/src/app/app.ts`、`layout/side-nav/nav-item.model.ts` | 刪掉 `rerunGuardsOnAccessChange()`；`navItems` 改回 `buildNavItems()` 的結果（不經 `filterNav`）；`NavLeaf.access` 與 `filterNav` 一起刪 |
+| 6 | `layout/side-nav/side-nav.component.*`、`layout/identity-switcher/` | 刪掉「切換身分」的 `@defer` 與 `currentName`／`currentRoles`，使用者卡片改回固定文字；`identity-switcher/` 整個刪 |
+| 7 | `core/auth/auth.service.ts`、`features/auth/pages/login-page.component.*` | 拿掉 `AccessService`；登入頁的示範帳號清單改回一顆「進入系統」 |
+| 8 | `features/settings/pages/settings-page.component.*` | 刪掉「示範工具」那一段（`IdentitySwitcherService`） |
+| 9 | `features/access-control/`、`features/roles/`、`features/errors/forbidden-page.component.ts` | 整個刪掉；`features/error-pages/` 拿掉「沒有權限」那一塊 |
+| 10 | `showcase/showcase-registry.ts`、`showcase-catalog.ts` | 刪掉 `access-control`、`roles` 兩筆、`access` 分組，以及 `ShowcaseEntry` 的 `access`／`guardUnsaved` 欄位 |
+| 11 | `shared/ui/component-label-providers.ts`、`core/i18n/zh-tw.ts` | 刪掉 `PERMISSION_MATRIX_LABEL_PROVIDERS` 與 `ZH_TW.permissionMatrix` |
+| 12 | spec | `app.spec.ts`、`side-nav`、`auth.service`、`login-page`、`settings-page`、`showcase-pages.spec.ts` 拿掉 `provideAccess(...)` 與權限相關的斷言 |
+
+刪完 `grep -rn "@admin-template/access\|libCan\|libDisabledUnless\|AccessService" apps libs` 應該是 0 筆，再照第 10 節驗收。
+只想拿掉「切換身分」小工具、保留權限：做第 6 列的 `@defer` 與 `layout/identity-switcher/`、第 8 列即可。
+
 ## 10. 驗收
 
 每條指令以 exit code 判定（`> log 2>&1; echo "exit=$?"`）。跑之前先切 Node 版本：`export PATH=~/.nvm/versions/node/v24.18.0/bin:$PATH`。
 
-1. 測試：`npx nx test theme-pack`、`admin`、`ui` 全過；`npx nx lint admin`、`ui`、`theme-pack` 通過。
+1. 測試：`npx nx test theme-pack`、`admin`、`ui`、`access`（沒刪的話）全過；`npx nx lint admin`、`ui`、`theme-pack`、`access` 通過。
 2. build：`npx nx build admin --configuration=production --skip-nx-cache` 成功，沒有預算警告（刪掉東西後順便把 `apps/admin/project.json` 的 initial 警示門檻降到「實測 + 20 kB」）。
 3. `npm run lint:theme` 通過；`npx vitest run scripts --exclude '.claude/**' --exclude '**/node_modules/**'` 通過。
 4. 啟動 admin 後跑 `npm run contrast:theme -- --base-url=http://localhost:<port>`，保留的組合全部 0 不合格。

@@ -4,6 +4,7 @@
 
 - `libs/ui`：通用元件（資料表、頁首工具列、進階篩選、已儲存檢視、雙月日期區間、響應式側板、狀態標籤、確認對話框、簽名板、語言切換、捲動陰影）。
 - `libs/theme-pack`：「質地 × 配色」雙軸主題（8 種質地、8 套配色）、外觀浮動面板、`ui-*` class 契約。
+- `libs/access`：通用的權限層（功能 × 動作、預設與自訂角色、路由守門、依權限隱藏或停用按鈕、權限矩陣編輯器、示範用的「切換身分」）。不依賴 `libs/ui`。
 - `apps/admin`：展示 app。殼層（側欄、頁首、頁尾、外觀面板、設定頁）＋每個元件一頁（`/components/<id>`），首頁列出全部元件與規劃中的項目。
 - `libs/assets`：共用的 Tailwind 基準與 favicon。
 
@@ -38,8 +39,8 @@ npm start          # nx serve admin → http://localhost:4200/
 | --- | --- |
 | `npm start` | 啟動展示 app（開發模式） |
 | `npm run build` | 建置 admin production 版，輸出到 `dist/admin-template` |
-| `npx nx test admin`／`ui`／`theme-pack` | 各專案的單元測試（Vitest） |
-| `npx nx lint admin`／`ui`／`theme-pack` | ESLint |
+| `npx nx test admin`／`ui`／`theme-pack`／`access` | 各專案的單元測試（Vitest） |
+| `npx nx lint admin`／`ui`／`theme-pack`／`access` | ESLint |
 | `npm run lint:theme` | 擋寫死的顏色、轉場時間與底層色階變數（掃 `libs/theme-pack`、`libs/*/src`、有套主題的 app） |
 | `npx vitest run scripts --exclude '.claude/**' --exclude '**/node_modules/**'` | 主題工具本身的測試（含質地登錄四處一致的檢查） |
 | `npm run contrast:theme -- --base-url=http://localhost:4200` | 每個「質地 × 配色」在 Material 元件總覽等頁的 WCAG 對比報告 |
@@ -50,8 +51,29 @@ npm start          # nx serve admin → http://localhost:4200/
 - 側欄、路由、首頁的元件表都由 `apps/admin/src/app/showcase/showcase-registry.ts` 產生；說明文字在 `showcase-catalog.ts`。新增一頁只要在兩處各加一筆，並建立 `features/<id>/` 頁面元件。
 - 每頁固定骨架（`app-showcase-page`）：用途與何時使用 → 示範（`app-demo-block`）→ 用法程式碼 → 輸入與輸出表。示範資料一律中性（工單、專案、聯絡人），放在 `showcase/demo-data.ts`。
 - **Material 元件總覽**（`/components/material`）是質地的測試台：範本支援的每個 Material 控制項與 `ui-*` class 在各種狀態下都排在這頁。新增或修改質地時，每個 recipe 都應該在這頁看得到效果。
-- 登入頁（`/login`）只是示範：不驗證，按下按鈕就進入；接上身分驗證時換掉 `AuthService`。
-- 頁面樣板（列表、詳情、表單、儀表板、錯誤頁…）與其餘元件都還在規劃中，清單在首頁與 `docs/plans/2026-10-13-template-pivot.md`。
+- 登入頁（`/login`）只是示範：不驗證，選一個示範帳號就以那個身分進入；接上身分驗證時換掉 `AuthService`。
+- 頁面樣板：角色與權限、錯誤頁（404、沒有權限）已完成，在側欄「頁面樣板」群組；列表、詳情、表單、儀表板等與其餘元件還在規劃中，清單在首頁與 `docs/plans/2026-10-13-template-pivot.md`。
+
+## 權限
+
+`libs/access` 只做通用的部分：權限＝**功能 × 動作**（檢視、建立、編輯、刪除、核准），角色分**預設角色**（唯讀）與**自訂角色**（複製預設角色後修改），一位使用者可以有多個角色、權限取聯集。據點、部門、「只能改自己建立的」這類資料層級的規則是業務規則，不在範本裡。
+
+> **純前端只能隱藏畫面，不是安全防護；接後端時伺服器必須再檢查一次。** 側欄、按鈕、路由守門都只是讓使用者看不到或按不了，任何人都能直接呼叫 API。
+
+1. **宣告功能與預設角色**：改 `apps/admin/src/app/core/access/demo-access.ts`（在 `app.config.ts` 用 `provideAccess(...)` 提供）。`features` 列出要分開管權限的功能（只有部分動作的寫 `actions: ['view']`）；`presetRoles` 由高到低排列（「需要{role}權限」的提示取最低的那個符合的角色）；`users` 換成後端回傳的使用者。
+2. **保護路由**：
+
+   ```ts
+   { path: 'reports', loadComponent: …, canActivate: [accessGuard],
+     data: { access: 'report:view' }, runGuardsAndResolvers: 'always' },
+   { path: 'forbidden', loadComponent: … }, // 沒有權限時顯示這一頁（網址列不變）
+   ```
+
+   App 根元件的建構式呼叫一次 `rerunGuardsOnAccessChange()`：換身分或改角色時重新檢查目前這一頁。側欄項目加 `access: 'report:view'`，用 `filterByAccess` 過濾（展示 app 的 `showcase-registry.ts` 每筆可以加 `access`）。
+3. **按鈕**：預設直接隱藏 `<button *libCan="'ticket:create'">`；使用者預期它在的地方（詳情頁的「核准」）改成停用＋提示 `[libDisabledUnless]="'ticket:approve'"`。程式裡用 `access.can('ticket', 'edit')`（signal，在 computed／template 裡會跟著身分更新）。
+4. **接後端**：自訂角色、指派與目前身分預設存在瀏覽器（`localStorage` 的 `app.access`）；換成自己的 `AccessRepository`：`{ provide: ACCESS_REPOSITORY, useClass: HttpAccessRepository }`，登入成功後呼叫 `access.signIn(userId)`。
+
+展示頁：「權限控制」（`/components/access-control`）、頁面樣板「角色與權限」（`/components/roles`）與「錯誤頁」。設定頁可以打開「切換身分」小工具，隨時換示範帳號。不需要權限時照刪減指南 9.3 整個拿掉。
 
 ## 雙軸主題系統
 
