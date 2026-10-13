@@ -302,6 +302,15 @@ describe('DataTable 欄位選擇與固定欄', () => {
     expect(host.prefs()).toBeNull();
   });
 
+  it('Esc 關閉面板，焦點回到「顯示欄位」按鈕', () => {
+    const { el, detect } = setup();
+    const panel = openChooser(el, detect);
+    panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    detect();
+    expect(document.querySelector('.dt-chooser')).toBeNull();
+    expect(document.activeElement).toBe(el.querySelector('.dt-chooser-trigger'));
+  });
+
   it('固定欄的 th／td 帶 dt-frozen；有勾選欄時勾選欄也固定', () => {
     const { el, host, detect } = setup();
     expect(el.querySelector('thead th')?.classList.contains('dt-frozen')).toBe(true);

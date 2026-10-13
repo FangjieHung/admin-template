@@ -35,7 +35,7 @@ export class DataTableColumnChooserComponent<T = unknown> {
 
   protected readonly open = signal(false);
   private readonly injector = inject(Injector);
-  private readonly trigger = viewChild<ElementRef<HTMLButtonElement>>('trigger');
+  private readonly trigger = viewChild('trigger', { read: ElementRef<HTMLButtonElement> });
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
 
   protected readonly positions: ConnectedPosition[] = [

@@ -98,6 +98,10 @@ export interface FilterLabels {
   atMost: string;
   /** 例：「{min}–{max}」。 */
   between: string;
+  /** 只有起日，例：「{date} 起」。 */
+  dateFrom: string;
+  /** 只有迄日，例：「至 {date}」。 */
+  dateTo: string;
   /** 多選的分隔，例：「、」。 */
   listSeparator: string;
 }

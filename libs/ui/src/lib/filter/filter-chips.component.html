@@ -1,0 +1,15 @@
+@if (chips().length > 0) {
+  <div #list class="fc" role="group" [attr.aria-label]="labels().chipsLabel">
+    @for (chip of chips(); track chip.field; let i = $index) {
+      <span class="ui-chip ui-chip--neutral fc-chip">
+        <span class="fc-text">{{ chip.text }}</span>
+        <button type="button" class="fc-remove" [attr.aria-label]="chip.removeLabel" (click)="remove(chip.field, i)">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <path d="M7 7l10 10M17 7L7 17" fill="none" stroke="currentColor" stroke-width="2" />
+          </svg>
+        </button>
+      </span>
+    }
+    <button type="button" matButton="text" class="fc-clear" (click)="clearAll()">{{ labels().clearAll }}</button>
+  </div>
+}

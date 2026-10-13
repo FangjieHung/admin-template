@@ -1,0 +1,166 @@
+<button
+  #trigger
+  type="button"
+  matButton="tonal"
+  class="af-trigger"
+  cdkOverlayOrigin
+  #origin="cdkOverlayOrigin"
+  aria-haspopup="dialog"
+  [attr.aria-expanded]="open()"
+  (click)="toggle()"
+>
+  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+    <path d="M4 6h16M7 12h10M10 18h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+  </svg>
+  {{ triggerText() }}
+</button>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="open()"
+  [cdkConnectedOverlayPositions]="positions"
+  [cdkConnectedOverlayHasBackdrop]="true"
+  cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+  (backdropClick)="close(false)"
+  (detach)="close(false)"
+  (attach)="onAttach()"
+  (overlayKeydown)="onOverlayKeydown($event)"
+>
+  <div #panel class="af-panel" role="dialog" [attr.aria-labelledby]="uid + '-title'">
+    <div class="af-head">
+      <span class="af-title" [id]="uid + '-title'">{{ labels().panelTitle }}</span>
+      <button type="button" class="af-icon-btn" [attr.aria-label]="labels().close" (click)="close()">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="af-body">
+      <label class="af-row">
+        <span class="af-label">{{ labels().field }}</span>
+        <select class="af-control" (change)="chooseField($event)">
+          <option value="" [selected]="!draft()">{{ labels().chooseField }}</option>
+          @for (f of fields(); track f.id) {
+            <option [value]="f.id" [selected]="draft()?.field === f.id">{{ f.label }}</option>
+          }
+        </select>
+      </label>
+
+      @if (draftField(); as f) {
+        @switch (f.type) {
+          @case ('text') {
+            <label class="af-row">
+              <span class="af-label">{{ labels().condition }}</span>
+              <input
+                type="text"
+                class="af-control"
+                [value]="draft()?.type === 'text' ? $any(draft()).text : ''"
+                [placeholder]="$any(f).placeholder ?? labels().textPlaceholder"
+                (input)="setText($event)"
+                (keydown.enter)="onFieldEnter($event)"
+              />
+            </label>
+          }
+          @case ('select') {
+            <label class="af-row">
+              <span class="af-label">{{ labels().condition }}</span>
+              <select class="af-control" (change)="setSelect($event)">
+                <option value="" [selected]="$any(draft()).value === ''">{{ labels().selectPlaceholder }}</option>
+                @for (o of $any(f).options; track o.value) {
+                  <option [value]="o.value" [selected]="$any(draft()).value === o.value">{{ o.label }}</option>
+                }
+              </select>
+            </label>
+          }
+          @case ('multiSelect') {
+            <fieldset class="af-row af-fieldset">
+              <legend class="af-label">{{ f.label }}</legend>
+              <div class="af-checks">
+                @for (o of $any(f).options; track o.value) {
+                  <label class="af-check">
+                    <input type="checkbox" [checked]="isChecked(o.value)" (change)="toggleValue(o.value, $event)" />
+                    <span>{{ o.label }}</span>
+                  </label>
+                }
+              </div>
+            </fieldset>
+          }
+          @case ('dateRange') {
+            <fieldset class="af-row af-fieldset">
+              <legend class="af-label">{{ f.label }}</legend>
+              <div class="af-checks">
+                @for (p of presetsOf(f); track p) {
+                  <label class="af-check">
+                    <input
+                      type="radio"
+                      [name]="uid + '-preset'"
+                      [checked]="datePresetChoice() === p"
+                      (change)="setDatePreset(p)"
+                    />
+                    <span>{{ presetLabel(p) }}</span>
+                  </label>
+                }
+                <label class="af-check">
+                  <input
+                    type="radio"
+                    [name]="uid + '-preset'"
+                    [checked]="datePresetChoice() === 'custom'"
+                    (change)="setDatePreset('custom')"
+                  />
+                  <span>{{ labels().presetCustom }}</span>
+                </label>
+              </div>
+              @if (datePresetChoice() === 'custom') {
+                <lib-dual-month-range-picker
+                  class="af-range"
+                  [start]="dateStart()"
+                  [end]="dateEnd()"
+                  (rangeSelected)="setDateRange($event)"
+                />
+              }
+            </fieldset>
+          }
+          @case ('numberRange') {
+            <fieldset class="af-row af-fieldset">
+              <legend class="af-label">{{ f.label }}</legend>
+              <div class="af-range-inputs">
+                <label class="af-number">
+                  <span class="af-sub">{{ labels().min }}</span>
+                  <input
+                    type="number"
+                    inputmode="decimal"
+                    class="af-control ui-text-numeric"
+                    [value]="numberOf('min')"
+                    (input)="setNumber('min', $event)"
+                    (keydown.enter)="onFieldEnter($event)"
+                  />
+                </label>
+                <span class="af-dash" aria-hidden="true">–</span>
+                <label class="af-number">
+                  <span class="af-sub">{{ labels().max }}</span>
+                  <input
+                    type="number"
+                    inputmode="decimal"
+                    class="af-control ui-text-numeric"
+                    [value]="numberOf('max')"
+                    (input)="setNumber('max', $event)"
+                    (keydown.enter)="onFieldEnter($event)"
+                  />
+                </label>
+              </div>
+            </fieldset>
+          }
+        }
+      }
+    </div>
+
+    <div class="af-foot">
+      <button type="button" matButton="text" (click)="close()">{{ labels().cancel }}</button>
+      <button type="button" matButton="filled" class="af-apply" [disabled]="!draft()" (click)="apply()">
+        {{ labels().apply }}
+      </button>
+    </div>
+  </div>
+</ng-template>

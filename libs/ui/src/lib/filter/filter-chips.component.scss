@@ -1,0 +1,57 @@
+:host {
+  display: block;
+}
+
+.fc {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+// 外觀（底色、字色、圓角）沿用質地的 .ui-chip／.ui-chip--neutral recipe，這裡只排版。
+.fc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  max-width: 100%;
+  padding-right: 0.125rem;
+}
+
+.fc-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 圖示 24px，點擊範圍用 ::before 擴到 44px（不撐高 chip）。
+.fc-remove {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -0.625rem;
+  }
+
+  &:hover {
+    background: var(--app-state-hover);
+  }
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: 0;
+  }
+}
