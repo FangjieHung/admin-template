@@ -21,6 +21,7 @@ import {
 } from '../../dispatch/calendar-view/calendar-view.component';
 import { PrepQueueDialogComponent } from '../dialogs/prep-queue-dialog.component';
 import { PageToolbarComponent } from '@car-rental/ui';
+import { LIST_TOOLBAR_LABEL_PROVIDERS } from '../../../shared/ui/list-toolbar-labels';
 
 /**
  * 總覽：頁首（新增訂單、待整備、待保養、搜尋訂單）＋月曆／時間軸卡片與右側面板。
@@ -39,6 +40,7 @@ import { PageToolbarComponent } from '@car-rental/ui';
   ],
   templateUrl: './dashboard-page.component.html',
   styleUrls: ['../../../app.scss'],
+  providers: [LIST_TOOLBAR_LABEL_PROVIDERS],
 })
 export class DashboardPageComponent {
   protected readonly t = ZH_TW;

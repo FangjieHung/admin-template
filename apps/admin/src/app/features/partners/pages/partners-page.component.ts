@@ -18,6 +18,7 @@ import { confirm } from '../../../shared/dialogs/confirm-dialog.component';
 import { HeaderToolbarDirective } from '../../../layout/header/header-toolbar-slot';
 import { ADMIN_DATA_TABLE_LABELS } from '../../../shared/ui/data-table-labels';
 import { PartnerDialogComponent, PartnerFormResult } from '../dialogs/partner-dialog.component';
+import { LIST_TOOLBAR_LABEL_PROVIDERS } from '../../../shared/ui/list-toolbar-labels';
 
 @Component({
   selector: 'app-partners-page',
@@ -31,6 +32,7 @@ import { PartnerDialogComponent, PartnerFormResult } from '../dialogs/partner-di
   ],
   templateUrl: './partners-page.component.html',
   styleUrls: ['../../../app.scss'],
+  providers: [LIST_TOOLBAR_LABEL_PROVIDERS],
 })
 export class PartnersPageComponent {
   protected readonly t = ZH_TW;

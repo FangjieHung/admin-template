@@ -32,6 +32,7 @@ import {
   RecordFormResult,
 } from '../../maintenance/dialogs/maintenance-record-dialog.component';
 import { firstValueFrom } from 'rxjs';
+import { LIST_TOOLBAR_LABEL_PROVIDERS } from '../../../shared/ui/list-toolbar-labels';
 
 /** 3.6：車輛清單「據點」篩選裡「未設定」那個選項的 sentinel 值——不是真實的據點 id。 */
 export const LOCATION_FILTER_UNSET = '__unset__';
@@ -58,6 +59,7 @@ const STATUS_KEY: Record<VehicleStatus, StatusKey> = {
   ],
   templateUrl: './vehicles-page.component.html',
   styleUrls: ['../../../app.scss'],
+  providers: [LIST_TOOLBAR_LABEL_PROVIDERS],
 })
 export class VehiclesPageComponent {
   protected readonly t = ZH_TW;

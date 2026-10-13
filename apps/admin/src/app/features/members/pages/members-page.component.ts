@@ -17,6 +17,7 @@ import { HeaderToolbarDirective } from '../../../layout/header/header-toolbar-sl
 import { provideHeaderTitle } from '../../../layout/header/header-title';
 import { ADMIN_DATA_TABLE_LABELS } from '../../../shared/ui/data-table-labels';
 import { MemberFormDialogComponent } from '../dialogs/member-form-dialog.component';
+import { LIST_TOOLBAR_LABEL_PROVIDERS } from '../../../shared/ui/list-toolbar-labels';
 
 @Component({
   selector: 'app-members-page',
@@ -30,6 +31,7 @@ import { MemberFormDialogComponent } from '../dialogs/member-form-dialog.compone
   ],
   templateUrl: './members-page.component.html',
   styleUrls: ['../../../app.scss'],
+  providers: [LIST_TOOLBAR_LABEL_PROVIDERS],
 })
 export class MembersPageComponent {
   protected readonly t = ZH_TW;

@@ -27,6 +27,7 @@ import {
   RecordFormResult,
 } from '../../maintenance/dialogs/maintenance-record-dialog.component';
 import { VehicleFormDialogComponent, VehicleFormResult } from '../dialogs/vehicle-form-dialog.component';
+import { LIST_TOOLBAR_LABEL_PROVIDERS } from '../../../shared/ui/list-toolbar-labels';
 
 @Component({
   selector: 'app-vehicle-detail-page',
@@ -41,6 +42,7 @@ import { VehicleFormDialogComponent, VehicleFormResult } from '../dialogs/vehicl
   ],
   templateUrl: './vehicle-detail-page.component.html',
   styleUrls: ['../../../app.scss', './vehicle-detail-page.component.scss'],
+  providers: [LIST_TOOLBAR_LABEL_PROVIDERS],
 })
 export class VehicleDetailPageComponent {
   protected readonly t = ZH_TW;

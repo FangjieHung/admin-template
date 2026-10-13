@@ -19,6 +19,7 @@ import { confirm } from '../../../shared/dialogs/confirm-dialog.component';
 import { HeaderToolbarDirective } from '../../../layout/header/header-toolbar-slot';
 import { ADMIN_DATA_TABLE_LABELS } from '../../../shared/ui/data-table-labels';
 import { CouponDialogComponent, CouponFormResult } from '../dialogs/coupon-dialog.component';
+import { LIST_TOOLBAR_LABEL_PROVIDERS } from '../../../shared/ui/list-toolbar-labels';
 
 @Component({
   selector: 'app-coupons-page',
@@ -32,6 +33,7 @@ import { CouponDialogComponent, CouponFormResult } from '../dialogs/coupon-dialo
   ],
   templateUrl: './coupons-page.component.html',
   styleUrls: ['../../../app.scss'],
+  providers: [LIST_TOOLBAR_LABEL_PROVIDERS],
 })
 export class CouponsPageComponent {
   protected readonly t = ZH_TW;

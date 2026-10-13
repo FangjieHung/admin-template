@@ -21,6 +21,7 @@ import {
   PricingPlanDialogComponent,
   PricingPlanFormResult,
 } from '../dialogs/pricing-plan-dialog.component';
+import { LIST_TOOLBAR_LABEL_PROVIDERS } from '../../../shared/ui/list-toolbar-labels';
 
 @Component({
   selector: 'app-pricing-page',
@@ -35,6 +36,7 @@ import {
   ],
   templateUrl: './pricing-page.component.html',
   styleUrls: ['../../../app.scss'],
+  providers: [LIST_TOOLBAR_LABEL_PROVIDERS],
 })
 export class PricingPageComponent {
   protected readonly t = ZH_TW;

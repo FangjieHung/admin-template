@@ -41,6 +41,7 @@ import {
   isOverdueReturn,
   isUrgent,
 } from '../order-urgency';
+import { LIST_TOOLBAR_LABEL_PROVIDERS } from '../../../shared/ui/list-toolbar-labels';
 
 /** 4.1：「待補」篩選只有一個選項（只看有待補）；沒選＝全部。 */
 export type IncompleteFilter = 'has';
@@ -105,6 +106,7 @@ function stripPhoneSeparators(value: string): string {
   templateUrl: './orders-page.component.html',
   styleUrls: ['../../../app.scss', './orders-page.component.scss'],
   providers: [
+    ...LIST_TOOLBAR_LABEL_PROVIDERS,
     { provide: DUAL_MONTH_RANGE_PICKER_LABELS, useValue: RANGE_PICKER_LABELS },
     // 月曆（DateAdapter）只有這個元件裡的雙月日期選擇器用到：在這裡提供，不放 app.config 的根層——
     // 根層一 import @angular/material/core，整個 barrel（option、pseudo-checkbox…）就被併進 Initial bundle。

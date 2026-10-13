@@ -18,6 +18,7 @@ import { confirm } from '../../../shared/dialogs/confirm-dialog.component';
 import { HeaderToolbarDirective } from '../../../layout/header/header-toolbar-slot';
 import { ADMIN_DATA_TABLE_LABELS } from '../../../shared/ui/data-table-labels';
 import { AddOnDialogComponent, AddOnFormResult } from '../dialogs/add-on-dialog.component';
+import { LIST_TOOLBAR_LABEL_PROVIDERS } from '../../../shared/ui/list-toolbar-labels';
 
 @Component({
   selector: 'app-add-ons-page',
@@ -32,6 +33,7 @@ import { AddOnDialogComponent, AddOnFormResult } from '../dialogs/add-on-dialog.
   ],
   templateUrl: './add-ons-page.component.html',
   styleUrls: ['../../../app.scss'],
+  providers: [LIST_TOOLBAR_LABEL_PROVIDERS],
 })
 export class AddOnsPageComponent {
   protected readonly t = ZH_TW;
