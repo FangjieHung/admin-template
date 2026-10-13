@@ -1,0 +1,130 @@
+<div class="sv">
+  <button
+    #trigger
+    type="button"
+    matButton="text"
+    class="sv-trigger"
+    cdkOverlayOrigin
+    #origin="cdkOverlayOrigin"
+    aria-haspopup="dialog"
+    [attr.aria-expanded]="open()"
+    [attr.aria-label]="triggerLabel()"
+    (click)="toggle()"
+  >
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path d="M4 5h16v4H4zM4 11h16v8H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+    </svg>
+    <span class="sv-name">{{ currentName() }}</span>
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" />
+    </svg>
+  </button>
+  @if (controller().modified()) {
+    <span class="ui-chip ui-chip--info sv-modified">{{ labels().modified }}</span>
+  }
+  @if (controller().persistFailed()) {
+    <span class="sv-warning" role="status">{{ labels().notPersisted }}</span>
+  }
+</div>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="open()"
+  [cdkConnectedOverlayPositions]="positions"
+  [cdkConnectedOverlayHasBackdrop]="true"
+  cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+  (backdropClick)="close(false)"
+  (detach)="close(false)"
+  (attach)="onAttach()"
+  (overlayKeydown)="onOverlayKeydown($event)"
+>
+  <div #panel class="sv-panel" role="dialog" [attr.aria-labelledby]="uid + '-title'">
+    <div class="sv-head">
+      <span class="sv-title" [id]="uid + '-title'">{{ labels().title }}</span>
+      <button type="button" class="sv-icon-btn" [attr.aria-label]="labels().close" (click)="close()">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" />
+        </svg>
+      </button>
+    </div>
+
+    @switch (mode()) {
+      @case ('list') {
+        <ul class="sv-list" [attr.aria-labelledby]="uid + '-title'">
+          <li>
+            <button
+              type="button"
+              class="sv-option"
+              [attr.aria-current]="controller().selectedId() === null ? 'true' : null"
+              (click)="choose(null)"
+            >
+              <span class="sv-check" aria-hidden="true">{{ controller().selectedId() === null ? '✓' : '' }}</span>
+              {{ labels().defaultView }}
+            </button>
+          </li>
+          @for (view of controller().views(); track view.id) {
+            <li>
+              <button
+                type="button"
+                class="sv-option"
+                [attr.aria-current]="controller().selectedId() === view.id ? 'true' : null"
+                (click)="choose(view.id)"
+              >
+                <span class="sv-check" aria-hidden="true">{{ controller().selectedId() === view.id ? '✓' : '' }}</span>
+                {{ view.name }}
+              </button>
+            </li>
+          }
+        </ul>
+        <div class="sv-actions">
+          @if (controller().selectedView() && controller().modified()) {
+            <button type="button" matButton="text" class="sv-save" (click)="saveCurrent()">{{ labels().save }}</button>
+          }
+          <button type="button" matButton="text" class="sv-save-as" (click)="setMode('saveAs')">{{ labels().saveAs }}</button>
+          @if (controller().modified()) {
+            <button type="button" matButton="text" class="sv-discard" (click)="discard()">{{ labels().discard }}</button>
+          }
+          @if (controller().selectedView()) {
+            <button type="button" matButton="text" class="sv-rename" (click)="setMode('rename')">{{ labels().rename }}</button>
+            <button type="button" matButton="text" class="sv-remove" (click)="setMode('remove')">{{ labels().remove }}</button>
+          }
+        </div>
+      }
+      @case ('remove') {
+        <div class="sv-body">
+          <p class="sv-confirm">{{ removeConfirmText() }}</p>
+          <div class="sv-foot">
+            <button type="button" matButton="text" (click)="setMode('list')">{{ labels().cancel }}</button>
+            <button type="button" matButton="filled" class="sv-remove-confirm" (click)="confirmRemove()">
+              {{ labels().removeAction }}
+            </button>
+          </div>
+        </div>
+      }
+      @default {
+        <form class="sv-body" (submit)="submitName($event)">
+          <label class="sv-field">
+            <span class="sv-label">{{ labels().name }}</span>
+            <input
+              type="text"
+              class="sv-input"
+              maxlength="40"
+              [value]="nameDraft()"
+              [attr.aria-invalid]="nameError() ? 'true' : null"
+              [attr.aria-describedby]="nameError() ? uid + '-error' : null"
+              (input)="onNameInput($event)"
+            />
+          </label>
+          @if (nameError(); as error) {
+            <p class="sv-error" [id]="uid + '-error'" role="alert">{{ error }}</p>
+          }
+          <div class="sv-foot">
+            <button type="button" matButton="text" (click)="setMode('list')">{{ labels().cancel }}</button>
+            <button type="submit" matButton="filled" class="sv-submit">{{ labels().confirm }}</button>
+          </div>
+        </form>
+      }
+    }
+  </div>
+</ng-template>
