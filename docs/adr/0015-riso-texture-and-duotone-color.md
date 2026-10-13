@@ -80,7 +80,7 @@ Riso 的層次靠第二墨，所以在對比之外再加兩條色票條件：**�
 ## 後果
 
 - 組合矩陣 12 × 12 = 144 格，相容 84 組（原 77 組＋Riso 4＋Riso 雙色進 Material、Grid、Editorial 3）。
-- Bundle：`texture-riso.css` 20.86 kB／gzip 3.81 kB（Brutal 19.13 kB）、`color-riso-duo.css` 2.44 kB／gzip 0.78 kB，都是按需檔案。Admin 初始 bundle 583.05 → 583.26 kB（+0.21 kB）：`main.js` 539.67 → 539.88 kB（`theme.token.ts` 的兩筆選項與白名單），`styles.css` 43.38 kB 逐位元組不變。其他按需質地與配色的 CSS 逐位元組不變。
-- 卡片的網點影是 `.ui-card::after`：Riso 下卡片自己不能再用 `::after`，也不能用 `overflow: hidden`（會裁掉網點影；`overflow: clip` 可以，質地用 `overflow-clip-margin` 放寬了裁切邊）。卡片的定位基準用權重 0-0-0 的 `:where()` 給 `position: relative`，元件自己寫的 `position`（外觀浮動面板是 `fixed`）一定贏。
-- 頁面大標的網點帶是 `h1::before`，h1 用 `isolation: isolate` 讓它墊在字的下面、不被頂列的半透明底色蓋住。
+- Bundle：`texture-riso.css` 20.86 kB／gzip 3.81 kB（Brutal 19.13 kB）、`color-riso-duo.css` 2.44 kB／gzip 0.78 kB，都是按需檔案。Admin 初始 bundle 583.05 → 583.26 kB（+0.21 kB）：`main.js` 539.67 → 539.88 kB（`theme.token.ts` 的兩筆選項與白名單），`styles.css` 43.38 kB 逐位元組不變。其他按需質地與配色的 CSS 逐位元組不變。注意 Tailwind 會掃描整個 repo（含文件）：文件裡單獨出現的 class 名稱（例如寫成程式碼的 CSS 值）會被當成 utility 編進主樣式，本 ADR 因此避免直接寫出那類值。
+- 卡片的網點影是 `.ui-card::after`：Riso 下卡片自己不能再用 `::after`，也不能用 `overflow: hidden`（會裁掉網點影；`overflow: clip` 可以，質地用 `overflow-clip-margin` 放寬了裁切邊）。卡片的定位基準（相對定位）用權重 0-0-0 的 `:where()` 給，元件自己寫的 `position`（外觀浮動面板是 `fixed`）一定贏。
+- 頁面大標的網點帶是 `h1::before`，h1 自己開一個獨立的層疊環境（`isolation`）讓它墊在字的下面、不被頂列的半透明底色蓋住。
 - 驗收截圖：Material 元件總覽（Riso × Riso 雙色／Sandstone／Candy／Signal；Material、Grid、Editorial × Riso 雙色）、首頁、資料表、載入／空白／錯誤、角色與權限頁與對話框（Riso × Riso 雙色），以及 2× 放大的顆粒、網點、錯位與文字特寫。
