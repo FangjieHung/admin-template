@@ -1,0 +1,151 @@
+<ng-template appHeaderToolbar>
+  <app-template-info [info]="info" />
+</ng-template>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="ticket-form ticket-form--loading" aria-busy="true">
+      <lib-skeleton variant="card" [count]="3" label="載入工單中" />
+    </div>
+  }
+  @case ('not-found') {
+    <section class="ui-card p-4 sm:p-6 ticket-form__missing" data-state="not-found">
+      <lib-empty-state
+        kind="no-results"
+        icon="search_off"
+        [message]="'找不到工單 ' + ticketId"
+        detail="這張工單可能已被刪除，或網址打錯了。"
+        actionLabel="回到工單列表"
+        (action)="backToList()"
+      />
+    </section>
+  }
+  @case ('error') {
+    <section class="ui-card p-4 sm:p-6" data-state="error">
+      <lib-error-state message="工單載入失敗" hint="請確認網路連線後再試一次。" (retry)="load(ticketId ?? '')" />
+    </section>
+  }
+  @default {
+    <form class="ticket-form" [formGroup]="form" (ngSubmit)="save()" novalidate [attr.aria-busy]="saving() ? 'true' : null">
+      @if (submitted() && errors().length) {
+        <div class="form-summary" role="alert" data-error-summary>
+          <h2 class="form-summary__title">
+            <span class="material-symbols-rounded" aria-hidden="true">error</span>
+            有 {{ errors().length }} 個欄位需要修正
+          </h2>
+          <ul class="form-summary__list">
+            @for (e of errors(); track e.key) {
+              <li>
+                <a [href]="'#field-' + e.key" [attr.data-summary-field]="e.key" (click)="$event.preventDefault(); focusField(e.key)">
+                  {{ e.label }}：{{ e.message }}
+                </a>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      <section class="ui-card ticket-form__section p-4 sm:p-6" aria-labelledby="section-basic">
+        <h2 id="section-basic" class="ui-text-subtitle">基本資料</h2>
+        <div class="ticket-form__grid">
+          <mat-form-field appearance="outline" class="ticket-form__wide" data-field="title" id="field-title">
+            <mat-label>標題</mat-label>
+            <input matInput formControlName="title" required autocomplete="off" />
+            <mat-hint align="end" class="ui-text-numeric">{{ titleLength() }}/{{ titleMax }}</mat-hint>
+            <mat-error>
+              {{ messageOf('title') }}@if (form.controls.title.hasError('maxlength')) {（{{ titleLength() }}/{{ titleMax }}）}
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" data-field="category" id="field-category">
+            <mat-label>分類</mat-label>
+            <mat-select formControlName="category" required>
+              @for (c of categories; track c) {
+                <mat-option [value]="c">{{ categoryLabels[c] }}</mat-option>
+              }
+            </mat-select>
+            <mat-error>{{ messageOf('category') }}</mat-error>
+          </mat-form-field>
+
+          <div class="ticket-form__choice" data-field="priority" id="field-priority">
+            <span class="ticket-form__choice-label" id="priority-label">優先順序 <span aria-hidden="true">*</span></span>
+            <mat-radio-group formControlName="priority" aria-labelledby="priority-label" class="ticket-form__radios" required>
+              @for (p of priorities; track p) {
+                <mat-radio-button [value]="p">{{ priorityLabels[p] }}</mat-radio-button>
+              }
+            </mat-radio-group>
+            @if (form.controls.priority.invalid && form.controls.priority.touched) {
+              <mat-error>{{ messageOf('priority') }}</mat-error>
+            }
+          </div>
+        </div>
+      </section>
+
+      <section class="ui-card ticket-form__section p-4 sm:p-6" aria-labelledby="section-assign">
+        <h2 id="section-assign" class="ui-text-subtitle">指派與期限</h2>
+        <div class="ticket-form__grid">
+          <lib-relation-select
+            data-field="requesterId"
+            id="field-requesterId"
+            label="申請人"
+            placeholder="輸入姓名或部門"
+            hint="找不到時可以直接建立"
+            [required]="true"
+            [errorMessage]="messageOf('requesterId') ?? ''"
+            formControlName="requesterId"
+            [source]="repo.requesterSource"
+            [displayWith]="personName"
+            [secondaryWith]="personTeam"
+            [avatarWith]="personInitials"
+            [allowCreate]="true"
+            (createRequested)="createRequester($event)"
+          />
+          <lib-relation-select
+            data-field="assigneeId"
+            id="field-assigneeId"
+            label="負責人"
+            placeholder="輸入姓名或單位"
+            hint="可以先不指派"
+            formControlName="assigneeId"
+            [source]="repo.assigneeSource"
+            [displayWith]="personName"
+            [secondaryWith]="personTeam"
+            [avatarWith]="personInitials"
+          />
+          <mat-form-field appearance="outline" data-field="dueDate" id="field-dueDate">
+            <mat-label>期限</mat-label>
+            <input matInput formControlName="dueDate" [matDatepicker]="duePicker" [min]="minDue()" placeholder="YYYY/MM/DD" />
+            <mat-datepicker-toggle matIconSuffix [for]="duePicker" />
+            <mat-datepicker #duePicker />
+            <mat-hint>不早於今天；可以不填</mat-hint>
+            <mat-error>{{ messageOf('dueDate') }}</mat-error>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <section class="ui-card ticket-form__section p-4 sm:p-6" aria-labelledby="section-description">
+        <h2 id="section-description" class="ui-text-subtitle">描述</h2>
+        <mat-form-field appearance="outline" class="ticket-form__full" data-field="description" id="field-description">
+          <mat-label>問題描述</mat-label>
+          <textarea matInput formControlName="description" rows="6" placeholder="發生了什麼事、從什麼時候開始、影響到誰"></textarea>
+          <mat-hint align="end" class="ui-text-numeric">{{ form.controls.description.value.length }}/{{ descriptionMax }}</mat-hint>
+          <mat-error>{{ messageOf('description') }}</mat-error>
+        </mat-form-field>
+      </section>
+
+      <!-- 操作列：sticky 貼在捲動容器（mat-sidenav-content）底部；外層卡片都不能是 overflow: hidden。 -->
+      <div class="ui-card form-actions" role="group" aria-label="表單操作">
+        <span class="form-actions__status" aria-live="polite">{{ isDirty() ? '有尚未儲存的變更' : '' }}</span>
+        <a matButton [routerLink]="cancelLink()" [queryParams]="cancelParams" data-action="cancel">取消</a>
+        <button matButton="filled" type="submit" [disabled]="saving()" data-action="save">
+          @if (saving()) {
+            <mat-spinner diameter="18" aria-hidden="true" />
+            存檔中…
+          } @else {
+            存檔
+          }
+        </button>
+      </div>
+    </form>
+  }
+}
