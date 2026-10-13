@@ -1,0 +1,148 @@
+<!-- 頁首：標題「工單」（provideHeaderTitle）；右邊是搜尋、狀態、進階篩選、新增與樣板說明。 -->
+<ng-template appHeaderToolbar>
+  <lib-page-toolbar
+    placeholder="搜尋編號、標題或申請人"
+    [query]="query()"
+    (queryChange)="setQuery($event)"
+    [activeFilterCount]="view.filters().length"
+    (clearAll)="clearFilters()"
+  >
+    <lib-filter-select
+      filters
+      label="狀態"
+      [options]="statusOptions"
+      [value]="quickStatus()"
+      (valueChange)="setQuickStatus($event)"
+    />
+    <lib-advanced-filter
+      filters
+      [fields]="fields"
+      [labels]="filterLabels"
+      [conditions]="view.filters()"
+      (conditionsChange)="setFilters($event)"
+    />
+    <div actions class="ticket-actions">
+      <a *libCan="'ticket:create'" matButton="filled" routerLink="new" data-action="create">
+        <span class="material-symbols-rounded" aria-hidden="true">add</span>新增工單
+      </a>
+      <app-template-info [info]="info" />
+    </div>
+  </lib-page-toolbar>
+</ng-template>
+
+<div class="ticket-list">
+  <div class="ticket-list__views">
+    <lib-saved-views [controller]="view" [labels]="savedViewsLabels" />
+    <lib-filter-chips
+      [fields]="fields"
+      [labels]="filterLabels"
+      [conditions]="view.filters()"
+      (conditionsChange)="setFilters($event)"
+    />
+    <p class="ui-text-caption ticket-count" aria-live="polite" data-ticket-count>{{ countText() }}</p>
+  </div>
+
+  @if (loadState() === 'error') {
+    <section class="ui-card p-4 sm:p-6" data-state="error">
+      <lib-error-state
+        message="工單載入失敗"
+        hint="請確認網路連線後再試一次。"
+        detail="示範：網址帶 ?demo=error 時模擬載入失敗，按重試會拿掉它。"
+        (retry)="retry()"
+      />
+    </section>
+  } @else {
+    <div class="ui-card ticket-table">
+      <lib-data-table
+        [columns]="columns"
+        [rows]="rows()"
+        [labels]="tableLabels"
+        [loading]="loadState() === 'loading'"
+        [loadingRows]="8"
+        [selectable]="true"
+        [showBatchDelete]="canDelete()"
+        [selection]="selection()"
+        (selectionChange)="selection.set($event)"
+        (batchDelete)="removeSelected($event)"
+        [rowClickable]="true"
+        (rowClick)="open($event)"
+        [pageable]="true"
+        [pageSizeOptions]="pageSizes"
+        [sortable]="true"
+        [columnChooser]="true"
+        [(sort)]="view.sort"
+        [(pageSize)]="view.pageSize"
+        [(page)]="view.page"
+        [(columnPrefs)]="view.columns"
+        exportName="tickets"
+      >
+        <ng-template dtCell="id" let-r><span class="ui-text-numeric ticket-id">{{ r.id }}</span></ng-template>
+        <ng-template dtCell="status" let-r>
+          <lib-status-chip [status]="statusTone(r)" [label]="statusLabel(r)" />
+        </ng-template>
+        <ng-template dtCell="priority" let-r>
+          <span class="ticket-priority" [attr.data-priority]="r.priority">
+            @if (r.priority === 'urgent' || r.priority === 'high') {
+              <span class="material-symbols-rounded" aria-hidden="true">{{ r.priority === 'urgent' ? 'priority_high' : 'arrow_upward' }}</span>
+            }
+            {{ priorityLabel(r) }}
+          </span>
+        </ng-template>
+        <ng-template dtCell="category" let-r><span class="ticket-nowrap">{{ categoryLabel(r) }}</span></ng-template>
+        <ng-template dtCell="assignee" let-r>
+          @if (assigneeName(r); as name) {
+            <span class="ticket-nowrap">{{ name }}</span>
+          } @else {
+            <span class="ticket-muted">未指派</span>
+          }
+        </ng-template>
+        <ng-template dtCell="createdAt" let-r><span class="ui-text-numeric ticket-nowrap">{{ formatCreatedAt(r.createdAt) }}</span></ng-template>
+        <ng-template dtCell="dueDate" let-r>
+          @if (r.dueDate) {
+            <span class="ui-text-numeric ticket-nowrap">{{ formatDueDate(r.dueDate) }}</span>
+            @if (isOverdue(r.dueDate, r.status)) {
+              <span class="ticket-overdue">已逾期</span>
+            }
+          } @else {
+            <span class="ticket-muted">—</span>
+          }
+        </ng-template>
+
+        <ng-template dtBatchActions let-rows>
+          @if (canEdit()) {
+            <button type="button" matButton="tonal" [matMenuTriggerFor]="statusMenu" [disabled]="busy()" data-action="batch-status">
+              <span class="material-symbols-rounded" aria-hidden="true">sync_alt</span>改狀態
+            </button>
+          }
+          <span class="ticket-selected" data-selected-count>已選 {{ rows.length }} 筆</span>
+        </ng-template>
+
+        <ng-template dtEmpty>
+          @if (filtered()) {
+            <lib-empty-state
+              kind="no-results"
+              message="沒有符合條件的工單"
+              detail="換個關鍵字，或清除篩選條件再看一次。"
+              actionLabel="清除篩選"
+              (action)="clearFilters()"
+            />
+          } @else {
+            <lib-empty-state
+              icon="inbox"
+              message="還沒有工單"
+              [detail]="canCreate() ? '建立第一張工單，開始追蹤待辦事項。' : '有人建立工單後會出現在這裡。'"
+              [actionLabel]="canCreate() ? '新增工單' : ''"
+              (action)="create()"
+            />
+          }
+        </ng-template>
+      </lib-data-table>
+
+      <mat-menu #statusMenu="matMenu" xPosition="before">
+        @for (s of statuses; track s) {
+          <button type="button" mat-menu-item [attr.data-status]="s" (click)="setStatus(s)">{{ statusLabels[s] }}</button>
+        }
+      </mat-menu>
+    </div>
+  }
+</div>

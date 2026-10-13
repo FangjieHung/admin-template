@@ -1,0 +1,79 @@
+// 工單列表樣板。只用語意 token；卡片、表格、按鈕、標籤的造型交給質地 recipe（表格外觀用 --dt-*，由質地設定）。
+
+:host {
+  display: block;
+}
+
+.ticket-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ticket-list__views {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  min-height: 2.5rem;
+}
+
+// 表格卡片不加內距：表格自己有儲存格留白。不能用 overflow: hidden（凍結欄與 Riso／Sketch 卡片外側的影子）。
+.ticket-table {
+  padding: 0;
+}
+
+.ticket-count {
+  margin: 0 0 0 auto;
+  white-space: nowrap;
+}
+
+.ticket-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  a .material-symbols-rounded {
+    font-size: 1.25rem;
+  }
+}
+
+.ticket-id,
+.ticket-nowrap {
+  white-space: nowrap;
+}
+
+// 批次操作列裡的「已選 N 筆」：排在按鈕後面。
+.ticket-selected {
+  align-self: center;
+  padding-inline: 0.25rem;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.ticket-priority {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  white-space: nowrap;
+
+  .material-symbols-rounded {
+    font-size: 1rem;
+  }
+
+  &[data-priority='urgent'] {
+    color: var(--mat-sys-error);
+    font-weight: 600;
+  }
+}
+
+.ticket-overdue {
+  display: block;
+  color: var(--mat-sys-error);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ticket-muted {
+  color: var(--mat-sys-on-surface-variant);
+}
