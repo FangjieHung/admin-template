@@ -17,6 +17,9 @@ export default [
             '{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}',
             '{projectRoot}/src/**/*.spec.ts',
           ],
+          // theme-pack 的 TS 沒有 import Material，但它的 SCSS（質地 recipe）是寫給 Material 元件的，
+          // 消費端一定要裝 @angular/material；保留在 peerDependencies 當作宣告。
+          ignoredDependencies: ['@angular/material'],
         },
       ],
     },
