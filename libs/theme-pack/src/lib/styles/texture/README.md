@@ -33,3 +33,5 @@
 5. **質地準則**：依上方模板寫 `<id>/design-guideline.md`；「層次表現」必須和現有質地都不同，否則這個質地不該存在。
 6. **截圖驗收**：展示 app 的「Material 元件總覽」（`/components/material`，每個 recipe 都應該在這頁看得到效果）、首頁、資料表頁，在新質地 × 每個相容配色下各截一張，並開對話框截一張；`npm run lint:theme` 通過。
 7. **文件**：更新 `theme-glossary.md` 的質地列表與根目錄 `README.md`「雙軸主題系統」一節；`scripts/contrast-report.mjs` 的 `TEXTURES` 清單也要加上新質地。
+
+配色（`color-themes/<id>/`）也是按需載入的（常駐的只有 Verdant），新增步驟見 [ADR 0013](../../../../../../docs/adr/0013-on-demand-color-themes.md)「現在怎麼新增一套配色」。新質地需要某一套配色的例外時，寫在 `_combos.scss` 該配色的 `for-color` 分支（跟著配色的檔案輸出）。

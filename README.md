@@ -79,12 +79,12 @@ npm start          # nx serve admin → http://localhost:4200/
 
 **質地**管造型（圓角、陰影、字體、背景紋理、元件 recipe），**配色**管顏色；兩者各自切換。目前有 Material、Linen、Grid、Soft UI、Clay、Editorial、Frosted、Aero、Ledger、Cockpit 十種質地（Ledger 是高密度質地：視覺密度屬於質地，不另設切換軸，ADR 0011；Cockpit 是深色優先的儀表艙質地，層次靠發光，只相容深色配色，ADR 0012），Verdant、Midnight、Sandstone、Azure、Cool Grey、Candy、Mist Ink、Glacier Blue、Graphite、OLED 十套配色（Midnight、Graphite、OLED 是深色）。每個質地只開放相容的配色，清單只存在 `libs/theme-pack/src/lib/theme/theme.token.ts` 的 `TEXTURE_COMPATIBILITY`（ADR 0007）。
 
-- Material 是常駐質地，其餘質地是按需質地：各自編成 `texture-<id>.css`，切換時才下載（ADR 0010）。
+- Material 是常駐質地，其餘質地是按需質地：各自編成 `texture-<id>.css`，切換時才下載（ADR 0010）。配色同理：Verdant 常駐，其餘配色各自編成 `color-<id>.css`（ADR 0013）。
 - 字型：專案不提供字型檔；中文一律用裝置的系統字，英文網頁字只在風格明顯不同時才從 Google Fonts 載入（CONTRACT.md「字體」）。
 - 寫樣式的規則（只用語意 token 與 `ui-*` class、改完跑 `npm run lint:theme`、新頁面三種質地截圖）見根目錄 [`CLAUDE.md`](./CLAUDE.md) 與 [`CONTRACT.md`](./libs/theme-pack/src/lib/styles/CONTRACT.md)。
 - 新增質地：[`texture/README.md`](./libs/theme-pack/src/lib/styles/texture/README.md)「新增一種質地」；每個質地的設計準則在 `texture/<id>/design-guideline.md`。
-- 新增配色：複製 `color-themes/verdant/` 改 token → `color-themes/_registry.scss` 加 `@forward` → `theme.token.ts` 的 `COLOR_THEMES` 與 `TEXTURE_COMPATIBILITY` 加入 → admin `index.html` 開機腳本的 `colorThemes` 加上 id。
-- 設計決策紀錄：`docs/adr/0002`–`0010`。
+- 新增配色：見 [ADR 0013](./docs/adr/0013-on-demand-color-themes.md)「現在怎麼新增一套配色」（`color-themes/<id>/` 的 `_tokens.scss`＋`_index.scss` → `project.json` 加 `color-<id>` 入口 → `theme.token.ts` 的 `COLOR_THEMES` 與 `TEXTURE_COMPATIBILITY` → 開機腳本的 `colorThemes`、`onDemandColors`）。
+- 設計決策紀錄：`docs/adr/0002`–`0013`。
 
 ## 參考
 

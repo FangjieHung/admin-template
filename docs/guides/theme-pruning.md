@@ -44,19 +44,20 @@ grep -rn "texture/<id>\|color-themes/<id>\|data-theme=\"<id>\"\|data-paradigm=\"
 | --- | --- | --- |
 | 1 | `libs/theme-pack/src/lib/styles/texture/<id>/` | 不要的質地整個資料夾刪掉（連同它的 `design-guideline.md`） |
 | 2 | `libs/theme-pack/src/lib/styles/color-themes/<id>/` | 不要的配色整個資料夾刪掉 |
-| 3 | `color-themes/_registry.scss` | 刪掉對應的 `@forward`。質地沒有 registry 了（2026-10-13 起按需載入，ADR 0010），改做第 4 步 |
-| 4 | `apps/admin/project.json` ＋ `apps/admin/src/index.html` | 已刪質地的 `texture-<id>` 樣式入口（`build.options.styles` 裡 `inject: false` 那幾筆）刪掉，**這通常是第一個 build 錯誤**；`index.html` 開機腳本（`#app-texture-boot`）的 `onDemandTextures` 刪掉同一個 id，刪了配色就從 `colorThemes` 刪掉。只留 Material 時 `onDemandTextures` 寫成空陣列 `[]`。質地字型在各自的 `_index.scss`，跟著資料夾一起刪，不用另外處理 |
+| 3 | （已無 registry） | 質地與配色都沒有 registry 了（2026-10-13 起按需載入，ADR 0010、0013），改做第 4 步。刪的是常駐配色（Verdant）時見第 9c 列 |
+| 4 | `apps/admin/project.json` ＋ `apps/admin/src/index.html` | 已刪質地的 `texture-<id>`、已刪配色的 `color-<id>` 樣式入口（`build.options.styles` 裡 `inject: false` 那幾筆）刪掉，**這通常是第一個 build 錯誤**；`index.html` 開機腳本（`#app-texture-boot`）的 `onDemandTextures` 刪掉同一個質地 id，刪了配色就從 `colorThemes` 與 `onDemandColors` 都刪掉。只留 Material 時 `onDemandTextures` 寫成空陣列 `[]`，只留 Verdant 時 `onDemandColors` 寫成 `[]`。質地字型在各自的 `_index.scss`，跟著資料夾一起刪，不用另外處理 |
 | 5 | 新專案另外加的、固定一種外觀的 app | 若刪了它用的配色或質地：scss 的 `@use` 與 `index.html` 的 `data-theme`／`data-paradigm` **兩處都要改**；只改一處會 build 失敗或整頁沒顏色 |
-| 6 | `libs/theme-pack/src/lib/styles/_combos.scss` | 刪掉引用已刪 id 的組合規則。**檔案本身要留著**，admin 的 `styles.scss` `@use` 它 |
+| 6 | `libs/theme-pack/src/lib/styles/_combos.scss` | 刪掉已刪配色的 `@if $id == '<id>'` 分支，以及其他分支裡引用已刪質地的規則。**檔案本身要留著**，每個配色的 `_index.scss` 都 `@use` 它（`for-color` mixin） |
 | 7 | 保留的質地／配色 `_tokens.scss` | 刪掉只為已刪配色寫的覆寫（例如 Midnight 的陰影、遮罩，Candy 的側欄淡底），若它們寫在保留的檔案裡 |
 | 8 | `libs/theme-pack/src/lib/theme/theme.token.ts` | `texture`、`COLOR_THEMES` 只留要的；`TEXTURE_COMPATIBILITY` 只留保留質地的那幾筆，每筆的 `compatibleThemeIds` 只列保留的配色，`defaultThemeId` 一定要在清單內；確認 `DEFAULT_PARADIGM`、`DEFAULT_THEME` 指向保留的 id |
 | 9 | `scripts/contrast-report.mjs` | 這支腳本有**另一份**質地與配色清單（它是 `.mjs`，沒有 import TS），要同步縮減，否則會去量已不存在的組合 |
 | 9b | 只留一個、而且不是 Material 的質地 | 把它改成常駐質地：`DEFAULT_PARADIGM` 改成它（`RESIDENT_TEXTURE_IDS` 跟著變），`apps/admin/src/styles.scss` 的 `texture/material` 換成 `texture/<id>`，刪掉它在 `project.json` 的 `texture-<id>` 入口與開機腳本裡的 id，`index.html` 的 `data-paradigm` 改成它 |
+| 9c | 刪掉 Verdant、或只留一套不是 Verdant 的配色 | 把保留的其中一套改成常駐配色：`DEFAULT_THEME` 改成它（`RESIDENT_COLOR_THEME_IDS` 跟著變，也要是 `DEFAULT_PARADIGM` 的 `defaultThemeId`），`apps/admin/src/styles.scss` 的 `color-themes/verdant` 換成 `color-themes/<id>`，刪掉它在 `project.json` 的 `color-<id>` 入口與 `onDemandColors` 裡的 id，`index.html` 的 `data-theme` 與開機腳本 `__appColorFailed` 裡的 `'verdant'` 改成它 |
 | 10 | 設定頁 `apps/admin/src/app/features/settings/pages/settings-page.component.{html,ts,scss}` | 見第 4 節 |
 | 10b | 展示頁 | 「外觀面板」頁（`features/appearance-panel/`）列出目前質地與配色；只留一種外觀時連同面板一起刪（第 3 節、第 9 節） |
 | 11 | spec | `theme-compatibility.spec.ts` 的 `DECISIONS` 改成保留的組合；`theme.service.spec.ts`、`settings-page.component.spec.ts` 裡寫死已刪 id（soft-ui、midnight、cool-grey…）的案例要改寫。**建議改成讀清單長度或清單第一筆**，之後增減就不用再改 spec |
 
-⚠️ **build 綠燈不代表刪乾淨**：第 1–7 步做完 build 就會過，但 `theme.token.ts` 若沒改，設定頁會繼續列出已經沒有樣式的選項。TS 清單與 SCSS 資料夾之間沒有編譯期連結，第 8、9 步一定要做。`npx vitest run scripts --exclude '.claude/**' --exclude '**/node_modules/**'` 裡的 `texture-registration.spec.mjs` 會比對 `texture/` 資料夾、`theme.token.ts`、`project.json`、開機腳本四處的質地清單，漏改哪一處就會紅。
+⚠️ **build 綠燈不代表刪乾淨**：第 1–7 步做完 build 就會過，但 `theme.token.ts` 若沒改，設定頁會繼續列出已經沒有樣式的選項。TS 清單與 SCSS 資料夾之間沒有編譯期連結，第 8、9 步一定要做。`npx vitest run scripts --exclude '.claude/**' --exclude '**/node_modules/**'` 裡的 `texture-registration.spec.mjs` 會比對 `texture/`／`color-themes/` 資料夾、`theme.token.ts`、`project.json`、開機腳本四處的質地與配色清單，漏改哪一處就會紅。
 
 ---
 
@@ -106,13 +107,13 @@ grep -n "resolveParadigmId" libs/theme-pack/src/lib/theme/theme.service.ts
 
 ## 6. 為什麼不建議把顏色寫死在 `:root`
 
-保留雙軸機制時，之後加回一套配色只要：新增 `color-themes/<id>/` 資料夾、registry 加一行、`theme.token.ts` 加一筆、admin `index.html` 開機腳本的 `colorThemes` 加上 id，設定頁自動出現。
+保留雙軸機制時，之後加回一套配色只要照 ADR 0013「現在怎麼新增一套配色」：新增 `color-themes/<id>/` 資料夾（`_tokens.scss`＋`_index.scss`）、`project.json` 加一筆 `color-<id>` 入口、`theme.token.ts` 加一筆、admin `index.html` 開機腳本的 `colorThemes` 與 `onDemandColors` 加上 id，設定頁自動出現。
 
 改成寫死要處理：
 
 - 配色與質地的 token 要寫成 `:root:root` 維持原本權重。只寫 `:root` 會跟 `_semantic.scss` 的預設同權重，變成看載入順序決定，這正是 ADR 0008 禁止的。
 - Material 的 7 個 recipe 檔以 `[data-paradigm="material"]` 開頭，換成 `:root` 才能維持權重；換成 `html` 或直接拿掉會輸給 Material 自己的樣式。datepicker 的權重註解要重算，data-table 的權重假設也要重新確認。
-- 刪 `_combos.scss` 與 admin 的 `@use`、`ThemeService`、app 啟動的初始化、設定頁、`index.html` 的 `data-*` 屬性，並改寫對比掃描與 lint 的說明。
+- 刪 `_combos.scss` 與各配色 `_index.scss` 的 `@use`、`ThemeService`、app 啟動的初始化、設定頁、`index.html` 的 `data-*` 屬性，並改寫對比掃描與 lint 的說明。
 - 等於每條規則的權重都變了，要逐頁截圖加對比掃描重新驗收。
 
 收益只有 CSS 少幾十個 bytes、少一個服務，除非確定永遠不再加回配色，否則不值得。
@@ -123,7 +124,7 @@ grep -n "resolveParadigmId" libs/theme-pack/src/lib/theme/theme.service.ts
 
 以 Material + Grid × Verdant + Cool Grey 為例（依 2026-09-27 定案，這 4 格全部相容）：
 
-- 質地刪 5 個（Grid 是按需質地，`project.json` 與開機腳本只留它一筆）、配色刪 6 套；配色 registry 留 2 組。
+- 質地刪 8 個、配色刪 8 套（Grid、Cool Grey 是按需的，`project.json` 與開機腳本各只留它們一筆）。
 - 相容清單：`material: { compatibleThemeIds: ['verdant', 'cool-grey'], defaultThemeId: 'verdant' }`，`grid` 同樣寫法。
 - 設定頁用第 4 節的隱藏寫法，兩列會自動顯示。注意舊 spec 有「相容配色數 < 全部配色數」的斷言，全部相容時一定會紅。
 - 浮動面板可留可刪。留的話，它的 spec 裡點 midnight、soft-ui、斷言 sandstone 被隱藏的案例要重寫。
@@ -136,7 +137,7 @@ grep -n "resolveParadigmId" libs/theme-pack/src/lib/theme/theme.service.ts
 ## 8. 更新文件
 
 - **要改**：repo 根目錄 `CLAUDE.md`（質地準則清單、截圖規則）、`libs/theme-pack/src/lib/styles/CONTRACT.md`、`docs/design-system/theme-glossary.md`、`README.md`（雙軸主題系統段落）。
-- **留著當歷史**：`docs/adr/0002`–`0010`。它們記錄的是當時的決定，不需要跟著改。
+- **留著當歷史**：`docs/adr/0002`–`0013`。它們記錄的是當時的決定，不需要跟著改。
 - **可選清理**：註解裡提到已刪 id 的說明（`_semantic.scss`、`_choice-controls.scss`、`component.scss` 等）不影響執行；但**指向已刪檔案路徑**的註解要改掉。
 
 ---

@@ -12,7 +12,8 @@
 | 預設配色 | 每個質地指定的一個相容配色；切換質地時若目前配色不相容，或載入時已存的組合不相容，就改用它 | 同上（`defaultThemeId`）；`ThemeService` 切換與載入時自動校正 |
 | 質地準則（design guideline） | 每個質地的設計準則文件，說明該質地的造型語言與禁忌；新增頁面或元件時必須參照 | `styles/texture/<id>/design-guideline.md`，10 份齊全；模板見 `styles/texture/README.md` |
 | 套用範圍 | 哪些 app 載入主題 CSS、提供選項並允許執行期切換 | 展示 app（`apps/admin`）完整切換；新專案若加入只用一種外觀的 app，在它的 `styles.scss` 只 `@use` 一個質地與一套配色，`index.html` 寫死 `data-paradigm`／`data-theme` |
-| 常駐質地／按需質地 | 常駐質地隨 app 一打開就載入，是預設外觀，也是其他質地載入失敗時的退路；按需質地只在使用者第一次切到它（或打開外觀面板）時才下載樣式 | 展示 app（ADR 0010）：Material 常駐（編進主樣式），其餘質地各自編成 `texture-<id>.css`（`apps/admin/project.json` 的 `inject: false` 入口）；`index.html` 開機腳本讓已存的質地在第一次繪製前就載入，`ThemeService` 切換時等新樣式載入完才換、失敗退回 Material；配色全部常駐 |
+| 常駐質地／按需質地 | 常駐質地隨 app 一打開就載入，是預設外觀，也是其他質地載入失敗時的退路；按需質地只在使用者第一次切到它（或打開外觀面板）時才下載樣式 | 展示 app（ADR 0010）：Material 常駐（編進主樣式），其餘質地各自編成 `texture-<id>.css`（`apps/admin/project.json` 的 `inject: false` 入口）；`index.html` 開機腳本讓已存的質地在第一次繪製前就載入，`ThemeService` 切換時等新樣式載入完才換、失敗退回 Material；配色同理，見下一列 |
+| 常駐配色／按需配色 | 比照常駐質地／按需質地：常駐配色隨 app 一打開就載入，是預設配色，也是其他配色載入失敗時的退路；按需配色只在使用者第一次切到它（或打開外觀面板）時才下載樣式 | 展示 app（ADR 0013）：Verdant 常駐（編進主樣式），其餘配色各自編成 `color-<id>.css`（`apps/admin/project.json` 的 `inject: false` 入口）；開機腳本把已存的配色跟質地一起在第一次繪製前載入（質地在前、配色在後）；組合覆寫（`_combos.scss`）跟著各自的配色輸出；失敗退回 Verdant 並提示「配色載入失敗，暫時使用預設配色」 |
 | 外觀浮動面板 | 在設定頁（或展示 app 的外觀面板頁）開啟後，於每一頁常駐的可拖曳小按鈕，展開後可即時切換質地與配色；位置會被記住 | 展示 app；`FloatingAppearancePanelComponent`，開關未開時不載入 |
 | 背景紋理 | 質地軸的一種造型，例如低對比紙感或網格；不能承載狀態意義或降低文字可讀性 | Linen 紙感、Grid 網格只作用於頁面底層；Cockpit 只有畫布四周一圈極淡的暗角 |
 | 深色優先質地 | 層次手段只在深色畫布上成立的質地，相容清單只放深色配色（即使淺色配色對比合格也排除） | Cockpit（層次靠發光，ADR 0012）：只相容 Midnight、Graphite、OLED |
