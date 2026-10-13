@@ -529,4 +529,24 @@
     --lib-detail-compact-frame: var(--brutal-line-thick);
     --lib-detail-compact-divider: var(--brutal-line-thick);
   }
+
+  // 圖表（libs/ui stat-card、line／bar／donut-chart，ADR 0017）：長條與扇形加 2px 墨框、直角；線 3px，資料點外圈墨線；
+  // 基準線是 2px 墨線。提示框是一張貼紙：卡片色底、2px 墨框、3px 墨影。顏色仍是配色的 --app-chart-*。
+  .lib-chart {
+    --lib-chart-line-width: 3px;
+    --lib-chart-bar-radius: 0px;
+    --lib-chart-bar-stroke: var(--brutal-ink);
+    --lib-chart-bar-stroke-width: 2px;
+    --lib-chart-slice-stroke: var(--brutal-ink);
+    --lib-chart-slice-stroke-width: 2px;
+    --lib-chart-baseline-color: var(--brutal-ink);
+    --lib-chart-baseline-width: 2px;
+    --lib-chart-marker-ring: var(--brutal-ink);
+    --lib-chart-swatch-frame: 2px solid var(--brutal-ink);
+    --lib-chart-tooltip-bg: var(--mat-sys-surface);
+    --lib-chart-tooltip-fg: var(--mat-sys-on-surface);
+    --lib-chart-tooltip-frame: var(--brutal-line);
+    --lib-chart-tooltip-shadow: var(--brutal-shadow-sm);
+    --lib-chart-tooltip-radius: 0px;
+  }
 }

@@ -539,4 +539,25 @@
       --tl-line-filter: none;
     }
   }
+
+  // 圖表（libs/ui stat-card、line／bar／donut-chart，ADR 0017）：只有格線（裝飾線）是抖動的鋼筆線；
+  // 資料線、長條、基準線、刻度與文字不套 filter，數值位置精確。提示框是一張手繪框的便條（紙底＋再描一次）。
+  .lib-chart {
+    --lib-chart-grid-filter: var(--sketch-jitter);
+    --lib-chart-grid-color: color-mix(in srgb, var(--mat-sys-on-surface) 24%, transparent);
+    --lib-chart-baseline-color: var(--sketch-ink);
+    --lib-chart-baseline-width: 1.5px;
+    --lib-chart-tooltip-bg: var(--mat-sys-surface);
+    --lib-chart-tooltip-fg: var(--mat-sys-on-surface);
+    --lib-chart-tooltip-frame: var(--sketch-pen-w) solid var(--sketch-ink);
+    --lib-chart-tooltip-radius: var(--sketch-wobble-sm);
+    --lib-chart-tooltip-shadow: var(--sketch-retrace);
+  }
+
+  @media (prefers-contrast: more), (forced-colors: active) {
+    .lib-chart {
+      --lib-chart-grid-filter: none;
+      --lib-chart-tooltip-radius: var(--mat-sys-corner-small);
+    }
+  }
 }

@@ -509,4 +509,18 @@
     --tl-line-color: var(--riso-ink-a);
     --tl-node-border: var(--riso-line);
   }
+
+  // 圖表（libs/ui stat-card、line／bar／donut-chart，ADR 0017）：面積改成同色的網點（線下的面積是裝飾，數值看線；
+  // 網點不壓字），格線是主墨 22% 的細線、基準線是主墨線。提示框是主墨 10% 平網的紙＋主墨線。長條、扇形不放網點。
+  .lib-chart {
+    --lib-chart-area-opacity: 0;
+    --lib-chart-area-dots: 1;
+    --lib-chart-grid-color: color-mix(in srgb, var(--riso-ink-a) 22%, transparent);
+    --lib-chart-baseline-color: var(--riso-ink-a);
+    --lib-chart-baseline-width: var(--riso-line-w);
+    --lib-chart-tooltip-bg: color-mix(in srgb, var(--riso-ink-a) 10%, var(--mat-sys-surface));
+    --lib-chart-tooltip-fg: var(--mat-sys-on-surface);
+    --lib-chart-tooltip-frame: var(--riso-line);
+    --lib-chart-tooltip-radius: var(--mat-sys-corner-medium);
+  }
 }

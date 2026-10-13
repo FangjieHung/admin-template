@@ -407,4 +407,17 @@
   .lib-activity-timeline {
     --tl-node-border: 1px solid var(--cockpit-edge-strong);
   }
+
+  // 圖表（libs/ui stat-card、line／bar／donut-chart，ADR 0017）：資料線像示波器的光跡（線色的微光，不位移）；
+  // 格線是暗的亮邊色、基準線是強亮邊。提示框是最亮的表面＋強亮邊＋光暈。長條與扇形不發光（大面積同時發光會失去焦點）。
+  .lib-chart {
+    --lib-chart-line-filter: drop-shadow(0 0 3px currentColor);
+    --lib-chart-grid-color: var(--cockpit-edge);
+    --lib-chart-baseline-color: var(--cockpit-edge-strong);
+    --lib-chart-area-opacity: 0.18;
+    --lib-chart-tooltip-bg: var(--mat-sys-surface-container-highest);
+    --lib-chart-tooltip-fg: var(--mat-sys-on-surface);
+    --lib-chart-tooltip-frame: 1px solid var(--cockpit-edge-strong);
+    --lib-chart-tooltip-shadow: var(--cockpit-glow-2);
+  }
 }

@@ -268,4 +268,17 @@
   .lib-activity-timeline {
     --tl-line-width: 1px;
   }
+
+  // 圖表（libs/ui stat-card、line／bar／donut-chart，ADR 0017）：細線（1.5px）、直角長條，基準線是 on-surface 的強調線；
+  // 提示框不浮起：卡片色底＋髮絲框、沒有陰影。
+  .lib-chart {
+    --lib-chart-line-width: 1.5px;
+    --lib-chart-bar-radius: 0px;
+    --lib-chart-baseline-color: var(--mat-sys-on-surface);
+    --lib-chart-tooltip-bg: var(--mat-sys-surface);
+    --lib-chart-tooltip-fg: var(--mat-sys-on-surface);
+    --lib-chart-tooltip-frame: 1px solid var(--mat-sys-outline-variant);
+    --lib-chart-tooltip-shadow: none;
+    --lib-chart-tooltip-radius: 0px;
+  }
 }

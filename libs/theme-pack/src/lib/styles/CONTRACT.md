@@ -178,6 +178,36 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 - 骨架、空狀態、錯誤只用上面的 `--app-skeleton-*`、`--app-empty-*` 與語意 token；說明文字用 `.ui-text-subtitle`、補充文字用 `.ui-text-caption`，字體交給質地 recipe。圖示是 Material Symbols，空狀態 `--mat-sys-on-surface-variant`、錯誤 `--mat-sys-error`。
 - 提示訊息（`ToastService`）的外框就是 MatSnackBar：底色 inverse-surface、圓角與陰影吃各質地既有的 snackbar recipe（`.mat-mdc-snack-bar-container .mdc-snackbar__surface`）。類型徽章用狀態語意一對：成功 `--app-positive-bg/-fg`、資訊 `--app-info-*`、警告 `--app-warning-*`、錯誤 `--app-danger-*`；關閉鈕 `--mat-sys-inverse-on-surface`，動作鈕沿用 snackbar 的 `--mat-sys-inverse-primary`。沒有新增質地要設的變數。
 
+#### 數字小卡與圖表（`libs/ui` stat-card、line-chart、bar-chart、donut-chart，ADR 0017）
+
+- 顏色只用語意 token：系列依序取 `--app-chart-1…6`（配色決定），格線 `--app-chart-grid`、軸文字與圖例 `--app-chart-axis`、小卡的變好／變差 `--app-chart-positive`／`-negative`、持平 `--mat-sys-on-surface-variant`；提示框預設 `--mat-sys-inverse-surface` 底＋`--mat-sys-inverse-on-surface` 字、圓角 `--mat-sys-corner-small`、陰影 `--mat-sys-level2`；滑過的類別 `--app-state-hover`；鍵盤焦點畫在游標線或類別框上（`--app-focus-ring`／`-width`），不畫 SVG 元素的外框；骨架 `--app-skeleton-*`；空資料是 `lib-empty-state`。
+- 數字小卡的外框是 `.ui-card`（可點時加 `.ui-card--clickable`），大數字是 `.ui-text-display`，內距跟著 Tailwind 的 `--spacing`（Ledger 較密）；「以表格檢視」按鈕是 `.ui-nav-pill`（按下時 `.is-active`），造型都交給質地既有的 recipe。
+- 4 個元件的外層都有 `.lib-chart`；質地要換造型時**只在 `.lib-chart` 上設下列變數**（元件裡是 `var()` 的第二個值），不覆寫屬性。變數裡要用到系列色時寫 `currentColor`（資料線的 `color` 就是系列色）。
+
+| 變數 | 預設 | 用途 | 目前設定的質地 |
+| --- | --- | --- | --- |
+| `--lib-chart-line-width` | `2px` | 折線與迷你趨勢的線寬 | Brutal `3px`；Ledger、Editorial `1.5px` |
+| `--lib-chart-line-filter` | `none` | 資料線的 filter（不可位移或扭曲） | Cockpit：`drop-shadow(0 0 3px currentColor)`（光跡） |
+| `--lib-chart-point-size` | `1` | 資料點的縮放倍率 | Ledger `0.75` |
+| `--lib-chart-marker-ring` | `var(--mat-sys-surface)` | 資料點外圈 | Brutal：`var(--brutal-ink)` |
+| `--lib-chart-area-opacity` | `0.12` | 面積的平塗濃度 | Cockpit `0.18`；Riso `0`（改用網點） |
+| `--lib-chart-area-dots` | `0` | 面積的網點圖層（同系列色、4px 網距） | Riso `1` |
+| `--lib-chart-grid-color` / `-width` / `-dash` | `var(--app-chart-grid)` / `1px` / `none` | 格線 | Sketch：文字墨 24%；Cockpit：`var(--cockpit-edge)`；Ledger：`var(--ledger-rule)`；Riso：主墨 22% |
+| `--lib-chart-grid-filter` | `none` | 只套在格線（裝飾線）上的 filter | Sketch：`var(--sketch-jitter)`（高對比時 `none`）；資料線、長條、基準線、文字永遠不套 |
+| `--lib-chart-baseline-color` / `-width` | `var(--mat-sys-outline)` / `1px` | 0 的基準線 | Brutal：墨色 `2px`；Sketch：`var(--sketch-ink)` `1.5px`；Cockpit：`var(--cockpit-edge-strong)`；Ledger：`var(--ledger-rule-strong)`；Riso：主墨、`var(--riso-line-w)`；Grid：`var(--mat-sys-outline)`；Editorial：`var(--mat-sys-on-surface)` |
+| `--lib-chart-bar-radius` | `min(4px, var(--mat-sys-corner-small))`（堆疊時 `0px`） | 長條圓角 | Brutal、Grid、Editorial、Ledger `0px` |
+| `--lib-chart-bar-stroke` / `-width` | `transparent` / `0px`（堆疊時卡片底色 `1px`，當段與段的細縫） | 長條框線 | Brutal：`var(--brutal-ink)` `2px` |
+| `--lib-chart-slice-stroke` / `-width` | `transparent` / `0px` | 圓環扇形框線（扇形之間的空隙是幾何留白，不靠框線） | Brutal：`var(--brutal-ink)` `2px` |
+| `--lib-chart-swatch-frame` | `0 solid transparent` | 圖例色塊的框（border 簡寫） | Brutal：`2px solid var(--brutal-ink)` |
+| `--lib-chart-tooltip-bg` / `-fg` | `var(--mat-sys-inverse-surface)` / `var(--mat-sys-inverse-on-surface)` | 提示框底色與文字（成對設定，對比 4.5:1） | Brutal、Sketch、Grid、Editorial：`surface`／`on-surface`；Cockpit：`surface-container-highest`／`on-surface`；Riso：主墨 10% 混進 surface／`on-surface` |
+| `--lib-chart-tooltip-frame` | `0 solid transparent` | 提示框的框（border 簡寫） | Brutal：`var(--brutal-line)`；Sketch：`var(--sketch-pen-w) solid var(--sketch-ink)`；Cockpit：1px `var(--cockpit-edge-strong)`；Riso：`var(--riso-line)`；Grid：1px `outline`；Editorial：1px `outline-variant` |
+| `--lib-chart-tooltip-radius` / `-shadow` | `var(--mat-sys-corner-small)` / `var(--mat-sys-level2)` | 提示框圓角與陰影 | Brutal：`0px`／`var(--brutal-shadow-sm)`；Sketch：`var(--sketch-wobble-sm)`／`var(--sketch-retrace)`；Cockpit：陰影 `var(--cockpit-glow-2)`；Riso：圓角 `corner-medium`；Grid：`0px`；Editorial：`0px`／`none` |
+| `--lib-chart-axis-size` | `0.75rem` | 軸文字字級（元件依 12px 估算軸標寬度，要改時兩者一起改） | （無） |
+| `--lib-chart-table-max-height` | `22rem` | 「以表格檢視」的最大高度（超過就捲動） | （無） |
+| `--lib-stat-card-value-size` | `2rem` | 數字小卡的大數字字級 | Ledger `1.5rem` |
+
+Material、Linen、Soft UI、Clay、Frosted、Aero 用預設值（陰影、紙感、體積、玻璃都在卡片上，圖表本身不需要另外調）。
+
 ### 字體（質地包提供，中英分軌）
 
 `--font-zh`（中文，裝置的系統字）、`--font-en`（英文依質地）、`--font-display`、`--font-body`、`--font-mono`

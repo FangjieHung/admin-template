@@ -297,4 +297,15 @@
     --lib-detail-compact-frame: 1px solid var(--mat-sys-outline);
     --lib-detail-compact-divider: 1px solid var(--mat-sys-outline);
   }
+
+  // 圖表（libs/ui stat-card、line／bar／donut-chart，ADR 0017）：直角長條，基準線 outline 實線；提示框是卡紙
+  // （卡片色底＋1px outline 實框＋直角，影子沿用 level2 硬影）。
+  .lib-chart {
+    --lib-chart-bar-radius: 0px;
+    --lib-chart-baseline-color: var(--mat-sys-outline);
+    --lib-chart-tooltip-bg: var(--mat-sys-surface);
+    --lib-chart-tooltip-fg: var(--mat-sys-on-surface);
+    --lib-chart-tooltip-frame: 1px solid var(--mat-sys-outline);
+    --lib-chart-tooltip-radius: 0px;
+  }
 }

@@ -398,4 +398,15 @@
   .ui-card--inverse .ui-text-caption {
     color: inherit;
   }
+
+  // 圖表（libs/ui stat-card、line／bar／donut-chart，ADR 0017）：細線（1.5px）、小資料點、直角長條，格線是帳冊的列線、
+  // 基準線是表頭下緣那條 outline 實線；數字小卡的大數字縮一級（1.5rem），一列放得下更多卡。
+  .lib-chart {
+    --lib-chart-line-width: 1.5px;
+    --lib-chart-point-size: 0.75;
+    --lib-chart-bar-radius: 0px;
+    --lib-chart-grid-color: var(--ledger-rule);
+    --lib-chart-baseline-color: var(--ledger-rule-strong);
+    --lib-stat-card-value-size: 1.5rem;
+  }
 }
