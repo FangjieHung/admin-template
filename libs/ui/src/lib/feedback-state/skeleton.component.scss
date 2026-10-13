@@ -41,6 +41,7 @@
 // ---- text ----
 .sk-text {
   display: grid;
+  align-content: start;
   gap: 0.625rem;
 }
 
@@ -104,6 +105,7 @@
 // ---- list ----
 .sk-list {
   display: grid;
+  align-content: start;
 }
 
 .sk-list__item {
