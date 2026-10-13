@@ -32,3 +32,6 @@ export * from './lib/feedback-state/skeleton.component';
 export * from './lib/feedback-state/empty-state.component';
 export * from './lib/feedback-state/error-state.component';
 export * from './lib/feedback-state/async-state.component';
+export * from './lib/toast/toast.types';
+export * from './lib/toast/toast.component';
+export * from './lib/toast/toast.service';

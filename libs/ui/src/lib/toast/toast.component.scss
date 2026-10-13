@@ -1,0 +1,77 @@
+// 外框（底色 inverse-surface、圓角、陰影）沿用 MatSnackBar 與各質地的 snackbar recipe；
+// 這裡只排版型：類型徽章＋訊息＋動作。徽章用狀態語意的 bg／fg 一對（CONTRACT.md），
+// 不論 snackbar 底色深淺，圖示對徽章底色的對比都由配色保證。
+// 進出場動畫由 MatSnackBar 負責：Angular Material 22 在 prefers-reduced-motion 時自動關掉。
+
+:host {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.lib-toast__badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-inline-start: 0.875rem;
+  border-radius: var(--mat-sys-corner-full);
+}
+
+.lib-toast__badge[data-tone='positive'] {
+  background: var(--app-positive-bg);
+  color: var(--app-positive-fg);
+}
+
+.lib-toast__badge[data-tone='info'] {
+  background: var(--app-info-bg);
+  color: var(--app-info-fg);
+}
+
+.lib-toast__badge[data-tone='warning'] {
+  background: var(--app-warning-bg);
+  color: var(--app-warning-fg);
+}
+
+.lib-toast__badge[data-tone='danger'] {
+  background: var(--app-danger-bg);
+  color: var(--app-danger-fg);
+}
+
+.lib-toast__icon {
+  display: block;
+  // 圖示字型載不到時 ligature 名稱不撐開版面。
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+.lib-toast__message {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.lib-toast__actions {
+  flex: 0 0 auto;
+}
+
+.lib-toast__close {
+  --mat-icon-button-icon-color: var(--mat-sys-inverse-on-surface);
+  --mat-icon-button-state-layer-color: var(--mat-sys-inverse-on-surface);
+  --mat-icon-button-ripple-color: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 12%, transparent);
+}
+
+.lib-toast__close .lib-toast__icon {
+  font-size: 1.25rem;
+}
+
+@media (forced-colors: active) {
+  .lib-toast__badge {
+    border: 1px solid CanvasText;
+  }
+}

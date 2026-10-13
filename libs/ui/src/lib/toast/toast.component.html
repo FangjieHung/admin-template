@@ -1,0 +1,24 @@
+<span class="lib-toast__badge" [attr.data-tone]="tone" aria-hidden="true">
+  <span class="lib-toast__icon material-symbols-rounded">{{ icon }}</span>
+</span>
+<div matSnackBarLabel class="lib-toast__message">{{ data.message }}</div>
+@if (data.action || data.closeLabel) {
+  <div matSnackBarActions class="lib-toast__actions">
+    @if (data.action) {
+      <button type="button" matButton matSnackBarAction class="lib-toast__action" (click)="runAction()">
+        {{ data.action }}
+      </button>
+    }
+    @if (data.closeLabel) {
+      <button
+        type="button"
+        matIconButton
+        class="lib-toast__close"
+        [attr.aria-label]="data.closeLabel"
+        (click)="close()"
+      >
+        <span class="lib-toast__icon material-symbols-rounded" aria-hidden="true">close</span>
+      </button>
+    }
+  </div>
+}
