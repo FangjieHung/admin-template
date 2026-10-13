@@ -452,6 +452,39 @@ async function extractFocusOutline(page, selector) {
   }, selector);
 }
 
+// ADR 0010：只有 Material 編在主樣式裡，其他質地是按需載入的 texture-<id>.css。重新整理時 index.html 的開機腳本
+// 會依 localStorage 載入它；這裡再確認一次該質地的 <link> 已載入完成（沒有就自己插入並等 load），
+// 才改 dataset 開始量，否則會量到沒有質地樣式的畫面。插入位置跟 ThemeService 一樣排在主樣式之前。
+async function applyCombo(page, paradigm, theme) {
+  await page.evaluate(
+    async ({ p, t }) => {
+      if (p !== 'material') {
+        const selector = `link[rel="stylesheet"][data-texture-css="${p}"]`;
+        let link = document.querySelector(selector);
+        if (!link || !link.sheet) {
+          link?.remove();
+          link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = `texture-${p}.css`;
+          link.setAttribute('data-texture-css', p);
+          const loaded = new Promise((resolve, reject) => {
+            link.addEventListener('load', resolve, { once: true });
+            link.addEventListener('error', () => reject(new Error(`無法載入 texture-${p}.css`)), { once: true });
+          });
+          const anchors = document.querySelectorAll('link[data-texture-css]');
+          const anchor = anchors[anchors.length - 1] ?? document.getElementById('cr-texture-boot');
+          if (anchor) anchor.after(link);
+          else document.head.prepend(link);
+          await loaded;
+        }
+      }
+      document.documentElement.dataset['paradigm'] = p;
+      document.documentElement.dataset['theme'] = t;
+    },
+    { p: paradigm, t: theme },
+  );
+}
+
 async function measureCombo(page, texture, color) {
   await page.evaluate(
     ({ p, t }) => {
@@ -463,13 +496,7 @@ async function measureCombo(page, texture, color) {
   await page.reload({ waitUntil: 'networkidle', timeout: 20000 });
   // ThemeService.init() 會把不相容的組合校正成預設配色（ADR 0007）；
   // 報告要量「所有」56 格，所以載入後直接蓋回要量的屬性。
-  await page.evaluate(
-    ({ p, t }) => {
-      document.documentElement.dataset['paradigm'] = p;
-      document.documentElement.dataset['theme'] = t;
-    },
-    { p: texture.id, t: color.id },
-  );
+  await applyCombo(page, texture.id, color.id);
   await page.waitForTimeout(600); // 讓 texture 的進場動畫/字型穩定
 
   const results = {};
@@ -578,13 +605,7 @@ async function measureOtherPages(page, texture, color, results) {
   let worst = null;
   for (const fp of FIELD_PAGES) {
     await page.goto(`${BASE_URL}${fp.path}`, { waitUntil: 'networkidle', timeout: 20000 });
-    await page.evaluate(
-      ({ p, t }) => {
-        document.documentElement.dataset['paradigm'] = p;
-        document.documentElement.dataset['theme'] = t;
-      },
-      { p: texture.id, t: color.id },
-    );
+    await applyCombo(page, texture.id, color.id);
     await page.waitForTimeout(600);
     if (fp.setup) await fp.setup(page);
     await page.mouse.move(1, 899); // 避免 hover 狀態
@@ -714,7 +735,7 @@ async function measureStatePairs(page, texture, color, results) {
   if (!keys.length) return results;
   const items = Object.fromEntries(keys.map((k) => [k, []]));
   const setCombo = async () => {
-    await page.evaluate(({ p, t }) => { document.documentElement.dataset['paradigm'] = p; document.documentElement.dataset['theme'] = t; }, { p: texture.id, t: color.id });
+    await applyCombo(page, texture.id, color.id);
     await page.waitForTimeout(400);
   };
   const hoverAll = async (pageKey, n) => {
