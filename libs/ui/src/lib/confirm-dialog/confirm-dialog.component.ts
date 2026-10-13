@@ -1,6 +1,8 @@
-import { Component, InjectionToken, Injector, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogConfig, MatDialogModule } from '@angular/material/dialog';
+import { Component, InjectionToken, Injector, computed, inject, signal } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogConfig, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { firstValueFrom } from 'rxjs';
 
 /** 確認對話框按鈕的預設文字。libs/ui 不內建使用者可見字串，由使用端提供（或每次在 data 裡給）。 */
@@ -25,6 +27,20 @@ export interface ConfirmDialogData {
   cancelLabel?: string;
   /** `danger`：確認鈕用錯誤色（刪除、作廢等不可復原的動作）；`primary`：一般確認。預設 `danger`。 */
   tone?: 'danger' | 'primary';
+  /**
+   * 要使用者先輸入一段確認字樣（例如帳號的 Email、專案名稱），輸入相同才能按確認。
+   * 用在刪除帳號、刪除整個專案這種影響很大、又無法復原的動作；一般刪除不需要。
+   */
+  typeToConfirm?: ConfirmDialogTypeToConfirm;
+}
+
+export interface ConfirmDialogTypeToConfirm {
+  /** 要輸入的字樣；比對時忽略前後空白，大小寫要相同。 */
+  text: string;
+  /** 輸入框的標籤，寫出要輸入什麼，例：「輸入專案名稱「官網改版」確認」。 */
+  label: string;
+  /** 選填：輸入框下方的提示。 */
+  hint?: string;
 }
 
 /**
@@ -33,7 +49,7 @@ export interface ConfirmDialogData {
  */
 @Component({
   selector: 'lib-confirm-dialog',
-  imports: [MatDialogModule, MatButtonModule],
+  imports: [MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule],
   templateUrl: './confirm-dialog.component.html',
   styleUrl: './confirm-dialog.component.scss',
 })
@@ -44,6 +60,24 @@ export class ConfirmDialogComponent {
   protected readonly confirmLabel = this.data.confirmLabel ?? this.labels?.confirm ?? missingLabel('confirm');
   protected readonly cancelLabel = this.data.cancelLabel ?? this.labels?.cancel ?? missingLabel('cancel');
   protected readonly tone = this.data.tone ?? 'danger';
+
+  private readonly ref = inject<MatDialogRef<ConfirmDialogComponent, boolean>>(MatDialogRef);
+  protected readonly typed = signal('');
+  /** 沒有要求輸入確認字樣，或已經輸入正確。 */
+  protected readonly canConfirm = computed(() => {
+    const required = this.data.typeToConfirm;
+    return !required || this.typed().trim() === required.text.trim();
+  });
+
+  protected onTyped(event: Event): void {
+    this.typed.set((event.target as HTMLInputElement).value);
+  }
+
+  /** 在確認字樣的輸入框按 Enter：輸入正確就當作按確認。 */
+  protected submitTyped(event: Event): void {
+    event.preventDefault();
+    if (this.canConfirm()) this.ref.close(true);
+  }
 }
 
 function missingLabel(name: keyof ConfirmDialogLabels): never {
@@ -72,7 +106,8 @@ export async function openConfirmDialog(
   const dialog = injector.get(MatDialog);
   const ref = dialog.open(ConfirmDialogComponent, {
     width: '360px',
-    autoFocus: 'dialog',
+    // 要輸入確認字樣時直接聚焦輸入框；其他時候聚焦對話框本身（不要一打開就停在確認鈕上）。
+    autoFocus: data.typeToConfirm ? '[data-confirm-text]' : 'dialog',
     injector: dialogInjector,
     ...config,
     data: resolved,

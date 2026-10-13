@@ -59,6 +59,46 @@ describe('openConfirmDialog', () => {
       TestBed.tick();
       await expect(result).resolves.toBe(false);
     });
+
+    it('typeToConfirm：輸入框聚焦、字樣不對時確認鈕停用；輸入正確（忽略前後空白）才能按，Enter 也算確認', async () => {
+      const result = openConfirmDialog(TestBed.inject(Injector), {
+        message: '刪除後無法復原。',
+        confirmLabel: '刪除帳號',
+        typeToConfirm: { text: 'name@example.com', label: '輸入 Email 確認', hint: '大小寫要相同' },
+      });
+      TestBed.tick();
+      await new Promise((r) => setTimeout(r));
+      const input = document.querySelector<HTMLInputElement>('[data-confirm-text]');
+      if (!input) throw new Error('沒有確認字樣的輸入框');
+      expect(document.querySelector('.cdk-overlay-container mat-label')?.textContent).toContain('輸入 Email 確認');
+      expect(document.querySelector('.cdk-overlay-container mat-hint')?.textContent).toContain('大小寫要相同');
+      const confirm = () => buttons()[1];
+      expect(confirm().disabled).toBe(true);
+
+      const type = (value: string) => {
+        input.value = value;
+        input.dispatchEvent(new Event('input'));
+        TestBed.tick();
+      };
+      type('Name@example.com');
+      expect(confirm().disabled).toBe(true);
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      TestBed.tick();
+      expect(document.querySelector('[data-confirm-text]')).not.toBeNull();
+
+      type('  name@example.com ');
+      expect(confirm().disabled).toBe(false);
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      TestBed.tick();
+      await expect(result).resolves.toBe(true);
+    });
+
+    it('沒有 typeToConfirm 時不顯示輸入框，確認鈕可以直接按', () => {
+      void openConfirmDialog(TestBed.inject(Injector), { message: '確定？' });
+      TestBed.tick();
+      expect(document.querySelector('[data-confirm-text]')).toBeNull();
+      expect(buttons()[1].disabled).toBe(false);
+    });
   });
 
   describe('只在頁面層提供文字（MatDialog 自己的 injector 看不到）', () => {

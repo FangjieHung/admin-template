@@ -6,7 +6,19 @@
   color: var(--mat-sys-on-surface);
 }
 
+.confirm-dialog__message {
+  margin: 0;
+}
+
+// 確認字樣的輸入框：跟訊息隔一段，占滿對話框寬度。
+.confirm-dialog__type {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+}
+
 // 不可復原的動作：確認鈕改用錯誤色（Material 22 的 color="warn" 已不再改變 M3 按鈕顏色）。
+// 按鈕同時掛 .ui-btn--danger：有些質地的 recipe 直接改實心按鈕底色，共用規則（theme-pack component.scss）會蓋回錯誤色。
 .confirm-dialog__confirm--danger {
   --mat-button-filled-container-color: var(--mat-sys-error);
   --mat-button-filled-label-text-color: var(--mat-sys-on-error);
