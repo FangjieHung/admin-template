@@ -1,11 +1,11 @@
 <div>
   <ng-template appHeaderToolbar>
-    <app-page-toolbar [showSearch]="false">
+    <lib-page-toolbar [showSearch]="false">
       <button actions mat-flat-button (click)="openForm(null)">
         <span class="material-symbols-rounded" aria-hidden="true">add</span>
         {{ t.common.create }}
       </button>
-    </app-page-toolbar>
+    </lib-page-toolbar>
   </ng-template>
 
   @if (store.partners().length === 0) {

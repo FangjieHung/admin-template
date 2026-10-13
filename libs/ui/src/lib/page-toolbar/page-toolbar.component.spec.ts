@@ -1,8 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { PageToolbarComponent } from './page-toolbar.component';
+import { PAGE_TOOLBAR_LABELS, PageToolbarComponent } from './page-toolbar.component';
+
+const LABELS = {
+  search: '搜尋',
+  collapseSearch: '收合搜尋',
+  clearSearch: '清除搜尋',
+  submitSearch: '搜尋',
+  clearFilters: '清除篩選',
+};
 
 function setup() {
+  TestBed.configureTestingModule({ providers: [{ provide: PAGE_TOOLBAR_LABELS, useValue: LABELS }] });
   const fixture = TestBed.createComponent(PageToolbarComponent);
   fixture.detectChanges();
   const el = fixture.nativeElement as HTMLElement;

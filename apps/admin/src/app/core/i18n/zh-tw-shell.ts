@@ -36,4 +36,14 @@ export const ZH_TW_SHELL = {
     breadcrumbAriaLabel: '麵包屑',
     back: '返回',
   },
+  // 清單頁的頁首工具列（@car-rental/ui 的 lib-page-toolbar／lib-filter-select）：在 app.config 根層提供，
+  // ZH_TW.common 的同名字串引用這裡。
+  listToolbar: {
+    search: '搜尋',
+    collapseSearch: '收合搜尋',
+    clearSearch: '清除搜尋',
+    submitSearch: '搜尋',
+    clearFilters: '清除篩選',
+    all: '全部',
+  },
 } as const;

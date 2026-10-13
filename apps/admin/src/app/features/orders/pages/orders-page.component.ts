@@ -7,12 +7,15 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {
-  DUAL_MONTH_RANGE_PICKER_LABELS,
   DataTableCellDirective,
   DataTableColumn,
   DataTableComponent,
+  DUAL_MONTH_RANGE_PICKER_LABELS,
   DualMonthRangePickerComponent,
   DualMonthRangePickerLabels,
+  FilterOption,
+  FilterSelectComponent,
+  PageToolbarComponent,
   SelectedDateRange,
 } from '@car-rental/ui';
 import { OrderStatus, RentalOrder } from '../../../core/models';
@@ -26,13 +29,8 @@ import { OperatorRecoveryStore } from '../../../stores/operator-recovery/operato
 import { StatusChipComponent } from '../../../shared/chips/status-chip.component';
 import { ORDER_STATUS_KEY } from '../../../shared/chips/order-status-key';
 import { StatusKey } from '@car-rental/theme-pack';
-import { PageToolbarComponent } from '../../../shared/ui/page-toolbar.component';
 import { HeaderToolbarDirective } from '../../../layout/header/header-toolbar-slot';
 import { ADMIN_DATA_TABLE_LABELS } from '../../../shared/ui/data-table-labels';
-import {
-  FilterOption,
-  FilterSelectComponent,
-} from '../../../shared/filters/filter-select.component';
 import { OrderDetailNavigation } from '../../orders/navigation/order-detail-navigation';
 import { OrderDetailSection } from '../../orders/navigation/order-detail-sections';
 import { OrderIncompleteItem } from '../../orders/incomplete/order-incomplete';

@@ -1,6 +1,6 @@
 <div class="shell-container">
   <ng-template appHeaderToolbar>
-    <app-page-toolbar [placeholder]="t.dashboard.searchPlaceholder" (searchSubmit)="onSearchSubmit($event)">
+    <lib-page-toolbar [placeholder]="t.dashboard.searchPlaceholder" (searchSubmit)="onSearchSubmit($event)">
       <!-- 待整備／待保養是工作佇列：安靜的外框按鈕＋徽章；「新增訂單」是頁面唯一的實心主按鈕。 -->
       <!-- 4.3：待整備＝還車後的清潔與檢查（不是保養），點開是清單 dialog。 -->
       <button
@@ -34,7 +34,7 @@
         <span class="material-symbols-rounded" aria-hidden="true">add</span>
         {{ t.dashboard.newOrder }}
       </a>
-    </app-page-toolbar>
+    </lib-page-toolbar>
   </ng-template>
 
   <app-calendar-view

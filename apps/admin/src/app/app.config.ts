@@ -51,6 +51,7 @@ import { DriverEligibilityGateway } from './core/services/driver-eligibility.gat
 import { MockDriverEligibilityGateway } from './core/services/mock-driver-eligibility.gateway';
 import { ReminderGateway } from './core/services/reminder.gateway';
 import { MockReminderGateway } from './core/services/mock-reminder.gateway';
+import { LIST_TOOLBAR_LABEL_PROVIDERS } from './shared/ui/list-toolbar-labels';
 
 /** 啟動時要確認有示範資料的 repository（app.config 提供的全部本機集合）。 */
 const DEMO_DATA_REPOS = [
@@ -320,5 +321,7 @@ export const appConfig: ApplicationConfig = {
     { provide: DriverEligibilityGateway, useExisting: MockDriverEligibilityGateway },
     MockReminderGateway,
     { provide: ReminderGateway, useExisting: MockReminderGateway },
+    // 清單頁頁首工具列的文字（libs/ui 不內建字串）。
+    ...LIST_TOOLBAR_LABEL_PROVIDERS,
   ],
 };

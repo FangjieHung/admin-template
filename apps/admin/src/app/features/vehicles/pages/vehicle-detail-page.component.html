@@ -5,12 +5,12 @@
   } @else {
     <!-- 4.7：頁首工具列「編輯」，重用車輛清單的表單 dialog。外框按鈕：這頁的實心按鈕留給「新增保養紀錄」。 -->
     <ng-template appHeaderToolbar>
-      <app-page-toolbar [showSearch]="false">
+      <lib-page-toolbar [showSearch]="false">
         <button actions type="button" matButton="outlined" class="vehicle-detail__edit" (click)="edit()">
           <span class="material-symbols-rounded" aria-hidden="true">edit</span>
           {{ t.common.edit }}
         </button>
-      </app-page-toolbar>
+      </lib-page-toolbar>
     </ng-template>
 
     <section class="ui-card flex flex-col gap-1 p-4 sm:p-6 break-words">

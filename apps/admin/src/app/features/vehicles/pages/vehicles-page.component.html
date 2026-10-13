@@ -1,24 +1,24 @@
 <div>
   <ng-template appHeaderToolbar>
-    <app-page-toolbar
+    <lib-page-toolbar
       [(query)]="searchQuery"
       [placeholder]="t.common.search"
       [activeFilterCount]="activeFilterCount()"
       (clearAll)="clearFilters()"
     >
-      <app-filter-select
+      <lib-filter-select
         filters
         [label]="t.vehicle.type"
         [options]="typeOptions"
         [(value)]="typeFilter"
       />
-      <app-filter-select
+      <lib-filter-select
         filters
         [label]="t.vehicle.status"
         [options]="statusOptions"
         [(value)]="statusFilter"
       />
-      <app-filter-select
+      <lib-filter-select
         filters
         [label]="t.vehicle.branch"
         [options]="locationOptions"
@@ -40,7 +40,7 @@
         <span class="material-symbols-rounded" aria-hidden="true">directions_car</span>
         {{ t.common.create }}{{ t.vehicle.vehicle }}
       </button>
-    </app-page-toolbar>
+    </lib-page-toolbar>
   </ng-template>
 
   @if (store.vehicles().length === 0) {

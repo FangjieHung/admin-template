@@ -6,7 +6,7 @@
         type="button"
         class="search__toggle"
         [class.search__toggle--active]="expanded()"
-        [attr.aria-label]="expanded() ? t.common.collapseSearch : t.common.search"
+        [attr.aria-label]="expanded() ? t.collapseSearch : t.search"
         [attr.aria-expanded]="expanded()"
         [attr.aria-controls]="searchInputId"
         (mousedown)="$event.preventDefault()"
@@ -25,8 +25,8 @@
               type="text"
               class="search__input"
               [tabindex]="expanded() ? 0 : -1"
-              [attr.aria-label]="placeholder()"
-              [placeholder]="placeholder()"
+              [attr.aria-label]="placeholderText()"
+              [placeholder]="placeholderText()"
               [ngModel]="query()"
               (ngModelChange)="query.set($event)"
               (keydown.enter)="submitQuery()"
@@ -37,7 +37,7 @@
               <button
                 type="button"
                 class="search__clear"
-                [attr.aria-label]="t.common.clearSearch"
+                [attr.aria-label]="t.clearSearch"
                 (mousedown)="$event.preventDefault()"
                 (click)="clearKeepFocus()"
               >
@@ -50,10 +50,10 @@
                 type="button"
                 matButton="tonal"
                 class="search__submit w-20"
-                [attr.aria-label]="t.common.submitSearch"
+                [attr.aria-label]="t.submitSearch"
                 (mousedown)="$event.preventDefault()"
                 (click)="submitQuery()"
-              >{{ t.common.submitSearch }}
+              >{{ t.submitSearch }}
               </button>
             }
           </div>
@@ -72,7 +72,7 @@
     @if (activeFilterCount() > 0) {
       <button mat-button class="clear-btn" type="button" (click)="clearAll.emit()">
         <span class="material-symbols-rounded" aria-hidden="true">close</span>
-        {{ t.common.clearFilters }}
+        {{ t.clearFilters }}
       </button>
     }
   </div>

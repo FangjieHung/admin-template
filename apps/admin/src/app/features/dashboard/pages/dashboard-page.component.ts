@@ -10,7 +10,6 @@ import { OrderStore } from '../../../stores/order/order.store';
 import { MemberStore } from '../../../stores/member/member.store';
 import { MaintenanceStore } from '../../../stores/maintenance/maintenance.store';
 import { PrepStore } from '../../../stores/prep/prep.store';
-import { PageToolbarComponent } from '../../../shared/ui/page-toolbar.component';
 import { HeaderToolbarDirective } from '../../../layout/header/header-toolbar-slot';
 import {
   CALENDAR_VIEW_PARAM,
@@ -21,6 +20,7 @@ import {
   returnProgress,
 } from '../../dispatch/calendar-view/calendar-view.component';
 import { PrepQueueDialogComponent } from '../dialogs/prep-queue-dialog.component';
+import { PageToolbarComponent } from '@car-rental/ui';
 
 /**
  * 總覽：頁首（新增訂單、待整備、待保養、搜尋訂單）＋月曆／時間軸卡片與右側面板。

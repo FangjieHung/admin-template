@@ -47,6 +47,7 @@ import {
 } from '../../../core/models';
 import { OrderDetailNavigation } from '../../orders/navigation/order-detail-navigation';
 import { ZH_TW } from '../../../core/i18n/zh-tw';
+import { LIST_TOOLBAR_LABEL_PROVIDERS } from '../../../shared/ui/list-toolbar-labels';
 
 function makeVehicle(partial: Partial<Vehicle>): Vehicle {
   return {
@@ -128,6 +129,7 @@ describe('OrdersPageComponent filtering', () => {
     workspaceEdit = vi.fn();
     TestBed.configureTestingModule({
       providers: [
+        ...LIST_TOOLBAR_LABEL_PROVIDERS,
         provideRouter([]),
         ...provideOrderDetailRepos(),
         { provide: OrderDetailNavigation, useValue: { open: workspaceOpen, edit: workspaceEdit } },
@@ -188,6 +190,7 @@ describe('OrdersPageComponent filtering', () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
+        ...LIST_TOOLBAR_LABEL_PROVIDERS,
         provideRouter([]),
         ...provideOrderDetailRepos(),
         { provide: OrderDetailNavigation, useValue: { open: vi.fn(), edit: vi.fn() } },
@@ -284,6 +287,7 @@ describe('OrdersPageComponent 急迫指標與排序', () => {
 
     TestBed.configureTestingModule({
       providers: [
+        ...LIST_TOOLBAR_LABEL_PROVIDERS,
         provideRouter([]),
         ...provideOrderDetailRepos({
           refunds: [
@@ -368,6 +372,7 @@ describe('OrdersPageComponent 從網址帶入 q 參數預填搜尋', () => {
   function createFixture(q: string | null) {
     TestBed.configureTestingModule({
       providers: [
+        ...LIST_TOOLBAR_LABEL_PROVIDERS,
         provideRouter([]),
         ...provideOrderDetailRepos(),
         {
@@ -434,6 +439,7 @@ describe('OrdersPageComponent 待補欄與篩選', () => {
     const incomplete: Member = { id: 'c2', name: '陳大文', phone: '0922000222', kind: 'local' };
     TestBed.configureTestingModule({
       providers: [
+        ...LIST_TOOLBAR_LABEL_PROVIDERS,
         provideRouter([]),
         ...provideOrderDetailRepos({
           contracts: [{ id: 'cv1', bookingId: 'done', version: 1, status: 'signed' } as ContractVersion],
@@ -559,6 +565,7 @@ describe('OrdersPageComponent 4.4：整列點擊、取車日期篩選、工具�
     const open = vi.fn();
     TestBed.configureTestingModule({
       providers: [
+        ...LIST_TOOLBAR_LABEL_PROVIDERS,
         provideRouter([]),
         ...provideOrderDetailRepos(),
         { provide: OrderDetailNavigation, useValue: { open, edit: vi.fn() } },

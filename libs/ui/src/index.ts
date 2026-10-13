@@ -7,3 +7,6 @@ export * from './lib/dual-month-range-picker/dual-month-range-picker-labels';
 export * from './lib/dual-month-range-picker/dual-month-range-picker.component';
 export * from './lib/data-table/data-table-query';
 export * from './lib/data-table/data-table-column-chooser.component';
+export * from './lib/page-toolbar/page-toolbar.component';
+export * from './lib/filter/filter.types';
+export * from './lib/filter/filter-select.component';

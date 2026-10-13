@@ -54,6 +54,7 @@ import { ReminderGateway } from '../../../core/services/reminder.gateway';
 import { HeaderToolbarSlot } from '../../../layout/header/header-toolbar-slot';
 import { PrepQueueDialogComponent } from '../dialogs/prep-queue-dialog.component';
 import { PrepStore } from '../../../stores/prep/prep.store';
+import { LIST_TOOLBAR_LABEL_PROVIDERS } from '../../../shared/ui/list-toolbar-labels';
 
 // Dashboard 內嵌的 CalendarViewComponent 會用到 PricingStore。
 function providePricing() {
@@ -98,6 +99,7 @@ describe('DashboardPageComponent child date contract', () => {
   function createFixture(orders: RentalOrder[] = []) {
     TestBed.configureTestingModule({
       providers: [
+        ...LIST_TOOLBAR_LABEL_PROVIDERS,
         ...providePricing(),
         ...provideOrderDetailRepos(),
         provideNativeDateAdapter(),
@@ -183,6 +185,7 @@ describe('DashboardPageComponent 今日出車／還車／待整備統計', () =>
   function createFixture(orders: RentalOrder[]) {
     TestBed.configureTestingModule({
       providers: [
+        ...LIST_TOOLBAR_LABEL_PROVIDERS,
         ...providePricing(),
         ...provideOrderDetailRepos(),
         provideNativeDateAdapter(),
@@ -267,7 +270,7 @@ describe('DashboardPageComponent 頁首', () => {
   const prepButton = (el: HTMLElement) => el.querySelector<HTMLButtonElement>('.dashboard-queue--prep');
 
   function renderToolbar(orders: RentalOrder[] = [], prepTasks: PrepTask[] = []) {
-    TestBed.configureTestingModule({ providers: [...dashboardProviders(orders, prepTasks), provideRouter([])] });
+    TestBed.configureTestingModule({ providers: [...LIST_TOOLBAR_LABEL_PROVIDERS, ...dashboardProviders(orders, prepTasks), provideRouter([])] });
     const page = TestBed.createComponent(DashboardPageComponent);
     page.detectChanges();
     const host = TestBed.createComponent(HeaderToolbarHostComponent);
@@ -382,7 +385,7 @@ describe('DashboardPageComponent 頁首', () => {
 describe('DashboardPageComponent 月曆｜時間軸切換（3.5）', () => {
   async function openDashboard(url: string) {
     TestBed.configureTestingModule({
-      providers: [...dashboardProviders(), provideRouter([{ path: '', component: DashboardPageComponent }])],
+      providers: [...LIST_TOOLBAR_LABEL_PROVIDERS, ...dashboardProviders(), provideRouter([{ path: '', component: DashboardPageComponent }])],
     });
     const harness = await RouterTestingHarness.create();
     const page = await harness.navigateByUrl(url, DashboardPageComponent);

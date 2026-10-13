@@ -18,6 +18,7 @@ import {
   MaintenanceRecordDialogComponent,
   RecordFormResult,
 } from '../../maintenance/dialogs/maintenance-record-dialog.component';
+import { LIST_TOOLBAR_LABEL_PROVIDERS } from '../../../shared/ui/list-toolbar-labels';
 
 function makeVehicle(partial: Partial<Vehicle>): Vehicle {
   return {
@@ -58,6 +59,7 @@ describe('VehicleDetailPageComponent', () => {
     dialogOpen = vi.fn();
     TestBed.configureTestingModule({
       providers: [
+        ...LIST_TOOLBAR_LABEL_PROVIDERS,
         { provide: MatDialog, useValue: { open: dialogOpen } },
         {
           provide: ActivatedRoute,
@@ -78,6 +80,7 @@ describe('VehicleDetailPageComponent', () => {
     dialogOpen = vi.fn();
     TestBed.configureTestingModule({
       providers: [
+        ...LIST_TOOLBAR_LABEL_PROVIDERS,
         { provide: MatDialog, useValue: { open: dialogOpen } },
         {
           provide: ActivatedRoute,
@@ -214,6 +217,7 @@ describe('VehicleDetailPageComponent 4.7 頁首「編輯」', () => {
     const snackBarOpen = vi.fn();
     TestBed.configureTestingModule({
       providers: [
+        ...LIST_TOOLBAR_LABEL_PROVIDERS,
         { provide: MatDialog, useValue: { open: dialogOpen } },
         { provide: MatSnackBar, useValue: { open: snackBarOpen } },
         {

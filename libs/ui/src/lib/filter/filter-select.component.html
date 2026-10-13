@@ -5,7 +5,7 @@
     [placeholder]="label()"
     [aria-label]="label()"
   >
-    <mat-option [value]="null">{{ t.common.all }}</mat-option>
+    <mat-option [value]="null">{{ t.all }}</mat-option>
     @for (opt of options(); track opt.value) {
       <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
     }

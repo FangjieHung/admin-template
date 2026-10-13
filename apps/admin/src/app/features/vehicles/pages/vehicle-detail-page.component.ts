@@ -6,13 +6,17 @@ import { firstValueFrom } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { DataTableCellDirective, DataTableColumn, DataTableComponent } from '@car-rental/ui';
+import {
+  DataTableCellDirective,
+  DataTableColumn,
+  DataTableComponent,
+  PageToolbarComponent,
+} from '@car-rental/ui';
 import { branchName, MaintenanceRecord } from '../../../core/models';
 import { ZH_TW } from '../../../core/i18n/zh-tw';
 import { fmtDateTime } from '../../../core/date-utils';
 import { provideHeaderTitle } from '../../../layout/header/header-title';
 import { HeaderToolbarDirective } from '../../../layout/header/header-toolbar-slot';
-import { PageToolbarComponent } from '../../../shared/ui/page-toolbar.component';
 import { TwdPipe } from '../../../shared/pipes/twd.pipe';
 import { MileagePipe } from '../../../shared/pipes/mileage.pipe';
 import { VehicleStore } from '../../../stores/vehicle/vehicle.store';
