@@ -3,6 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { AccessRole, AccessService, AccessUser, CanDirective, HasUnsavedChanges } from '@admin-template/access';
 import { PermissionMatrixComponent, RoleDraft, uniqueCopyName } from '@admin-template/access/permission-matrix';
+import { RoleManagementService } from '@admin-template/access/role-management';
 import {
   DataTableCellDirective,
   DataTableColumn,
@@ -57,6 +58,7 @@ interface UserRow {
 export class RolesPageComponent implements HasUnsavedChanges {
   protected readonly entry = ENTRY;
   protected readonly access = inject(AccessService);
+  private readonly roleManagement = inject(RoleManagementService);
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
   protected readonly tableLabels = ADMIN_DATA_TABLE_LABELS;
@@ -73,7 +75,7 @@ export class RolesPageComponent implements HasUnsavedChanges {
   protected readonly readonly = computed(() => this.selected().preset || !this.canEdit());
   protected readonly nameError = computed(() => {
     if (this.readonly()) return null;
-    const error = this.access.validateRoleName(this.draft.name(), this.selected().id);
+    const error = this.roleManagement.validateRoleName(this.draft.name(), this.selected().id);
     return error ? NAME_ERRORS[error] : null;
   });
 
@@ -123,7 +125,7 @@ export class RolesPageComponent implements HasUnsavedChanges {
     if (!(await this.canLeave())) return;
     const source = this.selected();
     const name = uniqueCopyName(source.name, this.access.roles(), (n) => (n === 1 ? '（副本）' : `（副本 ${n}）`));
-    const created = this.access.copyRole(source.id, name);
+    const created = this.roleManagement.copyRole(source.id, name);
     this.load(created);
     this.toast.success(`已建立「${created.name}」，可以開始修改權限`);
   }
@@ -134,7 +136,7 @@ export class RolesPageComponent implements HasUnsavedChanges {
 
   protected save(): void {
     if (!this.draft.dirty() || this.nameError()) return;
-    const updated = this.access.updateRole(this.selected().id, {
+    const updated = this.roleManagement.updateRole(this.selected().id, {
       name: this.draft.name(),
       permissions: this.draft.permissions(),
     });
@@ -158,7 +160,7 @@ export class RolesPageComponent implements HasUnsavedChanges {
       confirmLabel: '刪除角色',
     });
     if (!ok) return;
-    this.access.deleteRole(role.id);
+    this.roleManagement.deleteRole(role.id);
     this.load(this.presetRoles()[0]);
     this.toast.success(`已刪除「${role.name}」`);
   }
@@ -169,7 +171,7 @@ export class RolesPageComponent implements HasUnsavedChanges {
       confirmLabel: '還原',
     });
     if (!ok) return;
-    this.access.resetToDefaults();
+    this.roleManagement.resetToDefaults();
     this.load(this.presetRoles()[0]);
     this.toast.info('已還原示範資料');
   }
@@ -179,7 +181,7 @@ export class RolesPageComponent implements HasUnsavedChanges {
   protected onAssign(row: UserRow, roleId: string, event: Event): void {
     const checked = (event.target as HTMLInputElement).checked;
     const next = checked ? [...row.roleIds, roleId] : row.roleIds.filter((id) => id !== roleId);
-    this.access.assignRoles(row.id, next);
+    this.roleManagement.assignRoles(row.id, next);
     const user = this.access.users().find((u) => u.id === row.id);
     this.status.set(`「${row.name}」的角色：${user ? this.roleNames(user) : ''}`);
   }
@@ -234,10 +236,12 @@ export class RolesPageComponent implements HasUnsavedChanges {
 readonly draft = new RoleDraft();
 this.draft.load(role);          // 開始編輯
 this.draft.dirty();             // 名稱或權限跟載入時不同
-this.access.updateRole(role.id, { name: this.draft.name(), permissions: this.draft.permissions() });
+// 角色管理：RoleManagementService（@admin-template/access/role-management，只有這一頁用到，不進 Initial bundle）
+private readonly roles = inject(RoleManagementService);
+this.roles.updateRole(role.id, { name: this.draft.name(), permissions: this.draft.permissions() });
 
 // 預設角色唯讀：複製成自訂角色再改
-const copy = this.access.copyRole('manager', '區域主管');
+const copy = this.roles.copyRole('manager', '區域主管');
 
 // 離開頁面前確認（頁面實作 canLeave()）
 { path: 'roles', loadComponent: ..., canDeactivate: [unsavedChangesGuard] }`;

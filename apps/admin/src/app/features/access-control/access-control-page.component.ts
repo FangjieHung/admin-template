@@ -131,7 +131,7 @@ readonly canExport = computed(() => this.access.can('report', 'view'));`;
         { name: 'hintFor(check)', type: 'string', description: '「需要主管權限」：最低的符合的預設角色。' },
         { name: 'signIn(userId) / signOut()', type: 'void', description: '換身分（示範登入、切換身分小工具用）。' },
         { name: 'roles() / users()', type: 'Signal<…>', description: '所有角色（預設在前）與使用者（含目前的指派）。' },
-        { name: 'copyRole / updateRole / deleteRole / assignRoles', type: '…', description: '角色管理；預設角色唯讀，改或刪會丟錯。' },
+        { name: 'copyRole / updateRole / deleteRole / assignRoles', type: '…', description: '角色管理，在 RoleManagementService（@admin-template/access/role-management，不進 Initial bundle）；預設角色唯讀，改或刪會丟錯。' },
         { name: 'persisted()', type: 'Signal<boolean>', description: '最近一次儲存是否成功（私密模式等存不了時是 false）。' },
       ],
     },

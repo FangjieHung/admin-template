@@ -8,6 +8,7 @@
 - `@admin-template/access`：模型、`AccessService`、`accessGuard`／`accessMatchGuard`、`*libCan`、`[libDisabledUnless]`、`filterByAccess`、`unsavedChangesGuard`、`AccessRepository`（預設存在瀏覽器）。
 - `@admin-template/access/permission-matrix`：權限矩陣編輯器、`RoleDraft`（編輯中的角色與未儲存變更）。
 - `@admin-template/access/identity-switcher`：示範用的「切換身分」小工具。
+- `@admin-template/access/role-management`：`RoleManagementService`（複製、修改、刪除自訂角色，指派角色；預設角色唯讀）。只有角色頁用得到，所以不在核心 barrel。
 
 不依賴 `libs/ui`；`libs/ui` 也不依賴這裡。用法見根目錄 `README.md`「權限」與展示 app 的「權限控制」頁。
 

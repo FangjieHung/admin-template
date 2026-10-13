@@ -24,6 +24,9 @@
       ],
       "@admin-template/access/identity-switcher": [
         "./libs/access/src/lib/identity-switcher/identity-switcher.component.ts"
+      ],
+      "@admin-template/access/role-management": [
+        "./libs/access/src/lib/role-management/role-management.service.ts"
       ]
     }
   }

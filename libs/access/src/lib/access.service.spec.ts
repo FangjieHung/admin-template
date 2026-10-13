@@ -3,11 +3,12 @@ import { TestBed } from '@angular/core/testing';
 import { ACCESS_REPOSITORY, BrowserStorageAccessRepository, ACCESS_STORAGE_KEY } from './access.repository';
 import { ACCESS_CONFIG, AccessService } from './access.service';
 import { filterByAccess } from './access-filter';
+import { RoleManagementService } from './role-management/role-management.service';
 import { MemoryAccessRepository, TEST_ACCESS_CONFIG, provideTestAccess } from './testing/access-fixture';
 
 function setup(repository = new MemoryAccessRepository()) {
   TestBed.configureTestingModule({ providers: provideTestAccess(repository) });
-  return { access: TestBed.inject(AccessService), repository };
+  return { access: TestBed.inject(AccessService), roles: TestBed.inject(RoleManagementService), repository };
 }
 
 describe('AccessService', () => {
@@ -49,49 +50,60 @@ describe('AccessService', () => {
   });
 
   it('預設角色唯讀：改名、改權限、刪除都丟錯，內容不變', () => {
-    const { access } = setup();
-    expect(() => access.updateRole('manager', { name: '經理' })).toThrow(/預設角色/);
-    expect(() => access.updateRole('manager', { permissions: [] })).toThrow(/預設角色/);
-    expect(() => access.deleteRole('viewer')).toThrow(/預設角色/);
+    const { access, roles } = setup();
+    expect(() => roles.updateRole('manager', { name: '經理' })).toThrow(/預設角色/);
+    expect(() => roles.updateRole('manager', { permissions: [] })).toThrow(/預設角色/);
+    expect(() => roles.deleteRole('viewer')).toThrow(/預設角色/);
     expect(access.role('manager')?.name).toBe('主管');
     expect(access.role('manager')?.permissions).toContain('ticket:approve');
   });
 
   it('複製成自訂角色，可以改名、改權限、刪除；刪除時從使用者身上拿掉', () => {
-    const { access, repository } = setup();
-    const copy = access.copyRole('manager', '區域主管');
+    const { access, roles, repository } = setup();
+    const copy = roles.copyRole('manager', '區域主管');
     expect(copy.preset).toBe(false);
     expect(copy.copiedFrom).toBe('manager');
     expect(copy.permissions).toEqual(access.role('manager')?.permissions);
     expect(access.roles().map((r) => r.id)).toEqual(['admin', 'manager', 'member', 'viewer', copy.id]);
 
-    access.updateRole(copy.id, { name: '區域經理', permissions: ['ticket:view', 'report:edit' as never] });
+    roles.updateRole(copy.id, { name: '區域經理', permissions: ['ticket:view', 'report:edit' as never] });
     expect(access.role(copy.id)?.name).toBe('區域經理');
     expect(access.role(copy.id)?.permissions).toEqual(['ticket:view']); // 不存在的權限被丟掉
 
-    access.assignRoles('u-member', ['member', copy.id, 'ghost']);
+    roles.assignRoles('u-member', ['member', copy.id, 'ghost']);
     expect(access.users().find((u) => u.id === 'u-member')?.roleIds).toEqual(['member', copy.id]);
     expect(access.usersWithRole(copy.id).map((u) => u.id)).toEqual(['u-member']);
 
-    access.deleteRole(copy.id);
+    roles.deleteRole(copy.id);
     expect(access.role(copy.id)).toBeUndefined();
     expect(access.users().find((u) => u.id === 'u-member')?.roleIds).toEqual(['member']);
     expect(repository.saved?.customRoles).toEqual([]);
   });
 
+  it('resetToDefaults：清掉自訂角色與指派並保存', () => {
+    const { access, roles, repository } = setup();
+    const copy = roles.copyRole('manager', '區域主管');
+    roles.assignRoles('u-member', [copy.id]);
+    roles.resetToDefaults();
+    expect(access.roles().map((r) => r.id)).toEqual(['admin', 'manager', 'member', 'viewer']);
+    expect(access.users().find((u) => u.id === 'u-member')?.roleIds).toEqual(['member']);
+    expect(repository.saved?.customRoles).toEqual([]);
+    expect(repository.saved?.assignments).toEqual({});
+  });
+
   it('名稱重複或空白時不能複製或改名', () => {
-    const { access } = setup();
-    expect(() => access.copyRole('manager', ' 主管 ')).toThrow(/taken/);
-    const copy = access.copyRole('manager', '甲');
-    expect(() => access.updateRole(copy.id, { name: '' })).toThrow(/required/);
-    expect(access.validateRoleName('甲', copy.id)).toBeNull();
+    const { roles } = setup();
+    expect(() => roles.copyRole('manager', ' 主管 ')).toThrow(/taken/);
+    const copy = roles.copyRole('manager', '甲');
+    expect(() => roles.updateRole(copy.id, { name: '' })).toThrow(/required/);
+    expect(roles.validateRoleName('甲', copy.id)).toBeNull();
   });
 
   it('重新開啟時讀回自訂角色、指派與身分；已登出的狀態也保留', () => {
     const repository = new MemoryAccessRepository();
-    const first = setup(repository).access;
-    const copy = first.copyRole('member', '外包');
-    first.assignRoles('u-viewer', [copy.id]);
+    const { access: first, roles } = setup(repository);
+    const copy = roles.copyRole('member', '外包');
+    roles.assignRoles('u-viewer', [copy.id]);
     first.signIn('u-viewer');
 
     TestBed.resetTestingModule();
@@ -108,8 +120,8 @@ describe('AccessService', () => {
   it('存不了時照常運作，persisted() 變成 false', () => {
     const repository = new MemoryAccessRepository();
     repository.failSave = true;
-    const { access } = setup(repository);
-    access.copyRole('viewer', '訪客');
+    const { access, roles } = setup(repository);
+    roles.copyRole('viewer', '訪客');
     expect(access.roles()).toHaveLength(5);
     expect(access.persisted()).toBe(false);
   });
