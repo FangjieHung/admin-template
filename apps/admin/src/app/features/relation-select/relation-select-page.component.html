@@ -1,0 +1,121 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="模擬網路狀況"
+    description="套用在下面三個示範欄位。搜尋失敗時清單顯示「搜尋失敗」與「重試」；慢速時超過 150ms 才出現「載入中」，打字中途送出的舊搜尋會被取消。"
+  >
+    <div class="demo-row">
+      <mat-slide-toggle [checked]="simulateFailure()" (change)="simulateFailure.set($event.checked)" data-toggle="fail">
+        模擬搜尋失敗
+      </mat-slide-toggle>
+      <mat-slide-toggle [checked]="simulateSlow()" (change)="simulateSlow.set($event.checked)" data-toggle="slow">
+        模擬慢速 {{ slowSeconds }} 秒
+      </mat-slide-toggle>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="在表單裡挑一筆"
+    description="表單存的是 id。負責人：5,000 位示範使用者，模擬 300ms 延遲，聚焦就列出前 20 筆，打字縮小範圍。專案：一開始就帶 id，用 getById 查出名稱（查詢中顯示骨架）。聯絡人：找不到時可以直接建立。"
+  >
+    <form class="demo-grid" [formGroup]="form" (submit)="$event.preventDefault()">
+      <lib-relation-select
+        data-demo="owner"
+        label="負責人"
+        placeholder="輸入姓名或 email"
+        [hint]="'共 ' + users.length.toLocaleString() + ' 位示範使用者'"
+        formControlName="owner"
+        [source]="userSource"
+        [displayWith]="userName"
+        [secondaryWith]="userEmail"
+        [avatarWith]="userInitials"
+        (selectionChange)="onUserSelected($event)"
+      />
+      <lib-relation-select
+        data-demo="project"
+        label="專案"
+        placeholder="輸入專案名稱或代碼"
+        formControlName="project"
+        [source]="projectSource"
+        [displayWith]="projectName"
+        [secondaryWith]="projectMeta"
+      />
+      <lib-relation-select
+        data-demo="contact"
+        label="聯絡人"
+        placeholder="輸入姓名、部門或 email"
+        hint="找不到時可以直接建立"
+        formControlName="contact"
+        [source]="contactSource"
+        [displayWith]="contactName"
+        [secondaryWith]="contactMeta"
+        [avatarWith]="contactInitials"
+        [allowCreate]="true"
+        (createRequested)="onCreateContact($event)"
+      />
+    </form>
+    <dl class="demo-state">
+      <div>
+        <dt>owner</dt>
+        <dd><code>{{ form.controls.owner.value ?? 'null' }}</code></dd>
+      </div>
+      <div>
+        <dt>project</dt>
+        <dd><code>{{ form.controls.project.value ?? 'null' }}</code></dd>
+      </div>
+      <div>
+        <dt>contact</dt>
+        <dd><code>{{ form.controls.contact.value ?? 'null' }}</code></dd>
+      </div>
+    </dl>
+    <p class="demo-note result" aria-live="polite">最近的事件：{{ lastEvent() }}</p>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="狀態"
+    description="停用與唯讀都不能搜尋、沒有清除鈕；必填沒選且碰過時顯示 Material 的錯誤外觀；初始 id 查不到時顯示 id 本身與提示，不讓欄位空白。"
+  >
+    <div class="demo-grid">
+      <lib-relation-select
+        data-demo="disabled"
+        label="負責人（停用）"
+        value="u0003"
+        [disabled]="true"
+        [source]="userSource"
+        [displayWith]="userName"
+      />
+      <lib-relation-select
+        data-demo="readonly"
+        label="負責人（唯讀）"
+        value="u0004"
+        [readonly]="true"
+        [source]="userSource"
+        [displayWith]="userName"
+      />
+      <lib-relation-select
+        data-demo="required"
+        label="負責人"
+        errorMessage="請選擇負責人"
+        [required]="true"
+        [formControl]="requiredControl"
+        [source]="userSource"
+        [displayWith]="userName"
+        [secondaryWith]="userEmail"
+        [avatarWith]="userInitials"
+      />
+      <lib-relation-select
+        data-demo="missing"
+        label="專案（查不到）"
+        value="prj-999"
+        [source]="projectSource"
+        [displayWith]="projectName"
+      />
+    </div>
+  </app-demo-block>
+</app-showcase-page>

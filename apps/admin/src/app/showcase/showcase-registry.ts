@@ -82,6 +82,14 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     load: () => import('../features/status-chip/status-chip-page.component').then((m) => m.StatusChipPageComponent),
   },
   {
+    id: 'relation-select',
+    title: '關聯選擇欄位',
+    group: 'input',
+    icon: 'person_search',
+    load: () =>
+      import('../features/relation-select/relation-select-page.component').then((m) => m.RelationSelectPageComponent),
+  },
+  {
     id: 'date-range-picker',
     title: '雙月日期區間',
     group: 'input',

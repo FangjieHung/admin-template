@@ -59,6 +59,18 @@ export const ZH_TW = {
     nextMonth: '下個月',
     monthTitle: '{year}年{month}月',
   },
+  // 關聯選擇欄位（lib-relation-select）：{query} 是使用者輸入的字，{id} 是查不到的那筆 id。
+  relationSelect: {
+    loading: '載入中',
+    empty: '沒有可選擇的項目',
+    noResults: '找不到符合「{query}」的項目',
+    hasMore: '還有更多，請輸入更多字縮小範圍',
+    create: '建立「{query}」',
+    searchFailed: '搜尋失敗',
+    retry: '重試',
+    clear: '清除',
+    resolveFailed: '找不到這筆資料（{id}）',
+  },
   // 簽名板（lib-signature-pad）。
   signaturePad: {
     drawTab: '手寫簽名',

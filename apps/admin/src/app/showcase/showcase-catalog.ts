@@ -35,6 +35,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '依狀態語意顯示 5 種色調的小標籤；顏色與造型交給配色與質地。',
     source: 'libs/ui/src/lib/status-chip',
   },
+  'relation-select': {
+    summary: '輸入就搜尋，從大量資料裡挑一筆（負責人、專案、聯絡人）；表單存 id，初始值自動查出名稱，找不到時可以當場建立。',
+    source: 'libs/ui/src/lib/relation-select',
+  },
   'date-range-picker': {
     summary: '並排兩個月曆選起訖日，滑過時預覽區間；適合跨月的期間選擇。',
     source: 'libs/ui/src/lib/dual-month-range-picker',
@@ -102,7 +106,6 @@ export interface PlannedItem {
 }
 
 export const PLANNED_ITEMS: readonly PlannedItem[] = [
-  { title: '關聯選擇欄位', kind: '元件', priority: 'P0', summary: '輸入就搜尋，從大量資料裡挑一筆（客戶、專案、負責人）。' },
   { title: '詳情頁版型', kind: '元件', priority: 'P0', summary: '標題＋狀態＋主要動作＋分頁＋摘要側欄。' },
   { title: '數字小卡與圖表', kind: '元件', priority: 'P1', summary: '儀表板與報表的折線、長條、圓環。' },
   { title: '活動紀錄', kind: '元件', priority: 'P1', summary: '誰在何時改了什麼的時間軸。' },
