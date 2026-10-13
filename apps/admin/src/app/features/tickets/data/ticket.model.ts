@@ -71,9 +71,9 @@ export const TICKET_PRIORITY_LABELS: Readonly<Record<TicketPriority, string>> = 
 };
 
 export const TICKET_CATEGORY_LABELS: Readonly<Record<TicketCategory, string>> = {
-  hardware: '硬體設備',
+  hardware: '硬體',
   software: '軟體',
-  account: '帳號與權限',
+  account: '帳號權限',
   network: '網路',
   other: '其他',
 };
