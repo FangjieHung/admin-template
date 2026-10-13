@@ -1,0 +1,132 @@
+// 描述清單。只用語意 token：標籤 on-surface-variant、值 on-surface、分隔線 outline-variant；字體交給質地。
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.dsl {
+  display: grid;
+  margin: 0;
+  column-gap: 2rem;
+}
+
+:host([data-columns='2']) .dsl {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dsl-row {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 38%) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  min-width: 0;
+  padding-block: 0.625rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+// 最後一列（2 欄時是最後一排的一或兩格）不畫底線，外框交給放它的卡片。
+.dsl-row:last-child {
+  border-bottom: 0;
+}
+
+:host([data-columns='2']) .dsl-row:nth-last-child(2):nth-child(odd) {
+  border-bottom: 0;
+}
+
+// 2 欄（概覽分頁）：標籤在上、值在下。
+:host([data-columns='2']) .dsl-row {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.dsl-label {
+  min-width: 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--mat-sys-on-surface-variant);
+  overflow-wrap: anywhere;
+}
+
+.dsl-value {
+  min-width: 0;
+  margin: 0;
+  color: var(--mat-sys-on-surface);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.dsl-value__main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.375rem;
+  min-width: 0;
+}
+
+.dsl-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.dsl-empty {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.dsl-hint {
+  margin-top: 0.125rem;
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.dsl-copy {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-block: -0.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--mat-sys-corner-full);
+  background: transparent;
+  color: var(--mat-sys-on-surface-variant);
+  cursor: pointer;
+  transition: background-color var(--app-motion-fast) var(--app-ease-standard);
+
+  .material-symbols-rounded {
+    font-size: 1.125rem;
+  }
+
+  &:hover {
+    background: var(--app-state-hover);
+    color: var(--mat-sys-on-surface);
+  }
+
+  &:active {
+    background: var(--app-state-pressed);
+  }
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+
+  &.is-copied {
+    color: var(--mat-sys-primary);
+  }
+}
+
+.dsl-copied {
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// 窄螢幕一律 1 欄。
+@media (max-width: 767px) {
+  :host([data-columns='2']) .dsl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  :host([data-columns='2']) .dsl-row:nth-last-child(2):nth-child(odd) {
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+}

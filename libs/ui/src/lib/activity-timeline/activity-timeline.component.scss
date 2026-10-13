@@ -1,0 +1,344 @@
+// 活動紀錄。只用語意 token；線與節點的造型讀 --tl-* 變數（var() 的 fallback 就是預設），質地要特調時在
+// `.lib-activity-timeline` 上設這些變數（各質地 recipes.scss，CONTRACT.md「活動紀錄」）：
+//   --tl-line-width   線寬（預設 2px）
+//   --tl-line-color   線色（預設 --app-field-border：全站唯一保證對表面 ≥ 3:1 的邊界色）
+//   --tl-line-filter  線的 filter（預設 none；Sketch 用 --sketch-jitter 手繪抖動，線畫在不含文字的偽元素上）
+//   --tl-node-size    節點邊長（預設 2rem）
+//   --tl-node-radius  節點圓角（預設 --mat-sys-corner-full，Brutal 等質地的 corner-full 是 0 或小圓角，節點跟著變方）
+//   --tl-node-border  節點框線（border 簡寫，預設 0 solid transparent）
+//   --tl-node-shadow  節點陰影（預設 none）
+@use '../feedback-state/skeleton-block' as sk;
+
+@include sk.keyframes;
+
+:host {
+  // sr-only 是 absolute：host 當定位基準，避免它跳出外層捲動容器撐出捲軸。
+  position: relative;
+  display: block;
+  min-width: 0;
+
+  --_node: var(--tl-node-size, 2rem);
+  --_line-w: var(--tl-line-width, 2px);
+  // 線的左緣對齊整數像素，1px／3px 的線不會被反鋸齒成兩條半透明的線。
+  --_line-x: round(down, calc((var(--_node) - var(--_line-w)) / 2), 1px);
+}
+
+.tl-sr-only {
+  @include sk.sr-only;
+}
+
+.tl-filters {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.tl-group + .tl-group {
+  margin-top: 1.5rem;
+}
+
+.tl-day {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.tl-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tl-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--_node) minmax(0, 1fr);
+  column-gap: 0.875rem;
+  padding-bottom: 1.25rem;
+}
+
+// 線：從這一筆節點的下緣畫到下一筆節點的上緣（下一筆的節點貼著 li 的頂端），所以各段首尾相接、看起來是一條線。
+// 畫在跟節點一樣寬、不含文字的偽元素上（Sketch 的抖動 filter 需要比線本身寬的範圍才不會被裁掉）。
+.tl-item::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: var(--_node);
+  bottom: 0;
+  width: var(--_node);
+  pointer-events: none;
+  background-image: linear-gradient(
+    to right,
+    transparent var(--_line-x),
+    var(--tl-line-color, var(--app-field-border)) var(--_line-x),
+    var(--tl-line-color, var(--app-field-border)) calc(var(--_line-x) + var(--_line-w)),
+    transparent calc(var(--_line-x) + var(--_line-w))
+  );
+  filter: var(--tl-line-filter, none);
+}
+
+.tl-item--last {
+  padding-bottom: 0;
+}
+
+.tl-item--last::before {
+  content: none;
+}
+
+// 色調：節點底與圖示用狀態語意一對（--app-{tone}-bg/-fg，文字對比已由配色保證）。
+.tl-item[data-tone='neutral'] {
+  --_tone-bg: var(--app-neutral-bg);
+  --_tone-fg: var(--app-neutral-fg);
+}
+
+.tl-item[data-tone='info'] {
+  --_tone-bg: var(--app-info-bg);
+  --_tone-fg: var(--app-info-fg);
+}
+
+.tl-item[data-tone='positive'] {
+  --_tone-bg: var(--app-positive-bg);
+  --_tone-fg: var(--app-positive-fg);
+}
+
+.tl-item[data-tone='warning'] {
+  --_tone-bg: var(--app-warning-bg);
+  --_tone-fg: var(--app-warning-fg);
+}
+
+.tl-item[data-tone='danger'] {
+  --_tone-bg: var(--app-danger-bg);
+  --_tone-fg: var(--app-danger-fg);
+}
+
+.tl-node {
+  position: relative;
+  display: grid;
+  box-sizing: border-box;
+  place-items: center;
+  width: var(--_node);
+  height: var(--_node);
+  border: var(--tl-node-border, 0 solid transparent);
+  border-radius: var(--tl-node-radius, var(--mat-sys-corner-full));
+  background-color: var(--_tone-bg);
+  color: var(--_tone-fg);
+  box-shadow: var(--tl-node-shadow, none);
+}
+
+.tl-node__icon {
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+.tl-content {
+  min-width: 0;
+}
+
+// 第一行（圓章、摘要、時間）的行高 1.5rem，往下推半個差距，讓它和節點中心對齊。
+.tl-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding-top: calc((var(--_node) - 1.5rem) / 2);
+}
+
+.tl-avatar {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: var(--mat-sys-corner-full);
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+
+  .material-symbols-rounded {
+    font-size: 1rem;
+  }
+}
+
+.tl-avatar--system {
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.tl-summary {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  color: var(--mat-sys-on-surface);
+  overflow-wrap: anywhere;
+}
+
+.tl-time {
+  flex: 0 0 auto;
+  border-radius: var(--mat-sys-corner-small);
+  font-size: 0.75rem;
+  line-height: 1.5rem;
+  color: var(--mat-sys-on-surface-variant);
+  white-space: nowrap;
+  cursor: default;
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+}
+
+.tl-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0.25rem 0 0 -0.375rem;
+  padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+  border: 0;
+  border-radius: var(--mat-sys-corner-small);
+  background: transparent;
+  color: var(--mat-sys-primary);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--app-motion-fast) var(--app-ease-standard);
+
+  .material-symbols-rounded {
+    font-size: 1.125rem;
+  }
+
+  &:hover {
+    background: var(--app-state-hover);
+  }
+
+  &:active {
+    background: var(--app-state-pressed);
+  }
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+}
+
+.tl-changes {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.375rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.tl-change {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, max-content) minmax(0, 1fr);
+  gap: 0 0.75rem;
+  min-width: 0;
+}
+
+.tl-change__field {
+  color: var(--mat-sys-on-surface-variant);
+  overflow-wrap: anywhere;
+}
+
+.tl-change__values {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 0.375rem;
+  min-width: 0;
+}
+
+.tl-change__from {
+  color: var(--mat-sys-on-surface-variant);
+  text-decoration-line: line-through;
+  overflow-wrap: anywhere;
+}
+
+.tl-change__to {
+  color: var(--mat-sys-on-surface);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.tl-change__from.is-empty,
+.tl-change__to.is-empty {
+  font-weight: 400;
+  text-decoration-line: none;
+}
+
+.tl-change__arrow {
+  font-size: 0.9375rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.tl-body {
+  margin: 0.5rem 0 0;
+  padding: 0.625rem 0.875rem;
+  border-inline-start: 3px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-small);
+  background: var(--mat-sys-surface-container-low);
+  color: var(--mat-sys-on-surface);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.tl-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.25rem;
+}
+
+.tl-more__spinner {
+  display: inline-block;
+  margin-inline-end: 0.5rem;
+  vertical-align: middle;
+}
+
+// ---- 第一次載入的骨架 ----
+.tl-skeleton {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.tl-skeleton__item {
+  display: grid;
+  grid-template-columns: var(--_node) minmax(0, 1fr);
+  column-gap: 0.875rem;
+  align-items: center;
+}
+
+.tl-skeleton__text {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.tl-sk {
+  @include sk.block;
+}
+
+.tl-sk--node {
+  width: var(--_node);
+  height: var(--_node);
+  border-radius: var(--tl-node-radius, var(--mat-sys-corner-full));
+}
+
+.tl-sk--line {
+  height: 0.75rem;
+}
+
+.tl-sk--small {
+  height: 0.625rem;
+}

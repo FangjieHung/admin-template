@@ -1,0 +1,120 @@
+@if (filters().length > 0) {
+  <mat-chip-listbox
+    class="tl-filters"
+    hideSingleSelectionIndicator
+    [attr.aria-label]="labels.filters"
+    [value]="currentFilter()"
+    (change)="onFilterChange($event)"
+  >
+    @for (f of filters(); track f.id) {
+      <mat-chip-option [value]="f.id" [selected]="f.id === currentFilter()">{{ f.label }}</mat-chip-option>
+    }
+  </mat-chip-listbox>
+}
+
+@if (loading()) {
+  <div class="tl-skeleton">
+    <span class="tl-sr-only">{{ labels.loading }}</span>
+    @for (i of [0, 1, 2, 3]; track i) {
+      <div class="tl-skeleton__item" aria-hidden="true">
+        <span class="tl-sk tl-sk--node"></span>
+        <div class="tl-skeleton__text">
+          <span class="tl-sk tl-sk--line" [style.width.%]="[72, 58, 84, 64][i]"></span>
+          <span class="tl-sk tl-sk--line tl-sk--small" [style.width.%]="[30, 24, 36, 28][i]"></span>
+        </div>
+      </div>
+    }
+  </div>
+} @else if (entries().length === 0) {
+  <lib-empty-state
+    [compact]="true"
+    [kind]="isFiltered() ? 'no-results' : 'no-data'"
+    [icon]="isFiltered() ? '' : 'history'"
+    [message]="isFiltered() ? labels.emptyFiltered : labels.empty"
+  />
+} @else {
+  @for (group of groups(); track group.key) {
+    <section class="tl-group" [attr.aria-labelledby]="idPrefix + '-day-' + group.key">
+      <div
+        class="tl-day"
+        role="heading"
+        [attr.aria-level]="headingLevel()"
+        [id]="idPrefix + '-day-' + group.key"
+        [attr.data-day]="group.kind"
+      >
+        {{ heading(group) }}
+      </div>
+      <ol class="tl-list">
+        @for (entry of group.entries; track entry.id; let last = $last) {
+          <li class="tl-item" [class.tl-item--last]="last" [attr.data-tone]="toneOf(entry)" [attr.data-kind]="entry.kind">
+            <span class="tl-node" aria-hidden="true">
+              <span class="tl-node__icon material-symbols-rounded">{{ kindOf(entry).icon }}</span>
+            </span>
+            <div class="tl-content">
+              <div class="tl-head">
+                @if (entry.actor) {
+                  <span class="tl-avatar" aria-hidden="true">{{ initials(entry) }}</span>
+                } @else {
+                  <span class="tl-avatar tl-avatar--system" role="img" [attr.aria-label]="labels.system" [attr.title]="labels.system">
+                    <span class="material-symbols-rounded" aria-hidden="true">{{ systemIcon() }}</span>
+                  </span>
+                }
+                <p class="tl-summary">{{ entry.summary }}</p>
+                <time
+                  class="tl-time"
+                  tabindex="0"
+                  [attr.datetime]="timeOf(entry).iso"
+                  [matTooltip]="timeOf(entry).full"
+                  matTooltipPosition="above"
+                >{{ timeOf(entry).ago }}</time>
+              </div>
+
+              @if (entry.changes?.length) {
+                @if (isCollapsible(entry)) {
+                  <button
+                    type="button"
+                    class="tl-toggle"
+                    [attr.aria-expanded]="isExpanded(entry)"
+                    [attr.aria-controls]="idPrefix + '-changes-' + entry.id"
+                    (click)="toggleChanges(entry)"
+                  >
+                    <span class="material-symbols-rounded" aria-hidden="true">{{ isExpanded(entry) ? 'expand_less' : 'expand_more' }}</span>
+                    <span>{{ isExpanded(entry) ? labels.collapseChanges : expandLabel(entry) }}</span>
+                  </button>
+                }
+                <ul class="tl-changes" [id]="idPrefix + '-changes-' + entry.id" [hidden]="!isExpanded(entry)">
+                  @for (change of entry.changes; track $index) {
+                    <li class="tl-change">
+                      <span class="tl-change__field">{{ change.field }}</span>
+                      <span class="tl-change__values">
+                        <span class="tl-change__from" [class.is-empty]="change.from === null">{{ change.from ?? labels.emptyValue }}</span>
+                        <span class="tl-change__arrow material-symbols-rounded" aria-hidden="true">arrow_forward</span>
+                        <span class="tl-sr-only">{{ labels.changedTo }}</span>
+                        <span class="tl-change__to" [class.is-empty]="change.to === null">{{ change.to ?? labels.emptyValue }}</span>
+                      </span>
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (entry.body) {
+                <blockquote class="tl-body">{{ entry.body }}</blockquote>
+              }
+            </div>
+          </li>
+        }
+      </ol>
+    </section>
+  }
+
+  @if (hasMore()) {
+    <div class="tl-more">
+      <button type="button" matButton="outlined" class="tl-more__button" [disabled]="loadingMore()" (click)="loadMore.emit()">
+        @if (loadingMore()) {
+          <mat-spinner class="tl-more__spinner" diameter="18" aria-hidden="true" />
+        }
+        {{ labels.loadMore }}
+      </button>
+    </div>
+  }
+}

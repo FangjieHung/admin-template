@@ -1,0 +1,34 @@
+<dl class="dsl">
+  @for (item of items(); track $index; let i = $index) {
+    <div class="dsl-row">
+      <dt class="dsl-label">{{ item.label }}</dt>
+      <dd class="dsl-value">
+        <div class="dsl-value__main">
+          @if (templateOf(item); as tpl) {
+            <ng-container [ngTemplateOutlet]="tpl" [ngTemplateOutletContext]="{ $implicit: item }" />
+          } @else if (isEmpty(item)) {
+            <span class="dsl-empty">{{ labels.empty }}</span>
+          } @else {
+            <span class="dsl-text">{{ item.value }}</span>
+          }
+          @if (item.copyable && !isEmpty(item)) {
+            <button
+              type="button"
+              class="dsl-copy"
+              [class.is-copied]="copiedIndex() === i"
+              [attr.aria-label]="copyLabel(item)"
+              [attr.title]="copyLabel(item)"
+              (click)="copy(item, i)"
+            >
+              <span class="material-symbols-rounded" aria-hidden="true">{{ copiedIndex() === i ? 'check' : 'content_copy' }}</span>
+            </button>
+            <span class="dsl-copied" role="status">{{ copiedIndex() === i ? labels.copied : '' }}</span>
+          }
+        </div>
+        @if (item.hint) {
+          <div class="dsl-hint">{{ item.hint }}</div>
+        }
+      </dd>
+    </div>
+  }
+</dl>

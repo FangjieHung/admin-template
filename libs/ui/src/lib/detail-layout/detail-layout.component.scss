@@ -1,0 +1,290 @@
+// 詳情頁版型。只排版面與骨架；投影進來的標題、按鈕、分頁、卡片都用使用端自己的 class 與質地 recipe。
+// 只用語意 token（表面、文字、分隔線、陰影、圓角、動態）。
+@use '../feedback-state/skeleton-block' as sk;
+
+@include sk.keyframes;
+
+:host {
+  // 骨架的 sr-only 文字是 absolute：host 當定位基準，避免它跳出外層捲動容器（mat-sidenav-content）撐出捲軸。
+  position: relative;
+  display: block;
+  min-width: 0;
+
+  --_aside-w: var(--lib-detail-aside-width, 20rem);
+}
+
+// 自己的 display 規則不可以蓋過 [hidden]（載入中藏起投影內容）。
+[hidden] {
+  display: none !important;
+}
+
+.dl-sr-only {
+  @include sk.sr-only;
+}
+
+// ---- 精簡頁首 ----
+// 高度 0 的 sticky 外框：不占版面，捲動時一直貼在捲動容器頂端；父層（本元件以上）不可以是 overflow: hidden，
+// 需要裁切時用 overflow: clip。
+.dl-sticky {
+  position: sticky;
+  top: var(--lib-detail-sticky-top, 0px);
+  z-index: var(--app-z-sticky);
+  height: 0;
+}
+
+.dl-compact {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.5rem;
+  padding: 0.5rem 0.75rem 0.5rem 1rem;
+  // 質地要不同的框時在 .lib-detail-layout 上設：--lib-detail-compact-frame（四邊，border 簡寫）、
+  // --lib-detail-compact-divider（下緣，border 簡寫）。
+  border: var(--lib-detail-compact-frame, 0 solid transparent);
+  border-bottom: var(--lib-detail-compact-divider, 1px solid var(--mat-sys-outline-variant));
+  border-radius: 0 0 var(--mat-sys-corner-medium) var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface);
+  box-shadow: var(--mat-sys-level2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-0.5rem);
+  transition:
+    opacity var(--app-motion-fast) var(--app-ease-standard),
+    transform var(--app-motion-fast) var(--app-ease-standard),
+    visibility 0s linear var(--app-motion-fast);
+
+  &.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition:
+      opacity var(--app-motion-fast) var(--app-ease-standard),
+      transform var(--app-motion-fast) var(--app-ease-standard),
+      visibility 0s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transform: none;
+    transition: none;
+
+    &.is-visible {
+      transition: none;
+    }
+  }
+}
+
+.dl-compact__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--mat-sys-on-surface);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dl-compact__actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+// ---- 頁首 ----
+.dl-header {
+  margin-bottom: 1.25rem;
+}
+
+.dl-back {
+  margin-bottom: 0.5rem;
+}
+
+.dl-back:empty,
+.dl-meta:empty,
+.dl-tabs:empty {
+  display: none;
+}
+
+.dl-header__main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+}
+
+.dl-heading {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.dl-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+// 投影進來的標題與資訊列是使用端的元素：只歸零外距、排成一列，字體與顏色交給使用端的 class（例：.ui-text-title）。
+.dl-title > ::ng-deep [libDetailTitle] {
+  margin: 0;
+}
+
+.dl-meta {
+  margin-top: 0.5rem;
+}
+
+.dl-meta > ::ng-deep [libDetailMeta] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.875rem;
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.dl-actions {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.dl-actions__slot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.dl-actions__slot > ::ng-deep [libDetailActions] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dl-menu-icon {
+  margin-inline-end: 0.75rem;
+  font-size: 1.25rem;
+  vertical-align: middle;
+}
+
+// ---- 主內容＋摘要欄 ----
+.dl-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'tabs'
+    'main';
+  align-items: start;
+  column-gap: 1.5rem;
+}
+
+:host(.lib-detail-layout--with-aside) .dl-body {
+  grid-template-columns: minmax(0, 1fr) var(--_aside-w);
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    'tabs aside'
+    'main aside';
+}
+
+// 窄螢幕：摘要欄在頁首下方、分頁上方（最常被看的資訊）。
+:host(.lib-detail-layout--with-aside.lib-detail-layout--stacked) .dl-body {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: none;
+  grid-template-areas:
+    'aside'
+    'tabs'
+    'main';
+}
+
+.dl-aside {
+  grid-area: aside;
+  min-width: 0;
+}
+
+:host(.lib-detail-layout--stacked) .dl-aside {
+  margin-bottom: 1.25rem;
+}
+
+.dl-tabs {
+  grid-area: tabs;
+  min-width: 0;
+  margin-bottom: 1rem;
+}
+
+// 窄螢幕：分頁列改成原生水平捲動（讓分頁列撐到內容寬，Material 就不會換成左右箭頭）。
+:host(.lib-detail-layout--collapsed) .dl-tabs {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+
+:host(.lib-detail-layout--collapsed) .dl-tabs > ::ng-deep .mat-mdc-tab-nav-bar[libDetailTabs] {
+  min-width: max-content;
+}
+
+.dl-main {
+  grid-area: main;
+  min-width: 0;
+}
+
+// ---- 骨架（依形狀：標題、資訊列、按鈕、摘要欄的標籤＋值） ----
+.dl-sk {
+  @include sk.block;
+}
+
+.dl-skeleton--heading {
+  display: grid;
+  gap: 0.75rem;
+  padding-block: 0.375rem;
+}
+
+.dl-sk--title {
+  width: min(28rem, 80%);
+  height: 1.75rem;
+}
+
+.dl-sk--meta {
+  width: min(18rem, 60%);
+  height: 0.875rem;
+}
+
+.dl-skeleton--actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dl-sk--button {
+  width: 5.5rem;
+  height: 2.5rem;
+  border-radius: var(--mat-sys-corner-full);
+}
+
+.dl-skeleton--aside {
+  display: grid;
+  padding: 0.5rem 1.25rem;
+}
+
+.dl-skeleton__row {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 38%) minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  padding-block: 0.875rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.dl-sk--label {
+  width: 70%;
+  height: 0.625rem;
+}
+
+.dl-sk--value {
+  height: 0.75rem;
+}

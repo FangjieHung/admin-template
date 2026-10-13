@@ -1,0 +1,108 @@
+<!-- 精簡頁首：高度 0 的 sticky 外框貼在捲動容器頂端，裡面的列只在頁首捲出畫面後滑出來；不占版面、不搶焦點。 -->
+<div class="dl-sticky" #sticky>
+  @if (compactHeader()) {
+    <div class="dl-compact" [class.is-visible]="compactVisible()" [attr.inert]="compactVisible() ? null : ''" data-compact-header>
+      <div class="dl-compact__title" [attr.title]="compactTitleText()">{{ compactTitleText() }}</div>
+      <div class="dl-compact__actions">
+        @if (primaryAction(); as primary) {
+          <button type="button" matButton="filled" class="dl-compact__primary" [disabled]="primary.disabled" (click)="activate(primary)">
+            {{ primary.label }}
+          </button>
+        }
+        @if (compactMenuVisible()) {
+          <button
+            type="button"
+            matIconButton
+            class="dl-more"
+            [attr.aria-label]="labels.more"
+            [matMenuTriggerFor]="compactMenu"
+          >
+            <span class="material-symbols-rounded" aria-hidden="true">more_vert</span>
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<div class="dl-header" #header>
+  <div class="dl-back"><ng-content select="[libDetailBack]" /></div>
+  <div class="dl-header__main">
+    <div class="dl-heading">
+      @if (loading()) {
+        <div class="dl-skeleton dl-skeleton--heading" aria-hidden="true">
+          <span class="dl-sk dl-sk--title"></span>
+          <span class="dl-sk dl-sk--meta"></span>
+        </div>
+        <span class="dl-sr-only">{{ labels.loading }}</span>
+      }
+      <div class="dl-title" [hidden]="loading()"><ng-content select="[libDetailTitle]" /></div>
+      <div class="dl-meta" [hidden]="loading()"><ng-content select="[libDetailMeta]" /></div>
+    </div>
+    <div class="dl-actions">
+      @if (loading()) {
+        <div class="dl-skeleton dl-skeleton--actions" aria-hidden="true">
+          <span class="dl-sk dl-sk--button"></span>
+          <span class="dl-sk dl-sk--button"></span>
+        </div>
+      }
+      <div class="dl-actions__slot" [hidden]="loading()">
+        <ng-content select="[libDetailActions]" />
+        @if (headerMenuVisible()) {
+          <button
+            type="button"
+            matIconButton
+            class="dl-more"
+            [attr.aria-label]="labels.more"
+            [matMenuTriggerFor]="headerMenu"
+          >
+            <span class="material-symbols-rounded" aria-hidden="true">more_vert</span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="dl-body">
+  @if (hasAside()) {
+    <aside class="dl-aside" [attr.aria-label]="asideLabel() || null">
+      @if (loading()) {
+        <div class="ui-card dl-skeleton dl-skeleton--aside" aria-hidden="true">
+          @for (w of [62, 78, 54, 70, 46, 66]; track $index) {
+            <div class="dl-skeleton__row">
+              <span class="dl-sk dl-sk--label"></span>
+              <span class="dl-sk dl-sk--value" [style.width.%]="w"></span>
+            </div>
+          }
+        </div>
+      }
+      <div class="dl-aside__slot" [hidden]="loading()"><ng-content select="[libDetailAside]" /></div>
+    </aside>
+  }
+  <div class="dl-tabs"><ng-content select="[libDetailTabs]" /></div>
+  <div class="dl-main"><ng-content /></div>
+</div>
+
+<!-- 選單項目直接寫在 mat-menu 裡（不用 matMenuContent：它和殼層的選單在同一個檔案，用了會把它拉進 Initial bundle）。 -->
+<mat-menu #headerMenu="matMenu" xPosition="before" class="lib-detail-layout-menu">
+  @for (item of headerMenuItems(); track item.element) {
+    <button type="button" mat-menu-item [disabled]="isDisabled(item)" (click)="activate(item)">
+      @if (item.icon) {
+        <span class="material-symbols-rounded dl-menu-icon" aria-hidden="true">{{ item.icon }}</span>
+      }
+      <span class="dl-menu-label">{{ item.label }}</span>
+    </button>
+  }
+</mat-menu>
+
+<mat-menu #compactMenu="matMenu" xPosition="before" class="lib-detail-layout-menu">
+  @for (item of compactMenuItems(); track item.element) {
+    <button type="button" mat-menu-item [disabled]="isDisabled(item)" (click)="activate(item)">
+      @if (item.icon) {
+        <span class="material-symbols-rounded dl-menu-icon" aria-hidden="true">{{ item.icon }}</span>
+      }
+      <span class="dl-menu-label">{{ item.label }}</span>
+    </button>
+  }
+</mat-menu>
