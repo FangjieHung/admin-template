@@ -1,0 +1,77 @@
+// 載入、空白、錯誤展示頁。只用語意 token；狀態本身的外觀交給 libs/ui 與質地。
+
+.mode-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.contact-panel {
+  min-height: 15rem;
+}
+
+.contact-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  li:last-child {
+    border-bottom: 0;
+  }
+}
+
+.contact-list__avatar {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface-variant);
+  font-weight: 600;
+}
+
+.contact-list__text {
+  display: grid;
+  min-width: 0;
+  gap: 0.125rem;
+}
+
+.table-card {
+  overflow: clip;
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 1.5rem;
+
+  figure {
+    display: grid;
+    gap: 0.75rem;
+    min-width: 0;
+    margin: 0;
+  }
+}
+
+.skeleton-grid__wide {
+  grid-column: 1 / -1;
+}
+
+.state-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}

@@ -1,0 +1,72 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="4 種類型"
+    description="底部置中；每種類型一個圖示與狀態色調。滑鼠移到提示上、或用鍵盤聚焦在提示的按鈕時，暫停計時。"
+  >
+    <div class="demo-row">
+      @for (t of types; track t.type) {
+        <button type="button" matButton="outlined" [attr.data-toast]="t.type" (click)="show(t)">{{ t.label }}</button>
+      }
+    </div>
+    <table class="duration-table">
+      <caption class="ui-text-caption">各類型顯示多久</caption>
+      <thead>
+        <tr>
+          <th scope="col">類型</th>
+          <th scope="col">時長</th>
+          <th scope="col">報讀器</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (d of durations; track d.type) {
+          <tr>
+            <td>{{ d.label }}</td>
+            <td class="ui-text-numeric">{{ d.duration === null ? '不自動消失（有關閉鈕）' : d.duration / 1000 + ' 秒' }}</td>
+            <td>{{ d.type === 'error' ? '立刻念（assertive）' : '念完目前的內容再念（polite）' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="動作：已刪除・復原"
+    description="可以復原的動作直接執行，再用成功提示給「復原」。按下復原時 actionClicked 是 true，專案放回原位。"
+  >
+    <ul class="demo-list">
+      @for (p of projects(); track p.id) {
+        <li>
+          <span class="demo-list__title">{{ p.name }}</span>
+          <button type="button" matButton class="remove-btn" [attr.aria-label]="'刪除「' + p.name + '」'" (click)="remove(p)">
+            刪除
+          </button>
+        </li>
+      } @empty {
+        <li class="demo-list__empty">全部刪光了。</li>
+      }
+    </ul>
+    <div class="demo-row demo-row--end">
+      <button type="button" matButton (click)="resetProjects()">重設示範清單</button>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="一次一則與錯誤常駐"
+    description="新的提示會取代畫面上的那一則，不會疊起來。錯誤不會自動消失，要按關閉（或被下一則取代）。"
+  >
+    <div class="demo-row">
+      <button type="button" matButton="outlined" (click)="burst()">連續送出 3 則</button>
+      <button type="button" matButton="outlined" (click)="showPersistentError()">顯示錯誤（不會自動消失）</button>
+      <button type="button" matButton (click)="dismiss()">關掉目前的提示</button>
+    </div>
+  </app-demo-block>
+
+  <p class="demo-note result" aria-live="polite">結果：{{ result() }}</p>
+</app-showcase-page>

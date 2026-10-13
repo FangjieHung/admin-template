@@ -1,0 +1,190 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="即時切換（lib-async-state）"
+    description="同一塊聯絡人清單在 5 種狀態間切換：骨架照清單的形狀畫、空狀態分「尚無資料」與「篩選後沒有結果」、錯誤可以重試（重試會模擬重新載入 1.2 秒）。"
+  >
+    <div class="mode-switch" role="group" aria-label="清單狀態">
+      @for (m of listModes; track m.id) {
+        <button
+          type="button"
+          class="ui-nav-pill"
+          [class.is-active]="listMode() === m.id"
+          [attr.aria-pressed]="listMode() === m.id"
+          (click)="setListMode(m.id)"
+        >
+          {{ m.label }}
+        </button>
+      }
+    </div>
+    <lib-async-state
+      class="contact-panel"
+      [status]="listStatus()"
+      skeleton="list"
+      [skeletonCount]="4"
+      [emptyKind]="listEmptyKind()"
+      [emptyMessage]="listEmptyKind() === 'no-results' ? '沒有符合「工程部」的聯絡人' : '還沒有聯絡人'"
+      [emptyDetail]="listEmptyKind() === 'no-results' ? '換個篩選條件，或清除篩選看全部。' : '新增聯絡人後會出現在這裡。'"
+      [emptyActionLabel]="listEmptyKind() === 'no-results' ? '清除篩選' : '新增聯絡人'"
+      errorMessage="聯絡人載入失敗"
+      errorHint="請確認網路連線後再試一次。"
+      errorDetail="HTTP 503 Service Unavailable&#10;請求編號 7F3A-21C9"
+      (emptyAction)="onListEmptyAction()"
+      (retry)="onListRetry()"
+    >
+      <ul class="contact-list">
+        @for (c of contacts; track c.id) {
+          <li>
+            <span class="contact-list__avatar" aria-hidden="true">{{ c.name.slice(0, 1) }}</span>
+            <span class="contact-list__text">
+              <span class="demo-list__title">{{ c.name }}</span>
+              <span class="demo-list__meta">{{ c.team }} · {{ c.email }}</span>
+            </span>
+          </li>
+        }
+      </ul>
+    </lib-async-state>
+    <p class="demo-note" aria-live="polite">最後的動作：{{ lastAction() }}</p>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="資料表的載入與空白"
+    description="[loading] 保留表頭、內容換成骨架列；沒有資料時 emptyText 顯示成空狀態，篩選後沒有結果用 dtEmpty 放「清除篩選」。"
+  >
+    <div class="mode-switch" role="group" aria-label="資料表狀態">
+      @for (m of tableModes; track m.id) {
+        <button
+          type="button"
+          class="ui-nav-pill"
+          [class.is-active]="tableMode() === m.id"
+          [attr.aria-pressed]="tableMode() === m.id"
+          (click)="tableMode.set(m.id)"
+        >
+          {{ m.label }}
+        </button>
+      }
+    </div>
+    <div class="ui-card !p-0 table-card">
+      <lib-data-table
+        [columns]="projectColumns"
+        [rows]="tableRows()"
+        [labels]="tableLabels"
+        [loading]="tableMode() === 'loading'"
+        [loadingRows]="4"
+        [showExport]="false"
+        emptyText="還沒有專案"
+        emptyDetail="建立第一個專案後會出現在這裡。"
+      >
+        @if (tableMode() === 'no-results') {
+          <ng-template dtEmpty>
+            <lib-empty-state
+              kind="no-results"
+              message="沒有符合條件的專案"
+              detail="目前的篩選：負責人「王小明」、進度 100%。"
+              actionLabel="清除篩選"
+              [compact]="true"
+              (action)="tableMode.set('ready')"
+            />
+          </ng-template>
+        }
+      </lib-data-table>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="骨架的 5 種形狀"
+    description="照載入後的內容挑形狀；閃光很慢、很淡，系統設定「減少動態」時自動靜止。"
+  >
+    <div class="mode-switch" role="group" aria-label="骨架動畫">
+      <button
+        type="button"
+        class="ui-nav-pill"
+        [class.is-active]="skeletonAnimated()"
+        [attr.aria-pressed]="skeletonAnimated()"
+        (click)="skeletonAnimated.set(true)"
+      >
+        閃光
+      </button>
+      <button
+        type="button"
+        class="ui-nav-pill"
+        [class.is-active]="!skeletonAnimated()"
+        [attr.aria-pressed]="!skeletonAnimated()"
+        (click)="skeletonAnimated.set(false)"
+      >
+        靜止
+      </button>
+    </div>
+    <div class="skeleton-grid">
+      <figure>
+        <figcaption class="ui-text-caption">text：幾行文字</figcaption>
+        <lib-skeleton variant="text" [count]="4" [animated]="skeletonAnimated()" />
+      </figure>
+      <figure>
+        <figcaption class="ui-text-caption">list：頭像＋兩行</figcaption>
+        <lib-skeleton variant="list" [count]="3" [animated]="skeletonAnimated()" />
+      </figure>
+      <figure class="skeleton-grid__wide">
+        <figcaption class="ui-text-caption">table：表頭＋4 列 × 5 欄</figcaption>
+        <lib-skeleton variant="table" [count]="4" [columns]="5" [animated]="skeletonAnimated()" />
+      </figure>
+      <figure class="skeleton-grid__wide">
+        <figcaption class="ui-text-caption">kpi：數字小卡</figcaption>
+        <lib-skeleton variant="kpi" [count]="4" [animated]="skeletonAnimated()" />
+      </figure>
+      <figure class="skeleton-grid__wide">
+        <figcaption class="ui-text-caption">card：圖片＋文字的卡片</figcaption>
+        <lib-skeleton variant="card" [count]="3" [animated]="skeletonAnimated()" />
+      </figure>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="空狀態"
+    description="圖示＋一行說明＋選填的補充文字與一個動作；不用插圖。尚無資料的動作是實心主要鈕，篩選後沒有結果是外框鈕。"
+  >
+    <div class="state-grid">
+      <lib-empty-state
+        message="還沒有工單"
+        detail="建立第一張工單後，會出現在這裡。"
+        actionLabel="新增工單"
+        (action)="lastAction.set('按下「新增工單」（示範）')"
+      />
+      <lib-empty-state
+        kind="no-results"
+        message="沒有符合條件的工單"
+        detail="目前的篩選：狀態「已完成」、負責人「陳大同」。"
+        actionLabel="清除篩選"
+        (action)="lastAction.set('按下「清除篩選」（示範）')"
+      />
+      <lib-empty-state icon="notifications_off" message="沒有新通知" [compact]="true" />
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="錯誤"
+    description="說明什麼失敗了＋重試；技術細節收在「顯示詳細資訊」裡。重試沒有用的錯誤（例如沒有權限）拿掉重試鈕。"
+  >
+    <div class="state-grid">
+      <lib-error-state
+        message="工單清單載入失敗"
+        hint="請確認網路連線後再試一次。"
+        detail="HTTP 504 Gateway Timeout&#10;請求編號 4C1D-88E0&#10;2026-10-13 09:41:07"
+        (retry)="lastAction.set('按下「重試」（示範）')"
+      />
+      <lib-error-state
+        icon="lock"
+        message="你沒有檢視這份報表的權限"
+        hint="請向專案負責人申請權限。"
+        [retryable]="false"
+        [compact]="true"
+      />
+    </div>
+  </app-demo-block>
+</app-showcase-page>

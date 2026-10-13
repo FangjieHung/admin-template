@@ -1,0 +1,35 @@
+// 提示訊息展示頁。只用語意 token；提示本身的外觀交給 libs/ui 與質地的 snackbar recipe。
+
+.duration-table {
+  width: 100%;
+  max-width: 40rem;
+  margin-top: 1.25rem;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  caption {
+    padding-bottom: 0.5rem;
+    text-align: start;
+  }
+
+  th,
+  td {
+    padding: 0.5rem 0.75rem 0.5rem 0;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    text-align: start;
+  }
+
+  th {
+    font-weight: 600;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.demo-row--end {
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+
+.result {
+  margin: 0;
+}

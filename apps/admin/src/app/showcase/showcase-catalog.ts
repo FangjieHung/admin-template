@@ -47,6 +47,14 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '切換介面語言（示範繁中、英文、日文），連同日期與數字格式；附輕量的字典機制。',
     source: 'libs/ui/src/lib/i18n',
   },
+  'feedback-states': {
+    summary: '資料還沒到、沒有資料、載入失敗時的畫面：依內容形狀的骨架、空狀態（圖示＋說明＋一個動作）、錯誤與重試，以及自動切換三者的外框。',
+    source: 'libs/ui/src/lib/feedback-state',
+  },
+  'toast': {
+    summary: '操作後的簡短提示：成功、資訊、警告、錯誤 4 類，底部置中、一次一則，最多一個動作（例如復原）；錯誤要手動關閉。',
+    source: 'libs/ui/src/lib/toast',
+  },
   'confirm-dialog': {
     summary: '執行刪除等不可復原的動作前，再問一次；回傳使用者是否確認。',
     source: 'libs/ui/src/lib/confirm-dialog',
@@ -82,8 +90,6 @@ export interface PlannedItem {
 }
 
 export const PLANNED_ITEMS: readonly PlannedItem[] = [
-  { title: '載入、空白、錯誤三態', kind: '元件', priority: 'P0', summary: '依內容形狀的骨架、空狀態（圖示＋說明＋主要動作）、錯誤與重試。' },
-  { title: '提示訊息', kind: '元件', priority: 'P0', summary: '成功、資訊、警告、錯誤 4 類，底部置中、一次一則，最多一個動作（復原）。' },
   { title: '關聯選擇欄位', kind: '元件', priority: 'P0', summary: '輸入就搜尋，從大量資料裡挑一筆（客戶、專案、負責人）。' },
   { title: '詳情頁版型', kind: '元件', priority: 'P0', summary: '標題＋狀態＋主要動作＋分頁＋摘要側欄。' },
   { title: '權限控制', kind: '元件', priority: 'P0', summary: '路由守門、依權限隱藏或停用按鈕、沒有權限頁、切換身分小工具。' },

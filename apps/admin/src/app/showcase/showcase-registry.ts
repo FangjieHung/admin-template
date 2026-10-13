@@ -98,6 +98,21 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
       import('../features/language-switcher/language-switcher-page.component').then((m) => m.LanguageSwitcherPageComponent),
   },
   {
+    id: 'feedback-states',
+    title: '載入、空白、錯誤',
+    group: 'feedback',
+    icon: 'hourglass_empty',
+    load: () =>
+      import('../features/feedback-states/feedback-states-page.component').then((m) => m.FeedbackStatesPageComponent),
+  },
+  {
+    id: 'toast',
+    title: '提示訊息',
+    group: 'feedback',
+    icon: 'notifications',
+    load: () => import('../features/toast/toast-page.component').then((m) => m.ToastPageComponent),
+  },
+  {
     id: 'confirm-dialog',
     title: '確認對話框',
     group: 'feedback',

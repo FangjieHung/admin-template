@@ -57,7 +57,7 @@ export class ConfirmDialogPageComponent {
 
   protected readonly whenToUse = ['刪除、作廢、送出等不可復原或會通知別人的動作。', '一次影響多筆資料的批次動作。'];
   protected readonly avoid = [
-    '可以復原的動作：直接執行，再用提示訊息提供「復原」（提示訊息元件規劃中）。',
+    '可以復原的動作：直接執行，再用提示訊息提供「復原」（見「提示訊息」展示頁）。',
     '需要填寫內容才能確認：做成一般對話框表單。',
   ];
 
