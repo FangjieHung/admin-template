@@ -51,7 +51,7 @@ export interface PeriodRange {
   /** 上一期：跟本期一樣長（7／30 天緊接在前面；本季是上一季的同一段）。 */
   prevStart: Date;
   prevEnd: Date;
-  /** 趨勢的分桶（7、30 天按日；本季按週，最後一桶到今天為止）。 */
+  /** 趨勢的分桶（7 天按日、30 天每 3 天、本季按週，最後一桶到今天為止）。 */
   buckets: { start: Date; end: Date }[];
 }
 
@@ -72,7 +72,8 @@ export function periodRange(period: DashboardPeriod, today: Date): PeriodRange {
   // 7／30 天比緊接在前面的同樣天數；本季比上一季的同一段（10/1–10/14 比 7/1–7/14）。
   const prevStart = period === 'quarter' ? new Date(start.getFullYear(), start.getMonth() - 3, 1) : addDays(start, -days);
   const prevEnd = period === 'quarter' ? addDays(prevStart, days) : start;
-  const step = period === 'quarter' ? 7 : 1;
+  // 30 天若逐日畫，一天只有 0–2 張，線會呈鋸齒；3 天一格（剛好 10 格）才看得出起伏。7 天逐日、本季按週。
+  const step = period === 'quarter' ? 7 : period === '30d' ? 3 : 1;
   const buckets: { start: Date; end: Date }[] = [];
   for (let s = start; s < end; s = addDays(s, step)) {
     const e = addDays(s, step);

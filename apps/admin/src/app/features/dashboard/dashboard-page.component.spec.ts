@@ -28,13 +28,13 @@ class DetailStubComponent {}
 describe('dashboard-stats', () => {
   const today = TICKET_TEST_TODAY; // 2026-10-14（週三）15:00
 
-  it('期間：7 天與 30 天按日分桶、本季按週；上一期等長', () => {
+  it('期間：7 天按日、30 天每 3 天、本季按週；上一期等長', () => {
     const week = periodRange('7d', today);
     expect(week.buckets).toHaveLength(7);
     expect(week.start).toEqual(new Date(2026, 9, 8));
     expect(week.end).toEqual(new Date(2026, 9, 15));
     expect(week.prevStart).toEqual(new Date(2026, 9, 1));
-    expect(periodRange('30d', today).buckets).toHaveLength(30);
+    expect(periodRange('30d', today).buckets).toHaveLength(10);
     const quarter = periodRange('quarter', today);
     expect(quarter.start).toEqual(new Date(2026, 9, 1));
     expect(quarter.buckets).toHaveLength(2);
@@ -128,7 +128,7 @@ describe('DashboardPageComponent', () => {
     expect(periodButton('30d').getAttribute('aria-pressed')).toBe('true');
     expect(periodButton('7d').getAttribute('aria-pressed')).toBe('false');
     expect(statLabel('created')).toBe('近 30 天新增');
-    expect(trendPoints()).toBe(30);
+    expect(trendPoints()).toBe(10);
     expect(el.querySelector('[data-stat="open"] [data-stat-change]')!.textContent).toContain('較一個月前');
 
     periodButton('7d').click();

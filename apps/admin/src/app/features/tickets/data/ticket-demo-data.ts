@@ -115,6 +115,43 @@ export interface TicketDemoData {
 
 const HOUR = 3_600_000;
 
+const SPAN_DAYS = 90;
+/** 某次系統異常當天的爆量：[距今天數, 當天工單數]。 */
+const SPIKES: readonly (readonly [number, number])[] = [
+  [11, 7],
+  [47, 6],
+];
+
+/**
+ * 120 張工單各自的建立日（距今天數，由遠到近）：平日量是週末的 4 倍；每週有 ±30% 的起伏、整體緩慢上升；
+ * 另外有兩天因系統異常爆量。用獨立的亂數，不影響工單其他欄位的序列。
+ */
+function createdDayOffsets(now: Date): number[] {
+  const rand = seeded(31337);
+  const weekFactor = Array.from({ length: Math.ceil(SPAN_DAYS / 7) + 1 }, () => 0.7 + rand() * 0.6);
+  const weights = Array.from({ length: SPAN_DAYS }, (_, d) => {
+    const weekday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - d).getDay();
+    const rhythm = weekday === 0 || weekday === 6 ? 0.25 : 1;
+    return rhythm * weekFactor[Math.floor(d / 7)] * (0.75 + 0.5 * (1 - d / (SPAN_DAYS - 1)));
+  });
+  const total = weights.reduce((a, b) => a + b, 0);
+  const counts = new Array<number>(SPAN_DAYS).fill(0);
+  let rest = TICKET_COUNT;
+  for (const [d, n] of SPIKES) {
+    counts[d] += n;
+    rest -= n;
+  }
+  for (let k = 0; k < rest; k++) {
+    let r = rand() * total;
+    let d = 0;
+    while (d < SPAN_DAYS - 1 && r >= weights[d]) r -= weights[d++];
+    counts[d] += 1;
+  }
+  const offsets: number[] = [];
+  for (let d = SPAN_DAYS - 1; d >= 0; d--) for (let k = 0; k < counts[d]; k++) offsets.push(d);
+  return offsets;
+}
+
 /** 產生示範資料：建立時間與期限以 `today` 的日期起算；活動紀錄不會晚於 `today` 這個時間點。 */
 export function makeTicketDemoData(today = new Date()): TicketDemoData {
   const rand = seeded(20261014);
@@ -126,6 +163,8 @@ export function makeTicketDemoData(today = new Date()): TicketDemoData {
   ];
   const tickets: Ticket[] = [];
   const activity = new Map<string, ActivityEntry[]>();
+  const dayOffsets = createdDayOffsets(today);
+  let sameDayIndex = 0;
 
   for (let i = 0; i < TICKET_COUNT; i++) {
     const id = `TK-${FIRST_NUMBER + i}`;
@@ -134,8 +173,12 @@ export function makeTicketDemoData(today = new Date()): TicketDemoData {
     const priority = pick(TICKET_PRIORITIES);
     const assignee = status === 'open' && rand() < 0.5 ? null : pick(TICKET_ASSIGNEES);
     const requester = pick(requesters);
-    // 越後面的編號越新：建立時間從 90 天前到今天。
-    const created = base - Math.round(((TICKET_COUNT - i) / TICKET_COUNT) * 90 * 24 * HOUR) + Math.floor(9 + rand() * 9) * HOUR;
+    // 越後面的編號越新：建立日來自 createdDayOffsets（平日多週末少、有起伏、偶爾爆量）；同一天的依序往後排，時間不倒退。
+    const dayOffset = dayOffsets[i];
+    const sameDay = i > 0 && dayOffsets[i - 1] === dayOffset ? sameDayIndex + 1 : 0;
+    sameDayIndex = sameDay;
+    const day = new Date(today.getFullYear(), today.getMonth(), today.getDate() - dayOffset).getTime();
+    const created = day + Math.floor(9 + rand() * 9) * HOUR + sameDay * 7 * 60_000;
     const hasDue = rand() < 0.85;
     const due = hasDue ? toDateString(new Date(base + (Math.floor(rand() * 30) - 8) * 24 * HOUR)) : null;
     const ticket: Ticket = {
@@ -152,7 +195,7 @@ export function makeTicketDemoData(today = new Date()): TicketDemoData {
       attachmentCount: Math.floor(rand() * 4),
     };
     tickets.push(ticket);
-    activity.set(id, makeActivity(ticket, requester, assignee ?? null, created, today.getTime(), rand));
+    activity.set(id, makeActivity(ticket, requester, assignee ?? null, created, today.getTime(), rand, seeded(7000 + i * 31)));
   }
   // 新到舊：清單預設最新的在最上面。
   tickets.reverse();
@@ -167,13 +210,20 @@ function makeActivity(
   created: number,
   now: number,
   rand: () => number,
+  gapRand: () => number,
 ): ActivityEntry[] {
   const entries: ActivityEntry[] = [];
   let at = created;
   let seq = 0;
   const push = (entry: Omit<ActivityEntry, 'id' | 'at'>) => {
+    rand(); // 保留原本每筆消耗一次亂數，工單其他欄位的序列才不會變。
+    if (seq > 0) {
+      // 一般往來隔幾小時；結案的處理時間有長有短（約 6 小時到 7 天，偏短的居多）。
+      const finishing = entry.kind === 'resolve' || entry.kind === 'close';
+      const g = gapRand();
+      at += (finishing ? 6 + g * g * 170 : 1 + g * 20) * HOUR;
+    }
     entries.push({ ...entry, id: `${ticket.id}-a${++seq}`, at: new Date(at).toISOString() });
-    at += (2 + Math.floor(rand() * 20)) * HOUR;
   };
   push({ actor: { name: requester.name }, kind: 'create', summary: `${requester.name} 建立了工單` });
   if (assignee) {
@@ -207,6 +257,12 @@ function makeActivity(
       summary: `${requester.name} 把優先順序改成「${TICKET_PRIORITY_LABELS.urgent}」`,
       changes: [{ field: '優先順序', from: TICKET_PRIORITY_LABELS.high, to: TICKET_PRIORITY_LABELS.urgent }],
     });
+  }
+  // 已完成／已關閉的工單，結案一定發生在過去：最後一筆晚於「現在」時，把整串活動等比壓進 [建立, 現在]。
+  const lastAt = new Date(entries[entries.length - 1].at).getTime();
+  if ((ticket.status === 'resolved' || ticket.status === 'closed') && lastAt > now && now > created) {
+    const ratio = (now - created) / (lastAt - created);
+    for (const e of entries) e.at = new Date(created + (new Date(e.at).getTime() - created) * ratio).toISOString();
   }
   // 活動不會發生在未來：超過「現在」的就不放。
   return entries.filter((e) => new Date(e.at).getTime() <= now).reverse();
