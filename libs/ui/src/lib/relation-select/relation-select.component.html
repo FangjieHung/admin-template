@@ -1,0 +1,113 @@
+<mat-form-field
+  class="rs-field"
+  [class.rs-field--invalid]="invalidShown()"
+  [appearance]="appearance()"
+  [floatLabel]="resolving() ? 'always' : 'auto'"
+>
+  @if (label()) {
+    <mat-label>{{ label() }}</mat-label>
+  }
+  <input
+    #input
+    matInput
+    libRelationSelectErrorState
+    type="text"
+    autocomplete="off"
+    [value]="text()"
+    [placeholder]="resolving() ? '' : placeholder()"
+    [required]="isRequired()"
+    [disabled]="isDisabled()"
+    [readonly]="readonly() || resolving()"
+    [errorStateMatcher]="errorMatcher"
+    [matAutocomplete]="auto"
+    [matAutocompleteDisabled]="readonly() || isDisabled()"
+    [attr.aria-busy]="resolving() ? 'true' : null"
+    (input)="onInput($event)"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+  />
+  @if (resolving()) {
+    <span class="rs-resolving" aria-hidden="true"></span>
+  }
+  @if (showClear()) {
+    <button matIconButton matSuffix type="button" class="rs-clear" [attr.aria-label]="labels.clear" (click)="clear()">
+      <span class="material-symbols-rounded" aria-hidden="true">close</span>
+    </button>
+  }
+  @if (resolveFailedId() !== null) {
+    <mat-hint class="rs-hint--error">{{ resolveFailedText() }}</mat-hint>
+  } @else if (hint()) {
+    <mat-hint>{{ hint() }}</mat-hint>
+  }
+  @if (errorMessage()) {
+    <mat-error>{{ errorMessage() }}</mat-error>
+  }
+</mat-form-field>
+
+<mat-autocomplete
+  #auto="matAutocomplete"
+  class="lib-relation-select-panel"
+  [displayWith]="displayOption"
+  [autoActiveFirstOption]="true"
+  [hideSingleSelectionIndicator]="true"
+  (optionSelected)="onSelected($event)"
+  (closed)="onClosed()"
+>
+  @if (loadingVisible()) {
+    <mat-option disabled class="rs-status" data-state="loading">
+      <span class="rs-status__row">
+        <mat-spinner diameter="18" aria-hidden="true" />
+        <span>{{ labels.loading }}</span>
+      </span>
+    </mat-option>
+  } @else if (phase() === 'error') {
+    <mat-option disabled class="rs-status rs-status--error" data-state="error">
+      <span class="rs-status__row">
+        <span class="material-symbols-rounded rs-status__icon" aria-hidden="true">error</span>
+        <span>{{ labels.searchFailed }}</span>
+      </span>
+    </mat-option>
+    <mat-option class="rs-action" data-action="retry" [value]="RETRY">
+      <span class="rs-status__row">
+        <span class="material-symbols-rounded rs-status__icon" aria-hidden="true">refresh</span>
+        <span>{{ labels.retry }}</span>
+      </span>
+    </mat-option>
+  } @else if (phase() === 'results') {
+    @for (item of items(); track idOf(item)) {
+      <mat-option class="rs-option" [value]="item">
+        <span class="rs-option__row">
+          @if (avatarWith(); as avatar) {
+            <span class="rs-avatar" aria-hidden="true">{{ avatar(item) }}</span>
+          }
+          <span class="rs-option__text">
+            <!-- 片段之間不能有空白（插值兩側的空白會變成看得到的空格），未比對的片段也包一層 span。 -->
+            <span class="rs-option__primary"
+              >@for (seg of segments(displayWith()(item)); track $index) {@if (seg.match) {<mark class="rs-match">{{ seg.text }}</mark>} @else {<span>{{ seg.text }}</span>}}</span
+            >
+            @if (secondaryWith(); as secondary) {
+              <span class="rs-option__secondary"
+                >@for (seg of segments(secondary(item)); track $index) {@if (seg.match) {<mark class="rs-match">{{ seg.text }}</mark>} @else {<span>{{ seg.text }}</span>}}</span
+              >
+            }
+          </span>
+        </span>
+      </mat-option>
+    } @empty {
+      <mat-option disabled class="rs-status" data-state="empty">{{ noResultsText() }}</mat-option>
+    }
+    @if (canCreate()) {
+      <mat-option class="rs-action" data-action="create" [value]="CREATE">
+        <span class="rs-status__row">
+          <span class="material-symbols-rounded rs-status__icon" aria-hidden="true">add</span>
+          <span>{{ createText() }}</span>
+        </span>
+      </mat-option>
+    }
+    @if (hasMore()) {
+      <mat-option disabled class="rs-status rs-status--more" data-state="more">{{ labels.hasMore }}</mat-option>
+    }
+  }
+</mat-autocomplete>
+
+<span class="rs-sr-only" aria-live="polite">{{ liveMessage() }}</span>

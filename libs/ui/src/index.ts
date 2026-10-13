@@ -35,3 +35,6 @@ export * from './lib/feedback-state/async-state.component';
 export * from './lib/toast/toast.types';
 export * from './lib/toast/toast.component';
 export * from './lib/toast/toast.service';
+export * from './lib/relation-select/relation-source';
+export * from './lib/relation-select/relation-select-labels';
+export * from './lib/relation-select/relation-select.component';

@@ -134,6 +134,11 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 原生欄位邊界 `--app-field-border`、滑過 `--app-state-hover`、目前項目 `--app-state-selected`、焦點 `--app-focus-ring`、停用 `--app-disabled-fg`；
 條件 chips 用 `.ui-chip.ui-chip--neutral`、「已修改」用 `.ui-chip.ui-chip--info`，外觀交給各質地的 chip recipe。沒有新增質地要設的變數。
 
+#### 關聯選擇欄位（`libs/ui` relation-select）
+
+- 外框就是 `mat-form-field`＋`matInput`＋`mat-autocomplete`：欄位邊界、浮層底色、圓角、陰影都吃各質地既有的欄位與 `.mat-mdc-autocomplete-panel` recipe（浮層另掛 `.lib-relation-select-panel`；Brutal 的選項本身是粗體，在質地 recipe 裡給比對到的字 `.rs-match` 加 2px 底線）。
+- 選項內容只用語意 token：第二行與狀態列 `--mat-sys-on-surface-variant`、比對到的字只加粗（`font-weight: bolder`，不上底色）、縮寫圓章 `--mat-sys-primary-container`／`--mat-sys-on-primary-container`＋`--mat-sys-corner-full`（Brutal 等質地的 corner-full 是 0 或小圓角，圓章跟著變方）、搜尋失敗 `--mat-sys-error`、建立／重試的圖示 `--mat-sys-primary`；初始值解析中的骨架用 `--app-skeleton-*`。沒有新增質地要設的變數。
+
 #### 三態與提示訊息（`libs/ui` feedback-state、toast）
 
 - 骨架、空狀態、錯誤只用上面的 `--app-skeleton-*`、`--app-empty-*` 與語意 token；說明文字用 `.ui-text-subtitle`、補充文字用 `.ui-text-caption`，字體交給質地 recipe。圖示是 Material Symbols，空狀態 `--mat-sys-on-surface-variant`、錯誤 `--mat-sys-error`。

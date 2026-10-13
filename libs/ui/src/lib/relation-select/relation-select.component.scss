@@ -1,0 +1,135 @@
+// 關聯選擇欄位。外框、輸入框、浮層的造型都交給質地的 Material 欄位與 autocomplete recipe；
+// 這裡只排選項內容（圓章、主文字、第二行、比對加粗）與狀態列，顏色、圓角只用語意 token。
+@use '../feedback-state/skeleton-block' as sk;
+
+@include sk.keyframes;
+
+:host {
+  // 報讀器用的 aria-live 文字是 absolute：host 當定位基準，避免它跳出外層捲動容器撐出捲軸。
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.rs-field {
+  width: 100%;
+}
+
+// 初始值解析中：輸入框位置畫一條骨架（輸入框本身唯讀、空白，標籤固定浮起）。
+.rs-resolving {
+  @include sk.block;
+
+  position: absolute;
+  inset-inline-start: 0;
+  top: 50%;
+  width: min(12rem, 70%);
+  height: 0.875rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.rs-hint--error {
+  color: var(--mat-sys-error);
+}
+
+.rs-sr-only {
+  @include sk.sr-only;
+}
+
+// ---- 浮層裡的選項（mat-option 在 overlay，但內容是本元件範本宣告的，封裝屬性照樣套得到） ----
+.rs-option__row,
+.rs-status__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.rs-option__row {
+  padding-block: 0.375rem;
+}
+
+.rs-avatar {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--mat-sys-corner-full);
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.rs-option__text {
+  display: grid;
+  min-width: 0;
+  gap: 0.125rem;
+}
+
+.rs-option__primary,
+.rs-option__secondary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rs-option__secondary {
+  font-size: 0.8125rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// 鍵盤停留（active）與已選（selected）的選項會疊一層狀態底色，次要文字色在上面掉到 4.5 以下（Material × Verdant 量到 4.25），
+// 這兩個狀態把第二行往主文字色靠一半。
+.rs-option:is(.mat-mdc-option-active, .mdc-list-item--selected) .rs-option__secondary {
+  color: color-mix(in srgb, var(--mat-sys-on-surface-variant) 50%, var(--mat-sys-on-surface));
+}
+
+// 比對到的字：只加粗，不上底色（底色在 13 種質地 × 配色下很難都保持對比）。
+// bolder：選項本身已經是粗體的質地（Brutal）也還分得出來。
+.rs-match {
+  background: transparent;
+  color: inherit;
+  font-weight: bolder;
+}
+
+// 狀態列（載入中、找不到、還有更多、搜尋失敗）是 disabled 的 mat-option：讓面板有內容可開、鍵盤上下會跳過。
+// Material 會把 disabled 選項的文字降到 38% 不透明，這裡拉回 100%，改用次要文字色，對比才夠。
+.rs-status {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.875rem;
+}
+
+.rs-status.mdc-list-item--disabled ::ng-deep .mdc-list-item__primary-text {
+  opacity: 1;
+}
+
+.rs-status--error {
+  color: var(--mat-sys-error);
+}
+
+.rs-status__icon {
+  flex: 0 0 auto;
+  font-size: 1.25rem;
+}
+
+// 建立、重試：一般文字色，圖示用主色當提示。
+.rs-action .rs-status__icon {
+  color: var(--mat-sys-primary);
+}
+
+.rs-status--error .rs-status__icon {
+  color: var(--mat-sys-error);
+}
+
+@media (forced-colors: active) {
+  .rs-resolving {
+    border: 1px solid GrayText;
+  }
+
+  .rs-match {
+    text-decoration-line: underline;
+  }
+}

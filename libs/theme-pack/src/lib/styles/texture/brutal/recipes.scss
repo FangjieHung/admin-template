@@ -376,6 +376,12 @@
   .mat-mdc-option {
     font-weight: 700;
   }
+  // 關聯選擇欄位（libs/ui relation-select）：選項本身已是粗體，比對到的字再加粗也分不出來（中文裝置字最粗只到 semibold），另加墨線底線。
+  .lib-relation-select-panel .rs-match {
+    text-decoration-line: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
   // 展開面板：收合時是一張白卡片；展開時標題列換成副色容器色塊。
   .mat-expansion-panel {
     --mat-expansion-container-shape: 0;
