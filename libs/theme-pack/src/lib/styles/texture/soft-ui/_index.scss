@@ -1,0 +1,5 @@
+// src/styles/texture/soft-ui/_index.scss
+// 按需質地（ADR 0010）：soft-ui 的完整輸出（造型 token + 全部元件 recipe），在 apps/admin/project.json 以
+// `bundleName: texture-soft-ui`、`inject: false` 編成獨立的 texture-soft-ui.css，切到這個質地時才由 ThemeService 載入。
+@forward 'tokens';
+@forward 'recipes';

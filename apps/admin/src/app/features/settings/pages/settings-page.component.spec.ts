@@ -1,14 +1,26 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { AppearancePanelService, COLOR_THEMES, ThemeService, texture } from '@car-rental/theme-pack';
 import { ZH_TW } from '../../../core/i18n/zh-tw';
 import { HeaderTitleSlot } from '../../../layout/header/header-title';
 import { SettingsPageComponent } from './settings-page.component';
 
+// jsdom 不會下載樣式表：手動送出按需質地 <link> 的 load 事件（ADR 0010），再等 setParadigm 的 promise 跑完。
+async function loadTexture(id: string): Promise<void> {
+  document.head
+    .querySelector(`link[rel="stylesheet"][data-texture-css="${id}"]`)
+    ?.dispatchEvent(new Event('load'));
+  await new Promise((resolve) => setTimeout(resolve));
+}
+
 describe('SettingsPageComponent', () => {
   beforeEach(() => {
     localStorage.clear();
     TestBed.configureTestingModule({ imports: [SettingsPageComponent] });
+  });
+
+  afterEach(() => {
+    document.head.querySelectorAll('link[data-texture-css], link[data-texture-prefetch]').forEach((l) => l.remove());
   });
 
   it('顯示外觀設定文案', () => {
@@ -51,7 +63,7 @@ describe('SettingsPageComponent', () => {
     expect(compatible.length).toBeLessThan(COLOR_THEMES.length);
   });
 
-  it('選擇配色與質地會更新 ThemeService 並標示目前選項', () => {
+  it('選擇配色與質地會更新 ThemeService 並標示目前選項', async () => {
     const fixture = TestBed.createComponent(SettingsPageComponent);
     fixture.detectChanges();
     const theme = TestBed.inject(ThemeService);
@@ -60,6 +72,7 @@ describe('SettingsPageComponent', () => {
 
     (fixture.nativeElement.querySelector(`[data-theme-id="${color.id}"]`) as HTMLButtonElement).click();
     (fixture.nativeElement.querySelector(`[data-paradigm-id="${paradigm.id}"]`) as HTMLButtonElement).click();
+    await loadTexture(paradigm.id);
     fixture.detectChanges();
 
     expect(theme.theme()).toBe(color.id);
@@ -74,11 +87,12 @@ describe('SettingsPageComponent', () => {
     ).toBe('true');
   });
 
-  it('ADR 0007：選 Soft UI 後，配色列只顯示相容配色，Sandstone／Verdant 被隱藏', () => {
+  it('ADR 0007：選 Soft UI 後，配色列只顯示相容配色，Sandstone／Verdant 被隱藏', async () => {
     const fixture = TestBed.createComponent(SettingsPageComponent);
     fixture.detectChanges();
 
     (fixture.nativeElement.querySelector('[data-paradigm-id="soft-ui"]') as HTMLButtonElement).click();
+    await loadTexture('soft-ui');
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('[data-theme-id="sandstone"]')).toBeNull();
@@ -86,12 +100,14 @@ describe('SettingsPageComponent', () => {
     expect(fixture.nativeElement.querySelector('[data-theme-id="cool-grey"]')).not.toBeNull();
   });
 
-  it('ADR 0007：從 Soft UI × Sandstone 的已存組合重新載入，變成 Soft UI 的預設配色', () => {
+  it('ADR 0007：從 Soft UI × Sandstone 的已存組合重新載入，變成 Soft UI 的預設配色', async () => {
     localStorage.setItem('cr.paradigm', 'soft-ui');
     localStorage.setItem('cr.theme', 'sandstone');
 
     const theme = TestBed.inject(ThemeService);
-    theme.init();
+    const ready = theme.init();
+    await loadTexture('soft-ui');
+    await ready;
     const fixture = TestBed.createComponent(SettingsPageComponent);
     fixture.detectChanges();
 

@@ -1,10 +1,10 @@
-@use 'theme-pack/src/lib/styles/texture/clay/fonts';
-@use 'theme-pack/src/lib/styles/texture/editorial/fonts' as editorial-fonts;
 @use 'tailwindcss';
 @use 'assets/style/tailwind-base';
 @use '@angular/material' as mat;
 @use 'theme-pack/src/lib/styles/semantic' as *;
-@use 'theme-pack/src/lib/styles/texture/registry' as *;
+// 常駐質地（ADR 0010）：只有 Material 編進主樣式；其餘質地各自編成 texture-<id>.css（見 project.json 的 styles），
+// 切到該質地時才下載。
+@use 'theme-pack/src/lib/styles/texture/material' as *;
 @use 'theme-pack/src/lib/styles/color-themes/registry' as *;
 @use 'theme-pack/src/lib/styles/component';
 @use 'theme-pack/src/lib/styles/choice-controls';

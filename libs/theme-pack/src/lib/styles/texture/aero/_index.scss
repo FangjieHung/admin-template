@@ -1,0 +1,5 @@
+// src/styles/texture/aero/_index.scss
+// 按需質地（ADR 0010）：aero 的完整輸出（造型 token + 全部元件 recipe），在 apps/admin/project.json 以
+// `bundleName: texture-aero`、`inject: false` 編成獨立的 texture-aero.css，切到這個質地時才由 ThemeService 載入。
+@forward 'tokens';
+@forward 'recipes';

@@ -4,6 +4,47 @@
     <meta charset="utf-8" />
     <title>澎湖租車後台</title>
     <base href="/" />
+    <!--
+      ADR 0010：按需質地的開機腳本。必須在 <base> 之後（樣式檔網址相對於 base href）、在任何 <link rel="stylesheet">
+      之前（行內腳本會等前面的樣式表下載完才執行）。
+      依 localStorage 設好 data-paradigm／data-theme；存的是按需質地時，用 document.write 寫入一個由解析器插入的
+      <link>：它會擋住首次繪製與 main.js 執行，所以第一個畫面就是該質地，不會先閃 Material。
+      載入失敗就退回 Material、校正 localStorage，並在 <html data-texture-fallback> 留下 id，由 ThemeService.init() 提示。
+      兩份 id 清單要與 theme.token.ts 一致（scripts/texture-registration.spec.mjs 會檢查）。
+    -->
+    <script id="cr-texture-boot">
+      (function () {
+        var onDemandTextures = ['linen', 'grid', 'soft-ui', 'clay', 'editorial', 'frosted', 'aero'];
+        var colorThemes = ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue'];
+        var html = document.documentElement;
+        var paradigm = null;
+        var theme = null;
+        try {
+          paradigm = localStorage.getItem('cr.paradigm');
+          theme = localStorage.getItem('cr.theme');
+        } catch (e) {}
+        if (colorThemes.indexOf(theme) >= 0) {
+          html.setAttribute('data-theme', theme);
+        }
+        window.__crTextureFailed = function (link) {
+          html.setAttribute('data-paradigm', 'material');
+          html.setAttribute('data-texture-fallback', link.getAttribute('data-texture-css'));
+          try {
+            localStorage.setItem('cr.paradigm', 'material');
+          } catch (e) {}
+          link.remove();
+        };
+        // material（常駐）或不認得的 id：維持上面 <html> 的 data-paradigm="material"，殘值由 ThemeService.init() 覆寫。
+        if (onDemandTextures.indexOf(paradigm) < 0) {
+          return;
+        }
+        html.setAttribute('data-paradigm', paradigm);
+        document.write(
+          '<link rel="stylesheet" href="texture-' + paradigm + '.css" data-texture-css="' + paradigm + '"' +
+            ' onload="this.dataset.state=\'loaded\'" onerror="__crTextureFailed(this)">'
+        );
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />

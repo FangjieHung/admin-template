@@ -23,10 +23,13 @@ export class SettingsPageComponent {
   constructor() {
     // 2.1：/settings 不在側欄選單裡，找不到選單對應時不再誤退回「總覽」，改由頁面自己設定標題。
     provideHeaderTitle(() => ({ title: this.t.settingsPage.title, breadcrumbs: [] }));
+    // ADR 0010：設定頁跟外觀面板一樣列出全部質地，進頁就在背景預先下載按需質地的樣式。
+    this.theme.prefetchTextures();
   }
 
   protected onParadigm(id: string): void {
-    this.theme.setParadigm(id);
+    // 按需質地載入完成才會真的切換，失敗時 ThemeService 自己退回並提示。
+    void this.theme.setParadigm(id);
   }
 
   protected onTheme(id: string): void {

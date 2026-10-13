@@ -29,7 +29,44 @@
             "input": "libs/assets/image"
           }
         ],
-        "styles": ["apps/admin/src/styles.scss"],
+        "styles": [
+          "apps/admin/src/styles.scss",
+          {
+            "input": "libs/theme-pack/src/lib/styles/texture/linen/_index.scss",
+            "bundleName": "texture-linen",
+            "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/texture/grid/_index.scss",
+            "bundleName": "texture-grid",
+            "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/texture/soft-ui/_index.scss",
+            "bundleName": "texture-soft-ui",
+            "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/texture/clay/_index.scss",
+            "bundleName": "texture-clay",
+            "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/texture/editorial/_index.scss",
+            "bundleName": "texture-editorial",
+            "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/texture/frosted/_index.scss",
+            "bundleName": "texture-frosted",
+            "inject": false
+          },
+          {
+            "input": "libs/theme-pack/src/lib/styles/texture/aero/_index.scss",
+            "bundleName": "texture-aero",
+            "inject": false
+          }
+        ],
         "stylePreprocessorOptions": { "includePaths": ["libs"] },
         "outputPath": "dist/penghu-rental-admin"
       },

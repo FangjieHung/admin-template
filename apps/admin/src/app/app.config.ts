@@ -34,7 +34,7 @@ import {
   PREP_TASK_REPO,
 } from './core/repositories/tokens';
 import { demoSeed, ensureDemoData, storageResetHandler } from './core/repositories/demo-data';
-import { ThemeService } from '@car-rental/theme-pack';
+import { TEXTURE_FALLBACK_MESSAGE, TEXTURE_FALLBACK_NOTIFIER, ThemeService } from '@car-rental/theme-pack';
 // 殼層（Initial bundle）只從 repositories 子路徑取用，不經過 @car-rental/domain 的 barrel：
 // barrel 一旦被主 bundle 靜態引入，各頁面用到的 domain 模組（報價、取消、交車檢核…）都會被併進主 bundle。
 import {
@@ -84,6 +84,18 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideAppInitializer(() => inject(ThemeService).init()),
+    // ADR 0010：按需質地載入失敗、退回 Material 時的提示（theme-pack 不依賴 Material 的 snackbar，由 app 提供）。
+    {
+      provide: TEXTURE_FALLBACK_NOTIFIER,
+      // snackbar 只在失敗時才動態載入，不進初始 bundle（主程式原本就沒有 MatSnackBar）。
+      useFactory: () => {
+        const injector = inject(Injector);
+        return () =>
+          void import('@angular/material/snack-bar').then(({ MatSnackBar }) =>
+            injector.get(MatSnackBar).open(TEXTURE_FALLBACK_MESSAGE, undefined, { duration: 3000 }),
+          );
+      },
+    },
     // 畫面開始讀資料前，先確認每個集合都有可用的本機資料；缺的或損壞的才動態載入示範資料（見 demo-data.ts）。
     provideAppInitializer(() =>
       ensureDemoData(
