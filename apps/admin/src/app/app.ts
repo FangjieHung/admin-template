@@ -1,7 +1,7 @@
 import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { ConnectedPosition } from '@angular/cdk/overlay';
-import { MatSidenavContainer, MatSidenavModule } from '@angular/material/sidenav';
+import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
 import { Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
 import { AppearancePanelService } from '@admin-template/theme-pack';
@@ -43,7 +43,9 @@ function buildNavItems(): NavEntry[] {
   selector: 'app-root',
   imports: [
     RouterOutlet,
-    MatSidenavModule,
+    MatSidenav,
+    MatSidenavContainer,
+    MatSidenavContent,
     SideNavComponent,
     HeaderComponent,
     FooterComponent,

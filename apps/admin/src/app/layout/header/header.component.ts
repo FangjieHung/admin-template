@@ -1,7 +1,7 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
+import { MatIconButton } from '@angular/material/button';
 import { ZH_TW_SHELL } from '../../core/i18n/zh-tw-shell';
 import { HeaderToolbarSlot } from './header-toolbar-slot';
 import { HeaderTitleExtraSlot } from './header-title-extra-slot';
@@ -14,7 +14,7 @@ import { HeaderTitleData, HeaderTitleSlot } from './header-title';
  */
 @Component({
   selector: 'app-header',
-  imports: [NgTemplateOutlet, RouterLink, MatButtonModule],
+  imports: [NgTemplateOutlet, RouterLink, MatIconButton],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })

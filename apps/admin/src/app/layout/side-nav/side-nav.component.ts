@@ -1,8 +1,8 @@
 import { Component, computed, inject, input, output } from '@angular/core';
-import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
-import { MatButtonModule } from '@angular/material/button';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition } from '@angular/cdk/overlay';
+import { MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatTooltip } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { AccessService, IdentitySwitcherService } from '@admin-template/access';
 import { AuthService } from '../../core/auth/auth.service';
@@ -14,10 +14,13 @@ import { NavEntry, NavGroup, NavLeaf, isNavGroup } from './nav-item.model';
   selector: 'app-side-nav',
   imports: [
     RouterLink,
-    MatButtonModule,
-    MatMenuModule,
-    MatTooltipModule,
-    OverlayModule,
+    MatIconButton,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger,
+    MatTooltip,
+    CdkConnectedOverlay,
+    CdkOverlayOrigin,
     IdentitySwitcherSlotComponent,
   ],
   templateUrl: './side-nav.component.html',
