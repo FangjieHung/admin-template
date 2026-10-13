@@ -38,6 +38,10 @@
   color: var(--mat-sys-on-surface-variant);
 }
 
+.signature-pad__clear {
+  align-self: flex-start;
+}
+
 .signature-pad__typed-field {
   width: 100%;
 }

@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { provideNativeDateAdapter } from '@angular/material/core';
+import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 import { DualMonthRangePickerComponent, SelectedDateRange } from '@admin-template/ui';
 import { fmtDate } from '../../core/date-utils';
 import { rangePickerLabelProviders } from '../../shared/ui/component-label-providers';
@@ -17,7 +17,7 @@ function daysFromToday(n: number): Date {
 @Component({
   selector: 'app-date-range-picker-page',
   imports: [DualMonthRangePickerComponent, ShowcasePageComponent, DemoBlockComponent],
-  providers: [provideNativeDateAdapter(), ...rangePickerLabelProviders('專案期間')],
+  providers: [provideNativeDateAdapter(), { provide: MAT_DATE_LOCALE, useValue: 'zh-TW' }, ...rangePickerLabelProviders('專案期間')],
   template: `
     <app-showcase-page [summary]="entry.summary" [whenToUse]="whenToUse" [avoid]="avoid" [source]="entry.source" [usage]="usage" [api]="api">
       <app-demo-block heading="空白開始" description="點欄位開出兩個月曆：先點起日、再點迄日；滑過時預覽區間。">

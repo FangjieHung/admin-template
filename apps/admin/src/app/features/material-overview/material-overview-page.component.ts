@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { provideNativeDateAdapter } from '@angular/material/core';
+import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
@@ -95,7 +95,8 @@ const ENTRY = detailOf('material');
     ShowcasePageComponent,
     DemoBlockComponent,
   ],
-  providers: [provideNativeDateAdapter()],
+  // 月曆與日期欄位用繁中格式（2026/10/13、2026年10月）。
+  providers: [provideNativeDateAdapter(), { provide: MAT_DATE_LOCALE, useValue: 'zh-TW' }],
   templateUrl: './material-overview-page.component.html',
   styleUrl: './material-overview-page.component.scss',
 })

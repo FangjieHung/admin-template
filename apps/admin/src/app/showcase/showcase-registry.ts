@@ -48,7 +48,7 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
   },
   {
     id: 'page-toolbar',
-    title: '頁首工具列與快速篩選',
+    title: '頁首工具列',
     group: 'data',
     icon: 'search',
     load: () => import('../features/page-toolbar/page-toolbar-page.component').then((m) => m.PageToolbarPageComponent),

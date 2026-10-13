@@ -11,6 +11,7 @@ const ENTRY = detailOf('language-switcher');
 const MESSAGES = {
   'zh-TW': {
     title: '專案清單',
+    project: '專案',
     intro: '切換上方的語言，標題、欄名、日期與數字格式都會跟著變。',
     owner: '負責人',
     progress: '進度',
@@ -20,6 +21,7 @@ const MESSAGES = {
   },
   en: {
     title: 'Projects',
+    project: 'Project',
     intro: 'Switch the language above; headings, column names, dates and numbers follow.',
     owner: 'Owner',
     progress: 'Progress',
@@ -29,6 +31,7 @@ const MESSAGES = {
   },
   ja: {
     title: 'プロジェクト一覧',
+    project: 'プロジェクト',
     intro: '上の言語を切り替えると、見出し・列名・日付・数値の書式が変わります。',
     owner: '担当者',
     progress: '進捗',
@@ -54,7 +57,7 @@ const MESSAGES = {
             <table class="i18n-table">
               <thead>
                 <tr>
-                  <th scope="col">{{ t().title }}</th>
+                  <th scope="col">{{ t().project }}</th>
                   <th scope="col">{{ t().owner }}</th>
                   <th scope="col" class="num">{{ t().progress }}</th>
                   <th scope="col" class="num">{{ t().budget }}</th>

@@ -304,7 +304,7 @@
         <mat-progress-spinner mode="determinate" value="72" diameter="48" aria-label="進度 72%" />
         <mat-progress-spinner mode="indeterminate" diameter="48" aria-label="載入中" />
       </div>
-      <div class="ov-row">
+      <div class="ov-row ov-badges">
         <span matBadge="8" matBadgeOverlap="false">待辦</span>
         <span matBadge="99+" matBadgeOverlap="false" matBadgeColor="accent">訊息</span>
         <span matBadge="!" matBadgeOverlap="false" matBadgeColor="warn">錯誤</span>
@@ -340,6 +340,10 @@
   <!-- 步驟 -->
   <app-demo-block heading="步驟" description="mat-stepper（橫式）；第一步已完成、第二步是目前步驟。">
     <mat-stepper [selectedIndex]="1">
+      <!-- 步驟圖示換成專案的 Material Symbols（內建的 mat-icon 需要 Material Icons 字型，這裡沒有載入）。 -->
+      <ng-template matStepperIcon="done"><span class="material-symbols-rounded ov-step-icon" aria-hidden="true">check</span></ng-template>
+      <ng-template matStepperIcon="edit"><span class="material-symbols-rounded ov-step-icon" aria-hidden="true">edit</span></ng-template>
+      <ng-template matStepperIcon="error"><span class="material-symbols-rounded ov-step-icon" aria-hidden="true">priority_high</span></ng-template>
       <mat-step label="基本資料" [completed]="true"><p class="ov-tab-body">第一步。</p></mat-step>
       <mat-step label="成員"><p class="ov-tab-body">第二步：選擇成員。</p></mat-step>
       <mat-step label="確認"><p class="ov-tab-body">第三步：確認送出。</p></mat-step>
@@ -351,12 +355,12 @@
     <div class="ov-grid">
       <section class="ui-card ov-card-sample">
         <p class="ui-text-caption">.ui-card</p>
-        <p class="ui-text-display ui-text-numeric">128</p>
+        <p class="ui-text-display ui-text-numeric text-4xl">128</p>
         <p class="ov-muted">一般卡片：邊線、陰影、圓角依質地。</p>
       </section>
       <section class="ui-card ui-card--inverse ov-card-sample">
         <p class="ui-text-caption">.ui-card--inverse</p>
-        <p class="ui-text-display ui-text-numeric">42</p>
+        <p class="ui-text-display ui-text-numeric text-4xl">42</p>
         <p>深色重點卡。</p>
       </section>
       <button type="button" class="ui-card ui-card--clickable ov-card-sample ov-card-button">
@@ -371,9 +375,9 @@
         <span class="ui-chip" [class]="'ui-chip--' + t.tone"><span class="ui-chip__dot"></span>{{ t.label }}</span>
       }
     </div>
-    <p class="ov-label">.ui-text-*</p>
+    <p class="ov-label">.ui-text-*（.ui-text-display 只管字族與字重，字級由使用處決定，這裡用 text-4xl）</p>
     <div class="ov-type">
-      <p class="ui-text-display">Display 2,480</p>
+      <p class="ui-text-display text-4xl">Display 2,480</p>
       <p class="ui-text-title">Title 頁面大標</p>
       <p class="ui-text-subtitle">Subtitle 小節標題</p>
       <p class="ui-text-caption">Caption 卡片小標</p>

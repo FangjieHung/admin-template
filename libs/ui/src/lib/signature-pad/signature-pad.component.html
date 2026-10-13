@@ -55,7 +55,7 @@
     </mat-form-field>
   }
 
-  <button type="button" mat-button (click)="clear()" [disabled]="disabled() || !hasSignatureInput()">
+  <button type="button" mat-button class="signature-pad__clear" (click)="clear()" [disabled]="disabled() || !hasSignatureInput()">
     {{ labels.clear }}
   </button>
 
