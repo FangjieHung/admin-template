@@ -12,6 +12,7 @@ export const texture: ThemeOption[] = [
   { id: 'editorial', label: 'Editorial 編輯式極簡' },
   { id: 'frosted', label: 'Frosted 霧光玻璃' },
   { id: 'aero', label: 'Aero 雲霧玻璃' },
+  { id: 'ledger', label: 'Ledger 帳冊' },
 ];
 
 export const COLOR_THEMES: ThemeOption[] = [
@@ -95,6 +96,12 @@ export const TEXTURE_COMPATIBILITY: Record<string, TextureCompatibility> = {
   aero: {
     compatibleThemeIds: ['azure', 'cool-grey', 'mist-ink', 'glacier-blue'],
     defaultThemeId: 'glacier-blue',
+  },
+  // 排除 Candy（ADR 0011）：8 格對比全數合格，Candy 是依美感排除——高彩度糖果色和帳冊的冷靜數字感衝突。
+  // 2026-10-13 提案，待使用者定案。
+  ledger: {
+    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue'],
+    defaultThemeId: 'azure',
   },
 };
 

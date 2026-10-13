@@ -1,0 +1,401 @@
+// Ledger 帳冊：一頁塞得下最多資料、一眼對得齊數字。層次只靠斑馬紋＋分隔線（ADR 0011）：
+// 畫布是素色、卡片是貼平的 1px 框、列與列之間是細線、偶數列疊一層淡底；沒有陰影、模糊、背景紋理。
+// 斑馬紋一律畫成 background-image（疊在 background-color 之上），滑過、選取、提醒列的底色照常生效。
+:root[data-paradigm='ledger'] {
+  body {
+    background: var(--mat-sys-background);
+    font-size: 13px;
+    line-height: 1.45;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // ---- 殼層：側欄只用 1px 分隔線和畫布分開，內距收緊 ----
+  .app-sidenav {
+    padding: 16px 12px;
+    box-shadow: none;
+    border-right: 1px solid var(--ledger-rule);
+  }
+  .app-sidenav.collapsed {
+    padding: 16px 10px;
+  }
+  .page-shell {
+    padding: 0 1rem 1rem;
+  }
+  .topbar {
+    padding: 0.625rem 1rem;
+  }
+  .nav-link,
+  .nav-group-trigger {
+    padding-block: 7px;
+  }
+  .nav-sublink {
+    padding-block: 5px;
+  }
+  .brand-mark,
+  .avatar {
+    border-radius: var(--mat-sys-corner-medium);
+  }
+  .nav-flyout {
+    border: 1px solid var(--ledger-rule-strong);
+    border-radius: var(--mat-sys-corner-large);
+    box-shadow: none;
+  }
+
+  .theme-pill {
+    border-radius: var(--mat-sys-corner-small);
+    font-family: var(--font-body);
+    box-shadow: none;
+    border: 1px solid var(--ledger-rule);
+  }
+
+  // ---- 卡片：貼平的 1px 框，標題列下方一條較深的線 ----
+  .ui-card,
+  .stat-card {
+    background: var(--mat-sys-surface);
+    color: var(--mat-sys-on-surface);
+    border: 1px solid var(--ledger-rule);
+    border-radius: var(--mat-sys-corner-large);
+    box-shadow: none;
+  }
+  .ui-card {
+    overflow: hidden;
+  }
+  .ui-card--inverse {
+    background: var(--mat-sys-inverse-surface);
+    color: var(--mat-sys-inverse-on-surface);
+    border: 0;
+    border-radius: var(--mat-sys-corner-large);
+    padding: 16px;
+  }
+  .ui-card-header,
+  .ui-card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .ui-card-header {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--ledger-rule-strong);
+  }
+  .ui-card--inverse .ui-card-header {
+    border-bottom-color: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 24%, transparent);
+  }
+  .ui-card--clickable {
+    cursor: pointer;
+    transition: background-color var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .ui-card--clickable:hover,
+  .stat-card:hover {
+    background-color: color-mix(in srgb, var(--mat-sys-on-surface) 3%, var(--mat-sys-surface));
+    box-shadow: none;
+    transform: none;
+  }
+
+  // ---- 導覽膠囊、卡片分頁標籤：小圓角、窄內距 ----
+  .ui-nav-pill {
+    padding: 6px 12px;
+    border-radius: var(--mat-sys-corner-small);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--mat-sys-on-surface-variant);
+    white-space: nowrap;
+    transition: background-color var(--app-motion-fast) var(--app-ease-standard), color var(--app-motion-fast) var(--app-ease-standard);
+  }
+  .ui-nav-pill:hover {
+    background: var(--app-state-hover);
+    color: var(--mat-sys-on-surface);
+  }
+  .ui-nav-pill.is-active {
+    background: var(--mat-sys-primary);
+    color: var(--mat-sys-on-primary);
+  }
+
+  // 鍵盤焦點框：2px 實線、離 1px（--app-focus-ring-offset 在 _tokens.scss），與 Material 質地涵蓋同一批元素。
+  :is(
+      .theme-pill,
+      .ui-nav-pill,
+      .ui-card-titleNav__item,
+      .mat-mdc-button-base,
+      .ui-card--clickable,
+      .nav-link,
+      .nav-sublink,
+      .nav-group-trigger,
+      .nav-flyout-item
+    ):focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+
+  // 按鈕：32px 高（_tokens.scss 的 Material 密度 token）、2px 圓角；按下不縮放、不位移。
+  .mat-mdc-button-base {
+    --mat-button-filled-container-shape: var(--mat-sys-corner-small);
+    --mat-button-outlined-container-shape: var(--mat-sys-corner-small);
+    --mat-button-protected-container-shape: var(--mat-sys-corner-small);
+    --mat-button-text-container-shape: var(--mat-sys-corner-small);
+    --mat-button-tonal-container-shape: var(--mat-sys-corner-small);
+    --mat-button-filled-horizontal-padding: 0.875rem;
+    --mat-button-outlined-horizontal-padding: 0.875rem;
+    --mat-button-protected-horizontal-padding: 0.875rem;
+  }
+  .mat-mdc-icon-button {
+    --mat-icon-button-container-shape: var(--mat-sys-corner-small);
+  }
+  .mat-mdc-raised-button:not(:disabled) {
+    box-shadow: none;
+  }
+
+  // ---- 欄位：48px 高、2px 圓角、1px 實線框（--app-field-border），focus 換 2px 主色框 ----
+  .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    --app-field-shape: var(--mat-sys-corner-small);
+    --mat-form-field-filled-container-shape: var(--app-field-shape);
+    border: 1px solid var(--app-field-border);
+    border-radius: var(--app-field-shape);
+    padding-inline: 12px;
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--filled.mdc-text-field--focused {
+    border-color: var(--mat-sys-primary);
+    box-shadow: inset 0 0 0 1px var(--mat-sys-primary);
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
+    --mat-form-field-outlined-container-shape: var(--mat-sys-corner-small);
+    padding-inline: 12px;
+  }
+  .mat-mdc-form-field {
+    --mat-form-field-filled-active-indicator-height: 0;
+    --mat-form-field-filled-focus-active-indicator-height: 0;
+  }
+  .mat-mdc-form-field-focus-overlay {
+    border-radius: inherit;
+  }
+  // 數字輸入（金額、數量、天數）用等寬字：一欄一欄對得齊。
+  input[type='number'].mat-mdc-input-element {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .ui-field-group {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+  }
+  .ui-field-group > *:not(:first-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left: 0;
+  }
+  .ui-field-group > *:not(:last-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .ui-field-group > *:not(:first-child) .mat-mdc-text-field-wrapper.mdc-text-field--filled::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--app-field-border);
+    z-index: 1;
+  }
+
+  // ---- 浮層：日期選擇器、對話框、選單都是貼平的 1px 框（level token 已是 1px 細框，遮罩隔開背景）----
+  .mat-calendar,
+  .mat-datepicker-content {
+    --mat-datepicker-calendar-date-in-range-state-background-color: var(--app-calendar-range-fill);
+  }
+  .mat-datepicker-content {
+    border: 1px solid var(--ledger-rule-strong);
+    border-radius: var(--mat-sys-corner-large) !important;
+    box-shadow: none !important;
+  }
+  .mat-mdc-dialog-surface {
+    border: 1px solid var(--ledger-rule-strong);
+    border-radius: var(--mat-sys-corner-extra-large) !important;
+    box-shadow: none !important;
+  }
+  .mat-mdc-dialog-container {
+    --mat-dialog-headline-padding: 12px 16px 10px;
+    --mat-dialog-content-padding: 12px 16px;
+    --mat-dialog-with-actions-content-padding: 12px 16px;
+    --mat-dialog-actions-padding: 8px 16px;
+    --mat-dialog-subhead-size: 1rem;
+    --mat-dialog-subhead-line-height: 1.5rem;
+    --mat-dialog-subhead-weight: 700;
+    --mat-dialog-supporting-text-size: 0.8125rem;
+    --mat-dialog-supporting-text-line-height: 1.25rem;
+  }
+  // 標題下方有分隔線：內容區上緣留白補回來（Material 在標題後把它歸零），第一段說明與下方欄位隔開。
+  .mat-mdc-dialog-container .mat-mdc-dialog-title + .mat-mdc-dialog-content {
+    padding-top: 12px;
+  }
+  .mat-mdc-dialog-content > p {
+    margin: 0 0 12px;
+  }
+  .mat-mdc-dialog-title {
+    border-bottom: 1px solid var(--ledger-rule-strong);
+  }
+  .mat-mdc-dialog-actions {
+    border-top: 1px solid var(--ledger-rule);
+  }
+  // 展開面板：Material 自帶的 elevation 陰影拿掉，改 1px 框；相鄰面板共用分隔線。
+  .mat-expansion-panel {
+    --mat-expansion-container-shape: var(--mat-sys-corner-large);
+    box-shadow: none;
+    border: 1px solid var(--ledger-rule);
+  }
+  .mat-expansion-panel + .mat-expansion-panel {
+    border-top: 0;
+  }
+  .mat-expansion-panel.mat-expanded {
+    margin-block: 0;
+  }
+  .mat-expansion-panel.mat-expanded .mat-expansion-panel-header {
+    border-bottom: 1px solid var(--ledger-rule);
+  }
+  .mat-mdc-menu-panel,
+  .mat-mdc-select-panel,
+  .mat-mdc-autocomplete-panel {
+    border-radius: var(--mat-sys-corner-large) !important;
+  }
+  .mat-mdc-menu-item,
+  .mat-mdc-option {
+    min-height: 36px;
+  }
+  .mat-mdc-option:nth-child(even),
+  .mat-mdc-list-item:nth-child(even) {
+    background-image: linear-gradient(var(--ledger-stripe), var(--ledger-stripe));
+  }
+
+  // ---- 表格：斑馬紋＋分隔線、表頭底色＋深色下緣、等寬數字 ----
+  .mat-mdc-table {
+    background: transparent !important;
+  }
+  .mat-mdc-header-row {
+    background: var(--ledger-head-bg);
+  }
+  .mat-mdc-header-cell {
+    border-bottom: 1px solid var(--ledger-rule-strong);
+    font-weight: 600;
+  }
+  // mat-table 的儲存格是 `background: inherit`：半透明的斑馬紋會在列與儲存格各畫一次（變兩倍深），所以這裡用不透明的混色。
+  .mat-mdc-row:nth-child(even) {
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 6%, var(--mat-sys-surface));
+  }
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    padding-inline: 10px;
+    font-size: 13px;
+  }
+  .ui-text-numeric {
+    font-family: var(--font-mono), var(--font-zh);
+    font-variant-numeric: tabular-nums;
+  }
+
+  // Admin 的資料表是 libs/ui 的 data-table（.dt-table）：只設元件暴露的外觀變數（CONTRACT.md「--dt-*」），
+  // 不覆寫屬性。列高 = 狀態徽章 22px（或 13px × 1.45 行高的文字）+ 上下各 6px ≈ 35px；表頭同一組留白，加底色與 1px 深線。
+  .dt-table {
+    --dt-font-size: 0.8125rem;
+    --dt-cell-padding-block: 0.375rem;
+    --dt-cell-padding-inline: 0.625rem;
+    --dt-row-stripe-bg: var(--ledger-stripe);
+    --dt-header-bg: var(--ledger-head-bg);
+    --dt-head-border-color: var(--ledger-rule-strong);
+    --dt-row-border-color: var(--ledger-rule);
+    --dt-row-hover-bg: color-mix(in srgb, var(--mat-sys-primary) 8%, var(--mat-sys-surface));
+    --dt-selection-control-size: 2rem;
+    --dt-selection-padding-block: 0;
+  }
+  .dt-table th {
+    font-weight: 600;
+  }
+  // 表格裡的勾選框疊在斑馬紋上：外框改用次要文字色（就地覆寫用途變數），淡底上仍 ≥ 3:1（WCAG 1.4.11）。
+  // 只限表格內；一般表單的欄位邊界照用配色層的 --app-field-border。
+  :is(.dt-table, .mat-mdc-table, .pm) {
+    --app-field-border: var(--mat-sys-on-surface-variant);
+  }
+
+  // 其他展示頁裡的原生表格（API 表、權限矩陣、提示時長表、語系對照表）一樣畫斑馬紋。
+  :is(.showcase__api, .pm, .duration-table, .i18n-table) tbody tr:nth-child(even) {
+    background-image: linear-gradient(var(--ledger-stripe), var(--ledger-stripe));
+  }
+  :is(.showcase__api, .duration-table, .i18n-table) :is(th, td) {
+    padding-block: 0.3125rem;
+  }
+  // 權限矩陣（libs/access）：點擊熱區 44px → 32px（仍 ≥ 24px，WCAG 2.5.8），唯讀列的上下留白跟表格一致。
+  .pm-hit,
+  .pm-toggle {
+    min-height: 32px;
+  }
+  .pm.pm--readonly .pm-row-head {
+    padding-block: 0.375rem;
+  }
+
+  .mat-mdc-snack-bar-container .mdc-snackbar__surface {
+    border-radius: var(--mat-sys-corner-medium) !important;
+    box-shadow: none;
+  }
+
+  // ---- 狀態徽章：小方角、緊湊、細框 ----
+  .ui-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3125rem;
+    border-radius: var(--mat-sys-corner-small);
+    padding: 0.0625rem 0.4375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.125rem;
+    white-space: nowrap;
+  }
+  .ui-chip__dot {
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+  @each $tone in positive, info, neutral, warning, danger {
+    .ui-chip--#{$tone} {
+      background: var(--app-#{$tone}-bg);
+      color: var(--app-#{$tone}-fg);
+      border: 1px solid color-mix(in srgb, var(--app-#{$tone}-fg) 30%, transparent);
+      .ui-chip__dot {
+        background: var(--app-#{$tone}-dot);
+      }
+    }
+  }
+
+  // ---- 文字：標題不放大，數字一律等寬 ----
+  .ui-text-display {
+    font-family: var(--font-mono), var(--font-zh);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  .ui-text-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    color: var(--mat-sys-on-surface);
+  }
+  .ui-text-subtitle {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--mat-sys-on-surface);
+  }
+  .ui-text-caption {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface-variant);
+  }
+  .ui-card--inverse .ui-text-subtitle,
+  .ui-card--inverse .ui-text-caption {
+    color: inherit;
+  }
+}

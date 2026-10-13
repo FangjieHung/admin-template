@@ -1,0 +1,109 @@
+// Ledger 帳冊：高密度質地（ADR 0011）。造型 token，不定義配色；所有顏色由配色軸的語意 token 調出。
+// 層次只靠「斑馬紋＋分隔線」：沒有陰影、模糊、背景紋理。視覺密度屬於這個質地，不是獨立的切換軸。
+:root[data-paradigm='ledger'] {
+  --mat-sys-corner-small: 2px;
+  --mat-sys-corner-medium: 3px;
+  --mat-sys-corner-large: 4px;
+  --mat-sys-corner-extra-large: 4px;
+  --mat-sys-corner-full: 3px;
+
+  // 不用陰影分層：Material 元件裡吃 level token 的浮起表面（選單、下拉面板、凸起按鈕、提示訊息）
+  // 一律換成 1px 細框（0 模糊、0 偏移、1px 擴散），看起來是一條線，不是影子。
+  --mat-sys-level1: 0 0 0 1px var(--mat-sys-outline-variant);
+  --mat-sys-level2: 0 0 0 1px var(--mat-sys-outline-variant);
+  --mat-sys-level3: 0 0 0 1px var(--mat-sys-outline);
+  --mat-sys-level4: 0 0 0 1px var(--mat-sys-outline);
+
+  // Material 元件自己的 elevation token 沒設時用 M2 的固定陰影（不吃 level token），逐一指向細框或 none。
+  @each $t in menu-container, select-container, autocomplete-container, timepicker-container, datepicker-calendar-container
+  {
+    --mat-#{$t}-elevation-shadow: var(--mat-sys-level3);
+  }
+  @each $t in dialog-container, expansion-container, sidenav-container, fab-container, fab-small-container,
+    fab-extended-container, button-protected-container, button-protected-hover-container,
+    button-protected-focus-container, button-protected-pressed-container, slide-toggle-handle
+  {
+    --mat-#{$t}-elevation-shadow: none;
+  }
+  --mat-card-elevated-container-elevation: var(--mat-sys-level1);
+
+  // 斑馬紋：偶數列疊一層 on-surface 6%（深色配色下 on-surface 是淺色，一樣看得見）。
+  --ledger-stripe: color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
+  // 表頭底色：比斑馬紋深一階，表頭與第一列一眼分得開。
+  --ledger-head-bg: color-mix(in srgb, var(--mat-sys-on-surface) 9%, var(--mat-sys-surface));
+  // 分隔線：一般列線用 outline-variant；表頭下緣、卡片標題列下緣用較深的 outline（帳冊的「粗線」）。
+  --ledger-rule: var(--mat-sys-outline-variant);
+  --ledger-rule-strong: var(--mat-sys-outline);
+
+  // 焦點框：2px 實線、只離 1px，貼著元件邊緣，密集版面裡不會壓到隔壁的控制項。
+  --app-focus-ring-offset: 1px;
+  --app-border-emphasis: var(--mat-sys-outline-variant);
+  --app-state-hover: color-mix(in srgb, var(--mat-sys-on-surface) 7%, transparent);
+
+  // 動態極少：只留短淡入淡出，base／slow 都跟 fast 一樣快（減少動態時 fast 歸零，這兩檔跟著歸零）。
+  --app-motion-base: var(--app-motion-fast);
+  --app-motion-slow: var(--app-motion-fast);
+
+  // Tailwind 間距單位 4px → 3px：卡片 p-4／p-6、gap-* 這類工具 class 一起收緊 25%。
+  --spacing: 0.1875rem;
+
+  // 字型：中文用裝置字；英文內文用裝置的無襯線（不載入任何網頁字）；數字與等寬用全站已載入的 IBM Plex Mono。
+  --font-zh: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', system-ui, sans-serif;
+  --font-en: 'Helvetica Neue', 'Segoe UI', Roboto, Arial;
+  --font-display: var(--font-en), var(--font-zh);
+  --font-body: var(--font-en), var(--font-zh);
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  // Material 元件的字（欄位、按鈕、選單、分頁）預設是 mat.theme() 的 Inter：改吃這個質地的內文字，
+  // 字級往下收一階（欄位內文維持 16px：浮動標籤縮成 0.75 倍後才不會小於 12px，iOS 聚焦也不會放大頁面）。
+  @each $role in display-large, display-medium, display-small, headline-large, headline-medium, headline-small,
+    title-large, title-medium, title-small, body-large, body-medium, body-small, label-large, label-medium, label-small
+  {
+    --mat-sys-#{$role}-font: var(--font-body);
+  }
+  --mat-sys-title-medium-size: 0.875rem;
+  --mat-sys-title-medium-line-height: 1.25rem;
+  --mat-sys-title-small-size: 0.8125rem;
+  --mat-sys-title-small-line-height: 1.125rem;
+  --mat-sys-body-medium-size: 0.8125rem;
+  --mat-sys-body-medium-line-height: 1.125rem;
+  --mat-sys-body-small-size: 0.75rem;
+  --mat-sys-body-small-line-height: 1rem;
+  --mat-sys-label-large-size: 0.8125rem;
+  --mat-sys-label-large-line-height: 1.125rem;
+  --mat-sys-label-medium-size: 0.75rem;
+  --mat-sys-label-small-size: 0.75rem; // Material 預設 11px，帳冊全站下限 12px
+
+  // Material 密度（等同 density -2／-3）：按鈕 32px、圖示按鈕 32px、勾選／單選狀態層 32px、
+  // chip 28px、清單列 40px、分頁籤 40px、表格列 36px。隱形的 48px 觸控熱區關掉（會蓋到密集排列的隔壁元件），
+  // 可見尺寸維持 ≥ 24px（WCAG 2.5.8 AA）；未達 44px（2.5.5 AAA）的地方記在準則與 ADR 0011。
+  @each $kind in filled, outlined, protected, text, tonal {
+    --mat-button-#{$kind}-container-height: 32px;
+    --mat-button-#{$kind}-touch-target-display: none;
+  }
+  --mat-button-tonal-horizontal-padding: 0.75rem;
+  --mat-icon-button-state-layer-size: 32px;
+  --mat-icon-button-touch-target-display: none;
+  --mat-checkbox-state-layer-size: 32px;
+  --mat-checkbox-touch-target-display: none;
+  --mat-radio-state-layer-size: 32px;
+  --mat-radio-touch-target-display: none;
+  --mat-slide-toggle-touch-target-display: none;
+  --mat-chip-container-height: 28px;
+  --mat-list-list-item-one-line-container-height: 40px;
+  --mat-list-list-item-two-line-container-height: 56px;
+  --mat-tab-container-height: 40px;
+  --mat-table-header-container-height: 36px;
+  --mat-table-row-item-container-height: 34px;
+  --mat-table-footer-container-height: 34px;
+  --mat-paginator-container-size: 40px;
+  --mat-expansion-header-collapsed-state-height: 40px;
+  --mat-expansion-header-expanded-state-height: 48px;
+  --mat-menu-item-label-text-size: 0.8125rem;
+
+  // 欄位（appearance fill／outline）：48px 高（Material 預設 56px）。filled 的浮動標籤位置在 recipe 裡重算。
+  --mat-form-field-container-height: 48px;
+  --mat-form-field-container-vertical-padding: 12px;
+  --mat-form-field-filled-with-label-container-padding-top: 20px;
+  --mat-form-field-filled-with-label-container-padding-bottom: 4px;
+}

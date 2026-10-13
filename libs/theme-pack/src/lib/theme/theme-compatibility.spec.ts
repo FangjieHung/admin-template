@@ -38,6 +38,8 @@ describe('theme-compatibility（ADR 0007，2026-09-27 定案清單）', () => {
       excluded: ['verdant', 'midnight', 'sandstone', 'candy'],
       defaultThemeId: 'glacier-blue',
     },
+    // ADR 0011 提案（待使用者定案）
+    ledger: { excluded: ['candy'], defaultThemeId: 'azure' },
   };
 
   it('每個質地都有一筆定案', () => {

@@ -1,0 +1,6 @@
+// src/styles/texture/ledger/_index.scss
+// 按需質地（ADR 0010）：ledger 的完整輸出（造型 token + 全部元件 recipe），在 apps/admin/project.json 以
+// `bundleName: texture-ledger`、`inject: false` 編成獨立的 texture-ledger.css，切到這個質地時才由 ThemeService 載入。
+// 沒有 _fonts.scss：英文內文用裝置字，數字用全站 index.html 已載入的 IBM Plex Mono（ADR 0011）。
+@forward 'tokens';
+@forward 'recipes';
