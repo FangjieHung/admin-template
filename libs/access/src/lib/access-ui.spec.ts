@@ -87,6 +87,19 @@ describe('路由守門', () => {
     TestBed.tick();
     await new Promise((resolve) => setTimeout(resolve));
     expect(router.url).toBe('/reports');
+
+    // 權限改變但不影響目前這一頁：不重新導覽。
+    const navigate = vi.spyOn(router, 'navigateByUrl');
+    access.signIn('u-manager');
+    TestBed.tick();
+    expect(navigate).not.toHaveBeenCalled();
+
+    // 換成看不到這一頁的身分：變成沒有權限頁。
+    navigate.mockRestore();
+    access.signIn('u-member');
+    TestBed.tick();
+    await new Promise((resolve) => setTimeout(resolve));
+    expect(router.url).toBe('/forbidden?need=report:view');
   });
 });
 

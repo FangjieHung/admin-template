@@ -7,7 +7,7 @@ import { IdentitySwitcherComponent } from '../identity-switcher/identity-switche
 import { TEST_ACCESS_CONFIG, provideTestAccess } from '../testing/access-fixture';
 import { PERMISSION_MATRIX_LABELS, PermissionMatrixComponent } from './permission-matrix.component';
 import { RoleDraft } from './role-draft';
-import { unsavedChangesGuard } from './unsaved-changes.guard';
+import { unsavedChangesGuard } from '../unsaved-changes.guard';
 
 const LABELS = {
   feature: '功能',

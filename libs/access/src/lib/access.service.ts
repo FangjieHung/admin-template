@@ -91,8 +91,10 @@ export class AccessService {
     return this.roles().filter((r) => ids.includes(r.id));
   });
   /** 目前使用者的實際權限：所有角色的聯集。 */
-  readonly permissions = computed<ReadonlySet<Permission>>(() =>
-    effectivePermissions(this.roles(), this.currentUser()?.roleIds ?? []),
+  readonly permissions = computed<ReadonlySet<Permission>>(
+    () => effectivePermissions(this.roles(), this.currentUser()?.roleIds ?? []),
+    // 內容相同就視為沒變：改別人的角色、存一個不影響自己的角色時，依賴它的畫面與守門不必重跑。
+    { equal: (a, b) => a.size === b.size && [...a].every((p) => b.has(p)) },
   );
   /** 最近一次儲存是否成功；false 時提示「無法存到這台裝置」。 */
   readonly persisted = this.persistedState.asReadonly();

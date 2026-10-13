@@ -1,27 +1,43 @@
-// 「切換身分」：頁首右側的一顆按鈕＋選單。只用語意 token；按鈕外框跟頁首搜尋膠囊一樣用 hairline。
+// 「切換身分」：一顆按鈕＋選單。只用語意 token。`data-tone="shell"` 時放在深色側欄裡，改用 --app-shell-*。
 :host {
-  display: inline-flex;
+  display: block;
   min-width: 0;
+  --ids-fg: var(--mat-sys-on-surface);
+  --ids-muted: var(--mat-sys-on-surface-variant);
+  --ids-accent: var(--mat-sys-primary);
+  --ids-border: var(--mat-sys-outline-variant);
+  --ids-bg: var(--mat-sys-surface);
+  --ids-hover: var(--app-state-hover);
+}
+
+:host([data-tone='shell']) {
+  --ids-fg: var(--app-shell-on);
+  --ids-muted: var(--app-shell-on-muted);
+  --ids-accent: var(--app-shell-on);
+  --ids-border: var(--app-shell-hairline);
+  --ids-bg: transparent;
+  --ids-hover: var(--app-shell-hover);
 }
 
 .ids-trigger {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.625rem;
+  width: 100%;
   min-width: 0;
   min-height: 44px;
-  max-width: 18rem;
-  padding: 0.25rem 0.5rem 0.25rem 0.75rem;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: 999px;
-  background: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
+  padding: 0.5rem 0.625rem 0.5rem 0.75rem;
+  border: 1px dashed var(--ids-border);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--ids-bg);
+  color: var(--ids-fg);
   font: inherit;
+  text-align: start;
   cursor: pointer;
   transition: background-color var(--app-motion-fast) var(--app-ease-standard);
 
   &:hover {
-    background: var(--app-state-hover);
+    background: var(--ids-hover);
   }
 
   &:focus-visible {
@@ -30,28 +46,41 @@
   }
 }
 
+:host(.ids--compact) .ids-trigger {
+  justify-content: center;
+  padding-inline: 0;
+}
+
 .ids-icon {
+  flex: none;
   font-size: 1.25rem;
-  color: var(--mat-sys-primary);
+  color: var(--ids-accent);
 }
 
 .ids-caret {
+  flex: none;
+  margin-inline-start: auto;
   font-size: 1.125rem;
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--ids-muted);
 }
 
 .ids-text {
   display: grid;
   min-width: 0;
-  line-height: 1.25;
-  text-align: start;
+  line-height: 1.3;
 }
 
+.ids-caption,
 .ids-name,
 .ids-roles {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.ids-caption {
+  font-size: 0.6875rem;
+  color: var(--ids-muted);
 }
 
 .ids-name {
@@ -61,20 +90,10 @@
 
 .ids-roles {
   font-size: 0.75rem;
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--ids-muted);
 }
 
-// 窄螢幕只留圖示與目前角色，名字收進無障礙名稱。
-@media (max-width: 600px) {
-  .ids-name {
-    display: none;
-  }
-
-  .ids-trigger {
-    max-width: 9rem;
-  }
-}
-
+// 選單內容在 overlay 裡，但仍是這個元件的 template：一般底色的 token。
 .ids-menu-title {
   margin: 0;
   padding: 0.5rem 1rem 0.25rem;

@@ -25,7 +25,7 @@ import { AccessService } from './access.service';
 })
 export class DisabledUnlessDirective implements OnDestroy {
   /** 需要的權限，寫法同 `*libCan`。 */
-  readonly libDisabledUnless = input.required<AccessCheck>();
+  readonly libDisabledUnless = input.required<AccessCheck | string>();
   /** 自訂提示；不給就用「需要{最低符合的預設角色}權限」。 */
   readonly libDisabledUnlessHint = input('');
 
@@ -33,10 +33,10 @@ export class DisabledUnlessDirective implements OnDestroy {
   private readonly tooltip = inject(MatTooltip);
   private readonly el = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
-  readonly denied = computed(() => !this.access.can(this.libDisabledUnless()));
+  readonly denied = computed(() => !this.access.can(this.libDisabledUnless() as AccessCheck));
   /** 目前的提示文字（有權限時是空字串）。 */
   readonly hint = computed(() =>
-    this.denied() ? this.libDisabledUnlessHint() || this.access.hintFor(this.libDisabledUnless()) : '',
+    this.denied() ? this.libDisabledUnlessHint() || this.access.hintFor(this.libDisabledUnless() as AccessCheck) : '',
   );
 
   // 捕獲階段、掛在元素自己身上：比元素上的 (click)、routerLink 都早執行，攔下就不會觸發動作。

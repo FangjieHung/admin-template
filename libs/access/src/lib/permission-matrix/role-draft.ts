@@ -1,5 +1,6 @@
 import { computed, signal } from '@angular/core';
-import { AccessRole, Permission, samePermissions } from '../access.model';
+import { AccessRole, Permission, validateRoleName } from '../access.model';
+import { samePermissions } from './matrix-state';
 
 /**
  * 編輯中的角色：名稱與權限的草稿，和最後一次載入（或儲存）的內容比較，算出有沒有未儲存的變更。
@@ -40,5 +41,13 @@ export class RoleDraft {
     this.base.set({ id: null, name: '', permissions: [] });
     this.name.set('');
     this.permissions.set([]);
+  }
+}
+
+/** 依「名稱（副本）」「名稱（副本 2）」…產生不重複的名稱；`suffix` 由使用端提供（畫面文字）。 */
+export function uniqueCopyName(base: string, roles: readonly AccessRole[], suffix: (n: number) => string): string {
+  for (let n = 1; ; n++) {
+    const candidate = `${base}${suffix(n)}`;
+    if (!validateRoleName(candidate, roles)) return candidate;
   }
 }

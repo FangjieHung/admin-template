@@ -14,8 +14,8 @@ import { AccessService } from './access.service';
  */
 @Directive({ selector: '[libCan]' })
 export class CanDirective {
-  /** 需要的權限：`'project:edit'`、`{ feature, action }`，或陣列（全部都要有）。 */
-  readonly libCan = input.required<AccessCheck>();
+  /** 需要的權限：`'project:edit'`、`{ feature, action }`，或陣列（全部都要有）。字串格式錯誤會丟錯。 */
+  readonly libCan = input.required<AccessCheck | string>();
   /** 沒有權限時改顯示的 template（選填）。 */
   readonly libCanElse = input<TemplateRef<unknown> | null>(null);
 
@@ -27,7 +27,7 @@ export class CanDirective {
     let current: TemplateRef<unknown> | null = null;
     let view: EmbeddedViewRef<unknown> | null = null;
     effect(() => {
-      const next = this.access.can(this.libCan()) ? this.then : this.libCanElse();
+      const next = this.access.can(this.libCan() as AccessCheck) ? this.then : this.libCanElse();
       if (next === current && view) return;
       untracked(() => {
         this.vcr.clear();

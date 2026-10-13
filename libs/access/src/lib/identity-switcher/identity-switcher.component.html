@@ -5,16 +5,19 @@
   [attr.aria-label]="labels().trigger + '：' + currentName() + (currentRoles() ? '（' + currentRoles() + '）' : '')"
 >
   <span class="material-symbols-rounded ids-icon" aria-hidden="true">badge</span>
-  <span class="ids-text" aria-hidden="true">
-    <span class="ids-name">{{ currentName() }}</span>
-    @if (currentRoles()) {
-      <span class="ids-roles">{{ currentRoles() }}</span>
-    }
-  </span>
-  <span class="material-symbols-rounded ids-caret" aria-hidden="true">expand_more</span>
+  @if (!compact()) {
+    <span class="ids-text" aria-hidden="true">
+      <span class="ids-caption">{{ labels().trigger }}</span>
+      <span class="ids-name">{{ currentName() }}</span>
+      @if (currentRoles()) {
+        <span class="ids-roles">{{ currentRoles() }}</span>
+      }
+    </span>
+    <span class="material-symbols-rounded ids-caret" aria-hidden="true">unfold_more</span>
+  }
 </button>
 
-<mat-menu #menu="matMenu" xPosition="before">
+<mat-menu #menu="matMenu" yPosition="above">
   <p class="ids-menu-title" aria-hidden="true">{{ labels().menuTitle }}</p>
   @for (entry of entries(); track entry.user.id) {
     <button

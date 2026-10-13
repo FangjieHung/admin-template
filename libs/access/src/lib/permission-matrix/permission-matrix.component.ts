@@ -1,18 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, InjectionToken, computed, inject, input, output } from '@angular/core';
-import {
-  ACCESS_ACTIONS,
-  AccessAction,
-  AccessFeature,
-  Permission,
-  ToggleState,
-  actionsOf,
-  columnState,
-  permissionOf,
-  rowState,
-  toggleColumn,
-  togglePermission,
-  toggleRow,
-} from '../access.model';
+import { ACCESS_ACTIONS, AccessAction, AccessFeature, Permission, actionsOf, permissionOf } from '../access.model';
+import { ToggleState, columnState, rowState, toggleColumn, togglePermission, toggleRow } from './matrix-state';
 
 /** 權限矩陣的畫面文字（libs/access 不內建字串）；`{feature}`、`{action}` 會被換掉。 */
 export interface PermissionMatrixLabels {

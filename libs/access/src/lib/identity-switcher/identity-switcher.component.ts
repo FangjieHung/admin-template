@@ -27,9 +27,14 @@ export interface IdentitySwitcherLabels {
   templateUrl: './identity-switcher.component.html',
   styleUrl: './identity-switcher.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '[attr.data-tone]': 'tone()', '[class.ids--compact]': 'compact()' },
 })
 export class IdentitySwitcherComponent {
   readonly labels = input.required<IdentitySwitcherLabels>();
+  /** `surface`：放在一般底色上（頁首、卡片）；`shell`：放在深色側欄裡（用 `--app-shell-*`）。 */
+  readonly tone = input<'surface' | 'shell'>('surface');
+  /** 只顯示圖示（收合的側欄）；名字與角色仍在無障礙名稱與提示裡。 */
+  readonly compact = input(false);
 
   protected readonly access = inject(AccessService);
 

@@ -2,22 +2,17 @@ import { describe, expect, it } from 'vitest';
 import {
   AccessRole,
   allPermissions,
-  columnState,
   copyRole,
   effectivePermissions,
   leastPresetRoleFor,
   parsePermission,
-  rowState,
-  samePermissions,
   sanitizePermissions,
   satisfies,
   toRequirements,
-  toggleColumn,
-  togglePermission,
-  toggleRow,
-  uniqueCopyName,
   validateRoleName,
 } from './access.model';
+import { columnState, rowState, samePermissions, toggleColumn, togglePermission, toggleRow } from './permission-matrix/matrix-state';
+import { uniqueCopyName } from './permission-matrix/role-draft';
 import { TEST_ACCESS_CONFIG } from './testing/access-fixture';
 
 const FEATURES = TEST_ACCESS_CONFIG.features;
