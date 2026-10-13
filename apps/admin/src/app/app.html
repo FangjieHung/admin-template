@@ -38,12 +38,10 @@
     </mat-sidenav-content>
   </mat-sidenav-container>
 
-  <!-- ticket 03：外觀浮動面板，開關在 /settings（AppearancePanelService）。掛在殼層最外層、
-       position: fixed 浮動，跟目前路由無關，所以每一頁都在；可拖曳到任何不擋路的位置
-       （見 floating-appearance-panel.component.scss 開頭的走查記錄，說明為什麼不是釘死角落
-       也不是掛進頁首排版）。
-       ticket 14：面板本身＋它用到的 @angular/cdk/drag-drop 平常不需要，只有開關打開才載入，
-       所以用 @defer (when …) 包起來——開關沒開時 Initial bundle 完全不含這兩塊。 -->
+  <!-- 外觀浮動面板：開關在 /settings 與 /components/appearance-panel（AppearancePanelService）。掛在殼層最外層、
+       position: fixed 浮動，跟目前路由無關，所以每一頁都在，可拖曳到不擋路的位置。
+       面板本身＋它用到的 @angular/cdk/drag-drop 平常不需要，只有開關打開才載入（@defer），
+       開關沒開時 Initial bundle 完全不含這兩塊。 -->
   @defer (when appearancePanel.visible()) {
     <lib-floating-appearance-panel />
   }

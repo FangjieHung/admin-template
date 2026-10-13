@@ -1,0 +1,136 @@
+:host {
+  display: block;
+}
+
+.ov-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1rem 1.25rem;
+  align-items: start;
+}
+
+.ov-grid--buttons {
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+}
+
+.ov-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.625rem;
+}
+
+.ov-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-top: 1rem;
+}
+
+.ov-grid .ov-row,
+.ov-stack .ov-row {
+  margin-top: 0;
+}
+
+.ov-label {
+  margin: 1.25rem 0 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.ov-stack > .ov-label,
+.ov-label:first-child {
+  margin-top: 0;
+}
+
+.ov-stack > .ov-label {
+  margin-bottom: 0;
+}
+
+.ov-btn-icon {
+  margin-right: 0.25rem;
+  font-size: 1.125rem;
+}
+
+.ov-field-icon {
+  padding: 0 0.5rem;
+  font-size: 1.25rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.ov-wide {
+  grid-column: 1 / -1;
+}
+
+.ov-calendar {
+  max-width: 20rem;
+}
+
+.ov-native {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.ov-chip-remove,
+.ov-menu-icon {
+  font-size: 1.125rem;
+}
+
+.ov-menu-icon {
+  margin-right: 0.75rem;
+}
+
+.ov-tab-body {
+  margin: 0;
+  padding: 1rem 0;
+}
+
+.ov-list {
+  padding: 0;
+}
+
+.ov-table-scroll {
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.ov-table {
+  width: 100%;
+  min-width: 32rem;
+}
+
+.ov-card-sample {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1.25rem;
+
+  p {
+    margin: 0;
+  }
+}
+
+.ov-card-button {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+}
+
+.ov-muted {
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.ov-type {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  p {
+    margin: 0;
+  }
+}

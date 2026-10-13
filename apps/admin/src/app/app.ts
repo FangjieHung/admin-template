@@ -5,7 +5,7 @@ import { MatSidenavContainer, MatSidenavModule } from '@angular/material/sidenav
 import { Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
 import { AppearancePanelService } from '@car-rental/theme-pack';
-// ticket 14：面板元件單獨走這條深路徑（不經過 barrel），讓 @defer 能把它與
+// 面板元件單獨走這條深路徑（不經過 barrel），讓 @defer 能把它與
 // @angular/cdk/drag-drop 拆進獨立 chunk——barrel（index.ts）同時匯出 AppearancePanelService，
 // 若跟它共用同一個 import 語句／模組，AppearancePanelService 的 eager 使用會拖著整個 barrel
 // （含面板元件）一起被主 bundle 靜態引入，defer 就無法把它轉成動態 import。
@@ -17,6 +17,24 @@ import { HeaderComponent } from './layout/header/header.component';
 import { HeaderTitleData } from './layout/header/header-title';
 import { FooterComponent } from './layout/footer/footer.component';
 import { isFillPageRoute } from './layout/fill-page';
+import { SHOWCASE_ENTRIES, SHOWCASE_GROUPS, showcaseRoute } from './showcase/showcase-registry';
+
+function buildNavItems(): NavEntry[] {
+  const t = ZH_TW_SHELL.nav;
+  const groups: NavEntry[] = SHOWCASE_GROUPS.map((group) => ({
+    label: group.label,
+    icon: group.icon,
+    children: [
+      ...(group.id === 'overview' ? [{ route: '/', label: t.home, icon: 'home' }] : []),
+      ...SHOWCASE_ENTRIES.filter((entry) => entry.group === group.id).map((entry) => ({
+        route: showcaseRoute(entry),
+        label: entry.title,
+        icon: entry.icon,
+      })),
+    ],
+  }));
+  return [...groups, { route: '/templates', label: t.templates, icon: 'web', badge: t.planned }];
+}
 
 @Component({
   selector: 'app-root',
@@ -34,49 +52,8 @@ import { isFillPageRoute } from './layout/fill-page';
 export class App implements OnInit {
   protected readonly t = ZH_TW_SHELL;
 
-  protected readonly navItems: NavEntry[] = [
-    { route: '/dashboard', label: this.t.nav.dashboard, icon: 'dashboard' },
-    {
-      label: this.t.nav.productGroup,
-      icon: 'inventory_2',
-      children: [
-        { route: '/vehicles', label: this.t.nav.vehicles, icon: 'directions_car' },
-        { route: '/add-ons', label: this.t.nav.addOns, icon: 'extension' },
-      ],
-    },
-    // 4.5：「訂單管理」改成群組，會員不再藏在訂單列表的工具列裡。建單（/orders/new）與
-    // 訂單詳情（/orders/:id）歸在「訂單列表」底下：側欄亮它、頁首預設標題也算它。
-    {
-      label: this.t.nav.orders,
-      icon: 'calendar_month',
-      children: [
-        {
-          route: '/orders',
-          label: this.t.nav.orderList,
-          icon: 'calendar_month',
-          matchPrefixes: ['/orders/'],
-        },
-        { route: '/orders/members', label: this.t.nav.members, icon: 'group' },
-      ],
-    },
-    {
-      label: this.t.nav.pricingGroup,
-      icon: 'payments',
-      children: [
-        { route: '/pricing', label: this.t.nav.pricing, icon: 'payments' },
-        { route: '/pricing/calendar', label: this.t.nav.pricingCalendar, icon: 'event' },
-        { route: '/coupons', label: this.t.nav.coupons, icon: 'sell' },
-      ],
-    },
-    {
-      label: this.t.nav.partnerGroup,
-      icon: 'handshake',
-      children: [
-        { route: '/partners', label: this.t.nav.partners, icon: 'handshake' },
-        { route: '/commission', label: this.t.nav.commission, icon: 'percent' },
-      ],
-    },
-  ];
+  /** 側欄：總覽群組（首頁＋展示目錄的 overview 項目）、各元件群組，最後是規劃中的頁面樣板。 */
+  protected readonly navItems: NavEntry[] = buildNavItems();
 
   private readonly navLeaves = this.navItems.flatMap((entry) =>
     isNavGroup(entry) ? entry.children : [entry],
@@ -84,16 +61,15 @@ export class App implements OnInit {
 
   protected isMobile = false;
   protected isSidenavOpen = true;
-  // 頁首的預設標題／麵包屑：由側欄選單算出，頁面可以用 provideHeaderTitle() 覆寫
-  // （header-title.ts；訂單詳情、車輛詳情等標題含動態資料的頁面都是這樣做）。
-  protected defaultTitle: HeaderTitleData = { title: String(this.t.nav.dashboard), breadcrumbs: [] };
+  // 頁首的預設標題／麵包屑：由側欄選單算出，頁面可以用 provideHeaderTitle() 覆寫（header-title.ts）。
+  protected defaultTitle: HeaderTitleData = { title: String(this.t.nav.home), breadcrumbs: [] };
   // 側欄群組的 active 樣式仍需要知道目前群組是誰，跟頁首的麵包屑分開維護。
   protected currentGroupLabel: string | null = null;
   protected openGroupLabel: string | null = null;
   protected collapsed = false;
   /**
-   * 目前頁面對應的選單項目（含 matchPrefixes 的歸屬，例如 /orders/new → 訂單列表）。
-   * 側欄用它標示目前位置——單靠 routerLinkActive 的完全比對，建單與訂單詳情時側欄不會亮任何一項。
+   * 目前頁面對應的選單項目（含 matchPrefixes 的歸屬）。
+   * 側欄用它標示目前位置——單靠 routerLinkActive 的完全比對，子頁面時側欄不會亮任何一項。
    */
   protected readonly activeRoute = signal<string | null>(null);
   /** 目前頁面是「滿版頁」（路由 data 標記，見 layout/fill-page.ts）：主內容區撐滿頁首與頁尾之間的高度。 */
@@ -108,7 +84,7 @@ export class App implements OnInit {
 
   private readonly breakpointObserver = inject(BreakpointObserver);
   private readonly router = inject(Router);
-  // ticket 14：面板開關的 signal 讓 app.html 的 @defer 決定要不要載入面板本身（含拖曳模組）。
+  // 面板開關的 signal 讓 app.html 的 @defer 決定要不要載入面板本身（含拖曳模組）。
   protected readonly appearancePanel = inject(AppearancePanelService);
 
   ngOnInit(): void {
@@ -123,14 +99,14 @@ export class App implements OnInit {
     this.router.events
       .pipe(
         filter((event) => event.type === 1),
-        // 比對時去掉 query／fragment，`/orders/new?vehicleId=…` 這類帶參數的網址才對得到選單項目。
+        // 比對時去掉 query／fragment，帶參數的網址才對得到選單項目。
         map(() => this.router.url.split(/[?#]/)[0]),
       )
       .subscribe((url) => {
         const active =
           this.navLeaves.find((item) => item.route === url) ??
           this.navLeaves
-            .filter((item) => url.startsWith(`${item.route}/`))
+            .filter((item) => item.route !== '/' && url.startsWith(`${item.route}/`))
             .sort((a, b) => b.route.length - a.route.length)[0] ??
           this.navLeaves.find((item) => item.matchPrefixes?.some((p) => url.startsWith(p)));
 
@@ -146,9 +122,8 @@ export class App implements OnInit {
           this.openGroupLabel = activeGroup.label;
         }
 
-        // 2.1：找不到選單對應時不再退回「總覽」（會誤導，例如原本的設定頁）。
-        // 目前每個沒有選單對應的路由（登入、設定）都會用 provideHeaderTitle() 蓋過這個預設值，
-        // 這裡只是沒有任何一方覆寫時的保底，避免顯示錯誤的標題。
+        // 找不到選單對應時不退回「首頁」（會誤導）。沒有選單對應的路由（登入、設定）
+        // 都會用 provideHeaderTitle() 蓋過這個預設值，這裡只是沒有任何一方覆寫時的保底。
         this.defaultTitle = {
           title: active?.label ?? '',
           breadcrumbs: activeGroup ? [{ label: activeGroup.label }] : [],

@@ -31,8 +31,8 @@ export class SideNavComponent {
   readonly openGroupLabel = input.required<string | null>();
   readonly currentGroupLabel = input.required<string | null>();
   /**
-   * 目前頁面對應的選單項目路徑，由 App 依網址算出（含 matchPrefixes：/orders/new、/orders/:id
-   * 都算「訂單列表」）。取代 routerLinkActive 的完全比對——那樣建單、訂單詳情時側欄一項都不會亮。
+   * 目前頁面對應的選單項目路徑，由 App 依網址算出（含 matchPrefixes：子頁面也歸屬某個選單項目）。
+   * 取代 routerLinkActive 的完全比對——那樣子頁面時側欄一項都不會亮。
    */
   readonly activeRoute = input<string | null>(null);
   readonly flyoutPositions = input.required<ConnectedPosition[]>();

@@ -1,10 +1,10 @@
 <main class="login-page" aria-labelledby="login-title">
   <section class="ui-card login-card p-4 sm:p-6">
-    <div class="brand-mark" aria-hidden="true">P</div>
-    <p class="ui-text-caption">澎湖租車後台</p>
-    <!-- 2.1：頁面唯一的 h1 在頁首（provideHeaderTitle，見 login-page.component.ts constructor）。 -->
+    <div class="brand-mark" aria-hidden="true">A</div>
+    <p class="ui-text-caption">{{ t.app.title }}</p>
+    <!-- 頁面唯一的 h1 在頁首（provideHeaderTitle，見 login-page.component.ts constructor）。 -->
     <p id="login-title" class="ui-text-title">{{ t.loginPage.title }}</p>
-    <p class="empty-state">目前提供示範登入流程。</p>
+    <p class="login-note">示範登入：不驗證帳號密碼，按下按鈕就進入展示 app。接上真正的身分驗證時換掉 AuthService。</p>
     <button matButton="filled" type="button" (click)="enterSystem()">進入系統</button>
   </section>
 </main>

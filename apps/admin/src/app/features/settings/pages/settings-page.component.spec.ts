@@ -33,7 +33,7 @@ describe('SettingsPageComponent', () => {
     expect(text).toContain('配色');
   });
 
-  it('2.1：頁首標題登記為「設定」（不再誤退回「總覽」），頁面本身不渲染 h1', () => {
+  it('頁首標題登記為「設定」，頁面本身不渲染 h1', () => {
     const fixture = TestBed.createComponent(SettingsPageComponent);
     fixture.detectChanges();
 

@@ -1,6 +1,6 @@
 <div class="sidenav-inner" [class.collapsed]="collapsed()">
   <div class="brand">
-    <div class="brand-mark">P</div>
+    <div class="brand-mark" aria-hidden="true">A</div>
     @if (!collapsed()) {
       <div class="brand-copy">
         <!-- 2.1：側欄品牌不再是 h1——頁面唯一的 h1 是頁首的大標題（app-header）。 -->
@@ -35,6 +35,9 @@
           <span class="material-symbols-rounded nav-icon" aria-hidden="true">{{ item.icon }}</span>
           @if (!collapsed()) {
             <span>{{ item.label }}</span>
+            @if (item.badge) {
+              <span class="nav-badge">{{ item.badge }}</span>
+            }
           }
         </a>
       }
@@ -127,11 +130,11 @@
     <mat-menu #menu="matMenu">
       <a mat-menu-item data-menu-action="settings" [routerLink]="['/settings']">
         <span class="material-symbols-rounded nav-icon" aria-hidden="true">settings</span>
-        <span>設定</span>
+        <span>{{ t.layout.settings }}</span>
       </a>
       <button mat-menu-item data-menu-action="logout" type="button" (click)="auth.logout()">
         <span class="material-symbols-rounded nav-icon" aria-hidden="true">logout</span>
-        <span>登出</span>
+        <span>{{ t.layout.logout }}</span>
       </button>
     </mat-menu>
 

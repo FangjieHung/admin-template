@@ -1,5 +1,5 @@
-// 滿版頁（路由 data 標記，見 fill-page.ts）的生效條件：外框（app.scss）與頁面（例如
-// order-create-page.component.scss）用同一個條件，才不會出現「外框撐滿了、頁面卻還是自然排版」的半套狀態。
-// 1024px 以下步驟導覽改直式（order-create-page 的 NARROW_QUERY），視窗低於 600px 時可視區域太矮，
-// 兩者都退回自然排版：整頁一起捲動，操作列改用 sticky 貼在視窗底部。
+// 滿版頁（路由 data 標記，見 fill-page.ts）的生效條件：外框（app.scss）與頁面用同一個條件，
+// 才不會出現「外框撐滿了、頁面卻還是自然排版」的半套狀態。
+// 視窗太窄（< 1024px）或太矮（< 600px）時可視區域不夠，兩者都退回自然排版：整頁一起捲動，
+// 操作列改用 sticky 貼在視窗底部。
 $query: '(min-width: 1024px) and (min-height: 600px)';

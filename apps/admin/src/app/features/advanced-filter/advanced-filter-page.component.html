@@ -1,0 +1,29 @@
+<app-showcase-page [summary]="entry.summary" [whenToUse]="whenToUse" [avoid]="avoid" [source]="entry.source" [usage]="usage" [api]="api">
+  <app-demo-block
+    heading="篩選按鈕＋條件標籤"
+    description="按「篩選」選欄位、設定條件後套用；條件以標籤列出，點 × 移除、或「清除全部」。已預先套用兩個條件。"
+  >
+    <div class="demo-row">
+      <lib-advanced-filter [fields]="fields" [labels]="labels" [(conditions)]="conditions" />
+      <lib-filter-chips [fields]="fields" [labels]="labels" [(conditions)]="conditions" />
+    </div>
+    <p class="demo-note" aria-live="polite">120 筆工單中符合 {{ results().length }} 筆，前 8 筆：</p>
+    <ul class="demo-list">
+      @for (r of results().slice(0, 8); track r.id) {
+        <li>
+          <span class="demo-list__title"><span class="ui-text-numeric">{{ r.code }}</span> {{ r.title }}</span>
+          <span class="demo-list__meta">
+            {{ statusLabels[r.status] }} · {{ r.owner }} · 到期 <span class="ui-text-numeric">{{ fmt(r.dueAt) }}</span> ·
+            <span class="ui-text-numeric">{{ r.amount.toLocaleString('en-US') }}</span> 元
+          </span>
+        </li>
+      } @empty {
+        <li class="demo-list__empty">沒有符合條件的工單</li>
+      }
+    </ul>
+  </app-demo-block>
+
+  <app-demo-block heading="條件資料" description="條件是可以直接 JSON 化的資料，存進檢視或送給 API 都一樣。">
+    <pre class="demo-json"><code>{{ conditions() | json }}</code></pre>
+  </app-demo-block>
+</app-showcase-page>

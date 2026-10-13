@@ -1,0 +1,391 @@
+<app-showcase-page [summary]="entry.summary" [whenToUse]="whenToUse" [source]="entry.source" [usage]="usage">
+  <!-- 按鈕 -->
+  <app-demo-block heading="按鈕" description="五種變體各有一般與停用狀態；圖示按鈕、FAB 與徽章在最後一列。">
+    <div class="ov-grid ov-grid--buttons">
+      @for (b of buttonVariants; track b.variant) {
+        <div class="ov-stack">
+          <span class="ov-label">{{ b.label }}</span>
+          <button type="button" [matButton]="b.variant">{{ b.label }}</button>
+          <button type="button" [matButton]="b.variant" disabled>停用</button>
+          <button type="button" [matButton]="b.variant">
+            <span class="material-symbols-rounded ov-btn-icon" aria-hidden="true">add</span>新增
+          </button>
+        </div>
+      }
+    </div>
+    <div class="ov-row">
+      <button type="button" matIconButton aria-label="編輯"><span class="material-symbols-rounded" aria-hidden="true">edit</span></button>
+      <button type="button" matIconButton aria-label="刪除" disabled><span class="material-symbols-rounded" aria-hidden="true">delete</span></button>
+      <button type="button" matIconButton aria-label="通知" matBadge="3" matBadgeSize="small"><span class="material-symbols-rounded" aria-hidden="true">notifications</span></button>
+      <button type="button" matMiniFab aria-label="新增"><span class="material-symbols-rounded" aria-hidden="true">add</span></button>
+      <button type="button" matFab aria-label="建立"><span class="material-symbols-rounded" aria-hidden="true">edit_square</span></button>
+      <button type="button" matFab extended><span class="material-symbols-rounded" aria-hidden="true">add</span>建立工單</button>
+    </div>
+  </app-demo-block>
+
+  <!-- 文字欄位 -->
+  <app-demo-block heading="文字欄位" description="outline（一般表單）與 fill（篩選列、ui-field-group）兩種外觀；提示、錯誤、停用、前後綴與多行。">
+    @for (appearance of ['outline', 'fill']; track appearance) {
+      <p class="ov-label">appearance="{{ appearance }}"</p>
+      <div class="ov-grid">
+        <mat-form-field [appearance]="appearance === 'fill' ? 'fill' : 'outline'">
+          <mat-label>專案名稱</mat-label>
+          <input matInput placeholder="例：官網改版" />
+          <mat-hint>最多 40 字</mat-hint>
+        </mat-form-field>
+        <mat-form-field [appearance]="appearance === 'fill' ? 'fill' : 'outline'">
+          <mat-label>負責人（必填）</mat-label>
+          <input matInput [formControl]="requiredControl" required />
+          <mat-error>請輸入負責人</mat-error>
+        </mat-form-field>
+        <mat-form-field [appearance]="appearance === 'fill' ? 'fill' : 'outline'">
+          <mat-label>電子郵件</mat-label>
+          <input matInput type="email" [formControl]="emailControl" />
+          <mat-error>電子郵件格式不正確</mat-error>
+        </mat-form-field>
+        <mat-form-field [appearance]="appearance === 'fill' ? 'fill' : 'outline'">
+          <mat-label>專案代碼</mat-label>
+          <input matInput [formControl]="disabledControl" />
+          <mat-hint>停用</mat-hint>
+        </mat-form-field>
+        <mat-form-field [appearance]="appearance === 'fill' ? 'fill' : 'outline'">
+          <mat-label>預算</mat-label>
+          <span matTextPrefix>NT$&nbsp;</span>
+          <input matInput type="number" value="480000" class="ui-text-numeric" />
+          <span matTextSuffix>元</span>
+        </mat-form-field>
+        <mat-form-field [appearance]="appearance === 'fill' ? 'fill' : 'outline'">
+          <mat-label>搜尋</mat-label>
+          <span matPrefix class="material-symbols-rounded ov-field-icon" aria-hidden="true">search</span>
+          <input matInput placeholder="輸入關鍵字" />
+          <span matSuffix class="material-symbols-rounded ov-field-icon" aria-hidden="true">close</span>
+        </mat-form-field>
+        <mat-form-field [appearance]="appearance === 'fill' ? 'fill' : 'outline'" class="ov-wide">
+          <mat-label>備註</mat-label>
+          <textarea matInput rows="3">多行文字欄位。</textarea>
+        </mat-form-field>
+      </div>
+    }
+    <p class="ov-label">.ui-field-group（相連的 fill 欄位）</p>
+    <div class="ui-field-group">
+      <mat-form-field appearance="fill">
+        <mat-label>起日</mat-label>
+        <input matInput value="2026/10/01" class="ui-text-numeric" />
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>迄日</mat-label>
+        <input matInput value="2026/10/31" class="ui-text-numeric" />
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>數量</mat-label>
+        <input matInput value="12" class="ui-text-numeric" />
+      </mat-form-field>
+    </div>
+  </app-demo-block>
+
+  <!-- 下拉、自動完成、日期與時間 -->
+  <app-demo-block heading="下拉、自動完成、日期與時間" description="選單面板、月曆與時間清單都是浮層，造型由質地的 datepicker／menu recipe 決定。">
+    <div class="ov-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>狀態</mat-label>
+        <mat-select value="doing">
+          <mat-option value="todo">待處理</mat-option>
+          <mat-option value="doing">進行中</mat-option>
+          <mat-option value="done">已完成</mat-option>
+          <mat-option value="hold" disabled>暫停（停用選項）</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>分類（可複選）</mat-label>
+        <mat-select [value]="['design', 'dev']" multiple>
+          <mat-option value="design">設計</mat-option>
+          <mat-option value="dev">開發</mat-option>
+          <mat-option value="ops">維運</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>優先順序（必填）</mat-label>
+        <mat-select [formControl]="selectErrorControl" required>
+          <mat-option value="high">高</mat-option>
+          <mat-option value="low">低</mat-option>
+        </mat-select>
+        <mat-error>請選擇優先順序</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>聯絡人</mat-label>
+        <input matInput [matAutocomplete]="contactAuto" (input)="onContactInput($event)" placeholder="輸入姓名或部門" />
+        <mat-autocomplete #contactAuto="matAutocomplete">
+          @for (c of contactOptions(); track c.id) {
+            <mat-option [value]="c.name">{{ c.name }}（{{ c.team }}）</mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>到期日</mat-label>
+        <input matInput [matDatepicker]="duePicker" [value]="today" />
+        <mat-datepicker-toggle matIconSuffix [for]="duePicker" />
+        <mat-datepicker #duePicker />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>期間</mat-label>
+        <mat-date-range-input [rangePicker]="rangePicker">
+          <input matStartDate placeholder="起日" />
+          <input matEndDate placeholder="迄日" />
+        </mat-date-range-input>
+        <mat-datepicker-toggle matIconSuffix [for]="rangePicker" />
+        <mat-date-range-picker #rangePicker />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>開始時間</mat-label>
+        <input matInput [matTimepicker]="timePicker" [value]="today" />
+        <mat-timepicker-toggle matIconSuffix [for]="timePicker" />
+        <mat-timepicker #timePicker interval="30m" />
+      </mat-form-field>
+    </div>
+    <p class="ov-label">內嵌月曆（mat-calendar）</p>
+    <mat-card appearance="outlined" class="ov-calendar">
+      <mat-calendar [selected]="today" />
+    </mat-card>
+  </app-demo-block>
+
+  <!-- 選擇控制 -->
+  <app-demo-block heading="勾選、單選與開關" description="Material 的 checkbox／radio／slide-toggle，以及 theme-pack 重畫的原生 input（_choice-controls.scss），各含停用與錯誤狀態。">
+    <div class="ov-grid">
+      <div class="ov-stack">
+        <span class="ov-label">mat-checkbox</span>
+        <mat-checkbox>未勾選</mat-checkbox>
+        <mat-checkbox [checked]="true">已勾選</mat-checkbox>
+        <mat-checkbox [indeterminate]="true">部分勾選</mat-checkbox>
+        <mat-checkbox disabled>停用</mat-checkbox>
+        <mat-checkbox disabled [checked]="true">停用（已勾選）</mat-checkbox>
+      </div>
+      <div class="ov-stack">
+        <span class="ov-label">mat-radio</span>
+        <mat-radio-group value="month" aria-label="期間" class="ov-stack">
+          <mat-radio-button value="week">本週</mat-radio-button>
+          <mat-radio-button value="month">本月</mat-radio-button>
+          <mat-radio-button value="year" disabled>本年（停用）</mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <div class="ov-stack">
+        <span class="ov-label">mat-slide-toggle</span>
+        <mat-slide-toggle>關閉</mat-slide-toggle>
+        <mat-slide-toggle [checked]="true">開啟</mat-slide-toggle>
+        <mat-slide-toggle disabled>停用</mat-slide-toggle>
+        <mat-slide-toggle disabled [checked]="true">停用（開啟）</mat-slide-toggle>
+      </div>
+      <div class="ov-stack">
+        <span class="ov-label">原生 input</span>
+        <label class="ov-native"><input type="checkbox" />未勾選</label>
+        <label class="ov-native"><input type="checkbox" checked />已勾選</label>
+        <label class="ov-native"><input type="checkbox" aria-invalid="true" />錯誤</label>
+        <label class="ov-native"><input type="checkbox" disabled checked />停用</label>
+        <label class="ov-native"><input type="radio" name="ov-native-radio" checked />單選 A</label>
+        <label class="ov-native"><input type="radio" name="ov-native-radio" />單選 B</label>
+        <label class="ov-native"><input type="radio" name="ov-native-radio-2" disabled />單選（停用）</label>
+      </div>
+    </div>
+  </app-demo-block>
+
+  <!-- Chips -->
+  <app-demo-block heading="Chips" description="可選取的篩選 chip（單選）與可移除的標籤；狀態徽章請用下方的 .ui-chip。">
+    <div class="ov-stack">
+      <mat-chip-listbox aria-label="篩選" value="待處理">
+        @for (chip of filterChips; track chip) {
+          <mat-chip-option [value]="chip">{{ chip }}</mat-chip-option>
+        }
+        <mat-chip-option disabled>停用</mat-chip-option>
+      </mat-chip-listbox>
+      <mat-chip-set aria-label="標籤">
+        @for (tag of tags(); track tag) {
+          <mat-chip (removed)="removeTag(tag)">
+            {{ tag }}
+            <button type="button" matChipRemove [attr.aria-label]="'移除 ' + tag">
+              <span class="material-symbols-rounded ov-chip-remove" aria-hidden="true">close</span>
+            </button>
+          </mat-chip>
+        }
+      </mat-chip-set>
+    </div>
+  </app-demo-block>
+
+  <!-- Tabs -->
+  <app-demo-block heading="分頁標籤" description="mat-tab-group；第三個分頁停用。">
+    <mat-tab-group>
+      <mat-tab label="基本資料"><p class="ov-tab-body">分頁內容：專案名稱、負責人、期限。</p></mat-tab>
+      <mat-tab label="成員"><p class="ov-tab-body">分頁內容：成員清單。</p></mat-tab>
+      <mat-tab label="封存" disabled><p class="ov-tab-body">停用的分頁。</p></mat-tab>
+    </mat-tab-group>
+  </app-demo-block>
+
+  <!-- 浮層 -->
+  <app-demo-block heading="選單、提示、對話框與提示訊息" description="點按鈕開啟；選單與對話框的外框、圓角、陰影與遮罩都由質地決定。">
+    <div class="ov-row">
+      <button type="button" matButton="outlined" [matMenuTriggerFor]="demoMenu">開啟選單</button>
+      <mat-menu #demoMenu="matMenu">
+        <button type="button" mat-menu-item>
+          <span class="material-symbols-rounded ov-menu-icon" aria-hidden="true">edit</span><span>編輯</span>
+        </button>
+        <button type="button" mat-menu-item>
+          <span class="material-symbols-rounded ov-menu-icon" aria-hidden="true">content_copy</span><span>複製</span>
+        </button>
+        <button type="button" mat-menu-item disabled>
+          <span class="material-symbols-rounded ov-menu-icon" aria-hidden="true">delete</span><span>刪除（停用）</span>
+        </button>
+      </mat-menu>
+      <button type="button" matButton="outlined" matTooltip="這是工具提示">滑過看提示</button>
+      <button type="button" matButton="tonal" (click)="openDialog()">開啟對話框</button>
+      <button type="button" matButton="tonal" (click)="openSnackBar()">顯示提示訊息</button>
+    </div>
+  </app-demo-block>
+
+  <!-- 卡片、清單、表格 -->
+  <app-demo-block heading="卡片、清單與表格" description="mat-card 兩種外觀、mat-list，以及 Material 原生的 mat-table（清單頁請用 lib-data-table）。">
+    <div class="ov-grid">
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-title>outlined 卡片</mat-card-title>
+          <mat-card-subtitle>mat-card</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content><p>卡片內容。一般頁面的區塊請優先用 .ui-card。</p></mat-card-content>
+        <mat-card-actions align="end"><button type="button" matButton>查看</button></mat-card-actions>
+      </mat-card>
+      <mat-card appearance="raised">
+        <mat-card-header>
+          <mat-card-title>raised 卡片</mat-card-title>
+          <mat-card-subtitle>mat-card</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content><p>有陰影的卡片。</p></mat-card-content>
+      </mat-card>
+      <mat-list class="ov-list">
+        @for (c of contacts.slice(0, 4); track c.id) {
+          <mat-list-item>
+            <span matListItemTitle>{{ c.name }}</span>
+            <span matListItemLine>{{ c.team }} · {{ c.email }}</span>
+          </mat-list-item>
+        }
+      </mat-list>
+    </div>
+    <div class="ov-table-scroll">
+      <table mat-table [dataSource]="projects" class="ov-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>專案</th>
+          <td mat-cell *matCellDef="let p">{{ p.name }}</td>
+        </ng-container>
+        <ng-container matColumnDef="owner">
+          <th mat-header-cell *matHeaderCellDef>負責人</th>
+          <td mat-cell *matCellDef="let p">{{ p.owner }}</td>
+        </ng-container>
+        <ng-container matColumnDef="progress">
+          <th mat-header-cell *matHeaderCellDef>進度</th>
+          <td mat-cell *matCellDef="let p" class="ui-text-numeric">{{ p.progress }}%</td>
+        </ng-container>
+        <ng-container matColumnDef="budget">
+          <th mat-header-cell *matHeaderCellDef>預算</th>
+          <td mat-cell *matCellDef="let p" class="ui-text-numeric">{{ p.budget.toLocaleString('en-US') }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: tableColumns"></tr>
+      </table>
+    </div>
+  </app-demo-block>
+
+  <!-- 進度與徽章 -->
+  <app-demo-block heading="進度與徽章">
+    <div class="ov-grid">
+      <div class="ov-stack">
+        <span class="ov-label">mat-progress-bar</span>
+        <mat-progress-bar mode="determinate" value="64" aria-label="進度 64%" />
+        <mat-progress-bar mode="buffer" value="40" bufferValue="70" aria-label="緩衝中" />
+        <mat-progress-bar mode="indeterminate" aria-label="載入中" />
+      </div>
+      <div class="ov-row">
+        <mat-progress-spinner mode="determinate" value="72" diameter="48" aria-label="進度 72%" />
+        <mat-progress-spinner mode="indeterminate" diameter="48" aria-label="載入中" />
+      </div>
+      <div class="ov-row">
+        <span matBadge="8" matBadgeOverlap="false">待辦</span>
+        <span matBadge="99+" matBadgeOverlap="false" matBadgeColor="accent">訊息</span>
+        <span matBadge="!" matBadgeOverlap="false" matBadgeColor="warn">錯誤</span>
+      </div>
+    </div>
+  </app-demo-block>
+
+  <!-- 展開面板 -->
+  <app-demo-block heading="展開面板" description="mat-accordion；一次只展開一個，第三個停用。">
+    <mat-accordion>
+      <mat-expansion-panel [expanded]="true">
+        <mat-expansion-panel-header>
+          <mat-panel-title>基本資料</mat-panel-title>
+          <mat-panel-description>專案名稱與負責人</mat-panel-description>
+        </mat-expansion-panel-header>
+        <p>展開的內容。</p>
+      </mat-expansion-panel>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>預算</mat-panel-title>
+          <mat-panel-description>金額與付款期程</mat-panel-description>
+        </mat-expansion-panel-header>
+        <p>展開的內容。</p>
+      </mat-expansion-panel>
+      <mat-expansion-panel disabled>
+        <mat-expansion-panel-header>
+          <mat-panel-title>封存（停用）</mat-panel-title>
+        </mat-expansion-panel-header>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </app-demo-block>
+
+  <!-- 步驟 -->
+  <app-demo-block heading="步驟" description="mat-stepper（橫式）；第一步已完成、第二步是目前步驟。">
+    <mat-stepper [selectedIndex]="1">
+      <mat-step label="基本資料" [completed]="true"><p class="ov-tab-body">第一步。</p></mat-step>
+      <mat-step label="成員"><p class="ov-tab-body">第二步：選擇成員。</p></mat-step>
+      <mat-step label="確認"><p class="ov-tab-body">第三步：確認送出。</p></mat-step>
+    </mat-stepper>
+  </app-demo-block>
+
+  <!-- ui-* class 契約 -->
+  <app-demo-block heading="ui-* class（CONTRACT.md）" description="骨架 HTML 的固定 class，每個質地負責實作：卡片、狀態徽章、字級、導覽膠囊（相連欄位 .ui-field-group 見上方文字欄位）。">
+    <div class="ov-grid">
+      <section class="ui-card ov-card-sample">
+        <p class="ui-text-caption">.ui-card</p>
+        <p class="ui-text-display ui-text-numeric">128</p>
+        <p class="ov-muted">一般卡片：邊線、陰影、圓角依質地。</p>
+      </section>
+      <section class="ui-card ui-card--inverse ov-card-sample">
+        <p class="ui-text-caption">.ui-card--inverse</p>
+        <p class="ui-text-display ui-text-numeric">42</p>
+        <p>深色重點卡。</p>
+      </section>
+      <button type="button" class="ui-card ui-card--clickable ov-card-sample ov-card-button">
+        <p class="ui-text-caption">.ui-card--clickable</p>
+        <p class="ui-text-subtitle">可點的卡片</p>
+        <p class="ov-muted">游標與滑過狀態提示可以點。</p>
+      </button>
+    </div>
+    <p class="ov-label">.ui-chip--{{ '{' }}tone{{ '}' }}</p>
+    <div class="ov-row">
+      @for (t of toneSamples; track t.tone) {
+        <span class="ui-chip" [class]="'ui-chip--' + t.tone"><span class="ui-chip__dot"></span>{{ t.label }}</span>
+      }
+    </div>
+    <p class="ov-label">.ui-text-*</p>
+    <div class="ov-type">
+      <p class="ui-text-display">Display 2,480</p>
+      <p class="ui-text-title">Title 頁面大標</p>
+      <p class="ui-text-subtitle">Subtitle 小節標題</p>
+      <p class="ui-text-caption">Caption 卡片小標</p>
+      <p class="ui-text-numeric">Numeric 2026/10/13 09:30 · 1,234,567</p>
+      <p>內文 Body：一般段落文字，中文用裝置的系統字型。</p>
+    </div>
+    <p class="ov-label">.ui-nav-pill（.is-active）</p>
+    <div class="ov-row" role="group" aria-label="期間">
+      @for (pill of navPills; track pill) {
+        <button type="button" class="ui-nav-pill" [class.is-active]="activePill() === pill" [attr.aria-pressed]="activePill() === pill" (click)="activePill.set(pill)">
+          {{ pill }}
+        </button>
+      }
+    </div>
+  </app-demo-block>
+</app-showcase-page>

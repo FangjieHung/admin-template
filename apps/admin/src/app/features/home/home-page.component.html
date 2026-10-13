@@ -1,0 +1,73 @@
+<div class="home">
+  <section class="ui-card home__hero p-4 sm:p-6" aria-labelledby="home-title">
+    <p class="ui-text-caption">Admin Template</p>
+    <h2 id="home-title" class="ui-text-title">可以整個複製的後台元件範本</h2>
+    <p class="home__lede">
+      這是一個 Angular＋Material 的 Nx monorepo：<code>libs/ui</code> 是不含業務規則的元件，<code>libs/theme-pack</code>
+      是「質地 × 配色」雙軸主題，這個展示 app 用中性的示範資料，把每個元件的各種狀態排出來。
+      右下角的外觀面板（設定頁可開啟）能即時切換質地與配色，每一頁都會跟著變。
+    </p>
+    <div class="home__stats">
+      <div>
+        <p class="ui-text-display">{{ doneCount }}</p>
+        <p class="ui-text-caption">已完成的元件頁</p>
+      </div>
+      <div>
+        <p class="ui-text-display">{{ plannedCount }}</p>
+        <p class="ui-text-caption">規劃中的元件與頁面樣板</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="ui-card p-4 sm:p-6" aria-labelledby="home-start">
+    <h2 id="home-start" class="ui-text-subtitle">用它開一個新專案</h2>
+    <ol class="home__steps">
+      @for (step of steps; track step.title; let i = $index) {
+        <li>
+          <span class="home__step-no ui-text-numeric" aria-hidden="true">{{ i + 1 }}</span>
+          <div>
+            <p class="home__step-title">{{ step.title }}</p>
+            <p class="home__step-body">{{ step.body }}</p>
+          </div>
+        </li>
+      }
+    </ol>
+  </section>
+
+  <section class="ui-card p-4 sm:p-6" aria-labelledby="home-catalog">
+    <div class="home__catalog-head">
+      <div>
+        <h2 id="home-catalog" class="ui-text-subtitle">元件目錄</h2>
+        <p class="home__note">
+          規劃中的項目來自
+          <a [href]="gapListUrl" target="_blank" rel="noopener">ERP／CRM 元件缺口清單</a>
+          與 <code>docs/plans/2026-10-13-template-pivot.md</code>。
+        </p>
+      </div>
+      <div class="home__filter" role="group" aria-label="依狀態篩選">
+        <button type="button" class="ui-nav-pill" [class.is-active]="filter() === 'all'" [attr.aria-pressed]="filter() === 'all'" (click)="filter.set('all')">全部</button>
+        <button type="button" class="ui-nav-pill" [class.is-active]="filter() === 'done'" [attr.aria-pressed]="filter() === 'done'" (click)="filter.set('done')">已完成</button>
+        <button type="button" class="ui-nav-pill" [class.is-active]="filter() === 'planned'" [attr.aria-pressed]="filter() === 'planned'" (click)="filter.set('planned')">規劃中</button>
+      </div>
+    </div>
+
+    <lib-data-table
+      [columns]="columns"
+      [rows]="visibleRows()"
+      [labels]="tableLabels"
+      [showExport]="false"
+      emptyText="沒有項目"
+    >
+      <ng-template dtCell="title" let-r>
+        @if (r.route) {
+          <a class="home__link" [routerLink]="r.route">{{ r.title }}</a>
+        } @else {
+          {{ r.title }}
+        }
+      </ng-template>
+      <ng-template dtCell="status" let-r>
+        <lib-status-chip [label]="statusLabel(r)" [status]="r.status === 'done' ? 'completed' : 'draft'" />
+      </ng-template>
+    </lib-data-table>
+  </section>
+</div>

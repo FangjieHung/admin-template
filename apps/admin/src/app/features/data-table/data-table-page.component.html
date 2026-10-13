@@ -1,0 +1,92 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <ng-template appHeaderToolbar>
+    <lib-page-toolbar [(query)]="query">
+      <lib-filter-select
+        filters
+        label="狀態"
+        [options]="statusOptions"
+        [value]="quickStatus()"
+        (valueChange)="setQuickStatus($event)"
+      />
+      <lib-advanced-filter
+        filters
+        [fields]="fields"
+        [labels]="filterLabels"
+        [conditions]="view.filters()"
+        (conditionsChange)="setFilters($event)"
+      />
+    </lib-page-toolbar>
+  </ng-template>
+
+  <app-demo-block
+    heading="完整功能"
+    description="312 筆工單：分頁、排序、欄位選擇（右上角）、固定最左的單號欄、多選與匯出；頁首的搜尋與「狀態」快速篩選、上方的已儲存檢視與條件標籤都接在同一份檢視狀態上。"
+  >
+  <div class="demo-controls">
+    <lib-saved-views [controller]="view" [labels]="savedViewsLabels" />
+    <lib-filter-chips
+      [fields]="fields"
+      [labels]="filterLabels"
+      [conditions]="view.filters()"
+      (conditionsChange)="setFilters($event)"
+    />
+  </div>
+
+  <div class="ui-card wide-table !p-0">
+    <lib-data-table
+      [columns]="columns"
+      [rows]="filteredItems()"
+      [labels]="tableLabels"
+      [selectable]="true"
+      [showBatchDelete]="false"
+      [pageable]="true"
+      [sortable]="true"
+      [columnChooser]="true"
+      [(sort)]="view.sort"
+      [(pageSize)]="view.pageSize"
+      [(page)]="view.page"
+      [(columnPrefs)]="view.columns"
+      emptyText="沒有符合條件的資料"
+      exportName="demo-items"
+      (exportFailed)="onExportFailed($event)"
+    >
+      <ng-template dtCell="code" let-r><span class="ui-text-numeric">{{ r.code }}</span></ng-template>
+      <ng-template dtCell="status" let-r>
+        <lib-status-chip [label]="statusLabel(r)" [status]="statusTone(r)" />
+      </ng-template>
+      <ng-template dtCell="category" let-r>{{ categoryLabel(r) }}</ng-template>
+      <ng-template dtCell="createdAt" let-r><span class="ui-text-numeric">{{ fmt(r.createdAt) }}</span></ng-template>
+      <ng-template dtCell="dueAt" let-r><span class="ui-text-numeric">{{ fmt(r.dueAt) }}</span></ng-template>
+    </lib-data-table>
+  </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="少量資料與手機版"
+    description="不分頁、不排序也能用；整列可點。把視窗縮到 640px 以下，切換卡片（只顯示 primary 欄，其餘可展開）或橫向捲動。"
+  >
+    <div class="mobile-switch" role="group" aria-label="手機版呈現">
+      <button type="button" class="ui-nav-pill" [class.is-active]="mobileMode() === 'cards'" (click)="mobileMode.set('cards')">卡片</button>
+      <button type="button" class="ui-nav-pill" [class.is-active]="mobileMode() === 'scroll'" (click)="mobileMode.set('scroll')">橫向捲動</button>
+    </div>
+    <div class="ui-card !p-0">
+      <lib-data-table
+        [columns]="smallColumns"
+        [rows]="smallRows"
+        [labels]="tableLabels"
+        [mobile]="mobileMode()"
+        [showExport]="false"
+        [rowClickable]="true"
+        (rowClick)="lastClicked.set($event)"
+      />
+    </div>
+    <p class="demo-note" aria-live="polite">最後點的列：{{ lastClicked()?.code ?? '（尚未點選）' }}</p>
+  </app-demo-block>
+</app-showcase-page>

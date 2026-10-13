@@ -1,0 +1,33 @@
+<app-showcase-page [summary]="entry.summary" [whenToUse]="whenToUse" [avoid]="avoid" [source]="entry.source" [usage]="usage" [api]="api">
+  <app-demo-block
+    heading="切換、儲存、另存"
+    description="排序、篩選、換欄位或每頁筆數後，檢視名稱旁會出現「已修改」；打開檢視選單可以儲存、另存新檢視、改名或刪除。存在這個瀏覽器，重新整理後還在。"
+  >
+    <div class="demo-row">
+      <lib-saved-views [controller]="view" [labels]="savedViewsLabels" />
+      <lib-advanced-filter [fields]="fields" [labels]="filterLabels" [conditions]="view.filters()" (conditionsChange)="view.setFilters($event)" />
+      <lib-filter-chips [fields]="fields" [labels]="filterLabels" [conditions]="view.filters()" (conditionsChange)="view.setFilters($event)" />
+    </div>
+    <div class="ui-card !p-0 mt-3">
+      <lib-data-table
+        [columns]="columns"
+        [rows]="rows()"
+        [labels]="tableLabels"
+        [pageable]="true"
+        [sortable]="true"
+        [columnChooser]="true"
+        [showExport]="false"
+        [(sort)]="view.sort"
+        [(pageSize)]="view.pageSize"
+        [(page)]="view.page"
+        [(columnPrefs)]="view.columns"
+        emptyText="沒有符合條件的資料"
+      />
+    </div>
+  </app-demo-block>
+
+  <app-demo-block heading="目前的檢視狀態" description="ListViewController.state()：存進檢視的就是這份資料。">
+    <p class="demo-note">目前檢視：{{ view.selectedView()?.name ?? savedViewsLabels.defaultView }}{{ view.modified() ? '（已修改）' : '' }}</p>
+    <pre class="demo-json"><code>{{ view.state() | json }}</code></pre>
+  </app-demo-block>
+</app-showcase-page>

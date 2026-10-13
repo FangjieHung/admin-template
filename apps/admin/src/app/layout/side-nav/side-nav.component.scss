@@ -249,3 +249,15 @@
   color: var(--app-shell-on-muted);
   font-size: 0.8rem;
 }
+
+// 選單項目右側的小標（例如頁面樣板的「規劃中」）：跟著側欄自己的前景色，不用狀態色。
+.nav-badge {
+  margin-left: auto;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid var(--app-shell-hairline);
+  border-radius: var(--mat-sys-corner-full);
+  color: var(--app-shell-on-muted);
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  white-space: nowrap;
+}

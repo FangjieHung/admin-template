@@ -13,7 +13,7 @@ export interface HeaderTitleData {
   breadcrumbs: HeaderBreadcrumb[];
   /**
    * 「← 返回」圖示按鈕的目的地；只有跟麵包屑的上一層不同時才需要給
-   * （例如訂單詳情要回「來源頁」，不一定是訂單列表）。不給就不顯示返回按鈕。
+   * （例如詳情頁要回「來源頁」，不一定是列表頁）。不給就不顯示返回按鈕。
    */
   backTo?: string;
 }
@@ -34,7 +34,7 @@ export class HeaderTitleSlot {
 
 /**
  * 頁面元件在 constructor 呼叫，登記自己的頁首標題／麵包屑，取代側欄選單推得的預設值。
- * `source` 可以讀頁面自己的 signal，標題會隨資料變動（例如訂單詳情的承租人姓名）。
+ * `source` 可以讀頁面自己的 signal，標題會隨資料變動（例如詳情頁的資料名稱）。
  *
  * 離開頁面時自動清空——用 owner 身分判斷是否仍是自己登記的值才清空，避免換頁時
  * 「下一頁先建立、這一頁才銷毀」的順序把新頁面剛設定的標題誤蓋掉（比照 HeaderToolbarDirective）。

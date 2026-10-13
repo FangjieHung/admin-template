@@ -18,12 +18,12 @@ export class LoginPageComponent {
   private readonly router = inject(Router);
 
   constructor() {
-    // 2.1：/login 不在側欄選單裡，找不到選單對應時不再誤退回「總覽」，改由頁面自己設定標題。
+    // /login 不在側欄選單裡，由頁面自己設定標題。
     provideHeaderTitle(() => ({ title: this.t.loginPage.title, breadcrumbs: [] }));
   }
 
   protected enterSystem(): void {
     this.auth.login();
-    void this.router.navigateByUrl('/dashboard');
+    void this.router.navigateByUrl('/');
   }
 }

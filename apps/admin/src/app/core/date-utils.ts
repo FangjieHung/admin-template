@@ -50,7 +50,7 @@ export function fmtIsoDate(iso: string): string {
 
 /**
  * 全站日期時間格式（1.8）：與參考日期（預設「今天」）同一年只顯示「MM/DD HH:mm」，
- * 跨年才加上年份「YYYY/MM/DD HH:mm」——列表裡大多是近期訂單，同年時不必每筆都印年份。
+ * 跨年才加上年份「YYYY/MM/DD HH:mm」——列表裡大多是近期資料，同年時不必每筆都印年份。
  * `now` 可傳入固定的參考日期，測試才不必依賴執行當下的實際日期；一律用 `new Date(iso)`
  * 轉換再讀本地的 getFullYear/getMonth/getDate/getHours/getMinutes，不能用字串切片
  * （iso 是 UTC，字串切片會露出跟本地時間差 8 小時的錯誤日期／時間）。

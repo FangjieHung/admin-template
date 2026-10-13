@@ -3,7 +3,7 @@ import { FILTER_SELECT_LABELS, PAGE_TOOLBAR_LABELS } from '@car-rental/ui';
 import { ZH_TW } from '../../core/i18n/zh-tw';
 
 /**
- * 清單頁頁首工具列（lib-page-toolbar／lib-filter-select）的文字。用到工具列的頁面在自己的 `providers` 加上它
+ * 頁首工具列（lib-page-toolbar／lib-filter-select）的文字。用到工具列的頁面在自己的 `providers` 加上它
  * （頁首的 ng-template 由頁面宣告，往上找得到頁面的 provider）。刻意不放 app.config 的根層：
  * 根層一 import @car-rental/ui，整個 barrel 會被併進 Initial bundle（實測 +165 kB）。
  */

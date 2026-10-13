@@ -1,0 +1,75 @@
+<div class="showcase">
+  <section class="ui-card showcase__intro p-4 sm:p-6" aria-labelledby="showcase-summary">
+    <p class="ui-text-caption">用途</p>
+    <p id="showcase-summary" class="showcase__summary">{{ summary() }}</p>
+
+    @if (whenToUse().length || avoid().length) {
+      <div class="showcase__when">
+        @if (whenToUse().length) {
+          <div>
+            <h2 class="ui-text-caption">何時使用</h2>
+            <ul>
+              @for (item of whenToUse(); track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          </div>
+        }
+        @if (avoid().length) {
+          <div>
+            <h2 class="ui-text-caption">不適合</h2>
+            <ul>
+              @for (item of avoid(); track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+    }
+
+    @if (source()) {
+      <p class="showcase__source">原始碼：<code>{{ source() }}</code></p>
+    }
+  </section>
+
+  <ng-content />
+
+  @if (usage()) {
+    <section class="ui-card p-4 sm:p-6" aria-labelledby="showcase-usage">
+      <h2 id="showcase-usage" class="ui-text-subtitle">用法</h2>
+      <pre class="showcase__code"><code>{{ usage() }}</code></pre>
+    </section>
+  }
+
+  @if (api().length) {
+    <section class="ui-card p-4 sm:p-6" aria-labelledby="showcase-api">
+      <h2 id="showcase-api" class="ui-text-subtitle">輸入與輸出</h2>
+      @for (section of api(); track section.title) {
+        <h3 class="ui-text-caption showcase__api-title">{{ section.title }}</h3>
+        <div class="showcase__api-scroll">
+          <table class="showcase__api">
+            <thead>
+              <tr>
+                <th scope="col">名稱</th>
+                <th scope="col">型別</th>
+                <th scope="col">預設</th>
+                <th scope="col">說明</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of section.rows; track row.name) {
+                <tr>
+                  <td><code>{{ row.name }}</code></td>
+                  <td><code>{{ row.type }}</code></td>
+                  <td>{{ row.default ?? '—' }}</td>
+                  <td>{{ row.description }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

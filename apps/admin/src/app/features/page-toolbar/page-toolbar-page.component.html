@@ -1,0 +1,42 @@
+<app-showcase-page [summary]="entry.summary" [whenToUse]="whenToUse" [avoid]="avoid" [source]="entry.source" [usage]="usage" [api]="api">
+  <ng-template appHeaderToolbar>
+    <lib-page-toolbar
+      [(query)]="query"
+      placeholder="搜尋專案名稱"
+      [activeFilterCount]="activeFilterCount()"
+      (clearAll)="clearAll()"
+      (searchSubmit)="submitted.set($event)"
+    >
+      <lib-filter-select filters label="負責人" [options]="ownerOptions" [(value)]="owner" />
+      <lib-filter-select filters label="進度" [options]="progressOptions" [(value)]="progress" />
+    </lib-page-toolbar>
+  </ng-template>
+
+  <app-demo-block
+    heading="放在頁首"
+    description="這一頁的工具列就在上方頁首（appHeaderToolbar）：點放大鏡展開搜尋、選負責人或進度篩選，下面的清單即時更新；有篩選時出現「清除篩選」。"
+  >
+    <dl class="demo-state">
+      <div><dt>搜尋</dt><dd>{{ query() || '（空白）' }}</dd></div>
+      <div><dt>負責人</dt><dd>{{ owner() ?? '全部' }}</dd></div>
+      <div><dt>進度</dt><dd>{{ progress() ?? '全部' }}</dd></div>
+      <div><dt>最後送出</dt><dd>{{ submitted() ?? '—' }}</dd></div>
+    </dl>
+    <ul class="demo-list">
+      @for (p of rows(); track p.id) {
+        <li>
+          <span class="demo-list__title">{{ p.name }}</span>
+          <span class="demo-list__meta">{{ p.owner }} · <span class="ui-text-numeric">{{ p.progress }}%</span></span>
+        </li>
+      } @empty {
+        <li class="demo-list__empty">沒有符合條件的專案</li>
+      }
+    </ul>
+  </app-demo-block>
+
+  <app-demo-block heading="只有篩選" description="showSearch=false：不需要搜尋時，工具列只放篩選。">
+    <lib-page-toolbar [showSearch]="false" [activeFilterCount]="owner() ? 1 : 0" (clearAll)="owner.set(null)">
+      <lib-filter-select filters label="負責人" [options]="ownerOptions" [(value)]="owner" />
+    </lib-page-toolbar>
+  </app-demo-block>
+</app-showcase-page>

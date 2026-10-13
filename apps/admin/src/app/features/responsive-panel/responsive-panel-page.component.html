@@ -1,0 +1,41 @@
+<app-showcase-page [summary]="entry.summary" [whenToUse]="whenToUse" [avoid]="avoid" [source]="entry.source" [usage]="usage" [api]="api">
+  <app-demo-block
+    heading="清單＋詳情"
+    description="點一位聯絡人，詳情出現在右側面板；把視窗縮到 1280px 以下，面板會改成全螢幕對話框。"
+  >
+    <div class="split">
+      <section class="split__list" aria-label="聯絡人">
+        <ul class="contact-list">
+          @for (c of contacts; track c.id) {
+            <li>
+              <button type="button" class="contact-list__item" [class.is-selected]="c.id === selectedId()" [attr.aria-pressed]="c.id === selectedId()" (click)="selectedId.set(c.id)">
+                <span class="demo-list__title">{{ c.name }}</span>
+                <span class="demo-list__meta">{{ c.team }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+      <section class="split__panel">
+        <lib-responsive-panel [open]="!!selected()" [heading]="selected()?.name ?? ''" [closeLabel]="closeLabel" (closed)="selectedId.set(null)">
+          @if (selected(); as c) {
+            <div class="panel-body">
+              <dl class="demo-state">
+                <div><dt>部門</dt><dd>{{ c.team }}</dd></div>
+                <div><dt>電子郵件</dt><dd>{{ c.email }}</dd></div>
+              </dl>
+              <p class="demo-note">面板內容可以是詳情、編輯表單或分頁標籤。</p>
+              <div class="demo-row">
+                <button type="button" matButton="filled">編輯</button>
+                <button type="button" matButton="outlined" (click)="selectedId.set(null)">關閉</button>
+              </div>
+            </div>
+          }
+        </lib-responsive-panel>
+        @if (!selected()) {
+          <p class="demo-note">面板已關閉。點左邊任一位聯絡人再打開。</p>
+        }
+      </section>
+    </div>
+  </app-demo-block>
+</app-showcase-page>

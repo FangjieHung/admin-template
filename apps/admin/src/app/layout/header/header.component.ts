@@ -10,7 +10,7 @@ import { HeaderTitleData, HeaderTitleSlot } from './header-title';
 /**
  * 頁首：麵包屑（上層路徑，可點）＋大標題（這一頁的名字，頁面唯一的 h1）。
  * 預設值（`defaultTitle`）由 App 依側欄選單算出；頁面可透過 `provideHeaderTitle()`
- * （header-title.ts）登記覆寫，蓋過預設值——訂單詳情、車輛詳情等標題含動態資料的頁面都是這樣做。
+ * （header-title.ts）登記覆寫，蓋過預設值——詳情頁這類標題含動態資料的頁面都是這樣做。
  */
 @Component({
   selector: 'app-header',

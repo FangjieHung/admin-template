@@ -24,7 +24,7 @@ describe('LoginPageComponent', () => {
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('登入');
   });
 
-  it('2.1：頁首標題登記為「登入」（不在側欄選單裡，不再誤退回「總覽」），頁面本身不渲染 h1', () => {
+  it('頁首標題登記為「登入」（不在側欄選單裡），頁面本身不渲染 h1', () => {
     const fixture = TestBed.createComponent(LoginPageComponent);
     fixture.detectChanges();
 
@@ -35,7 +35,7 @@ describe('LoginPageComponent', () => {
     expect((fixture.nativeElement as HTMLElement).querySelectorAll('h1')).toHaveLength(0);
   });
 
-  it('點擊進入系統建立 session 並導向總覽', () => {
+  it('點擊進入系統建立 session 並導向首頁', () => {
     const fixture = TestBed.createComponent(LoginPageComponent);
     fixture.detectChanges();
     const auth = TestBed.inject(AuthService);
@@ -45,6 +45,6 @@ describe('LoginPageComponent', () => {
     (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
 
     expect(vi.mocked(auth.login)).toHaveBeenCalledOnce();
-    expect(navigateSpy).toHaveBeenCalledWith('/dashboard');
+    expect(navigateSpy).toHaveBeenCalledWith('/');
   });
 });

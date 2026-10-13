@@ -1,7 +1,7 @@
 import { Directive, Injectable, OnDestroy, TemplateRef, inject, signal } from '@angular/core';
 
 /**
- * Topbar 標題旁的自訂內容插槽（例如訂單詳情的狀態 chip、急迫狀態徽章）。
+ * Topbar 標題旁的自訂內容插槽（例如詳情頁的狀態標籤）。
  * 比照 HeaderToolbarSlot（header-toolbar-slot.ts）的作法，只是渲染位置在 h1 旁而不是列尾。
  */
 @Injectable({ providedIn: 'root' })

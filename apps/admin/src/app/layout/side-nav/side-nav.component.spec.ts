@@ -7,11 +7,11 @@ import { NavEntry } from './nav-item.model';
 
 describe('SideNavComponent', () => {
   const navItems: NavEntry[] = [
-    { route: '/dashboard', label: '總覽', icon: 'dashboard' },
+    { route: '/', label: '首頁', icon: 'home' },
     {
-      label: '商品管理',
-      icon: 'inventory_2',
-      children: [{ route: '/vehicles', label: '車輛清單', icon: 'directions_car' }],
+      label: '資料呈現',
+      icon: 'table_view',
+      children: [{ route: '/components/data-table', label: '資料表', icon: 'table' }],
     },
   ];
 
@@ -47,16 +47,16 @@ describe('SideNavComponent', () => {
     const fixture = setup();
     fixture.detectChanges();
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(text).toContain('總覽');
-    expect(text).toContain('商品管理');
+    expect(text).toContain('首頁');
+    expect(text).toContain('資料呈現');
   });
 
-  it('2.1：側欄品牌不再是 h1（頁面唯一的 h1 是頁首的大標題），但品牌文字仍顯示', () => {
+  it('側欄品牌不是 h1（頁面唯一的 h1 是頁首的大標題），但品牌文字仍顯示', () => {
     const fixture = setup();
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelectorAll('h1')).toHaveLength(0);
-    expect(el.querySelector('.brand')?.textContent).toContain('澎湖租車後台');
+    expect(el.querySelector('.brand')?.textContent).toContain('Admin Template');
   });
 
   it('點擊群組觸發 toggleGroup 事件', () => {
@@ -68,40 +68,40 @@ describe('SideNavComponent', () => {
       '.nav-group-trigger',
     ) as HTMLButtonElement;
     trigger.click();
-    expect(emitted).toBe('商品管理');
+    expect(emitted).toBe('資料呈現');
   });
 
   it('currentGroupLabel 命中時群組按鈕加上 active class', () => {
     const fixture = setup();
-    fixture.componentRef.setInput('currentGroupLabel', '商品管理');
+    fixture.componentRef.setInput('currentGroupLabel', '資料呈現');
     fixture.detectChanges();
     const trigger = (fixture.nativeElement as HTMLElement).querySelector('.nav-group-trigger');
     expect(trigger?.classList.contains('active')).toBe(true);
   });
 
-  it('4.5：activeRoute 對到的選單項目亮起並標 aria-current="page"——含群組內的子項目；其他項目不亮', () => {
+  it('activeRoute 對到的選單項目亮起並標 aria-current="page"——含群組內的子項目；其他項目不亮', () => {
     const fixture = setup();
-    fixture.componentRef.setInput('openGroupLabel', '商品管理');
-    fixture.componentRef.setInput('activeRoute', '/vehicles');
+    fixture.componentRef.setInput('openGroupLabel', '資料呈現');
+    fixture.componentRef.setInput('activeRoute', '/components/data-table');
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
 
     const sublink = el.querySelector('.nav-sublink');
     expect(sublink?.classList.contains('active')).toBe(true);
     expect(sublink?.getAttribute('aria-current')).toBe('page');
-    const dashboard = el.querySelector('a.nav-link');
-    expect(dashboard?.classList.contains('active')).toBe(false);
-    expect(dashboard?.hasAttribute('aria-current')).toBe(false);
+    const home = el.querySelector('a.nav-link');
+    expect(home?.classList.contains('active')).toBe(false);
+    expect(home?.hasAttribute('aria-current')).toBe(false);
 
-    fixture.componentRef.setInput('activeRoute', '/dashboard');
+    fixture.componentRef.setInput('activeRoute', '/');
     fixture.detectChanges();
     expect(el.querySelector('a.nav-link')?.classList.contains('active')).toBe(true);
     expect(el.querySelector('.nav-sublink')?.classList.contains('active')).toBe(false);
   });
 
-  it('4.5：沒有對應的選單項目（例如設定頁）時一項都不亮', () => {
+  it('沒有對應的選單項目（例如設定頁）時一項都不亮', () => {
     const fixture = setup();
-    fixture.componentRef.setInput('openGroupLabel', '商品管理');
+    fixture.componentRef.setInput('openGroupLabel', '資料呈現');
     fixture.detectChanges();
 
     expect((fixture.nativeElement as HTMLElement).querySelectorAll('.active')).toHaveLength(0);

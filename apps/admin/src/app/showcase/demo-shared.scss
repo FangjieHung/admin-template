@@ -1,0 +1,90 @@
+// 展示頁共用的小樣式（目前狀態、示範清單）。只用語意 token。
+:host {
+  display: block;
+}
+
+.demo-state {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 0.75rem 1.25rem;
+  margin: 0 0 1rem;
+
+  div {
+    min-width: 0;
+  }
+
+  dt {
+    font-size: 0.75rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  dd {
+    margin: 0.125rem 0 0;
+    overflow-wrap: anywhere;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+.demo-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  li:last-child {
+    border-bottom: 0;
+  }
+}
+
+.demo-list__title {
+  font-weight: 600;
+  color: var(--mat-sys-on-surface);
+}
+
+.demo-list__meta,
+.demo-list__empty,
+.demo-note {
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.demo-note {
+  margin: 0.75rem 0 0;
+}
+
+.demo-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.demo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+.demo-json {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-small);
+  background: var(--mat-sys-surface-container-low);
+  color: var(--mat-sys-on-surface);
+}
