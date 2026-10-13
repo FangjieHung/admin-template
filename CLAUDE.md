@@ -22,3 +22,4 @@
 1. 元件放 `libs/ui/src/lib/<name>/`，selector 用 `lib-` 前綴，從 `libs/ui/src/index.ts` 匯出；畫面文字用 InjectionToken 或 input 由使用端提供，不內建字串；附 spec。
 2. 展示頁：`apps/admin/src/app/showcase/showcase-registry.ts` 與 `showcase-catalog.ts` 各加一筆，頁面放 `apps/admin/src/app/features/<id>/`，用 `app-showcase-page`＋`app-demo-block`，含用法程式碼與輸入輸出表；從 `showcase-catalog.ts` 的 `PLANNED_ITEMS` 移除對應的規劃中項目。
 3. 根層（`app.config.ts`）不要 import `@admin-template/ui`：整個 barrel 會進 Initial bundle。元件需要的文字由展示頁自己的 `providers` 提供（`apps/admin/src/app/shared/ui/*`）。
+   殼層（`app.ts`、`layout/`）同理：esbuild 以檔案為單位分 chunk，殼層 import 的套件檔案會連同展示頁用到的部分整個進 Initial bundle；殼層的 icon button 用 `apps/admin/src/vendor/mat-icon-button`，不要 import `@angular/material/button`（見 `apps/admin/src/vendor/mat-icon-button/index.mjs`）。
