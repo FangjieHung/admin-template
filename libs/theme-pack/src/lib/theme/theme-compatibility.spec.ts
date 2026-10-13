@@ -25,20 +25,20 @@ describe('theme-compatibility（ADR 0007，2026-09-27 定案清單）', () => {
   // 設計定案：每個質地排除哪些配色、預設哪個配色。
   const DECISIONS: Record<string, { excluded: string[]; defaultThemeId: string }> = {
     material: { excluded: ['candy'], defaultThemeId: 'verdant' },
-    linen: { excluded: ['candy'], defaultThemeId: 'sandstone' },
+    linen: { excluded: ['candy', 'oled'], defaultThemeId: 'sandstone' },
     grid: { excluded: [], defaultThemeId: 'verdant' },
-    'soft-ui': { excluded: ['sandstone', 'verdant'], defaultThemeId: 'cool-grey' },
+    'soft-ui': { excluded: ['sandstone', 'verdant', 'oled'], defaultThemeId: 'cool-grey' },
     clay: {
-      excluded: ['verdant', 'sandstone', 'azure', 'candy', 'mist-ink', 'glacier-blue'],
+      excluded: ['verdant', 'sandstone', 'azure', 'candy', 'mist-ink', 'glacier-blue', 'oled'],
       defaultThemeId: 'cool-grey',
     },
     editorial: { excluded: ['cool-grey'], defaultThemeId: 'mist-ink' },
     frosted: { excluded: ['sandstone', 'cool-grey'], defaultThemeId: 'candy' },
     aero: {
-      excluded: ['verdant', 'midnight', 'sandstone', 'candy'],
+      excluded: ['verdant', 'midnight', 'sandstone', 'candy', 'graphite', 'oled'],
       defaultThemeId: 'glacier-blue',
     },
-    // ADR 0011 提案（待使用者定案）
+    // ADR 0011 提案（待使用者定案）；Graphite、OLED 的格子是 ADR 0012 提案（待使用者定案）
     ledger: { excluded: ['candy'], defaultThemeId: 'azure' },
   };
 

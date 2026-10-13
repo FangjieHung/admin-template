@@ -1,0 +1,97 @@
+// src/styles/color-themes/oled/_tokens.scss
+// OLED 純黑（ADR 0012）：#000 畫布、表面只往上墊極小的亮度階、冷調電光青主色。深色配色。
+// 盡量不出現大面積的亮色：反轉表面（提示訊息、inverse hero 卡）也是深色，只比表面再亮幾階，不是 M3 預設的淺色。
+// token 涵蓋範圍和 Graphite 相同：Midnight 有的全部，加上建置產物裡有元件引用的 mat.theme() 缺口（理由見 graphite/_tokens.scss 開頭）。
+:root[data-theme='oled'] {
+  // 主題私有底層色階（僅本檔使用）。冷灰，色相約 215°；表面每階只差 1–2% 亮度。
+  --_k-0: #000000;
+  --_k-50: #0a0b0d;
+  --_k-100: #101216;
+  --_k-150: #16191e;
+  --_k-200: #1c2027;
+  --_k-250: #222831;
+  --_k-300: #2a303a;
+  --_k-500: #6c7586;
+  --_k-700: #a6afbe;
+  --_k-900: #e3e8ef;
+  // 電光青（主色）
+  --_cyan-200: #a8eefb;
+  --_cyan-400: #35d3f2;
+  --_cyan-800: #06303a;
+  --_cyan-950: #00161c;
+
+  // M3 顏色 token
+  --mat-sys-primary: var(--_cyan-400);
+  --mat-sys-on-primary: var(--_cyan-950);
+  --mat-sys-primary-container: var(--_cyan-800);
+  --mat-sys-on-primary-container: var(--_cyan-200);
+  --mat-sys-secondary: #86b8c8;
+  --mat-sys-on-secondary: #001e27;
+  --mat-sys-secondary-container: #13262d;
+  --mat-sys-on-secondary-container: #cbe7f0;
+  --mat-sys-tertiary: #a99dff;
+  --mat-sys-on-tertiary: #170c45;
+  --mat-sys-tertiary-container: #231c4a;
+  --mat-sys-on-tertiary-container: #ddd8ff;
+  --mat-sys-background: var(--_k-0);
+  --mat-sys-on-background: var(--_k-900);
+  --mat-sys-surface: var(--_k-50);
+  --mat-sys-surface-container-lowest: var(--_k-0);
+  --mat-sys-surface-container-low: var(--_k-50);
+  --mat-sys-surface-container: var(--_k-100);
+  --mat-sys-surface-container-high: var(--_k-150);
+  --mat-sys-surface-container-highest: var(--_k-200);
+  --mat-sys-on-surface: var(--_k-900);
+  --mat-sys-surface-variant: var(--_k-150); /* filled input 等元件底色的 fallback 來源 */
+  --mat-sys-on-surface-variant: var(--_k-700);
+  --mat-sys-outline: var(--_k-500);
+  --mat-sys-outline-variant: var(--_k-300);
+  --mat-sys-inverse-surface: var(--_k-250);
+  --mat-sys-inverse-on-surface: var(--_k-900);
+  --mat-sys-inverse-primary: var(--_cyan-400);
+  --mat-sys-error: #ff6b7a;
+  --mat-sys-on-error: #2a0008;
+  --mat-sys-error-container: #3b0b13;
+  --mat-sys-on-error-container: #ffb3bb;
+  // mat.theme() 直接引用的兩個調色盤色（停用選項文字的基底、側欄遮罩），理由同 graphite。
+  --mat-sys-neutral10: var(--_k-900);
+  --mat-sys-neutral-variant20: var(--_k-0);
+
+  // app 擴充狀態色：資訊用靛藍（不和電光青主色撞色），警示用琥珀
+  --app-positive-bg: #0b2416;
+  --app-positive-fg: #7be6a5;
+  --app-positive-dot: #36c771;
+  --app-info-bg: #171b3d;
+  --app-info-fg: #b8c0ff;
+  --app-info-dot: #8394ff;
+  --app-neutral-bg: var(--_k-150);
+  --app-neutral-fg: var(--_k-700);
+  --app-neutral-dot: var(--_k-500);
+  --app-warning-bg: #2b2108;
+  --app-warning-fg: #f7d266;
+  --app-warning-dot: #e9b62b;
+  --app-danger-bg: #3b0b13;
+  --app-danger-fg: #ff9ea8;
+  --app-danger-dot: #ff6b7a;
+
+  // 圖表色：電光青、靛藍、琥珀、品紅（色相各差 ≥ 60°）
+  --app-viz-1: var(--_cyan-400);
+  --app-viz-2: #8394ff;
+  --app-viz-3: #e9b62b;
+  --app-viz-4: #e27ad0;
+
+  // 側欄：和畫布一樣是純黑（沒有比 #000 更深的顏色），靠表面與文字亮度分區
+  --app-shell-bg: var(--_k-0);
+  --app-shell-on: var(--_k-900);
+  --app-shell-on-muted: var(--_k-700);
+
+  --app-topbar-bg: color-mix(in srgb, var(--_k-0) 82%, transparent);
+  --app-calendar-range-fill: color-mix(in srgb, var(--_cyan-400) 26%, var(--_k-150));
+
+  // 語意用途變數（ADR 0008 第 2 層：配色）。陰影在純黑上本來就看不見，色調照樣用黑，不會變成「發光」；
+  // 遮罩：畫面本來就是黑的，提高到 60% 才壓得住卡片與文字。
+  --app-shadow-tint: black;
+  --app-scrim: color-mix(in srgb, black 60%, transparent);
+
+  color-scheme: dark;
+}

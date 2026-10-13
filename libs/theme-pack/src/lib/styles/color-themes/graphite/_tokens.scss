@@ -1,0 +1,99 @@
+// src/styles/color-themes/graphite/_tokens.scss
+// Graphite 石墨橘（ADR 0012）：帶一點暖的石墨灰（不是純黑）＋儀表指示燈般的琥珀橘主色。深色配色。
+// 只放顏色；造型交給質地。主樣式的 mat.theme() 對每個 --mat-sys-* 顏色輸出 light-dark(淺, 深) 預設值（綠色調色盤），
+// 配色沒蓋到的 token 會露出那組綠色。除了 Midnight 有的 token，這裡另外蓋掉「建置產物裡真的有元件引用」的 5 個缺口
+// （inverse-primary、on-background、tertiary-container、neutral10、neutral-variant20，ADR 0012 附抽取方法），
+// 另補 tertiary 一組讓 tertiary-container 有成對的前景。沒人引用的 fixed 系列、surface-dim/bright 等不寫（每個 token 都算進初始 bundle）。
+:root[data-theme='graphite'] {
+  // 主題私有底層色階（僅本檔使用）。石墨灰：色相約 40°（暖），彩度很低。
+  --_g-950: #121110;
+  --_g-900: #191816;
+  --_g-850: #211f1d;
+  --_g-800: #292725;
+  --_g-750: #312f2c;
+  --_g-700: #3a3834;
+  --_g-600: #4b4842;
+  --_g-450: #8c867c;
+  --_g-300: #c2bcb1;
+  --_g-100: #ede9e2;
+  // 琥珀橘（主色，色相約 29°）。警示另用檸檬黃（約 50°）、危險用帶粉的紅（約 355°），三者不靠同一個色相。
+  --_amber-200: #ffd2a6;
+  --_amber-400: #ff9a3c;
+  --_amber-800: #4a2c0e;
+  --_amber-950: #241200;
+
+  // M3 顏色 token
+  --mat-sys-primary: var(--_amber-400);
+  --mat-sys-on-primary: var(--_amber-950);
+  --mat-sys-primary-container: var(--_amber-800);
+  --mat-sys-on-primary-container: var(--_amber-200);
+  --mat-sys-secondary: #d9bc98;
+  --mat-sys-on-secondary: #2a1d0e;
+  --mat-sys-secondary-container: #3f3528;
+  --mat-sys-on-secondary-container: #f0dfc8;
+  --mat-sys-tertiary: #6fcfc6;
+  --mat-sys-on-tertiary: #00201e;
+  --mat-sys-tertiary-container: #133f3b;
+  --mat-sys-on-tertiary-container: #b2eee8;
+  --mat-sys-background: var(--_g-900);
+  --mat-sys-on-background: var(--_g-100);
+  --mat-sys-surface: var(--_g-850);
+  --mat-sys-surface-container-lowest: var(--_g-950);
+  --mat-sys-surface-container-low: var(--_g-850);
+  --mat-sys-surface-container: var(--_g-800);
+  --mat-sys-surface-container-high: var(--_g-750);
+  --mat-sys-surface-container-highest: var(--_g-700);
+  --mat-sys-on-surface: var(--_g-100);
+  --mat-sys-surface-variant: var(--_g-750); /* filled input 等元件底色的 fallback 來源 */
+  --mat-sys-on-surface-variant: var(--_g-300);
+  --mat-sys-outline: var(--_g-450);
+  --mat-sys-outline-variant: var(--_g-600);
+  --mat-sys-inverse-surface: var(--_g-100);
+  --mat-sys-inverse-on-surface: var(--_g-900);
+  --mat-sys-inverse-primary: #8f4a00; /* 淺色反轉底（提示訊息）上的動作鈕 */
+  --mat-sys-error: #ff7b84;
+  --mat-sys-on-error: #2b0508;
+  --mat-sys-error-container: #4d151a;
+  --mat-sys-on-error-container: #ffb3b9;
+  // mat.theme() 直接引用的兩個調色盤色：停用選項文字（38% 混色）的基底、側欄遮罩。深色下前者要是淺色。
+  --mat-sys-neutral10: var(--_g-100);
+  --mat-sys-neutral-variant20: var(--_g-950);
+
+  // app 擴充狀態色（M3 缺 success/warning/info；danger 沿用 error 的色相）
+  --app-positive-bg: #15301f;
+  --app-positive-fg: #92e2aa;
+  --app-positive-dot: #52c47c;
+  --app-info-bg: #142a3d;
+  --app-info-fg: #a3cfff;
+  --app-info-dot: #5ca9f2;
+  --app-neutral-bg: var(--_g-750);
+  --app-neutral-fg: var(--_g-300);
+  --app-neutral-dot: var(--_g-450);
+  --app-warning-bg: #35300d;
+  --app-warning-fg: #f4e070;
+  --app-warning-dot: #e8cf2e;
+  --app-danger-bg: #4d151a;
+  --app-danger-fg: #ff9ea6;
+  --app-danger-dot: #ff7b84;
+
+  // 圖表色：橘、天藍、紫、沙灰（色相各差 ≥ 60°，沙灰另以明度區分）
+  --app-viz-1: var(--_amber-400);
+  --app-viz-2: #5ca9f2;
+  --app-viz-3: #b58ef2;
+  --app-viz-4: #a59e92;
+
+  // 側欄：比畫布更深的石墨
+  --app-shell-bg: var(--_g-950);
+  --app-shell-on: var(--_g-100);
+  --app-shell-on-muted: var(--_g-300);
+
+  --app-topbar-bg: color-mix(in srgb, var(--_g-850) 82%, transparent);
+  // 日曆範圍底色：主色疊在面板底（surface-container-high）上；深色要比淺色高的比例才看得出來。
+  --app-calendar-range-fill: color-mix(in srgb, var(--_amber-400) 26%, var(--_g-750));
+
+  // 語意用途變數（ADR 0008 第 2 層：配色）：深色配色的陰影色調與遮罩改近黑，理由同 Midnight。
+  --app-shadow-tint: color-mix(in srgb, var(--mat-sys-background) 30%, black);
+  --app-scrim: color-mix(in srgb, color-mix(in srgb, var(--mat-sys-background) 30%, black) 55%, transparent);
+
+  color-scheme: dark;
+}

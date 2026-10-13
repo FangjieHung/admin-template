@@ -24,6 +24,8 @@ export const COLOR_THEMES: ThemeOption[] = [
   { id: 'candy', label: 'Candy 糖果色' },
   { id: 'mist-ink', label: 'Mist Ink 霧藍墨色' },
   { id: 'glacier-blue', label: 'Glacier Blue 冰霧藍' },
+  { id: 'graphite', label: 'Graphite 石墨橘' },
+  { id: 'oled', label: 'OLED 純黑' },
 ];
 
 export const DEFAULT_PARADIGM = 'material';
@@ -50,6 +52,8 @@ export function textureStylesheetHref(id: string): string {
 
 // ADR 0007：質地是主軸，每個質地宣告自己的相容配色（白名單）與一個預設配色。
 // 清單於 2026-09-27 由設計定案（ticket 09），依據是美感；56 格對比已全數合格（ticket 15）。
+// 2026-10-13 新增 Graphite、OLED 兩套深色配色（ADR 0012）：新增的格子是提案，待使用者定案；
+// 兩套配色比照 Midnight 的相容範圍，再依美感排除（Aero 兩者都排除，OLED 另排除 Linen、Soft UI、Clay）。
 // 相容清單只存在這一處，settings 頁與之後的外觀浮動面板（ticket 03）都透過 ThemeService 讀取，不重抄清單。
 export interface TextureCompatibility {
   readonly compatibleThemeIds: readonly string[];
@@ -62,34 +66,34 @@ const ALL_COLOR_THEME_IDS: readonly string[] = COLOR_THEMES.map((c) => c.id);
 export const TEXTURE_COMPATIBILITY: Record<string, TextureCompatibility> = {
   // 排除 Candy
   material: {
-    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue'],
+    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue', 'graphite', 'oled'],
     defaultThemeId: 'verdant',
   },
-  // 排除 Candy
+  // 排除 Candy；OLED 依美感排除（ADR 0012：紙張色階在純黑上幾乎沒有差，紙感消失）
   linen: {
-    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue'],
+    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue', 'graphite'],
     defaultThemeId: 'sandstone',
   },
   // 全部相容
   grid: {
-    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue'],
+    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue', 'graphite', 'oled'],
     defaultThemeId: 'verdant',
   },
-  // 排除 Sandstone、Verdant
+  // 排除 Sandstone、Verdant；OLED 依美感排除（ADR 0012：純黑上暗面陰影看不見，浮雕消失）
   'soft-ui': {
-    compatibleThemeIds: ['midnight', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue'],
+    compatibleThemeIds: ['midnight', 'azure', 'cool-grey', 'candy', 'mist-ink', 'glacier-blue', 'graphite'],
     defaultThemeId: 'cool-grey',
   },
-  // 只保留 Midnight、Cool Grey
-  clay: { compatibleThemeIds: ['midnight', 'cool-grey'], defaultThemeId: 'cool-grey' },
+  // 只保留 Midnight、Cool Grey，加上 Graphite（ADR 0012）；OLED 依美感排除（環境陰影在純黑上看不見，體積感消失）
+  clay: { compatibleThemeIds: ['midnight', 'cool-grey', 'graphite'], defaultThemeId: 'cool-grey' },
   // 排除 Cool Grey
   editorial: {
-    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'candy', 'mist-ink', 'glacier-blue'],
+    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'candy', 'mist-ink', 'glacier-blue', 'graphite', 'oled'],
     defaultThemeId: 'mist-ink',
   },
   // 排除 Sandstone、Cool Grey
   frosted: {
-    compatibleThemeIds: ['verdant', 'midnight', 'azure', 'candy', 'mist-ink', 'glacier-blue'],
+    compatibleThemeIds: ['verdant', 'midnight', 'azure', 'candy', 'mist-ink', 'glacier-blue', 'graphite', 'oled'],
     defaultThemeId: 'candy',
   },
   // 高亮度雲霧玻璃只搭配冷調、淺色畫布；深色與暖沙會讓透明層失去參考圖的空氣感。
@@ -99,8 +103,9 @@ export const TEXTURE_COMPATIBILITY: Record<string, TextureCompatibility> = {
   },
   // 排除 Candy（ADR 0011）：8 格對比全數合格，Candy 是依美感排除——高彩度糖果色和帳冊的冷靜數字感衝突。
   // 2026-10-13 提案，待使用者定案。
+  // Graphite、OLED 於 2026-10-13 依 ADR 0012 提案加入（對比全數合格），待使用者定案。
   ledger: {
-    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue'],
+    compatibleThemeIds: ['verdant', 'midnight', 'sandstone', 'azure', 'cool-grey', 'mist-ink', 'glacier-blue', 'graphite', 'oled'],
     defaultThemeId: 'azure',
   },
 };

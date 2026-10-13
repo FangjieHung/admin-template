@@ -83,6 +83,8 @@ const COLOR_THEMES = [
   { id: 'candy', label: 'Candy 糖果色' },
   { id: 'mist-ink', label: 'Mist Ink 霧藍墨色' },
   { id: 'glacier-blue', label: 'Glacier Blue 冰霧藍' },
+  { id: 'graphite', label: 'Graphite 石墨橘' },
+  { id: 'oled', label: 'OLED 純黑' },
 ];
 
 // 方便單一組合 smoke-test / 局部重跑：--textures=material,frosted --colors=verdant
