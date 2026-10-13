@@ -524,4 +524,19 @@
       content: none;
     }
   }
+
+  // 活動紀錄（libs/ui activity-timeline）：時間軸的線是裝飾，用鋼筆線＋抖動（畫在不含文字的偽元素上，字不變形）；
+  // 節點是手繪小圓框。表格與欄位的線照樣是直的。高對比時抖動拉直。
+  .lib-activity-timeline {
+    --tl-line-color: var(--sketch-pen);
+    --tl-line-filter: var(--sketch-jitter);
+    --tl-node-border: var(--sketch-pen-w) solid var(--sketch-pen);
+    --tl-node-radius: var(--sketch-wobble-xs);
+  }
+
+  @media (prefers-contrast: more), (forced-colors: active) {
+    .lib-activity-timeline {
+      --tl-line-filter: none;
+    }
+  }
 }

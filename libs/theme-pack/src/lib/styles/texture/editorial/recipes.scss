@@ -263,4 +263,9 @@
   }
 
   // prefers-reduced-motion：transition 時長取自 --app-motion-*，由 _semantic.scss 在 reduce 時歸零。
+
+  // 活動紀錄（libs/ui activity-timeline）：時間軸是一條 1px 的細線（髮絲線的粗細，顏色用對底色 ≥ 3:1 的 --app-field-border）。
+  .lib-activity-timeline {
+    --tl-line-width: 1px;
+  }
 }

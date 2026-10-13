@@ -402,4 +402,9 @@
   .ui-card--inverse .ui-text-caption {
     color: inherit;
   }
+
+  // 活動紀錄（libs/ui activity-timeline）：節點像儀表上的指示燈座，一圈強亮邊；不發光（大面積同時發光會失去焦點）。
+  .lib-activity-timeline {
+    --tl-node-border: 1px solid var(--cockpit-edge-strong);
+  }
 }

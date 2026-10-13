@@ -285,4 +285,16 @@
   .ui-card--inverse .ui-text-caption {
     color: inherit;
   }
+
+  // 活動紀錄（libs/ui activity-timeline）：1px 的線（顏色維持 --app-field-border，Verdant 的 outline 對底色不到 3:1），節點加 1px outline 實框。
+  .lib-activity-timeline {
+    --tl-line-width: 1px;
+    --tl-node-border: 1px solid var(--mat-sys-outline);
+  }
+
+  // 詳情頁版型（libs/ui detail-layout）的精簡頁首：1px outline 實框（影子沿用 level2 硬影）。
+  .lib-detail-layout {
+    --lib-detail-compact-frame: 1px solid var(--mat-sys-outline);
+    --lib-detail-compact-divider: 1px solid var(--mat-sys-outline);
+  }
 }

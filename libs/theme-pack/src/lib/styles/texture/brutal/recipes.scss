@@ -514,4 +514,18 @@
       transform: none;
     }
   }
+
+  // 活動紀錄（libs/ui activity-timeline）：只設元件暴露的 --tl-* 變數。線是 3px 墨線；節點是 2px 墨框＋3px 墨影的貼紙（corner-full 是 0，所以是方的）。
+  .lib-activity-timeline {
+    --tl-line-width: 3px;
+    --tl-line-color: var(--brutal-ink);
+    --tl-node-border: var(--brutal-line);
+    --tl-node-shadow: var(--brutal-shadow-sm);
+  }
+
+  // 詳情頁版型（libs/ui detail-layout）的精簡頁首：跟卡片一樣是 3px 墨框的色紙（影子沿用 level2 墨影）。
+  .lib-detail-layout {
+    --lib-detail-compact-frame: var(--brutal-line-thick);
+    --lib-detail-compact-divider: var(--brutal-line-thick);
+  }
 }

@@ -139,6 +139,35 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 - 外框就是 `mat-form-field`＋`matInput`＋`mat-autocomplete`：欄位邊界、浮層底色、圓角、陰影都吃各質地既有的欄位與 `.mat-mdc-autocomplete-panel` recipe（浮層另掛 `.lib-relation-select-panel`；Brutal 的選項本身是粗體，在質地 recipe 裡給比對到的字 `.rs-match` 加 2px 底線）。
 - 選項內容只用語意 token：第二行與狀態列 `--mat-sys-on-surface-variant`、比對到的字只加粗（`font-weight: bolder`，不上底色）、縮寫圓章 `--mat-sys-primary-container`／`--mat-sys-on-primary-container`＋`--mat-sys-corner-full`（Brutal 等質地的 corner-full 是 0 或小圓角，圓章跟著變方）、搜尋失敗 `--mat-sys-error`、建立／重試的圖示 `--mat-sys-primary`；初始值解析中的骨架用 `--app-skeleton-*`。沒有新增質地要設的變數。
 
+#### 詳情頁版型與描述清單（`libs/ui` detail-layout、description-list）
+
+- 版型只排版面：投影進來的標題、按鈕、分頁、卡片用使用端的 class（`.ui-text-title`、`.ui-card`、Material 按鈕與分頁）與各質地既有 recipe。資訊列與「更多」選單的文字 `--mat-sys-on-surface-variant`；載入中骨架用 `--app-skeleton-*`（摘要欄骨架外面套 `.ui-card`）。
+- 精簡頁首（捲動後貼在捲動容器頂端的那一列）：底 `--mat-sys-surface`、陰影 `--mat-sys-level2`、圓角 `--mat-sys-corner-medium`（只有下方兩角）、轉場 `--app-motion-fast`（減少動態時不轉場）、圖層 `--app-z-sticky`。框線是元件暴露的變數，在 `.lib-detail-layout` 上設：
+
+| 變數 | 預設 | 用途 | 目前設定的質地 |
+| --- | --- | --- | --- |
+| `--lib-detail-compact-frame` | `0 solid transparent` | 精簡頁首四邊的框（border 簡寫） | Brutal：`var(--brutal-line-thick)`；Grid：`1px solid var(--mat-sys-outline)` |
+| `--lib-detail-compact-divider` | `1px solid var(--mat-sys-outline-variant)` | 精簡頁首下緣（border 簡寫） | Brutal：`var(--brutal-line-thick)`；Grid：`1px solid var(--mat-sys-outline)` |
+
+- 描述清單：標籤 `--mat-sys-on-surface-variant`、值 `--mat-sys-on-surface`、列與列之間 `--mat-sys-outline-variant`（最後一列不畫）、空值 `--mat-sys-on-surface-variant`；複製鈕滑過 `--app-state-hover`、按下 `--app-state-pressed`、焦點 `--app-focus-ring`、複製完成的勾號 `--mat-sys-primary`。沒有質地要設的變數。
+- 版型的父層（到捲動容器為止）不可以是 `overflow: hidden`，否則精簡頁首的 sticky 失效；展示頁的 `app-demo-block` 用 `[stickyContent]="true"` 把卡片改成 `overflow: visible`（Aero、Clay、Editorial、Frosted 的 `.ui-card` 是 hidden）。
+
+#### 活動紀錄（`libs/ui` activity-timeline）
+
+- 日期分組標題、相對時間、變更的欄位名與舊值 `--mat-sys-on-surface-variant`；摘要與新值 `--mat-sys-on-surface`；操作者圓章 `--mat-sys-primary-container`／`--mat-sys-on-primary-container`＋`--mat-sys-corner-full`，系統圓章 `--mat-sys-surface-container-high`／`--mat-sys-on-surface-variant`；留言引用區 `--mat-sys-surface-container-low` 底＋左緣 3px `--mat-sys-outline-variant`；展開變更鈕 `--mat-sys-primary`；篩選是 `mat-chip-listbox`（吃各質地的 chip recipe）；空狀態是 `lib-empty-state`；骨架用 `--app-skeleton-*`。
+- 節點的底與圖示用狀態語意一對 `--app-{tone}-bg`／`--app-{tone}-fg`（tone 的 `success` 對到 `positive`）。
+- 線與節點是元件暴露的變數（同 `--dt-*` 的作法：元件裡是 `var()` 的 fallback，質地只在 `.lib-activity-timeline` 上設變數，不覆寫屬性）。線畫在跟節點一樣寬、不含文字的 `::before` 上，所以 Sketch 可以加抖動 filter 而字不變形；表格、欄位的線不受影響。
+
+| 變數 | 預設 | 用途 | 目前設定的質地 |
+| --- | --- | --- | --- |
+| `--tl-line-width` | `2px` | 線寬（左緣對齊整數像素） | Brutal `3px`；Grid、Editorial `1px` |
+| `--tl-line-color` | `var(--app-field-border)` | 線色：全站唯一保證對表面 ≥ 3:1 的邊界色（WCAG 1.4.11） | Brutal：`var(--brutal-ink)`；Riso：`var(--riso-ink-a)`；Sketch：`var(--sketch-pen)` |
+| `--tl-line-filter` | `none` | 線的 filter | Sketch：`var(--sketch-jitter)`（高對比時 `none`） |
+| `--tl-node-size` | `2rem` | 節點邊長 | （無） |
+| `--tl-node-radius` | `var(--mat-sys-corner-full)` | 節點圓角（Brutal 的 corner-full 是 0、Grid／Editorial 是 2px，節點跟著變方） | Sketch：`var(--sketch-wobble-xs)` |
+| `--tl-node-border` | `0 solid transparent` | 節點框線（border 簡寫） | Brutal：`var(--brutal-line)`；Riso：`var(--riso-line)`；Sketch：`var(--sketch-pen-w) solid var(--sketch-pen)`；Grid：`1px solid var(--mat-sys-outline)`；Cockpit：`1px solid var(--cockpit-edge-strong)` |
+| `--tl-node-shadow` | `none` | 節點陰影 | Brutal：`var(--brutal-shadow-sm)` |
+
 #### 三態與提示訊息（`libs/ui` feedback-state、toast）
 
 - 骨架、空狀態、錯誤只用上面的 `--app-skeleton-*`、`--app-empty-*` 與語意 token；說明文字用 `.ui-text-subtitle`、補充文字用 `.ui-text-caption`，字體交給質地 recipe。圖示是 Material Symbols，空狀態 `--mat-sys-on-surface-variant`、錯誤 `--mat-sys-error`。

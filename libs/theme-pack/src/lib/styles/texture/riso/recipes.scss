@@ -503,4 +503,10 @@
       content: none;
     }
   }
+
+  // 活動紀錄（libs/ui activity-timeline）：線是主墨（2px，比 --riso-line 粗半格，免得 1.5px 的線被反鋸齒成淡色），節點外一圈主墨線。不放網點、不做錯位。
+  .lib-activity-timeline {
+    --tl-line-color: var(--riso-ink-a);
+    --tl-node-border: var(--riso-line);
+  }
 }
