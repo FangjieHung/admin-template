@@ -1,0 +1,9 @@
+// 活動紀錄展示頁。只用語意 token；時間軸的線與節點交給 libs/ui 與質地 recipe。
+
+.alp-timeline {
+  max-width: 48rem;
+}
+
+.alp-empty {
+  min-width: 0;
+}

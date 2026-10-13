@@ -1,0 +1,50 @@
+// 詳情頁版型展示頁。只用語意 token；版面交給 lib-detail-layout，卡片、標籤、按鈕交給質地 recipe。
+
+.dlp-controls {
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.dlp-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: var(--mat-sys-corner-small);
+  color: var(--mat-sys-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+
+  .material-symbols-rounded {
+    font-size: 1.125rem;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+}
+
+.dlp-text {
+  max-width: 68ch;
+  margin: 0.5rem 0 1rem;
+  color: var(--mat-sys-on-surface);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.dlp-section-title {
+  margin-bottom: 1rem;
+}
+
+.dlp-related-title {
+  margin-inline-start: 0.5rem;
+}
+
+.dlp-async {
+  margin-top: 1rem;
+}

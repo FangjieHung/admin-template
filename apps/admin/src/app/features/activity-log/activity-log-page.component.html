@@ -1,0 +1,56 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="工單的活動紀錄"
+    description="40 筆示範紀錄（固定內容，時間相對於打開頁面的這一刻）：人的操作與系統紀錄、留言、多欄位變更（超過 3 筆預設收合）。換篩選會重新查詢（顯示骨架），「載入更多」模擬 0.8 秒延遲。相對時間每分鐘更新，滑過或用 Tab 聚焦可看完整時間。"
+  >
+    <dl class="demo-state">
+      <div>
+        <dt>篩選</dt>
+        <dd data-demo="filter">{{ filterLabel() }}</dd>
+      </div>
+      <div>
+        <dt>顯示</dt>
+        <dd class="ui-text-numeric" data-demo="shown">{{ shown().length }} / {{ filteredCount() }} 筆</dd>
+      </div>
+      <div>
+        <dt>示範</dt>
+        <dd><button type="button" class="ui-nav-pill" data-demo="reload" (click)="reload()">重新載入（看骨架）</button></dd>
+      </div>
+    </dl>
+    <div class="alp-timeline">
+      <lib-activity-timeline
+        data-demo="timeline"
+        [entries]="shown()"
+        [kinds]="kinds"
+        [filters]="filters"
+        [filter]="filter()"
+        [hasMore]="hasMore()"
+        [loading]="loading()"
+        [loadingMore]="loadingMore()"
+        (filterChange)="onFilterChange($event)"
+        (loadMore)="onLoadMore()"
+      />
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="空狀態"
+    description="沒有任何紀錄時用 lib-empty-state；有篩選（不是第一個「全部」）而沒有符合的紀錄時，文字換成「沒有符合篩選條件的紀錄」。"
+  >
+    <div class="demo-grid">
+      <div class="alp-empty" data-demo="empty">
+        <lib-activity-timeline [entries]="noEntries" [kinds]="kinds" />
+      </div>
+      <div class="alp-empty" data-demo="empty-filtered">
+        <lib-activity-timeline [entries]="noEntries" [kinds]="kinds" [filters]="filters" filter="comments" />
+      </div>
+    </div>
+  </app-demo-block>
+</app-showcase-page>

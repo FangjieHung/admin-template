@@ -82,6 +82,13 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     load: () => import('../features/status-chip/status-chip-page.component').then((m) => m.StatusChipPageComponent),
   },
   {
+    id: 'activity-log',
+    title: '活動紀錄',
+    group: 'data',
+    icon: 'history',
+    load: () => import('../features/activity-log/activity-log-page.component').then((m) => m.ActivityLogPageComponent),
+  },
+  {
     id: 'relation-select',
     title: '關聯選擇欄位',
     group: 'input',
@@ -141,6 +148,13 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     icon: 'right_panel_open',
     load: () =>
       import('../features/responsive-panel/responsive-panel-page.component').then((m) => m.ResponsivePanelPageComponent),
+  },
+  {
+    id: 'detail-layout',
+    title: '詳情頁版型',
+    group: 'layout',
+    icon: 'article',
+    load: () => import('../features/detail-layout/detail-layout-page.component').then((m) => m.DetailLayoutPageComponent),
   },
   {
     id: 'scroll-shadow',

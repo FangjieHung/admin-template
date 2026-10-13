@@ -1,0 +1,173 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="示範工單"
+    description="寬螢幕是主內容＋右側摘要欄；1280px 以下摘要欄移到頁首下方，900px 以下頁首只留「編輯」，其餘收進「更多」。往下捲到頁首看不見時，頂端出現精簡列。換身分看動作依權限出現或消失。"
+    [stickyContent]="true"
+  >
+    <div class="demo-row dlp-controls">
+      <mat-slide-toggle [checked]="loading()" (change)="loading.set($event.checked)" data-toggle="loading">載入中</mat-slide-toggle>
+      <div class="demo-row" role="group" aria-label="示範身分">
+        @for (user of identities; track user.id) {
+          <button
+            type="button"
+            class="ui-nav-pill"
+            [class.is-active]="access.currentUser()?.id === user.id"
+            [attr.aria-pressed]="access.currentUser()?.id === user.id"
+            [attr.data-user-id]="user.id"
+            (click)="switchTo(user.id)"
+          >
+            {{ user.label }}
+          </button>
+        }
+      </div>
+    </div>
+    <dl class="demo-state">
+      <div>
+        <dt>最後操作</dt>
+        <dd data-demo="last-action">{{ lastAction() }}</dd>
+      </div>
+    </dl>
+
+    <lib-detail-layout class="dlp-ticket" [loading]="loading()" asideLabel="工單摘要">
+      <a libDetailBack class="dlp-back" routerLink="/components/data-table">
+        <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>返回工單清單
+      </a>
+      <h2 libDetailTitle class="ui-text-title">工單 #TK-2048 印表機無法連線</h2>
+      <div libDetailMeta>
+        <lib-status-chip status="processing" label="處理中" />
+        <span class="ui-text-numeric">TK-2048</span>
+        <span>建立者 李佩君</span>
+        <span>建立於 <span class="ui-text-numeric">2026/10/12 09:30</span></span>
+      </div>
+
+      <div libDetailActions>
+        <button type="button" matButton="filled" *libCan="'ticket:edit'" (click)="act('編輯')">
+          <span class="material-symbols-rounded" aria-hidden="true">edit</span>編輯
+        </button>
+        <button type="button" matButton="outlined" libDetailSecondary *libCan="'ticket:edit'" (click)="act('指派')">
+          <span class="material-symbols-rounded" aria-hidden="true">person_add</span>指派
+        </button>
+        <button type="button" matButton="outlined" libDetailSecondary *libCan="'ticket:approve'" (click)="act('關閉工單')">
+          <span class="material-symbols-rounded" aria-hidden="true">task_alt</span>關閉工單
+        </button>
+        <button type="button" libDetailOverflow (click)="act('複製連結')">
+          <span class="material-symbols-rounded" aria-hidden="true">link</span>複製連結
+        </button>
+        <button type="button" libDetailOverflow (click)="act('列印')">
+          <span class="material-symbols-rounded" aria-hidden="true">print</span>列印
+        </button>
+        <button type="button" libDetailOverflow *libCan="'ticket:delete'" (click)="act('刪除工單')">
+          <span class="material-symbols-rounded" aria-hidden="true">delete</span>刪除工單
+        </button>
+      </div>
+
+      <nav mat-tab-nav-bar libDetailTabs [tabPanel]="ticketPanel" aria-label="工單內容">
+        <a mat-tab-link [active]="tab() === 'overview'" (click)="tab.set('overview')">概覽</a>
+        <a mat-tab-link [active]="tab() === 'related'" (click)="tab.set('related')">相關項目（{{ related.length }}）</a>
+        <a mat-tab-link [active]="tab() === 'activity'" (click)="tab.set('activity')">活動紀錄</a>
+        <a mat-tab-link [active]="tab() === 'files'" (click)="tab.set('files')">附件（{{ files.length }}）</a>
+      </nav>
+
+      <mat-tab-nav-panel #ticketPanel>
+        @switch (tab()) {
+          @case ('overview') {
+            <section class="ui-card p-4 sm:p-6" aria-labelledby="dlp-overview">
+              <h3 id="dlp-overview" class="ui-text-subtitle">問題描述</h3>
+              <p class="dlp-text">
+                3 樓影印區的印表機從週一早上開始無法從電腦列印，送出的工作都停在佇列；印表機面板可以列印測試頁。
+                影響同一層約 12 位同仁。
+              </p>
+              <lib-description-list [items]="overviewItems" [columns]="2" (copied)="onCopied($event)" />
+            </section>
+          }
+          @case ('related') {
+            <section class="ui-card p-4 sm:p-6" aria-labelledby="dlp-related">
+              <h3 id="dlp-related" class="ui-text-subtitle">相關項目</h3>
+              <ul class="demo-list">
+                @for (r of related; track r.code) {
+                  <li>
+                    <span>
+                      <span class="ui-text-numeric demo-list__meta">{{ r.code }}</span>
+                      <span class="demo-list__title dlp-related-title">{{ r.title }}</span>
+                    </span>
+                    <lib-status-chip [status]="r.status" [label]="r.statusLabel" />
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+          @case ('activity') {
+            <section class="ui-card p-4 sm:p-6" aria-labelledby="dlp-activity">
+              <h3 id="dlp-activity" class="ui-text-subtitle dlp-section-title">活動紀錄</h3>
+              <lib-activity-timeline
+                [entries]="activity()"
+                [kinds]="kinds"
+                [hasMore]="hasMoreActivity()"
+                [loadingMore]="loadingMoreActivity()"
+                [headingLevel]="4"
+                (loadMore)="loadMoreActivity()"
+              />
+            </section>
+          }
+          @case ('files') {
+            <section class="ui-card p-4 sm:p-6" aria-labelledby="dlp-files">
+              <h3 id="dlp-files" class="ui-text-subtitle">附件</h3>
+              <ul class="demo-list">
+                @for (f of files; track f.name) {
+                  <li>
+                    <span class="demo-list__title">{{ f.name }}</span>
+                    <span class="demo-list__meta">{{ f.meta }}</span>
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+        }
+      </mat-tab-nav-panel>
+
+      <section libDetailAside class="ui-card p-4 sm:p-6" aria-labelledby="dlp-summary">
+        <h3 id="dlp-summary" class="ui-text-subtitle">摘要</h3>
+        <lib-description-list [items]="summaryItems" (copied)="onCopied($event)">
+          <ng-template libDescriptionValue="status" let-item>
+            <lib-status-chip status="processing" [label]="'' + item.value" />
+          </ng-template>
+        </lib-description-list>
+      </section>
+    </lib-detail-layout>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="錯誤與找不到"
+    description="版型不處理錯誤：載入失敗或找不到時，頁面用 lib-async-state（或直接用 lib-error-state、lib-empty-state）取代整個詳情頁。重試後模擬 0.9 秒載入。"
+  >
+    <div class="demo-row" role="group" aria-label="示範狀態">
+      <button type="button" class="ui-nav-pill" [class.is-active]="errorDemo() === 'not-found'" [attr.aria-pressed]="errorDemo() === 'not-found'" (click)="showErrorDemo('not-found')">找不到</button>
+      <button type="button" class="ui-nav-pill" [class.is-active]="errorDemo() === 'error'" [attr.aria-pressed]="errorDemo() === 'error'" (click)="showErrorDemo('error')">載入失敗</button>
+      <button type="button" class="ui-nav-pill" [class.is-active]="errorDemo() === 'ready'" [attr.aria-pressed]="errorDemo() === 'ready'" (click)="showErrorDemo('ready')">載入完成</button>
+    </div>
+    <lib-async-state
+      class="dlp-async"
+      [status]="errorStatus()"
+      skeleton="text"
+      emptyKind="no-results"
+      emptyIcon="search_off"
+      emptyMessage="找不到工單 TK-9999"
+      emptyDetail="這張工單可能已被刪除，或你沒有檢視權限。"
+      emptyActionLabel="回到工單清單"
+      errorMessage="工單載入失敗"
+      errorHint="請確認網路連線後再試一次。"
+      errorDetail="HTTP 503・請求編號 RQ-7F3A"
+      (retry)="retry()"
+      (emptyAction)="act('回到工單清單')"
+    >
+      <p class="dlp-text">工單 #TK-2048 已載入：這裡放 lib-detail-layout。</p>
+    </lib-async-state>
+  </app-demo-block>
+</app-showcase-page>

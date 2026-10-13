@@ -35,6 +35,14 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '依狀態語意顯示 5 種色調的小標籤；顏色與造型交給配色與質地。',
     source: 'libs/ui/src/lib/status-chip',
   },
+  'activity-log': {
+    summary: '「誰在何時改了什麼」的時間軸：依日期分組、相對時間、欄位的舊值與新值、留言、篩選與載入更多。',
+    source: 'libs/ui/src/lib/activity-timeline',
+  },
+  'detail-layout': {
+    summary: '打開一筆資料的整頁骨架：標題、狀態、主要動作、分頁與摘要側欄；窄螢幕自動重排，捲動時頁首縮成精簡列。',
+    source: 'libs/ui/src/lib/detail-layout',
+  },
   'relation-select': {
     summary: '輸入就搜尋，從大量資料裡挑一筆（負責人、專案、聯絡人）；表單存 id，初始值自動查出名稱，找不到時可以當場建立。',
     source: 'libs/ui/src/lib/relation-select',
@@ -106,9 +114,7 @@ export interface PlannedItem {
 }
 
 export const PLANNED_ITEMS: readonly PlannedItem[] = [
-  { title: '詳情頁版型', kind: '元件', priority: 'P0', summary: '標題＋狀態＋主要動作＋分頁＋摘要側欄。' },
   { title: '數字小卡與圖表', kind: '元件', priority: 'P1', summary: '儀表板與報表的折線、長條、圓環。' },
-  { title: '活動紀錄', kind: '元件', priority: 'P1', summary: '誰在何時改了什麼的時間軸。' },
   { title: '附件上傳與相機擷取', kind: '元件', priority: 'P1', summary: '拖放、預覽、進度、清單；手機可直接拍照。' },
   { title: '匯入精靈', kind: '元件', priority: 'P1', summary: '上傳 → 欄位對應 → 預覽驗證 → 匯入。' },
   { title: '通知中心', kind: '元件', priority: 'P1', summary: '鈴鐺、未讀數、通知清單。' },

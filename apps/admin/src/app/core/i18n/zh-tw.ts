@@ -71,6 +71,33 @@ export const ZH_TW = {
     clear: '清除',
     resolveFailed: '找不到這筆資料（{id}）',
   },
+  // 詳情頁版型（lib-detail-layout）。
+  detailLayout: {
+    more: '更多動作',
+    loading: '載入中',
+  },
+  // 描述清單（lib-description-list）：{label} 是那一列的標籤。
+  descriptionList: {
+    empty: '未填',
+    copy: '複製{label}',
+    copied: '已複製',
+  },
+  // 活動紀錄（lib-activity-timeline）：{date} 是日期、{weekday} 是星期、{count} 是變更筆數。
+  activityTimeline: {
+    today: '今天',
+    yesterday: '昨天',
+    dayHeading: '{date}（{weekday}）',
+    system: '系統',
+    loadMore: '載入更多',
+    expandChanges: '展開 {count} 筆變更',
+    collapseChanges: '收合變更',
+    emptyValue: '（空白）',
+    changedTo: '改成',
+    empty: '還沒有活動紀錄',
+    emptyFiltered: '沒有符合篩選條件的紀錄',
+    filters: '篩選活動紀錄',
+    loading: '載入中',
+  },
   // 簽名板（lib-signature-pad）。
   signaturePad: {
     drawTab: '手寫簽名',
