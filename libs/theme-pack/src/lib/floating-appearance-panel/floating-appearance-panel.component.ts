@@ -103,6 +103,8 @@ export class FloatingAppearancePanelComponent implements OnInit, OnDestroy {
     this.open.set(next);
     if (next) {
       this.computeAnchor();
+      // ADR 0010：面板一打開就在背景預先下載所有按需質地，之後點選時多半不用等網路。
+      this.theme.prefetchTextures();
     }
   }
 
@@ -112,7 +114,8 @@ export class FloatingAppearancePanelComponent implements OnInit, OnDestroy {
   }
 
   protected onParadigm(id: string): void {
-    this.theme.setParadigm(id);
+    // 按需質地載入完成才會真的切換（ADR 0010），失敗時 ThemeService 自己退回並提示，這裡不用等。
+    void this.theme.setParadigm(id);
   }
 
   protected onTheme(id: string): void {

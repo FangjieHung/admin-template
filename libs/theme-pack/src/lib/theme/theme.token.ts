@@ -31,6 +31,22 @@ export const DEFAULT_THEME = 'verdant';
 export const PARADIGM_KEY = 'cr.paradigm';
 export const THEME_KEY = 'cr.theme';
 
+// ADR 0010：常駐質地編進主樣式（一打開就有，也是按需質地載入失敗時的退路）；其餘質地都是按需質地，
+// 各自編成 `texture-<id>.css`（apps/admin/project.json 的 styles，`inject: false`），用到時才下載。
+// 新增質地預設就是按需，不用改這裡。admin index.html 的開機腳本有一份按需質地 id 清單，
+// scripts/texture-registration.spec.mjs 會比對它、這份 `texture` 與 project.json 三處一致。
+export const RESIDENT_TEXTURE_IDS: readonly string[] = [DEFAULT_PARADIGM];
+
+/** 這個質地的樣式是否要按需下載（常駐質地以外的已知質地）。 */
+export function isOnDemandTexture(id: string): boolean {
+  return texture.some((t) => t.id === id) && !RESIDENT_TEXTURE_IDS.includes(id);
+}
+
+/** 按需質地樣式檔的網址（相對於 `<base href>`；檔名不帶 hash，見 ADR 0010）。 */
+export function textureStylesheetHref(id: string): string {
+  return `texture-${id}.css`;
+}
+
 // ADR 0007：質地是主軸，每個質地宣告自己的相容配色（白名單）與一個預設配色。
 // 清單於 2026-09-27 由設計定案（ticket 09），依據是美感；56 格對比已全數合格（ticket 15）。
 // 相容清單只存在這一處，settings 頁與之後的外觀浮動面板（ticket 03）都透過 ThemeService 讀取，不重抄清單。
