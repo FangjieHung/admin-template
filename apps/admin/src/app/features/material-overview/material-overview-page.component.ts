@@ -19,13 +19,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ToastService } from '@admin-template/ui';
 import { DEMO_CONTACTS, DEMO_PROJECTS } from '../../showcase/demo-data';
+import { TOAST_PROVIDERS } from '../../shared/ui/component-label-providers';
 import { DemoBlockComponent } from '../../showcase/demo-block.component';
 import { ShowcasePageComponent } from '../../showcase/showcase-page.component';
 import { detailOf } from '../../showcase/showcase-catalog';
@@ -96,13 +97,14 @@ const ENTRY = detailOf('material');
     DemoBlockComponent,
   ],
   // 月曆與日期欄位用繁中格式（2026/10/13、2026年10月）。
-  providers: [provideNativeDateAdapter(), { provide: MAT_DATE_LOCALE, useValue: 'zh-TW' }],
+  // 提示訊息用 libs/ui 的 ToastService（MatSnackBar 外面包一層，統一 4 種類型與時長）。
+  providers: [provideNativeDateAdapter(), { provide: MAT_DATE_LOCALE, useValue: 'zh-TW' }, ...TOAST_PROVIDERS],
   templateUrl: './material-overview-page.component.html',
   styleUrl: './material-overview-page.component.scss',
 })
 export class MaterialOverviewPageComponent {
   private readonly dialog = inject(MatDialog);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly toast = inject(ToastService);
 
   protected readonly entry = ENTRY;
   protected readonly buttonVariants = [
@@ -188,7 +190,7 @@ export class MaterialOverviewPageComponent {
     this.dialog.open(OverviewDialogComponent, { data: '對話框的內容。外框、圓角、陰影與遮罩都由質地決定。', width: '400px' });
   }
 
-  protected openSnackBar(): void {
-    this.snackBar.open('已儲存變更', '復原', { duration: 4000 });
+  protected openToast(): void {
+    this.toast.success('已儲存變更', { action: '復原' });
   }
 }

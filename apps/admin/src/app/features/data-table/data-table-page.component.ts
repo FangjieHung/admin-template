@@ -1,5 +1,4 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   AdvancedFilterComponent,
   DataTableCellDirective,
@@ -17,6 +16,7 @@ import {
   SAVED_VIEW_REPOSITORY,
   SavedViewsComponent,
   StatusChipComponent,
+  ToastService,
   applyFilters,
   removeCondition,
   upsertCondition,
@@ -27,7 +27,7 @@ import { HeaderToolbarDirective } from '../../layout/header/header-toolbar-slot'
 import { ADMIN_DATA_TABLE_LABELS } from '../../shared/ui/data-table-labels';
 import { ADMIN_FILTER_LABELS, ADMIN_SAVED_VIEWS_LABELS } from '../../shared/ui/list-view-labels';
 import { LIST_TOOLBAR_LABEL_PROVIDERS } from '../../shared/ui/list-toolbar-labels';
-import { rangePickerLabelProviders } from '../../shared/ui/component-label-providers';
+import { TOAST_PROVIDERS, rangePickerLabelProviders } from '../../shared/ui/component-label-providers';
 import {
   DEMO_CATEGORY_LABELS,
   DEMO_OWNERS,
@@ -77,13 +77,14 @@ const ENTRY = detailOf('data-table');
   providers: [
     ...LIST_TOOLBAR_LABEL_PROVIDERS,
     ...rangePickerLabelProviders('到期日', '選擇日期'),
+    ...TOAST_PROVIDERS,
     // 範本沒有真正的登入身分，先用固定的本機使用者；接上帳號後換成目前使用者的 id。
     { provide: SAVED_VIEW_REPOSITORY, useFactory: () => new LocalStorageSavedViewRepository({ userId: () => 'local' }) },
   ],
 })
 export class DataTablePageComponent {
   protected readonly entry = ENTRY;
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly toast = inject(ToastService);
   protected readonly tableLabels = ADMIN_DATA_TABLE_LABELS;
   protected readonly filterLabels = ADMIN_FILTER_LABELS;
   protected readonly savedViewsLabels = ADMIN_SAVED_VIEWS_LABELS;
@@ -208,7 +209,11 @@ readonly view = new ListViewController({ listId: 'work-orders', defaults, reposi
         { name: '[rowClickable]', type: 'boolean', default: 'false', description: '整列可點，觸發 rowClick。' },
         { name: '[showExport]', type: 'boolean', default: 'true', description: '是否顯示匯出 Excel 鈕。' },
         { name: 'exportName', type: 'string', default: "'export'", description: '匯出檔名（不含副檔名）。' },
-        { name: 'emptyText', type: 'string', default: "''", description: '沒有資料時的文字。' },
+        { name: 'emptyText', type: 'string', default: "''", description: '沒有資料時的一行說明，顯示成空狀態（lib-empty-state）；空字串時不顯示。' },
+        { name: 'emptyDetail', type: 'string', default: "''", description: '空狀態的補充文字。' },
+        { name: '[emptyKind]', type: "'no-data' | 'no-results'", default: "'no-data'", description: '還沒有資料，或篩選後沒有結果（圖示不同）；要放「清除篩選」等按鈕時用 dtEmpty 插槽。' },
+        { name: '[loading]', type: 'boolean', default: 'false', description: '載入中：保留表頭、內容換成骨架列，不顯示空狀態、匯出與分頁；報讀器念 labels.loading。' },
+        { name: '[loadingRows]', type: 'number', default: '5', description: '載入中顯示幾列骨架。' },
       ],
     },
     {
@@ -234,6 +239,7 @@ readonly view = new ListViewController({ listId: 'work-orders', defaults, reposi
       rows: [
         { name: 'dtCell="<key>"', type: 'let-r', description: '自訂某一欄的儲存格內容。' },
         { name: 'dtBatchActions', type: 'let-selected', description: '批次操作列的額外按鈕。' },
+        { name: 'dtEmpty', type: '—', description: '沒有資料時取代預設空狀態，例如放一個帶「清除篩選」的 lib-empty-state。' },
         { name: 'dtHead／dtBody', type: '—', description: '逃生門：整個表頭或表身自己寫（合併儲存格等）。' },
       ],
     },
@@ -268,6 +274,7 @@ readonly view = new ListViewController({ listId: 'work-orders', defaults, reposi
 
   onExportFailed(e: Error): void {
     console.error('DataTable 匯出失敗', e);
-    this.snackBar.open(this.tableLabels.exportFailedText, undefined, { duration: 3000 });
+    // 錯誤提示不會自動消失，使用者看到之後自己關。
+    this.toast.error(this.tableLabels.exportFailedText);
   }
 }

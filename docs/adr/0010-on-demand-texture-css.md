@@ -18,7 +18,7 @@ Admin 把 8 個質地全部編進 `apps/admin/src/styles.scss`：`styles.css` 15
 5. **切換時保留舊外觀直到新樣式載入完成**：`ThemeService.setParadigm()` 先由 `TextureStylesheetLoader` 下載新質地，`load` 之後才在同一個步驟切換 `data-paradigm`（以及必要的配色校正），然後移除舊質地的 `<link>`（Clay 有 body 層的光暈與 keyframes，留著沒有意義）。下載期間 `pendingParadigm` 是新的 id、`paradigm` 仍是舊的。連點兩個質地時只套用最後一個。
 6. **插入位置固定在主樣式之前**（開機腳本後面）。以前所有質地都編在主樣式裡，排在配色、`component.scss`、組合層之前，也排在 Angular 執行期插入的元件 `<style>` 之前。放在同一個相對位置，同權重規則的勝負就跟以前一樣；若 append 到 `<head>` 最後，會排到已經存在的元件樣式後面，同權重時反過來蓋掉元件樣式。
 7. **預先下載**：外觀浮動面板打開時（以及進入設定頁時），`ThemeService.prefetchTextures()` 為每個尚未載入的按需質地放一個 `<link rel="prefetch" as="style">`，之後點選時多半直接用 HTTP 快取。
-8. **載入失敗**：退回 Material，校正 localStorage 與 dataset，並提示「外觀載入失敗，暫時使用預設外觀」。theme-pack 不依賴任何 app 的提示元件：`ThemeService` 呼叫可選的 `TEXTURE_FALLBACK_NOTIFIER`，admin 在 `app.config.ts` 提供它，失敗時才動態載入 `MatSnackBar` 顯示 3 秒。開機時的失敗由開機腳本的 `onerror` 處理（退回 Material、在 `<html data-texture-fallback>` 留下 id），`init()` 在第一次渲染後提示。
+8. **載入失敗**：退回 Material，校正 localStorage 與 dataset，並提示「外觀載入失敗，暫時使用預設外觀」。theme-pack 不依賴任何 app 的提示元件：`ThemeService` 呼叫可選的 `TEXTURE_FALLBACK_NOTIFIER`，admin 在 `app.config.ts` 提供它，失敗時才動態載入 libs/ui 的 `ToastService`（`apps/admin/src/app/shared/ui/texture-fallback-toast.ts`），以警告提示顯示 6 秒（2026-10-13 起；原本是 `MatSnackBar` 3 秒）。開機時的失敗由開機腳本的 `onerror` 處理（退回 Material、在 `<html data-texture-fallback>` 留下 id），`init()` 在第一次渲染後提示。
 
 ## 考慮過的替代方案
 

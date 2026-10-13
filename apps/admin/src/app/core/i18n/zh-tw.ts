@@ -42,6 +42,17 @@ export const ZH_TW = {
     closePanel: '關閉面板',
     moreActions: '更多操作',
   },
+  // 載入／空白／錯誤三態（lib-skeleton、lib-error-state、lib-async-state）。
+  feedback: {
+    loading: '載入中',
+    retry: '重試',
+    showDetails: '顯示詳細資訊',
+    hideDetails: '隱藏詳細資訊',
+  },
+  // 提示訊息（ToastService）：錯誤提示的關閉鈕。
+  toast: {
+    close: '關閉',
+  },
   // 雙月日期區間選擇器（lib-dual-month-range-picker）的月曆按鈕與標題。
   rangePicker: {
     prevMonth: '上個月',

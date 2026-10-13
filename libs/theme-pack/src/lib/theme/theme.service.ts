@@ -20,7 +20,8 @@ export const TEXTURE_FALLBACK_MESSAGE = '外觀載入失敗，暫時使用預設
 
 /**
  * 按需質地載入失敗時要怎麼告訴使用者。theme-pack 不依賴任何 app 的提示元件，由 app 自己提供
- * （admin 在 app.config.ts 用 MatSnackBar 顯示 TEXTURE_FALLBACK_MESSAGE）。沒有提供時只做退回、不提示。
+ * （admin 在 app.config.ts 用 libs/ui 的 ToastService 以警告提示顯示 TEXTURE_FALLBACK_MESSAGE，提示元件動態載入）。
+ * 沒有提供時只做退回、不提示。
  */
 export const TEXTURE_FALLBACK_NOTIFIER = new InjectionToken<(failedTextureId: string) => void>(
   'TEXTURE_FALLBACK_NOTIFIER',
