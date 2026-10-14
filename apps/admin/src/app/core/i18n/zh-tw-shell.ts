@@ -24,4 +24,6 @@ export const ZH_TW_SHELL = {
   },
   // 頁首的通知鈴鐺（面板裡的文字在 shared/ui/notification-center-labels.ts，跟面板一起 lazy 載入）。
   notifications: { bell: '通知', unread: ' 則未讀' },
+  // 頁首的全域指令面板按鈕（面板裡的文字在 shared/ui/command-palette-labels.ts，跟面板一起 lazy 載入）。
+  search: '搜尋',
 } as const;

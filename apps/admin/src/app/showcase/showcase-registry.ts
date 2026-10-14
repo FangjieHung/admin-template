@@ -189,6 +189,13 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     load: () => import('../features/detail-layout/detail-layout-page.component').then((m) => m.DetailLayoutPageComponent),
   },
   {
+    id: 'command-palette',
+    title: '指令面板',
+    group: 'layout',
+    icon: 'keyboard',
+    load: () => import('../features/command-palette/command-palette-page.component').then((m) => m.CommandPalettePageComponent),
+  },
+  {
     id: 'scroll-shadow',
     title: '捲動陰影',
     group: 'layout',

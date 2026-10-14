@@ -85,6 +85,29 @@ export class TicketRepository {
     return ticket ? { ...ticket } : null;
   }
 
+  /**
+   * 依編號或標題找工單（頁首的指令面板用）：編號開頭相符的在前，再來是編號或標題包含查詢字的，最多 `limit` 筆。
+   * 接後端時改成搜尋 API（`signal` 交給 HttpClient／fetch，使用者繼續打字時會取消上一次）。
+   */
+  async search(query: string, options: { signal?: AbortSignal; limit?: number } = {}): Promise<Ticket[]> {
+    await this.delay(options.signal);
+    const q = query.trim().toLocaleLowerCase();
+    if (!q) return [];
+    const rank = (t: Ticket) => {
+      const id = t.id.toLocaleLowerCase();
+      if (id === q) return 0;
+      if (id.startsWith(q)) return 1;
+      if (id.includes(q)) return 2;
+      return t.title.toLocaleLowerCase().includes(q) ? 3 : -1;
+    };
+    return this.data.tickets
+      .map((ticket, index) => ({ ticket, index, rank: rank(ticket) }))
+      .filter((e) => e.rank >= 0)
+      .sort((a, b) => a.rank - b.rank || a.index - b.index)
+      .slice(0, options.limit ?? 10)
+      .map((e) => ({ ...e.ticket }));
+  }
+
   /** 活動紀錄（新到舊）。 */
   async activity(id: string): Promise<ActivityEntry[]> {
     await this.delay();

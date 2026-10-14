@@ -91,6 +91,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '寬螢幕是貼在內容旁的側板，窄螢幕自動變成全螢幕對話框；用來看詳情或編輯一筆資料。',
     source: 'libs/ui/src/lib/responsive-panel',
   },
+  'command-palette': {
+    summary: '⌘K（Windows 是 Ctrl+K）或 / 打開的全域搜尋：跳到任何頁面、依編號或標題找資料、執行動作（新增、切換外觀、切換身分）；結果依來源分組，非同步來源各自載入與失敗，記得最近使用。',
+    source: 'libs/ui/src/lib/command-palette、apps/admin/src/app/layout/command-palette',
+  },
   'scroll-shadow': {
     summary: '捲動容器上下還有內容時加上 class，讓樣式畫出提示陰影。',
     source: 'libs/ui/src/lib/scroll-shadow',
@@ -163,7 +167,6 @@ export interface PlannedItem {
 
 export const PLANNED_ITEMS: readonly PlannedItem[] = [
   { title: '匯入精靈', kind: '元件', priority: 'P1', summary: '上傳 → 欄位對應 → 預覽驗證 → 匯入。' },
-  { title: '全域搜尋與指令面板', kind: '元件', priority: 'P1', summary: '⌘K 找資料、跳頁、執行動作。' },
   { title: '表格內直接編輯', kind: '元件', priority: 'P1', summary: '行內編輯與批次修改。' },
   { title: '共用日曆與排程', kind: '元件', priority: 'P1', summary: '月／週檢視與資源時間軸，含拖曳。' },
   { title: '看板', kind: '元件', priority: 'P1', summary: '卡片拖曳換欄。' },

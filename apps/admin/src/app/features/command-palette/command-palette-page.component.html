@@ -1,0 +1,66 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="全域指令面板"
+    description="右上角的搜尋鈕就是它：在任何一頁按 ⌘K（Windows 是 Ctrl+K），或在焦點不在輸入欄位時按 /。可以搜尋頁面（只列目前身分看得到的）、依編號或標題找工單（例如輸入 TK-20），以及執行動作：新增工單、切換質地與配色（只列相容的配色）、切換身分、開啟通知中心。執行過的項目會記在「最近使用」。"
+  >
+    <div data-demo="global" class="cmdk-demo-actions">
+      <button matButton="filled" type="button" data-demo-action="open-global" (click)="openGlobal()">
+        打開全域指令面板
+      </button>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="嵌在頁面裡"
+    description="同一個元件直接放在頁面裡（不是浮層）。聯絡人是同步來源，打字時立刻顯示；專案是非同步來源（模擬 0.4 秒延遲），等你停手才搜尋。查詢空白時列出最近使用與建議的動作；「切換檢視」是兩段式動作：Enter 打開子清單，空白時按 Backspace 回上一層。"
+  >
+    <div data-demo="inline">
+      <div class="cmdk-demo-frame">
+        <lib-command-palette
+          [providers]="inlineProviders"
+          [history]="inlineHistory"
+          [(query)]="inlineQuery"
+          (selected)="lastSelected.set($event)"
+        />
+      </div>
+      <dl class="demo-state cmdk-demo-state">
+        <div>
+          <dt>query</dt>
+          <dd data-demo-state="query">{{ inlineQuery() || '（空白）' }}</dd>
+        </div>
+        <div>
+          <dt>最後一次 (selected)</dt>
+          <dd>{{ lastSelected()?.title ?? '—' }}</dd>
+        </div>
+        <div>
+          <dt>執行結果（示範不導覽）</dt>
+          <dd data-demo-state="log">{{ inlineLog() }}</dd>
+        </div>
+      </dl>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="慢的與會失敗的來源"
+    description="每一組各自載入：聯絡人已經列出時，慢速的專案還在顯示「搜尋中…」（2.5 秒），封存資料搜尋失敗只在那一組顯示錯誤，不影響其他組。改一個字就重新搜尋，上一次還沒回來的請求會被取消。"
+  >
+    <div data-demo="states">
+      <div class="cmdk-demo-frame">
+        <lib-command-palette [providers]="statesProviders" [(query)]="statesQuery" />
+      </div>
+      <dl class="demo-state cmdk-demo-state">
+        <div>
+          <dt>執行結果（示範不導覽）</dt>
+          <dd>{{ statesLog() }}</dd>
+        </div>
+      </dl>
+    </div>
+  </app-demo-block>
+</app-showcase-page>

@@ -20,9 +20,31 @@
   margin-right: auto;
 }
 
+// 全域指令面板的按鈕：跟鈴鐺排在一起（DOM 順序在前）。寬螢幕把圓鈕拉成膠囊、裡面多一個快捷鍵小框（::after，
+// 內容是 data-kbd），框線讀 --lib-cmdk-kbd-frame（質地在 .lib-command-palette 上設，CONTRACT.md「指令面板」）。
+// 這裡在 Initial bundle，只放兩條（order 跟鈴鐺寫在同一條）。
+@media (min-width: 1024px) {
+  .topbar-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: auto;
+    padding: 0 0.625rem 0 0.5rem;
+  }
+
+  .topbar-search::after {
+    content: attr(data-kbd);
+    padding: 0 0.375rem;
+    border: var(--lib-cmdk-kbd-frame, 1px solid var(--app-field-border));
+    border-radius: var(--mat-sys-corner-small);
+    font: 500 0.75rem / 1.25rem var(--font-body);
+  }
+}
+
 // 通知鈴鐺：排在頁面工具列第一列之後、篩選列（order: 2，獨佔一列）之前。
 // 徽章是 ::after（data-count，0 時沒有這個屬性），讀 --lib-notif-badge-*（質地在 .lib-notification-center 上設，
 // CONTRACT.md「通知中心」）。這裡在 Initial bundle，只放兩條。
+.topbar-search,
 .topbar-bell {
   order: 1;
   position: relative;

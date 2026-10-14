@@ -1,0 +1,15 @@
+// 指令面板展示頁。只用語意 token；面板的外觀交給 libs/ui 與質地 recipe。
+
+.cmdk-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cmdk-demo-frame {
+  max-width: 40rem;
+}
+
+.cmdk-demo-state {
+  margin-top: 1rem;
+}
