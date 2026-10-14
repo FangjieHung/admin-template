@@ -327,3 +327,14 @@
     --lib-tree-current-indicator: inset 0 0 0 1px var(--frost-border);
   }
 }
+
+// ── Print document ──
+// 列印版面（libs/ui print-document）：只設螢幕預覽桌面與紙張外框的 --lib-print-* 變數（CONTRACT.md「列印版面」）。
+// 紙張內容與列印樣式不分質地（一律白紙黑字），這裡不碰。
+// 霧玻璃：卡片裡不再疊一層玻璃，桌面只是文字墨 5% 的淡霧色＋霧邊。
+:root[data-paradigm='frosted'] {
+  .lib-print-document {
+    --lib-print-desk-bg: color-mix(in srgb, var(--mat-sys-on-surface) 5%, transparent);
+    --lib-print-desk-frame: 1px solid var(--frost-border);
+  }
+}

@@ -729,3 +729,16 @@
     --lib-tree-toggle-radius: var(--sketch-wobble-xs);
   }
 }
+
+// ── Print document ──
+// 列印版面（libs/ui print-document）：只設螢幕預覽桌面與紙張外框的 --lib-print-* 變數（CONTRACT.md「列印版面」）。
+// 紙張內容與列印樣式不分質地（一律白紙黑字），這裡不碰。
+// 手繪：桌面是鋼筆畫的虛線框（手繪圓角），白紙用一條鋼筆細線描邊、不加影。
+:root[data-paradigm='sketch'] {
+  .lib-print-document {
+    --lib-print-desk-bg: transparent;
+    --lib-print-desk-frame: 1.5px dashed var(--sketch-pen);
+    --lib-print-desk-radius: var(--sketch-wobble-md);
+    --lib-print-sheet-shadow: 0 0 0 1px var(--sketch-pen);
+  }
+}

@@ -435,3 +435,15 @@
     --lib-tree-toggle-frame: 1px solid var(--mat-sys-outline);
   }
 }
+
+// ── Print document ──
+// 列印版面（libs/ui print-document）：只設螢幕預覽桌面與紙張外框的 --lib-print-* 變數（CONTRACT.md「列印版面」）。
+// 紙張內容與列印樣式不分質地（一律白紙黑字），這裡不碰。
+// 工程圖：桌面 1px outline 實框、container-low 底，紙張 1px outline 框加 level1 硬影（0 模糊）。
+:root[data-paradigm='grid'] {
+  .lib-print-document {
+    --lib-print-desk-bg: var(--mat-sys-surface-container-low);
+    --lib-print-desk-frame: 1px solid var(--mat-sys-outline);
+    --lib-print-sheet-shadow: 0 0 0 1px var(--mat-sys-outline), var(--mat-sys-level1);
+  }
+}

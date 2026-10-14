@@ -439,6 +439,36 @@ Material 用預設值（container-low 的欄、白色卡片＋level1、滑過 le
 
 Material 用預設值（膠囊形的列、`--app-state-selected` 的目前項目、圓形展開鈕、不畫連接線）。
 
+#### 列印版面（`libs/ui` print-document、print-table）
+
+- **列印時隱藏殼層（全域機制）**：`lib-print-document` 的樣式不封裝，裡面的 `@media print` 規則只看 DOM 結構、不認得任何殼層 class。頁面上有 `.lib-print-sheet`（紙張）時：① 不在「通往紙張的路徑」上、也不在紙張裡的元素一律 `display: none`（側欄、頁首、頁尾、外觀面板、提示訊息、通知、CDK 浮層、展示頁說明、單據工具列）；② 路徑上的祖先（`html`、`body`、`mat-sidenav-content` 捲動容器、卡片…）用 `:has(.lib-print-sheet)` 攤平：`display: block`、不捲動、沒有固定高度、沒有內外距、框、底色、陰影、transform、filter，祖先的 `::before`／`::after`（質地的紋理、光暈、紙張顆粒）不印，`html`／`body` 強制白底與 `color-scheme: light`；③ 按了某一份單據的「列印」時，那張紙掛 `.lib-print-sheet--target`，同頁其他單據不印（`afterprint` 時拿掉）。使用者直接按 Ctrl＋P 也適用（沒有目標時頁面上的單據全部印）。這些規則跟著元件的 lazy chunk 進 `<head>`，**主樣式（`styles-*.css`）沒有增加任何位元組**；換殼層不必改 class。殼層或頁面若有權重高過 0-3-1 的 `display: … !important`，列印時可能露出來。
+- **@page**：元件在 `<head>` 放一個 `<style data-lib-print-page>`（有 `CSP_NONCE` 就帶上），寫具名頁 `@page lib-print-N { size: A4|letter portrait|landscape; margin: …mm }`；紙張與根元素都用這個頁名（根元素也要用，否則紙張後面的空元素會換回預設頁、多出一張空白頁）。頁尾用 `@page` 的 margin box：左下單號、右下「第 N 頁，共 M 頁」（`counter(page)`／`counter(pages)`，文字來自 `PRINT_DOCUMENT_LABELS.pageCounter`）。**Chrome 131 起支援 margin box**（實測 Chrome 149 正常）；不支援的瀏覽器只是不印這兩塊，其餘照常。工單服務單樣板另在頁尾說明印列印時間。
+- **分頁**：表頭（`thead`）每頁重印、每一列 `break-inside: avoid`。最後 `keepWithSummary`（預設 3）列明細、合計列與單據的結尾（備註、簽名欄、頁尾）放在最後一張明細表的同一個 `<tbody class="lib-print-table__tail">`，整段 `break-inside: avoid`：合計與簽名欄不會單獨落到新的一頁，也不會被切開。**不用逐列的 `break-before: avoid`**：實測 Chrome 149 在表格後面的區塊放不下時，會把合計拆開、把簽名欄切成兩半，不會回頭把最後幾列一起帶走（說明在 `libs/ui/src/lib/print-document/print-closing.ts`）。所以明細表要放在正文最後；沒有明細表時結尾畫在 `.lib-print-sheet__closing`（盡量黏在前面的內容後）。
+- **螢幕預覽**：紙張依實際尺寸（mm）排版，四邊內距＝頁邊，換行跟列印一樣；容器比紙窄時用 `transform: scale()` 等比縮小（ResizeObserver 量寬度，外層設成縮小後的寬高，不會撐出橫向捲動）。分頁用**參考線**表示：每一頁的內容高度（紙高減上下頁邊）畫一條虛線＋「第 N 頁」，紙張高度補到整頁；工具列的「預覽約 N 頁」依內容高度估計，不切開的結尾區段跨過分頁線時整段移到下一頁再算。實際分頁還會因「列不切開」、表頭重印略往前移，所以是「大約」。
+- **紙張一律白紙黑字**：紙張用元件自己的中性 token（定義在 `.lib-print-document`），不讀 `--mat-sys-*`，不分質地、配色、深色模式；螢幕預覽的紙張也是白的（`color-scheme: light`）。紙張裡另外把 `--mat-sys-on-surface`／`-on-surface-variant`／`-surface`／`-outline`／`-outline-variant`／`-primary` 與 `--font-body`／`--font-display` 指向列印 token，投影進來的內容若用了系統 token 也印成墨色。**質地不要設這組**；使用端真的需要（例如公司色抬頭）才在自己的頁面覆寫。
+
+| 列印 token（元件預設，質地不設） | 值 | 用途 |
+| --- | --- | --- |
+| `--lib-print-paper` / `-ink` | `white` / `black` | 紙張底、主要文字（21:1） |
+| `--lib-print-ink-muted` | `color-mix(in srgb, black 72%, white)` | 標籤、說明、頁碼、分頁參考線的字（對白紙約 9.4:1） |
+| `--lib-print-rule` / `-rule-strong` | 黑 35% / `black` | 明細列之間的細線 / 表頭、頁首下緣、總計上方的線 |
+| `--lib-print-font` / `-font-size` | `var(--font-zh, system-ui, sans-serif)` / `10pt` | 紙上一律用裝置的中文字（中英數都是），不跟質地換字；Chrome 存 PDF 時把用到的系統字字形（macOS 是 PingFang TC）嵌成 Type3（向量、文字可選取） |
+
+- 輔助 class（紙上）：`.lib-print-brand-name`（公司名稱）、`.lib-print-fields`（資訊區兩欄，整列加 `.is-wide`）、`.lib-print-section-title`、`.lib-print-note`、`.lib-print-num`（等寬數字）。明細表的數字欄（`align: 'end'`，`data-align="end"`）靠右並用 `font-variant-numeric: tabular-nums`——列印不分質地，所以**不掛 `.ui-text-numeric`**（Grid 等質地會把它換成等寬字型）。`table.lib-print-table` 也可以掛在自己寫的表格上（資料列 `.lib-print-table__row`，最後幾列與合計放進 `tbody.lib-print-table__tail`）。
+- 工具列：「列印」是 `matButton="filled"`、「下載 PDF」是 `matButton="outlined"`（吃各質地的按鈕 recipe），說明與頁數估計是 `--mat-sys-on-surface-variant`。「下載 PDF」一樣打開列印對話框（另存為 PDF）：不在前端產生 PDF，中文字型無法嵌入、會變成點陣圖。列印前 `document.title` 暫時換成「單號-標題」（存檔的預設檔名），`afterprint` 時還原。
+- 螢幕預覽的桌面與紙張外框跟著質地：質地只在 `.lib-print-document` 上設下列變數（recipe 在各質地 `recipes.scss` 檔尾的「Print document」區塊）。
+
+| 變數 | 預設 | 用途 | 目前設定的質地 |
+| --- | --- | --- | --- |
+| `--lib-print-desk-bg` | `var(--mat-sys-surface-container)` | 紙張後面的桌面底色 | Linen `surface-container-high`；Grid `surface-container-low`；Soft UI `background`；Clay `surface-container-high`；Editorial `surface-container`；Frosted、Aero 文字墨 5%；Ledger `var(--ledger-head-bg)`；Cockpit `surface-container-lowest`；Brutal `var(--brutal-raised)`；Riso `var(--riso-raised)`；Sketch `transparent` |
+| `--lib-print-desk-frame` | `0 solid transparent` | 桌面的框（border 簡寫） | Grid 1px `outline`；Editorial 1px `outline-variant`；Frosted 1px `var(--frost-border)`；Aero 1px `var(--aero-edge)`；Ledger 1px `var(--ledger-rule)`；Cockpit 1px `var(--cockpit-edge)`；Brutal `var(--brutal-line-thick)`；Riso `var(--riso-line)`；Sketch 1.5px 鋼筆虛線 |
+| `--lib-print-desk-radius` | `var(--mat-sys-corner-large)` | 桌面圓角 | Ledger corner-small；Brutal `0px`；Sketch `var(--sketch-wobble-md)` |
+| `--lib-print-desk-shadow` | `none` | 桌面陰影（凹槽） | Soft UI `var(--soft-inset)`；Clay `var(--clay-shadow-pressed)` |
+| `--lib-print-desk-padding` / `-padding-narrow` | `1.5rem` / `0.75rem`（容器窄於 40rem） | 桌面留白 | Ledger `1rem` |
+| `--lib-print-sheet-shadow` | `var(--mat-sys-level2)` | 紙張的影子或描邊（box-shadow，不用 border，紙張尺寸才不會變） | Linen、Editorial 1px `outline-variant`；Grid 1px `outline`＋level1 硬影；Ledger 1px `var(--ledger-rule)`；Cockpit `var(--cockpit-glow-1)`；Brutal 2px 墨框＋`var(--brutal-shadow)`；Riso level1（平網影）；Sketch 1px 鋼筆線 |
+
+Material 用預設值（container 色的桌面、corner-large、紙張 level2 陰影），主樣式裡沒有列印版面的規則。
+
 ### 字體（質地包提供，中英分軌）
 
 `--font-zh`（中文，裝置的系統字）、`--font-en`（英文依質地）、`--font-display`、`--font-body`、`--font-mono`

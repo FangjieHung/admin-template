@@ -683,3 +683,15 @@
     --lib-tree-current-indicator: inset 3px 0 0 var(--riso-ink-a);
   }
 }
+
+// ── Print document ──
+// 列印版面（libs/ui print-document）：只設螢幕預覽桌面與紙張外框的 --lib-print-* 變數（CONTRACT.md「列印版面」）。
+// 紙張內容與列印樣式不分質地（一律白紙黑字），這裡不碰。
+// 孔版：桌面是第二墨的平網（--riso-raised）＋主墨線，白紙右下一塊平網影（level1）。
+:root[data-paradigm='riso'] {
+  .lib-print-document {
+    --lib-print-desk-bg: var(--riso-raised);
+    --lib-print-desk-frame: var(--riso-line);
+    --lib-print-sheet-shadow: var(--mat-sys-level1);
+  }
+}

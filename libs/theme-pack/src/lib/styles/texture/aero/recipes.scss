@@ -315,3 +315,14 @@
     --lib-tree-current-indicator: inset 0 0 0 1px var(--aero-edge);
   }
 }
+
+// ── Print document ──
+// 列印版面（libs/ui print-document）：只設螢幕預覽桌面與紙張外框的 --lib-print-* 變數（CONTRACT.md「列印版面」）。
+// 紙張內容與列印樣式不分質地（一律白紙黑字），這裡不碰。
+// 雲霧玻璃：同 Frosted，桌面是淡霧色＋亮邊，不加第二層模糊。
+:root[data-paradigm='aero'] {
+  .lib-print-document {
+    --lib-print-desk-bg: color-mix(in srgb, var(--mat-sys-on-surface) 5%, transparent);
+    --lib-print-desk-frame: 1px solid var(--aero-edge);
+  }
+}

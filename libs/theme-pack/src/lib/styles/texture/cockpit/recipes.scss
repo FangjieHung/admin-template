@@ -579,3 +579,15 @@
     --lib-tree-toggle-radius: var(--mat-sys-corner-small);
   }
 }
+
+// ── Print document ──
+// 列印版面（libs/ui print-document）：只設螢幕預覽桌面與紙張外框的 --lib-print-* 變數（CONTRACT.md「列印版面」）。
+// 紙張內容與列印樣式不分質地（一律白紙黑字），這裡不碰。
+// 儀表艙：桌面是最暗的讀數窗（surface-container-lowest＋亮邊），白紙外面一圈主色微光。
+:root[data-paradigm='cockpit'] {
+  .lib-print-document {
+    --lib-print-desk-bg: var(--mat-sys-surface-container-lowest);
+    --lib-print-desk-frame: 1px solid var(--cockpit-edge);
+    --lib-print-sheet-shadow: var(--cockpit-glow-1);
+  }
+}

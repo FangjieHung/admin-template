@@ -387,3 +387,14 @@
     --lib-tree-current-indicator: var(--clay-shadow-pressed);
   }
 }
+
+// ── Print document ──
+// 列印版面（libs/ui print-document）：只設螢幕預覽桌面與紙張外框的 --lib-print-* 變數（CONTRACT.md「列印版面」）。
+// 紙張內容與列印樣式不分質地（一律白紙黑字），這裡不碰。
+// 黏土：桌面是捏出來的凹槽（surface-container-high＋按壓陰影），紙張是浮起來的厚片（預設 level2）。
+:root[data-paradigm='clay'] {
+  .lib-print-document {
+    --lib-print-desk-bg: var(--mat-sys-surface-container-high);
+    --lib-print-desk-shadow: var(--clay-shadow-pressed);
+  }
+}

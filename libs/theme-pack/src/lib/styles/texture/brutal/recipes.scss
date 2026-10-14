@@ -779,3 +779,16 @@
     --lib-tree-toggle-fg: var(--mat-sys-on-surface);
   }
 }
+
+// ── Print document ──
+// 列印版面（libs/ui print-document）：只設螢幕預覽桌面與紙張外框的 --lib-print-* 變數（CONTRACT.md「列印版面」）。
+// 紙張內容與列印樣式不分質地（一律白紙黑字），這裡不碰。
+// 粗野：桌面是一塊 secondary-container 色紙＋3px 墨框，白紙 2px 墨框加 5px 墨影。
+:root[data-paradigm='brutal'] {
+  .lib-print-document {
+    --lib-print-desk-bg: var(--brutal-raised);
+    --lib-print-desk-frame: var(--brutal-line-thick);
+    --lib-print-desk-radius: 0px;
+    --lib-print-sheet-shadow: 0 0 0 2px var(--brutal-ink), var(--brutal-shadow);
+  }
+}
