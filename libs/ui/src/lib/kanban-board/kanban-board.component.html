@@ -1,0 +1,118 @@
+<div class="kb-board" cdkDropListGroup cdkScrollable [class.is-dragging]="dragging()">
+  @for (view of views(); track view.column.id) {
+    <section
+      class="kb-column"
+      [attr.aria-labelledby]="view.headingId"
+      [class.is-over-limit]="view.over > 0"
+      [class.is-drop-target]="dropTarget()?.columnId === view.column.id && !dropTarget()?.blocked"
+      [class.is-drop-blocked]="dropTarget()?.columnId === view.column.id && dropTarget()?.blocked"
+      [attr.data-kanban-column]="view.column.id"
+    >
+      <lib-kanban-column-head
+        class="kb-head"
+        [title]="view.column.title"
+        [headingId]="view.headingId"
+        [level]="headingLevel()"
+        [countText]="view.countText"
+        [countLabel]="view.countLabel"
+        [over]="view.over"
+        [overText]="view.overText"
+        [hint]="view.column.hint"
+      />
+
+      <div class="kb-body">
+        <ul
+          class="kb-list"
+          cdkDropList
+          [id]="view.listId"
+          [cdkDropListData]="view.column.id"
+          [cdkDropListDisabled]="readonly()"
+          [attr.aria-labelledby]="view.headingId"
+          (cdkDropListEntered)="onEntered($event)"
+          (cdkDropListDropped)="onDropped($event)"
+        >
+          @for (card of view.cards; track card.key) {
+            <li
+              class="kb-item"
+              cdkDrag
+              [cdkDragData]="card"
+              [cdkDragDisabled]="readonly()"
+              [cdkDragStartDelay]="dragDelay"
+              [cdkDragPreviewClass]="previewClasses"
+              (cdkDragStarted)="onDragStarted($event)"
+              (cdkDragEnded)="onDragEnded()"
+            >
+              <div
+                class="kb-card"
+                tabindex="0"
+                role="group"
+                [attr.aria-roledescription]="labels.card"
+                [attr.aria-label]="card.title"
+                [attr.aria-describedby]="readonly() ? card.positionId : card.positionId + ' ' + hintId"
+                [attr.data-kanban-card]="card.domKey"
+                (keydown)="onCardKeydown($event, view, card)"
+              >
+                <div class="kb-card__content">
+                  <ng-container *ngTemplateOutlet="cardTemplate(); context: card.context" />
+                </div>
+                @if (!readonly()) {
+                  <button
+                    matIconButton
+                    type="button"
+                    class="kb-move"
+                    [attr.aria-label]="card.moveLabel"
+                    [attr.data-kanban-move]="card.domKey"
+                    [matMenuTriggerFor]="moveMenu"
+                    [matMenuTriggerRestoreFocus]="false"
+                    (menuClosed)="onMenuClosed(card)"
+                  >
+                    <span class="material-symbols-rounded" aria-hidden="true">open_with</span>
+                  </button>
+                  <mat-menu #moveMenu="matMenu" class="lib-kanban-menu">
+                    @for (column of otherColumns(view); track column.id) {
+                      <button mat-menu-item type="button" (click)="moveToColumn(view, card, column)">
+                        <span class="material-symbols-rounded kb-menu-icon" aria-hidden="true">east</span>
+                        <span>{{ moveToLabel(column) }}</span>
+                      </button>
+                    }
+                    <button mat-menu-item type="button" [disabled]="card.index === 0" (click)="moveBy(view, card, -1)">
+                      <span class="material-symbols-rounded kb-menu-icon" aria-hidden="true">arrow_upward</span>
+                      <span>{{ labels.moveUp }}</span>
+                    </button>
+                    <button
+                      mat-menu-item
+                      type="button"
+                      [disabled]="card.index === view.cards.length - 1"
+                      (click)="moveBy(view, card, 1)"
+                    >
+                      <span class="material-symbols-rounded kb-menu-icon" aria-hidden="true">arrow_downward</span>
+                      <span>{{ labels.moveDown }}</span>
+                    </button>
+                  </mat-menu>
+                }
+                <span class="kb-sr" aria-hidden="true" [id]="card.positionId">{{ card.positionText }}</span>
+              </div>
+              <!-- 放置預覽是這一列的複本（CDK 預設）；會被拒絕時才顯示這個禁止圖示。 -->
+              <span class="material-symbols-rounded kb-blocked" aria-hidden="true">block</span>
+            </li>
+          }
+        </ul>
+        @if (view.cards.length === 0) {
+          <p class="kb-empty">{{ labels.emptyColumn }}</p>
+        }
+      </div>
+
+      @if (view.column.allowAdd && !readonly()) {
+        <lib-kanban-add-card
+          class="kb-add"
+          [buttonLabel]="labels.addCard"
+          [inputLabel]="view.addLabel"
+          [hint]="labels.addCardHint"
+          (add)="onAdd(view, $event)"
+        />
+      }
+    </section>
+  }
+</div>
+<p class="kb-sr" aria-hidden="true" [id]="hintId">{{ labels.keyboardHint }}</p>
+<div class="kb-sr" aria-live="polite" aria-atomic="true">{{ announcement() }}</div>

@@ -85,3 +85,7 @@ export * from './lib/calendar/calendar-layout';
 export * from './lib/calendar/calendar-drag';
 export * from './lib/calendar/calendar-format';
 export * from './lib/calendar/calendar.component';
+export * from './lib/kanban-board/kanban-board-labels';
+export * from './lib/kanban-board/kanban-board.types';
+export * from './lib/kanban-board/kanban-card.directive';
+export * from './lib/kanban-board/kanban-board.component';

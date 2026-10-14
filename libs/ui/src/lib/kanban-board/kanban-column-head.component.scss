@@ -1,0 +1,63 @@
+// 看板欄頭（lib-kanban-board 內部）。只用語意 token；造型讀 `.lib-kanban-board` 上的 --lib-kanban-* 變數。
+
+:host {
+  display: block;
+}
+
+.kh-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.kh-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--lib-kanban-title-font, var(--font-body));
+  font-size: var(--lib-kanban-title-size, 0.9375rem);
+  font-weight: var(--lib-kanban-title-weight, 600);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.kh-count {
+  flex: none;
+  min-width: 1.5rem;
+  padding: 0.125rem 0.5rem;
+  border: var(--lib-kanban-count-frame, 0 solid transparent);
+  border-radius: var(--lib-kanban-count-radius, var(--mat-sys-corner-full));
+  background: var(--lib-kanban-count-bg, var(--mat-sys-surface-container-high));
+  color: var(--lib-kanban-count-fg, var(--mat-sys-on-surface));
+  box-shadow: var(--lib-kanban-count-shadow, none);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+:host(.is-over-limit) .kh-count {
+  background: var(--lib-kanban-wip-bg, var(--mat-sys-error-container));
+  color: var(--lib-kanban-wip-fg, var(--mat-sys-on-error-container));
+}
+
+.kh-wip {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0.5rem 0 0;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--mat-sys-corner-small);
+  background: var(--lib-kanban-wip-bg, var(--mat-sys-error-container));
+  color: var(--lib-kanban-wip-fg, var(--mat-sys-on-error-container));
+  font-size: 0.8125rem;
+  font-weight: 600;
+
+  .material-symbols-rounded {
+    font-size: 1.125rem;
+  }
+}
+
+.kh-hint {
+  margin: 0.25rem 0 0;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.75rem;
+}

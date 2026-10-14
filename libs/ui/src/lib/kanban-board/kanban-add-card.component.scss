@@ -1,0 +1,40 @@
+// 看板欄底的「新增卡片」。只用語意 token；按鈕是 Material 的 matButton（吃質地的按鈕 recipe）。
+
+:host {
+  display: block;
+}
+
+.ka-button {
+  width: 100%;
+  justify-content: flex-start;
+
+  .material-symbols-rounded {
+    margin-inline-end: 0.25rem;
+    font-size: 1.25rem;
+  }
+}
+
+// 原生輸入框：欄位邊界一律 --app-field-border（對欄底 ≥ 3:1），字級 16px（iOS 聚焦不放大整頁）。
+.ka-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--app-field-border);
+  border-radius: var(--mat-sys-corner-small);
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: inherit;
+  font-size: 1rem;
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+}
+
+.ka-hint {
+  margin: 0.25rem 0 0;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.75rem;
+}
