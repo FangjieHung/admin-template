@@ -1,0 +1,40 @@
+<ng-template appHeaderToolbar>
+  <app-template-info [info]="info" />
+</ng-template>
+
+<div class="schedule">
+  <section class="ui-card schedule-card" aria-label="工單排程">
+    @if (!canEdit()) {
+      <p class="schedule-note" data-readonly-note>
+        <span class="material-symbols-rounded" aria-hidden="true">visibility</span>你只有檢視權限：可以查看排程，不能拖曳改期限或負責人。
+      </p>
+    }
+    <lib-calendar
+      view="resource"
+      resourceScale="week"
+      [views]="['resource', 'month', 'agenda']"
+      [source]="source()"
+      [resources]="resources"
+      [categories]="categories"
+      [readonly]="!canEdit()"
+      [resourceFilter]="true"
+      [onEventChange]="save"
+      (eventClick)="open($event)"
+    />
+  </section>
+
+  @if (selected(); as t) {
+    <section class="schedule-panel">
+      <lib-responsive-panel [open]="true" [heading]="t.id + ' ' + t.title" closeLabel="關閉工單詳情" (closed)="selectedId.set(null)">
+        <div class="schedule-panel__body">
+          <lib-description-list [items]="summary()">
+            <ng-template libDescriptionValue="status" let-item>
+              <lib-status-chip [status]="statusTones[t.status]" [label]="'' + item.value" />
+            </ng-template>
+          </lib-description-list>
+          <a matButton="filled" [routerLink]="['/templates/tickets', t.id]" data-action="open-ticket">打開工單</a>
+        </div>
+      </lib-responsive-panel>
+    </section>
+  }
+</div>

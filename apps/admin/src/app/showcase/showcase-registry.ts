@@ -100,6 +100,13 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     load: () => import('../features/activity-log/activity-log-page.component').then((m) => m.ActivityLogPageComponent),
   },
   {
+    id: 'calendar',
+    title: '日曆與排程',
+    group: 'data',
+    icon: 'calendar_month',
+    load: () => import('../features/calendar/calendar-page.component').then((m) => m.CalendarPageComponent),
+  },
+  {
     id: 'charts',
     title: '數字小卡與圖表',
     group: 'data',
@@ -254,6 +261,7 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
   { id: 'ticket-detail', title: '詳情頁', group: 'templates', icon: 'article', path: 'templates/tickets/TK-2048', access: 'ticket:view' },
   { id: 'ticket-form', title: '表單頁', group: 'templates', icon: 'edit_document', path: 'templates/tickets/TK-2048/edit', access: 'ticket:edit' },
   { id: 'ticket-import', title: '匯入頁', group: 'templates', icon: 'upload', path: 'templates/tickets/import', access: 'ticket:create' },
+  { id: 'schedule', title: '排程', group: 'templates', icon: 'event_note', path: 'templates/schedule', access: 'ticket:view' },
   { id: 'login', title: '登入', group: 'templates', icon: 'login', path: 'login' },
   { id: 'settings-template', title: '設定頁', group: 'templates', icon: 'manage_accounts', path: 'templates/settings' },
   { id: 'notifications-page', title: '通知頁', group: 'templates', icon: 'inbox', path: 'templates/notifications' },

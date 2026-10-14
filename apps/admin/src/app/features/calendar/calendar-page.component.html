@@ -1,0 +1,125 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="月、週、日與議程"
+    description="同一份資料四種看法；換頁時依範圍載入（載入中蓋一層閃光）。拖曳活動改時間、拉下緣調整長度，或聚焦活動後按 Alt＋方向鍵；成功會提示可以「復原」。點活動在右側打開詳情，點空白處或拖出一段是選取時段。把視窗縮到 600px 以下會預設改成議程。"
+    [stickyContent]="true"
+  >
+    <div data-demo="main">
+      <div class="cal-split">
+        <div class="ui-card cal-card">
+          <lib-calendar
+            [(view)]="view"
+            [views]="['month', 'week', 'day', 'agenda']"
+            [source]="source"
+            [categories]="categories"
+            [showWeekNumbers]="true"
+            [onEventChange]="saveMain"
+            (eventClick)="selected.set($event)"
+            (slotSelect)="onSlot($event)"
+            (rangeChange)="onRange($event)"
+            (eventChange)="onChange($event)"
+          />
+        </div>
+        @if (selected(); as e) {
+          <section class="cal-panel">
+            <lib-responsive-panel [open]="true" [heading]="e.title" closeLabel="關閉詳情" (closed)="selected.set(null)">
+              <div class="panel-body">
+                <dl class="demo-state panel-dl">
+                  <div><dt>時間</dt><dd>{{ selectedWhen() }}</dd></div>
+                  <div><dt>類別</dt><dd>{{ selectedCategory() }}</dd></div>
+                  <div><dt>狀態</dt><dd>{{ e.status || '—' }}</dd></div>
+                </dl>
+                <p class="demo-note">面板放詳情或編輯表單；儲存後更新資料來源即可。</p>
+              </div>
+            </lib-responsive-panel>
+          </section>
+        }
+      </div>
+      <dl class="demo-state cal-state">
+        <div><dt>(rangeChange)</dt><dd data-range>{{ lastRange() }}</dd></div>
+        <div><dt>(eventChange)</dt><dd data-last-change>{{ lastChange() }}</dd></div>
+        <div><dt>(slotSelect)</dt><dd data-last-slot>{{ lastSlot() }}</dd></div>
+      </dl>
+      <label class="demo-row cal-fail">
+        <input type="checkbox" [checked]="failNext()" (change)="failNext.set($any($event.target).checked)" />
+        下一次載入失敗（換頁看錯誤與重試）
+      </label>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="資源排程：會議室"
+    description="一列一間會議室，依樓層分組；左右拖曳換時間、上下拖曳換會議室，拉左右緣調整長度。會議室 B 有兩場重疊：同一間會議室時間衝突時加上警告圖示與「時間衝突」，拖曳中也會預告。點空白處或拖出一段新增預約。可以切換日／週／月刻度，或只看某一層樓。"
+    [stickyContent]="true"
+  >
+    <div data-demo="resource">
+      <div class="ui-card cal-card">
+        <lib-calendar
+          view="resource"
+          resourceScale="day"
+          [views]="['resource']"
+          [resources]="rooms"
+          [events]="bookings()"
+          [categories]="categories"
+          [allowOverlap]="false"
+          [resourceFilter]="true"
+          [dayStart]="8"
+          [dayEnd]="19"
+          [onEventChange]="saveBooking"
+          (slotSelect)="addBooking($event)"
+        />
+      </div>
+      <dl class="demo-state cal-state">
+        <div><dt>最後一次儲存</dt><dd data-last-booking>{{ lastBooking() }}</dd></div>
+      </dl>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="儲存失敗會還原"
+    description="星期五下午是鎖定的維護時段（不能拖）。把「客戶簡報」拖到星期五 14:00，或聚焦它按 Alt＋→ 兩次：伺服器拒絕，活動回到原位，錯誤提示寫出原因。"
+  >
+    <div data-demo="failing" class="ui-card cal-card">
+      <lib-calendar
+        view="week"
+        [views]="['week', 'day']"
+        [events]="locked()"
+        [categories]="categories"
+        [showLegend]="false"
+        [dayStart]="8"
+        [dayEnd]="19"
+        [scrollToHour]="8"
+        [onEventChange]="saveLocked"
+      />
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="唯讀的迷你月曆"
+    description="readonly 加 compact：每天只畫類別色圓點，不能拖曳或選取；按下有活動的日子（或 Enter）打開當天清單。適合放在儀表板或側欄。"
+  >
+    <div data-demo="mini" class="mini-row">
+      <div class="ui-card cal-card mini-card">
+        <lib-calendar
+          [views]="['month']"
+          [events]="miniEvents"
+          [categories]="categories"
+          [readonly]="true"
+          [compact]="true"
+          [showLegend]="false"
+          (eventClick)="miniOpened.set($event.title)"
+        />
+      </div>
+      <dl class="demo-state">
+        <div><dt>(eventClick)</dt><dd data-mini-opened>{{ miniOpened() }}</dd></div>
+      </dl>
+    </div>
+  </app-demo-block>
+</app-showcase-page>

@@ -43,6 +43,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '「誰在何時改了什麼」的時間軸：依日期分組、相對時間、欄位的舊值與新值、留言、篩選與載入更多。',
     source: 'libs/ui/src/lib/activity-timeline',
   },
+  'calendar': {
+    summary: '共用日曆與資源排程：月、週、日、議程與資源時間軸五種檢視，拖曳移動、拉邊緣調整長度（鍵盤也可以），先改畫面、失敗還原；同一個資源時間重疊時標出衝突，依範圍分段載入。',
+    source: 'libs/ui/src/lib/calendar',
+  },
   'charts': {
     summary: '儀表板與報表的數字小卡（變化與迷你趨勢）、折線、長條、圓環：自己寫的輕量 SVG，顏色與造型跟著配色與質地；每張圖都能用鍵盤逐點查看、切成表格。',
     source: 'libs/ui/src/lib/stat-card、line-chart、bar-chart、donut-chart、chart-core',
@@ -151,6 +155,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '設定頁樣板：分組導覽同步到網址（個人資料、通知、安全性、偏好、進階），示範明確存檔（未儲存列、離開前確認）與即時儲存（失敗時還原）兩種模式，以及要輸入確認字樣的刪除帳號。',
     source: 'libs/ui（confirm-dialog、toast）、apps/admin/src/app/features/account-settings',
   },
+  'schedule': {
+    summary: '排程樣板：工程師一人一列的資源排程，有期限的工單排在到期日；拖曳就能改負責人或期限（寫進活動紀錄），點工單在側邊看詳情；檢視者只能看。',
+    source: 'libs/ui（calendar、responsive-panel、description-list）、apps/admin/src/app/features/schedule',
+  },
   'notifications-page': {
     summary: '全部通知樣板：頁首鈴鐺面板的「查看全部通知」連到這裡；全部／未讀、類別篩選、今天／昨天／更早分組、載入更多，與鈴鐺共用資料來源，在這裡標為已讀，鈴鐺的未讀數跟著變。',
     source: 'libs/ui（notification-list）、apps/admin/src/app/features/notifications、apps/admin/src/app/layout/notification-bell',
@@ -178,7 +186,6 @@ export interface PlannedItem {
 }
 
 export const PLANNED_ITEMS: readonly PlannedItem[] = [
-  { title: '共用日曆與排程', kind: '元件', priority: 'P1', summary: '月／週檢視與資源時間軸，含拖曳。' },
   { title: '看板', kind: '元件', priority: 'P1', summary: '卡片拖曳換欄。' },
   { title: '樹狀選單與樹狀表', kind: '元件', priority: 'P2', summary: '組織架構、分類。' },
   { title: '列印與 PDF 版面', kind: '元件', priority: 'P2', summary: '單據可列印、可寄送。' },

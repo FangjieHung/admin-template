@@ -1,0 +1,66 @@
+import { Provider } from '@angular/core';
+import { CALENDAR_LABELS, CalendarLabels } from '@admin-template/ui';
+
+/**
+ * 共用日曆（lib-calendar）的畫面文字。文字直接寫在這裡、不放 core/i18n/zh-tw.ts：
+ * 那份字典被殼層 import，整份在 Initial bundle 裡，這些句子只有用到日曆的頁面需要。
+ */
+export const ZH_TW_CALENDAR_LABELS: CalendarLabels = {
+  viewSwitcher: '檢視方式',
+  viewMonth: '月',
+  viewWeek: '週',
+  viewDay: '日',
+  viewAgenda: '議程',
+  viewResource: '資源',
+  scaleSwitcher: '時間軸刻度',
+  scaleDay: '單日',
+  scaleWeek: '一週',
+  scaleMonth: '整月',
+  today: '今天',
+  previous: '往前',
+  next: '往後',
+  pickMonth: '選擇月份',
+  yearTitle: '{year} 年',
+  monthName: '{month} 月',
+  previousYear: '上一年',
+  nextYear: '下一年',
+  titleMonth: '{year} 年 {month} 月',
+  titleDay: '{year} 年 {month} 月 {day} 日 {weekday}',
+  titleRange: '{start} – {end}',
+  dateShort: '{month}/{day}',
+  dateShortYear: '{year}/{month}/{day}',
+  dateLong: '{month} 月 {day} 日 {weekday}',
+  weekdays: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
+  weekdaysShort: ['日', '一', '二', '三', '四', '五', '六'],
+  am: '上午',
+  pm: '下午',
+  timeRange: '{start} 到 {end}',
+  allDay: '整天',
+  multiDay: '第 {day} 天，共 {count} 天',
+  more: '+{count} 筆',
+  moreLabel: '{date}還有 {count} 筆活動',
+  dayEvents: '{date}',
+  close: '關閉',
+  dayCell: '{date}，{count} 筆活動',
+  todayMark: '今天',
+  weekNumber: '第 {week} 週',
+  weekColumn: '週次',
+  resourceColumn: '資源',
+  resourceFilter: '顯示資源',
+  allResources: '全部資源',
+  conflict: '時間衝突',
+  keyboardHint: 'Alt 加方向鍵移動，Alt 加 Shift 加方向鍵調整長度',
+  loading: '載入中',
+  error: '行事曆載入失敗',
+  retry: '重試',
+  empty: '這段期間沒有活動',
+  moved: '已把「{title}」移到 {when}',
+  extended: '已把「{title}」改成 {when}',
+  saveFailed: '「{title}」沒有儲存，已還原',
+  saveFailedReason: '「{title}」沒有儲存，已還原：{reason}',
+  undo: '復原',
+  viewChanged: '{view}，{title}',
+};
+
+/** 用到 lib-calendar 的頁面在自己的 providers 加上這組。 */
+export const CALENDAR_LABEL_PROVIDERS: Provider[] = [{ provide: CALENDAR_LABELS, useValue: ZH_TW_CALENDAR_LABELS }];

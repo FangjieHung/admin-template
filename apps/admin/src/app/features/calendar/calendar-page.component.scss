@@ -1,0 +1,55 @@
+// 日曆展示頁。只用語意 token；日曆本身的造型交給質地（--lib-cal-*）。
+
+.cal-card {
+  padding: 1rem;
+}
+
+.cal-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (min-width: 1281px) {
+  .cal-split:has(.cal-panel) {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+  }
+
+  .cal-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: var(--mat-sys-corner-medium);
+  }
+}
+
+.panel-body {
+  padding: 1rem;
+}
+
+.panel-dl {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cal-state {
+  margin-top: 1rem;
+}
+
+.cal-fail {
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.mini-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.mini-card {
+  width: min(22rem, 100%);
+  padding: 0.75rem;
+}

@@ -71,6 +71,7 @@ describe('App（展示 app 的殼層）', () => {
       '/templates/tickets/TK-2048',
       '/templates/tickets/TK-2048/edit',
       '/templates/tickets/import',
+      '/templates/schedule',
       '/login',
       '/templates/settings',
       '/templates/notifications',

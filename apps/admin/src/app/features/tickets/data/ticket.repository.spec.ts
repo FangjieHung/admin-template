@@ -73,6 +73,20 @@ describe('TicketRepository（工單樣板的示範資料層）', () => {
     await expect(repo.patchMany([{ id: 'TK-0000', patch: { priority: 'low' } }], ME)).rejects.toBeInstanceOf(TicketNotFoundError);
   });
 
+  it('reschedule：排程頁拖曳改負責人與期限，記一筆「在排程修改了」；沒有改到就不記', async () => {
+    const t = (await repo.get('TK-2048'))!;
+    const before = (await repo.activity(t.id)).length;
+    const saved = await repo.reschedule(t.id, { assigneeId: 'staff-12', dueDate: '2026-10-30' }, ME);
+    expect([saved.assigneeId, saved.dueDate]).toEqual(['staff-12', '2026-10-30']);
+    const log = await repo.activity(t.id);
+    expect(log).toHaveLength(before + 1);
+    expect(log[0].summary).toContain('在排程修改了');
+    expect(log[0].changes?.map((c) => c.field)).toEqual(expect.arrayContaining(['期限']));
+    await repo.reschedule(t.id, { assigneeId: 'staff-12', dueDate: '2026-10-30' }, ME);
+    expect(await repo.activity(t.id)).toHaveLength(before + 1);
+    await expect(repo.reschedule('TK-0000', { assigneeId: null, dueDate: null }, ME)).rejects.toBeInstanceOf(TicketNotFoundError);
+  });
+
   it('list() 回傳複本：改回傳的物件不會改到資料層', async () => {
     const [first] = await repo.list();
     first.title = '被改掉';

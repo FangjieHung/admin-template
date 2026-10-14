@@ -248,6 +248,28 @@ export class TicketRepository {
     return snapshot;
   }
 
+  /**
+   * 排程頁的拖曳：改負責人與期限（一次一張）。有改到才記一筆活動紀錄；id 不存在丟 TicketNotFoundError。
+   * 接後端時換成 PATCH /api/tickets/:id（`signal` 交給 HttpClient，同一張工單又被拖時取消上一次）。
+   */
+  async reschedule(
+    id: string,
+    patch: Pick<Ticket, 'assigneeId' | 'dueDate'>,
+    actor: TicketActor,
+    signal?: AbortSignal,
+  ): Promise<Ticket> {
+    await this.delay(signal);
+    const current = this.require(id);
+    const next: Ticket = { ...current, ...patch };
+    const changes = this.diff(current, next);
+    Object.assign(current, next);
+    if (changes.length) {
+      const fields = changes.map((c) => c.field).join('、');
+      this.log(id, this.entry(id, actor, 'edit', `${actor.name} 在排程修改了${fields}`, changes));
+    }
+    return { ...current };
+  }
+
   /** 刪除（單筆或批次）。回傳刪除前的快照，交給 restore() 就能復原。 */
   async remove(ids: readonly string[]): Promise<TicketSnapshot> {
     await this.delay();
