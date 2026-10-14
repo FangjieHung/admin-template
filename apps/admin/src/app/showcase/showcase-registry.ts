@@ -121,6 +121,13 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     load: () => import('../features/kanban/kanban-page.component').then((m) => m.KanbanPageComponent),
   },
   {
+    id: 'tree',
+    title: '樹狀選單與樹狀表',
+    group: 'data',
+    icon: 'account_tree',
+    load: () => import('../features/tree/tree-page.component').then((m) => m.TreePageComponent),
+  },
+  {
     id: 'relation-select',
     title: '關聯選擇欄位',
     group: 'input',

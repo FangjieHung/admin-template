@@ -59,6 +59,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '依狀態分欄的卡片看板：拖曳排序與換欄、WIP 上限提醒、換欄前檢查（不符就回到原位並說明原因）；也能用鍵盤與「移動」選單操作，窄螢幕改成橫向捲動。',
     source: 'libs/ui/src/lib/kanban-board',
   },
+  'tree': {
+    summary: '有上下層的清單與表格：組織架構、分類、資料夾。單選目前項目或三態勾選、搜尋保留上層、用到才載入（失敗就地重試）；完整鍵盤操作，樹狀表外觀跟資料表一致。',
+    source: 'libs/ui/src/lib/tree',
+  },
   'relation-select': {
     summary: '輸入就搜尋，從大量資料裡挑一筆（負責人、專案、聯絡人）；表單存 id，初始值自動查出名稱，找不到時可以當場建立。',
     source: 'libs/ui/src/lib/relation-select',
@@ -190,7 +194,6 @@ export interface PlannedItem {
 }
 
 export const PLANNED_ITEMS: readonly PlannedItem[] = [
-  { title: '樹狀選單與樹狀表', kind: '元件', priority: 'P2', summary: '組織架構、分類。' },
   { title: '列印與 PDF 版面', kind: '元件', priority: 'P2', summary: '單據可列印、可寄送。' },
   { title: '富文字、留言與 @提及', kind: '元件', priority: 'P2', summary: '備註與內部協作。' },
 ];

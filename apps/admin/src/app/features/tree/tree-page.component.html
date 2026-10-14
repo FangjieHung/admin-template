@@ -1,0 +1,182 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="組織架構：選一個目前項目"
+    description="公司 → 部門 → 小組 → 人。點一下（或用方向鍵移動後按 Enter、空白鍵）讓它成為目前項目，詳情顯示在旁邊（窄螢幕在下方）。→ 展開、← 收合或回到上一層，Home／End 跳到第一個／最後一個。"
+  >
+    <div class="tree-org-frame" data-demo="org">
+    <div class="tree-org">
+      <div class="tree-org__tree">
+        <lib-tree
+          label="組織架構"
+          selection="single"
+          [nodes]="org"
+          [nodeKey]="idOf"
+          [nodeLabel]="nameOf"
+          [(expandedKeys)]="orgExpanded"
+          [(currentKey)]="orgCurrent"
+        >
+          <ng-template libTreeNode [libTreeNodeOf]="org" let-node>
+            <span class="tree-node">
+              <span class="material-symbols-rounded tree-node__icon" aria-hidden="true">{{ orgKindIcons[node.kind] }}</span>
+              <span class="tree-node__name">{{ node.name }}</span>
+              <span class="tree-node__meta">{{ orgMeta(node) }}</span>
+            </span>
+          </ng-template>
+        </lib-tree>
+      </div>
+      <section class="tree-org__detail" aria-live="polite" data-demo-detail>
+        @if (orgDetail(); as d) {
+          <h3 class="ui-text-subtitle tree-org__title">
+            <span class="material-symbols-rounded" aria-hidden="true">{{ orgKindIcons[d.node.kind] }}</span>{{ d.node.name }}
+          </h3>
+          <dl class="demo-state tree-org__fields">
+            <div><dt>類型</dt><dd>{{ orgKindLabels[d.node.kind] }}</dd></div>
+            <div><dt>所屬</dt><dd>{{ d.path }}</dd></div>
+            @if (d.node.kind === 'person') {
+              <div><dt>職稱</dt><dd>{{ d.node.role }}</dd></div>
+              <div><dt>分機</dt><dd class="ui-text-numeric">{{ d.node.ext }}</dd></div>
+            } @else {
+              <div><dt>主管</dt><dd>{{ d.node.role }}</dd></div>
+              <div><dt>人數</dt><dd class="ui-text-numeric">{{ d.members }} 人</dd></div>
+            }
+          </dl>
+        } @else {
+          <p class="demo-note">選一個單位或人員，這裡會顯示詳情。</p>
+        }
+      </section>
+    </div>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="文件分類：三態勾選＋搜尋"
+    description="勾父分類會連帶勾所有子分類；子分類只勾一部分時父分類顯示半勾，全部勾滿時自動變全勾。空白鍵勾選。搜尋時只留下符合的分類和它們的上層（上層自動展開），比對到的字會標出來；在搜尋框按 ↓ 直接進到樹裡。"
+  >
+    <div class="tree-category" data-demo="category">
+      <mat-form-field appearance="outline" class="tree-category__search" subscriptSizing="dynamic">
+        <mat-label>搜尋分類</mat-label>
+        <input
+          matInput
+          type="search"
+          autocomplete="off"
+          data-demo-search
+          [value]="categoryQuery()"
+          (input)="onCategoryQuery($event)"
+          (keydown.arrowdown)="focusCategoryTree($event)"
+        />
+        <mat-hint>例：採購、設備</mat-hint>
+      </mat-form-field>
+      <lib-tree
+        #categoryTree
+        label="文件分類"
+        selection="multiple"
+        [nodes]="categories"
+        [nodeKey]="idOf"
+        [nodeLabel]="nameOf"
+        [filterText]="categoryQuery()"
+        [(expandedKeys)]="categoryExpanded"
+        [(checkedKeys)]="categoryChecked"
+      >
+        <ng-template libTreeNode [libTreeNodeOf]="categories" let-node let-query="query">
+          <span class="tree-node">
+            <lib-tree-highlight class="tree-node__name" [text]="node.name" [query]="query" />
+            @if (node.docs !== undefined) {
+              <span class="tree-node__meta ui-text-numeric">{{ node.docs }} 份</span>
+            }
+          </span>
+        </ng-template>
+      </lib-tree>
+      <div class="tree-category__result" data-demo-checked>
+        <h3 class="ui-text-caption tree-category__caption">
+          已勾選 <span class="ui-text-numeric">{{ checkedLeaves().length }}</span> 個分類，共
+          <span class="ui-text-numeric">{{ checkedDocs() }}</span> 份文件
+        </h3>
+        <ul class="tree-category__chips" aria-live="off">
+          @for (leaf of checkedLeaves(); track leaf.id) {
+            <li class="ui-chip ui-chip--info">{{ leaf.name }}</li>
+          } @empty {
+            <li class="demo-list__empty">（還沒有勾選）</li>
+          }
+        </ul>
+        <button matButton="outlined" type="button" data-demo-action="clear" [disabled]="checkedLeaves().length === 0" (click)="clearChecked()">
+          清除勾選
+        </button>
+      </div>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="延遲載入：用到才載入，失敗就地重試"
+    description="資料夾第一次展開時才向「伺服器」拿內容（延遲 0.7 秒，轉圈表示載入中）。「設計稿」第一次一定失敗：節點下方出現錯誤與「重試」，按重試或在節點上按 → 會重新載入。「會議紀錄」是空的資料夾，載入後就不再顯示展開鈕。直接打英文字母可以跳到開頭相符的項目（例如按 R 跳到 README.md；中文要經過輸入法，不會觸發跳轉）。"
+  >
+    <div data-demo="lazy">
+      @for (round of [lazyRound()]; track round) {
+        <lib-tree
+          label="共用資料夾"
+          [nodes]="folders"
+          [nodeKey]="idOf"
+          [nodeLabel]="nameOf"
+          [hasChildren]="folderHasChildren"
+          [loadChildren]="loadFolder"
+        >
+          <ng-template libTreeNode [libTreeNodeOf]="folders" let-node let-expanded="expanded">
+            <span class="tree-node">
+              <span class="material-symbols-rounded tree-node__icon" aria-hidden="true">{{
+                node.kind === 'file' ? 'description' : expanded ? 'folder_open' : 'folder'
+              }}</span>
+              <span class="tree-node__name">{{ node.name }}</span>
+            </span>
+          </ng-template>
+        </lib-tree>
+      }
+      <div class="tree-demo-actions">
+        <button matButton="outlined" type="button" data-demo-action="reset-lazy" (click)="resetLazy()">重設示範（再失敗一次）</button>
+      </div>
+      <h3 class="ui-text-caption tree-demo-log-title">載入紀錄</h3>
+      <ul class="demo-list" aria-live="off">
+        @for (line of lazyLog(); track $index) {
+          <li>{{ line }}</li>
+        } @empty {
+          <li class="demo-list__empty">（還沒有載入）</li>
+        }
+      </ul>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="樹狀表：專案 → 階段 → 任務"
+    description="每一層都有負責人、進度與期限，欄位對齊方便比較。外觀跟資料表一致（跟著質地換框線、列高、表頭）。整張表只有一個 tab stop：↑↓ 換列、→ 展開或到第一個子列、← 收合或回到上一層。窄螢幕可以橫向捲動，名稱欄固定在左側。"
+  >
+    <div data-demo="plan">
+      <div class="tree-demo-actions tree-demo-actions--top">
+        <button matButton="outlined" type="button" data-demo-action="expand-all" (click)="expandAllPlans()">全部展開</button>
+        <button matButton="outlined" type="button" data-demo-action="collapse-all" (click)="collapseAllPlans()">全部收合</button>
+      </div>
+      <lib-tree-table
+        #planTable
+        label="專案進度"
+        [rows]="plans"
+        [columns]="planColumns"
+        [rowKey]="idOf"
+        [(expandedKeys)]="planExpanded"
+      >
+        <ng-template dtCell="name" let-row>
+          <span class="tree-plan__name" [class.is-project]="row.kind === 'project'">{{ row.name }}</span>
+        </ng-template>
+        <ng-template dtCell="progress" let-row>
+          <span class="tree-plan__progress">
+            <lib-status-chip [status]="row.status" [label]="statusLabel(row)" />
+            <span class="ui-text-numeric">{{ row.progress }}%</span>
+          </span>
+        </ng-template>
+      </lib-tree-table>
+    </div>
+  </app-demo-block>
+</app-showcase-page>
