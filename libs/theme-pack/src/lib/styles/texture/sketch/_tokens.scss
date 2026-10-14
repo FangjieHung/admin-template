@@ -25,6 +25,8 @@
   --sketch-wobble-lg: 40% 8px 35% 10px / 10px 38% 8px 42%; // 卡片
   --sketch-wobble-lg-alt: 9px 36% 10px 40% / 36% 9px 42% 8px;
   --sketch-wobble-xl: 42% 10px 36% 12px / 12px 40% 10px 44%; // 對話框
+  // 手繪的圓（步驟精靈的標記）：四個角都是接近 50% 的橢圓，但每個角差一點，像手畫一圈沒有完全閉合的圓。
+  --sketch-wobble-round: 52% 48% 55% 45% / 46% 54% 47% 53%;
 
   // ---- 筆：顏色全部取自配色的語意 token ----
   --sketch-ink: var(--mat-sys-on-surface); // 麥克筆（浮起的面板、對話框、強調）
@@ -123,6 +125,7 @@
 @media (prefers-contrast: more), (forced-colors: active) {
   :root[data-paradigm='sketch'] {
     --sketch-wobble-xs: var(--mat-sys-corner-full);
+    --sketch-wobble-round: var(--mat-sys-corner-full);
     --sketch-wobble-sm: var(--mat-sys-corner-small);
     --sketch-wobble-sm-alt: var(--mat-sys-corner-small);
     --sketch-wobble-md: var(--mat-sys-corner-medium);

@@ -549,4 +549,33 @@
     --lib-chart-tooltip-shadow: var(--brutal-shadow-sm);
     --lib-chart-tooltip-radius: 0px;
   }
+
+  // 步驟精靈（libs/ui step-wizard）：只設元件暴露的 --lib-step-* 變數。每個標記是一張 2px 墨框的方形貼紙
+  // （corner-full 是 0）、Space Grotesk 粗體數字：未開始是白紙、目前是 primary-container 色塊＋3px 墨影、
+  // 完成是 secondary-container 色塊、錯誤是 error-container 色塊。連接線是 3px 墨線，進度條是 2px 墨框的直角量尺；底部按鈕列上緣一條 2px 墨線（同卡片標題列）。
+  .lib-step-wizard {
+    --lib-step-marker-size: 2.25rem;
+    --lib-step-marker-font: var(--font-display);
+    --lib-step-marker-font-weight: 700;
+    --lib-step-upcoming-bg: var(--mat-sys-surface-container-lowest);
+    --lib-step-upcoming-fg: var(--mat-sys-on-surface);
+    --lib-step-upcoming-border-color: var(--brutal-ink);
+    --lib-step-active-border-color: var(--brutal-ink);
+    --lib-step-current-bg: var(--mat-sys-primary-container);
+    --lib-step-current-fg: var(--mat-sys-on-primary-container);
+    --lib-step-current-shadow: var(--brutal-shadow-sm);
+    --lib-step-done-bg: var(--mat-sys-secondary-container);
+    --lib-step-done-fg: var(--mat-sys-on-secondary-container);
+    --lib-step-error-bg: var(--mat-sys-error-container);
+    --lib-step-error-fg: var(--mat-sys-on-error-container);
+    --lib-step-label-current-weight: 700;
+    --lib-step-connector-width: 3px;
+    --lib-step-connector-color: var(--brutal-ink);
+    --lib-step-connector-done-color: var(--brutal-ink);
+    --lib-step-progress-height: 12px;
+    --lib-step-progress-radius: 0px;
+    --lib-step-progress-frame: var(--brutal-line);
+    --lib-step-progress-track: var(--mat-sys-surface-container-lowest);
+    --lib-step-actions-divider: var(--brutal-line);
+  }
 }

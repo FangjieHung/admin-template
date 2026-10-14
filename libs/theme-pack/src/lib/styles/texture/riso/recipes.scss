@@ -523,4 +523,25 @@
     --lib-chart-tooltip-frame: var(--riso-line);
     --lib-chart-tooltip-radius: var(--mat-sys-corner-medium);
   }
+
+  // 步驟精靈（libs/ui step-wizard）：只設元件暴露的 --lib-step-* 變數。標記是主墨線框的圓；目前步驟是實心主墨＋
+  // 第二墨往左下錯開 2px（套色錯位只在色塊上，數字不錯位）；完成是主墨 16% 平網＋主墨框。連接線是主墨淡線，
+  // 走過的那段是主墨；進度條是主墨線框、主墨 12% 平網的槽；底部按鈕列上緣是 --riso-rule。
+  .lib-step-wizard {
+    --lib-step-marker-border-width: var(--riso-line-w);
+    --lib-step-upcoming-border-color: var(--riso-ink-a);
+    --lib-step-current-bg: var(--riso-ink-a);
+    --lib-step-current-shadow: var(--riso-misreg);
+    --lib-step-done-bg: color-mix(in srgb, var(--riso-ink-a) 16%, var(--mat-sys-surface));
+    --lib-step-done-fg: var(--mat-sys-on-surface);
+    --lib-step-done-border-color: var(--riso-ink-a);
+    --lib-step-connector-width: var(--riso-line-w);
+    --lib-step-connector-color: color-mix(in srgb, var(--riso-ink-a) 45%, transparent);
+    --lib-step-connector-done-color: var(--riso-ink-a);
+    --lib-step-progress-height: 8px;
+    --lib-step-progress-frame: var(--riso-line);
+    --lib-step-progress-track: color-mix(in srgb, var(--riso-ink-a) 12%, var(--mat-sys-surface));
+    --lib-step-progress-fill: var(--riso-ink-a);
+    --lib-step-actions-divider: var(--riso-rule);
+  }
 }

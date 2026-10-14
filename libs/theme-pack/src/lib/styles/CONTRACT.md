@@ -209,6 +209,34 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 
 Material、Linen、Soft UI、Clay、Frosted、Aero 用預設值（陰影、紙感、體積、玻璃都在卡片上，圖表本身不需要另外調）。
 
+#### 步驟精靈（`libs/ui` step-wizard）
+
+- 步驟名稱：未開始、鎖住 `--mat-sys-on-surface-variant`，目前與完成 `--mat-sys-on-surface`，錯誤 `--mat-sys-error`；「選填」小字 `--mat-sys-on-surface-variant`；步驟按鈕滑過 `--app-state-hover`、按下 `--app-state-pressed`、焦點 `--app-focus-ring`（`-width`／`-offset`）、圓角 `--mat-sys-corner-small`。
+- 步驟標題用 `.ui-text-subtitle`，數字標記掛 `.ui-text-numeric`（Grid、Ledger、Cockpit、Riso、Sketch 自動換等寬字）；底部按鈕是 Material 的 `matButton`（outlined／filled，吃各質地的按鈕 recipe），上方一條 `--mat-sys-outline-variant` 分隔線。
+- 錯誤摘要：`--mat-sys-error-container` 底、`--mat-sys-on-error-container` 字、圓角 `--mat-sys-corner-medium`（同工單表單樣板）；換步驟的滑入動畫 `--app-motion-base`，送出中的轉圈 `--app-motion-loop / 8`，減少動態時都不動。
+- 標記、連接線、進度條是元件暴露的變數：質地只在 `.lib-step-wizard` 上設，不覆寫屬性。標記的框、底、陰影畫在不含文字的 `::before` 上，連接線也是不含文字的偽元素（線畫在正中間），所以可以加 filter 而數字不變形。標記與圖示的顏色要對旁邊的底色 ≥ 3:1、數字 ≥ 4.5:1。
+
+| 變數 | 預設 | 用途 | 目前設定的質地 |
+| --- | --- | --- | --- |
+| `--lib-step-marker-size` | `2rem` | 標記邊長 | Clay、Brutal `2.25rem`；Ledger `1.5rem` |
+| `--lib-step-marker-radius` | `var(--mat-sys-corner-full)` | 標記圓角（Grid、Editorial、Brutal、Ledger 的 corner-full 很小，標記自然變方） | Sketch：`var(--sketch-wobble-round)`（手繪的圓） |
+| `--lib-step-marker-border-width` | `2px` | 標記框線粗細 | Grid、Editorial、Ledger、Cockpit、Soft UI、Clay `1px`；Riso `var(--riso-line-w)`；Sketch `var(--sketch-pen-w)` |
+| `--lib-step-marker-font` / `-font-size` / `-font-weight` | `var(--font-body)` / `0.875rem` / `600` | 標記數字 | Editorial：`var(--font-display)`、`1rem`；Clay：`var(--font-display)`、`800`；Brutal：`var(--font-display)`、`700`；Ledger：`0.75rem` |
+| `--lib-step-marker-filter` | `none` | 標記框（`::before`）的 filter | （無） |
+| `--lib-step-upcoming-bg` / `-fg` / `-border-color` / `-shadow` | `transparent` / `--mat-sys-on-surface-variant` / `--app-field-border` / `none` | 未開始（鎖住的同色、框線改虛線：`--lib-step-locked-border-style`，預設 `dashed`） | Linen 底 `surface-container-low`；Cockpit 底 `surface-container-lowest`；Brutal 底 `surface-container-lowest`、字 `on-surface`、框 `var(--brutal-ink)`；Riso 框 `var(--riso-ink-a)`；Sketch 框 `var(--sketch-pen)`；Soft UI 陰影 `var(--soft-inset-small)`；Clay 陰影 `var(--clay-shadow-pressed)` |
+| `--lib-step-current-bg` / `-fg` / `-shadow` | `--mat-sys-primary` / `--mat-sys-on-primary` / 主色 18% 的 4px 外圈 | 目前步驟（目前步驟有錯時也用這個陰影） | Editorial：`on-surface`／`surface`、`none`；Brutal：`primary-container`／`on-primary-container`、`var(--brutal-shadow-sm)`；Riso：`var(--riso-ink-a)`、`var(--riso-misreg)`；Grid `var(--mat-sys-level1)`；Soft UI、Frosted、Aero `var(--mat-sys-level1)`；Clay `var(--clay-shadow-small)`；Cockpit `var(--cockpit-glow-active)`；Sketch `var(--sketch-retrace)`；Linen、Ledger `none` |
+| `--lib-step-done-bg` / `-fg` / `-border-color` / `-shadow` | `--mat-sys-primary` / `--mat-sys-on-primary` / 同底色 / `none` | 完成 | Editorial：`transparent`／`on-surface`／`on-surface`；Cockpit：`transparent`／`primary`／`primary`；Brutal：`secondary-container`／`on-secondary-container`；Riso：主墨 16% 平網／`on-surface`／主墨；Sketch：`surface`／`on-surface`；Soft UI 陰影 `var(--mat-sys-level1)`；Clay 陰影 `var(--clay-shadow-small)` |
+| `--lib-step-error-bg` / `-fg` / `-shadow` | `--mat-sys-error` / `--mat-sys-on-error` / `none`（目前這一步有錯時沿用 current-shadow） | 錯誤 | Brutal：`error-container`／`on-error-container`；Cockpit 陰影：錯誤色 50% 的 14px glow（紅燈） |
+| `--lib-step-active-border-color` | 同各狀態的底色 | 目前、完成、錯誤三種實心標記的框線色 | Brutal：`var(--brutal-ink)`；Sketch：`var(--sketch-ink)` |
+| `--lib-step-label-font` / `-label-size` / `-label-current-weight` | `var(--font-body)` / `0.875rem` / `600` | 步驟名稱 | Ledger 字級 `0.8125rem`；Brutal 目前步驟 `700` |
+| `--lib-step-button-min-height` | `2.75rem` | 步驟按鈕最小高度（點擊熱區） | Ledger `2rem` |
+| `--lib-step-connector-width` / `-color` / `-done-color` / `-filter` | `2px` / `--mat-sys-outline-variant`（裝飾） / `--mat-sys-primary` / `none` | 步驟之間的連接線；走過的那段換 done 色 | Grid：`1px`、`outline`；Editorial：`1px`、走過 `on-surface`；Ledger：`1px`、`var(--ledger-rule)`；Cockpit：`1px`、`var(--cockpit-edge)`；Brutal：`3px`、墨色；Riso：`var(--riso-line-w)`、主墨 45%／主墨；Sketch：`var(--sketch-pen-w)`、`var(--sketch-pen)`／`var(--sketch-ink)`（不抖：`--sketch-jitter` 套在細線上會變成階梯） |
+| `--lib-step-progress-height` / `-radius` / `-frame` / `-track` / `-fill` / `-shadow` | `4px` / `var(--mat-sys-corner-full)` / `0 solid transparent` / `--mat-sys-surface-container-high` / `--mat-sys-primary` / `none` | 窄版精簡列的進度條（裝飾，`aria-hidden`；文字已寫出第幾步） | Grid：`8px`、`0px`、1px `outline` 框、`surface` 槽；Editorial：`2px`、`0px`、`outline-variant` 槽、`on-surface`；Ledger：`3px`、`0px`；Cockpit：`6px`、corner-small、1px `var(--cockpit-edge-strong)`、`surface-container-lowest`；Brutal：`12px`、`0px`、`var(--brutal-line)`、`surface-container-lowest`；Riso：`8px`、`var(--riso-line)`、主墨 12% 平網、主墨；Sketch：`8px`、`var(--sketch-wobble-xs)`、鋼筆框、`surface`；Linen 槽 `surface-container`；Soft UI：`8px`、`background` 槽＋`var(--soft-inset-small)`；Clay：`10px`、`var(--clay-shadow-pressed)` |
+| `--lib-step-nav-width` | `14rem` | 直式時左側步驟清單的寬度 | （無） |
+| `--lib-step-actions-divider` | `1px solid var(--mat-sys-outline-variant)` | 底部按鈕列上緣（border 簡寫） | Brutal：`var(--brutal-line)`；Riso：`var(--riso-rule)`；Sketch：`var(--sketch-rule)` |
+
+Material 用預設值（實心主色圓＋淡淡的主色外圈）。
+
 ### 字體（質地包提供，中英分軌）
 
 `--font-zh`（中文，裝置的系統字）、`--font-en`（英文依質地）、`--font-display`、`--font-body`、`--font-mono`

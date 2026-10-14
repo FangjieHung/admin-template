@@ -420,4 +420,24 @@
     --lib-chart-tooltip-frame: 1px solid var(--cockpit-edge-strong);
     --lib-chart-tooltip-shadow: var(--cockpit-glow-2);
   }
+
+  // 步驟精靈（libs/ui step-wizard）：只設元件暴露的 --lib-step-* 變數。未開始的標記是凹進去的讀數窗（最暗的底），
+  // 目前步驟是亮起的指示燈（主色＋glow-active）、有錯的是紅燈，完成的是主色細框＋主色勾號（亮著但不發光）。連接線是暗的亮邊，
+  // 走過的那段換主色；進度條是 1px 強亮邊的讀數槽。
+  .lib-step-wizard {
+    --lib-step-marker-border-width: 1px;
+    --lib-step-upcoming-bg: var(--mat-sys-surface-container-lowest);
+    --lib-step-current-shadow: var(--cockpit-glow-active);
+    // 有錯的標記是亮著的紅燈（錯誤色的 glow，同 glow-active 的大小）。
+    --lib-step-error-shadow: 0 0 14px color-mix(in srgb, var(--mat-sys-error) 50%, transparent);
+    --lib-step-done-bg: transparent;
+    --lib-step-done-fg: var(--mat-sys-primary);
+    --lib-step-done-border-color: var(--mat-sys-primary);
+    --lib-step-connector-width: 1px;
+    --lib-step-connector-color: var(--cockpit-edge);
+    --lib-step-progress-height: 6px;
+    --lib-step-progress-radius: var(--mat-sys-corner-small);
+    --lib-step-progress-frame: 1px solid var(--cockpit-edge-strong);
+    --lib-step-progress-track: var(--mat-sys-surface-container-lowest);
+  }
 }

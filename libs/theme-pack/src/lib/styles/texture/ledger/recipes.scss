@@ -409,4 +409,19 @@
     --lib-chart-baseline-color: var(--ledger-rule-strong);
     --lib-stat-card-value-size: 1.5rem;
   }
+
+  // 步驟精靈（libs/ui step-wizard）：只設元件暴露的 --lib-step-* 變數。高密度：24px 標記、12px 等寬數字、13px 名稱、
+  // 32px 的按鈕；1px 框、不畫外圈；連接線是帳冊的細分隔線，進度條是 3px 的直角細條。
+  .lib-step-wizard {
+    --lib-step-marker-size: 1.5rem;
+    --lib-step-marker-font-size: 0.75rem;
+    --lib-step-marker-border-width: 1px;
+    --lib-step-current-shadow: none;
+    --lib-step-label-size: 0.8125rem;
+    --lib-step-button-min-height: 2rem;
+    --lib-step-connector-width: 1px;
+    --lib-step-connector-color: var(--ledger-rule);
+    --lib-step-progress-height: 3px;
+    --lib-step-progress-radius: 0px;
+  }
 }

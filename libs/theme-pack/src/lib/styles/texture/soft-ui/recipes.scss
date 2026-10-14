@@ -317,4 +317,16 @@
   }
 
   // prefers-reduced-motion：transition 時長取自 --app-motion-*，由 _semantic.scss 在 reduce 時歸零。
+
+  // 步驟精靈（libs/ui step-wizard）：只設元件暴露的 --lib-step-* 變數。未開始的標記壓進去（小內凹＋1px 欄位細框，
+  // 單靠浮雕對底色不到 3:1），目前與完成的標記凸起（level1）；進度條是一道內凹的槽。
+  .lib-step-wizard {
+    --lib-step-marker-border-width: 1px;
+    --lib-step-upcoming-shadow: var(--soft-inset-small);
+    --lib-step-current-shadow: var(--mat-sys-level1);
+    --lib-step-done-shadow: var(--mat-sys-level1);
+    --lib-step-progress-height: 8px;
+    --lib-step-progress-track: var(--mat-sys-background);
+    --lib-step-progress-shadow: var(--soft-inset-small);
+  }
 }

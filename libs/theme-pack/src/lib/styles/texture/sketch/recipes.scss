@@ -560,4 +560,26 @@
       --lib-chart-tooltip-radius: var(--mat-sys-corner-small);
     }
   }
+
+  // 步驟精靈（libs/ui step-wizard）：只設元件暴露的 --lib-step-* 變數。標記是手繪的圓（--sketch-wobble-round）：
+  // 未開始是鋼筆線、目前是主色螢光筆塗滿＋麥克筆框＋再描一次、完成是紙底＋麥克筆框與勾號。連接線是直的鋼筆線
+  // （--sketch-jitter 套在 1.5px 的細線上會變成一段一段的階梯，不像手畫，所以不抖），進度條是手繪框的槽，
+  // 底部按鈕列上緣是 --sketch-rule。
+  .lib-step-wizard {
+    --lib-step-marker-radius: var(--sketch-wobble-round);
+    --lib-step-marker-border-width: var(--sketch-pen-w);
+    --lib-step-upcoming-border-color: var(--sketch-pen);
+    --lib-step-active-border-color: var(--sketch-ink);
+    --lib-step-current-shadow: var(--sketch-retrace);
+    --lib-step-done-bg: var(--mat-sys-surface);
+    --lib-step-done-fg: var(--mat-sys-on-surface);
+    --lib-step-connector-width: var(--sketch-pen-w);
+    --lib-step-connector-color: var(--sketch-pen);
+    --lib-step-connector-done-color: var(--sketch-ink);
+    --lib-step-progress-height: 8px;
+    --lib-step-progress-radius: var(--sketch-wobble-xs);
+    --lib-step-progress-frame: var(--sketch-pen-w) solid var(--sketch-pen);
+    --lib-step-progress-track: var(--mat-sys-surface);
+    --lib-step-actions-divider: var(--sketch-rule);
+  }
 }

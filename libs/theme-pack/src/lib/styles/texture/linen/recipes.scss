@@ -227,4 +227,12 @@
   .ui-card--inverse .ui-text-caption {
     color: inherit;
   }
+
+  // 步驟精靈（libs/ui step-wizard）：只設元件暴露的 --lib-step-* 變數。沒有陰影：目前步驟不畫外圈，靠實心主色分辨；
+  // 未開始的標記是一張深一階的紙（surface-container-low）。標記跟著 corner-full（8px）是小圓角方塊，同時間軸節點。
+  .lib-step-wizard {
+    --lib-step-upcoming-bg: var(--mat-sys-surface-container-low);
+    --lib-step-current-shadow: none;
+    --lib-step-progress-track: var(--mat-sys-surface-container);
+  }
 }

@@ -231,4 +231,10 @@
       transform: none;
     }
   }
+
+  // 步驟精靈（libs/ui step-wizard）：只設元件暴露的 --lib-step-* 變數。目前步驟用 level1 的短淡投影＋亮邊，
+  // 不用預設的主色外圈。
+  .lib-step-wizard {
+    --lib-step-current-shadow: var(--mat-sys-level1);
+  }
 }
