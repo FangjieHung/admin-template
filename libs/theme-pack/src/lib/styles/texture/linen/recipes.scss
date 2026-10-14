@@ -245,4 +245,14 @@
     --lib-upload-thumb-bg: var(--mat-sys-surface-container);
     --lib-upload-progress-track: var(--mat-sys-surface-container);
   }
+
+  // 通知中心（libs/ui notification-center＋頁首鈴鐺）：只設元件暴露的 --lib-notif-* 變數。沒有陰影：面板是一張白紙＋淡框、
+  // 大圓角（同選單）；未讀是深一階的紙。
+  .lib-notification-center {
+    --lib-notif-panel-bg: var(--mat-sys-surface);
+    --lib-notif-panel-frame: 1px solid var(--mat-sys-outline-variant);
+    --lib-notif-panel-radius: var(--mat-sys-corner-extra-large);
+    --lib-notif-panel-shadow: none;
+    --lib-notif-unread-bg: var(--mat-sys-surface-container-low);
+  }
 }

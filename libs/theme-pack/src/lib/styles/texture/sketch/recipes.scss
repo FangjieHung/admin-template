@@ -610,4 +610,20 @@
       --lib-upload-zone-filter: none;
     }
   }
+
+  // 通知中心（libs/ui notification-center＋頁首鈴鐺）：只設元件暴露的 --lib-notif-* 變數。面板跟選單一樣是麥克筆框＋
+  // 再描一次的影、手繪圓角（框不套抖動：面板裡全是字）；未讀點、圖示格、徽章是手繪的圓；分隔線是 --sketch-rule 直線。
+  .lib-notification-center {
+    --lib-notif-panel-bg: var(--sketch-card);
+    --lib-notif-panel-frame: var(--sketch-marker-w) solid var(--sketch-ink);
+    --lib-notif-panel-radius: var(--sketch-wobble-md);
+    --lib-notif-panel-shadow: var(--sketch-retrace);
+    --lib-notif-divider: var(--sketch-rule);
+    --lib-notif-item-divider: var(--sketch-rule);
+    --lib-notif-dot-radius: var(--sketch-wobble-round);
+    --lib-notif-lead-frame: var(--sketch-pen-w) solid var(--sketch-pen);
+    --lib-notif-lead-radius: var(--sketch-wobble-round);
+    --lib-notif-badge-radius: var(--sketch-wobble-round);
+    --lib-notif-badge-shadow: 0 0 0 var(--sketch-pen-w) var(--sketch-ink);
+  }
 }

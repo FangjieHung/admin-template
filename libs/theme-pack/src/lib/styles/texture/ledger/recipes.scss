@@ -444,4 +444,18 @@
     --lib-upload-progress-height: 3px;
     --lib-upload-progress-radius: 0px;
   }
+
+  // 通知中心（libs/ui notification-center＋頁首鈴鐺）：只設元件暴露的 --lib-notif-* 變數。高密度：每則通知的內距、
+  // 圖示格與字級都小一號，通知之間是帳冊的細分隔線；面板是 1px 較深的帳冊框。
+  .lib-notification-center {
+    --lib-notif-panel-frame: 1px solid var(--ledger-rule-strong);
+    --lib-notif-panel-shadow: var(--mat-sys-level2);
+    --lib-notif-item-padding-block: 0.375rem;
+    --lib-notif-item-padding-inline: 0.75rem;
+    --lib-notif-item-divider: 1px solid var(--ledger-rule);
+    --lib-notif-lead-size: 1.75rem;
+    --lib-notif-title-size: 0.8125rem;
+    --lib-notif-body-size: 0.75rem;
+    --lib-notif-group-size: 0.6875rem;
+  }
 }

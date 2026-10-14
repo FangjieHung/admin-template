@@ -568,4 +568,23 @@
     --lib-upload-progress-track: color-mix(in srgb, var(--riso-ink-a) 12%, var(--mat-sys-surface));
     --lib-upload-progress-fill: var(--riso-ink-a);
   }
+
+  // 通知中心（libs/ui notification-center＋頁首鈴鐺）：只設元件暴露的 --lib-notif-* 變數。面板是紙底＋主墨線框、
+  // 第二墨的錯位影；未讀疊一層主墨 10% 平網，未讀點是主墨圓點＋第二墨錯位；圖示格是主墨線框，分隔線是 --riso-rule。
+  // 鈴鐺徽章是主墨色塊＋第二墨錯位。
+  .lib-notification-center {
+    --lib-notif-panel-bg: var(--mat-sys-surface);
+    --lib-notif-panel-frame: var(--riso-line);
+    --lib-notif-panel-radius: var(--mat-sys-corner-medium);
+    --lib-notif-panel-shadow: var(--riso-misreg);
+    --lib-notif-divider: var(--riso-rule);
+    --lib-notif-item-divider: var(--riso-rule);
+    --lib-notif-unread-bg: var(--riso-overlay);
+    --lib-notif-dot-color: var(--riso-ink-a);
+    --lib-notif-dot-shadow: var(--riso-misreg);
+    --lib-notif-lead-frame: var(--riso-line);
+    --lib-notif-badge-bg: var(--riso-ink-a);
+    --lib-notif-badge-fg: var(--mat-sys-on-primary);
+    --lib-notif-badge-shadow: var(--riso-misreg);
+  }
 }

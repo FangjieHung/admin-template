@@ -266,4 +266,14 @@
     --lib-upload-zone-active-shadow: var(--mat-sys-level1);
     --lib-upload-tile-shadow: var(--mat-sys-level1);
   }
+
+  // 通知中心（libs/ui notification-center＋頁首鈴鐺）：只設元件暴露的 --lib-notif-* 變數。面板跟選單一樣是霧面玻璃
+  // （frost-panel＋淡框、level4、背景霧化 20px），減少透明度時 frost-panel 變回實色。
+  .lib-notification-center {
+    --lib-notif-panel-bg: var(--frost-panel);
+    --lib-notif-panel-frame: 1px solid var(--frost-border);
+    --lib-notif-panel-radius: var(--mat-sys-corner-extra-large);
+    --lib-notif-panel-shadow: var(--mat-sys-level4);
+    --lib-notif-panel-backdrop: blur(20px);
+  }
 }

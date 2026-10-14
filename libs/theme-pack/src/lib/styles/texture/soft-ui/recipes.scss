@@ -346,4 +346,11 @@
     --lib-upload-progress-track: var(--mat-sys-background);
     --lib-upload-progress-shadow: var(--soft-inset-small);
   }
+
+  // 通知中心（libs/ui notification-center＋頁首鈴鐺）：只設元件暴露的 --lib-notif-* 變數。面板跟選單一樣是同色的浮雕
+  // （background 底、level3）；鈴鐺徽章外圈用頁面底色，看起來像嵌在按鈕上。
+  .lib-notification-center {
+    --lib-notif-panel-bg: var(--mat-sys-background);
+    --lib-notif-badge-shadow: 0 0 0 2px var(--mat-sys-background);
+  }
 }

@@ -319,4 +319,15 @@
     --lib-upload-progress-height: 10px;
     --lib-upload-progress-shadow: var(--clay-shadow-pressed);
   }
+
+  // 通知中心（libs/ui notification-center＋頁首鈴鐺）：只設元件暴露的 --lib-notif-* 變數。面板跟選單一樣是一塊大圓角、
+  // 深陰影的黏土；每則通知是面板裡一塊圓角的小黏土片（左右內縮、彼此留縫），不畫分隔線。
+  .lib-notification-center {
+    --lib-notif-panel-radius: var(--mat-sys-corner-extra-large);
+    --lib-notif-panel-shadow: var(--clay-shadow-deep);
+    --lib-notif-list-inset: 0.5rem;
+    --lib-notif-item-gap: 0.25rem;
+    --lib-notif-item-radius: var(--mat-sys-corner-medium);
+    --lib-notif-badge-shadow: var(--clay-shadow-small);
+  }
 }

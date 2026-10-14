@@ -269,6 +269,31 @@ Material 用預設值（實心主色圓＋淡淡的主色外圈）。
 
 Material 用預設值（淡底、1px 欄位色虛線、中圓角；拖進來時 2px 主色虛線＋主色淡底）。
 
+#### 通知中心（`libs/ui` notification-center、`apps/admin` 頁首鈴鐺）
+
+- 文字：標題 `--mat-sys-on-surface`（未讀加粗）、說明與時間、分組標題 `--mat-sys-on-surface-variant`；時間掛 `.ui-text-numeric`。未讀不只靠顏色：圓點旁有只給報讀器的「未讀」，標題加粗。圖示格用狀態語意一對 `--app-{tone}-bg`／`-fg`（預設 neutral），人送來的通知是名字縮寫圓章 `--mat-sys-primary-container`／`--mat-sys-on-primary-container`（同活動紀錄）。
+- 全部／未讀與類別是 `.ui-nav-pill`（目前那一顆 `.is-active`＋`aria-pressed`），「全部標為已讀」「載入更多」與通知上的動作是 Material 的 `matButton`、標為已讀／移除是 `matIconButton`，造型都交給質地既有的 recipe；滑過 `--app-state-hover`、焦點 `--app-focus-ring`（`-width`，畫在內側）。載入中、沒有通知、載入失敗是 `lib-skeleton`、`lib-empty-state`、`lib-error-state`。
+- 頁首鈴鐺在 Initial bundle：只有 `matIconButton` 加一條徽章規則（`::after`，內容是 `data-count`），徽章文字對徽章底色 ≥ 4.5:1；面板在 lazy chunk，掛在 CDK overlay（pane class `app-notification-pane`），600px 以下滿版（拿掉圓角與陰影）。
+- 質地只在 `.lib-notification-center` 上設下列變數，不覆寫屬性（清單、面板、鈴鐺按鈕都有這個 class；每則通知是內部元件，變數會繼承下去）。
+
+| 變數 | 預設 | 用途 | 目前設定的質地 |
+| --- | --- | --- | --- |
+| `--lib-notif-panel-bg` / `-frame` / `-radius` / `-shadow` / `-backdrop` | `--mat-sys-surface-container` / `0 solid transparent` / `--mat-sys-corner-large` / `--mat-sys-level3` / `none` | 鈴鐺面板的底、框（border 簡寫）、圓角、陰影、背景霧化（`backdrop-filter`）；Grid、Editorial 的 corner-large 是 0、Editorial 的 level3 是 none，跟著變 | Grid：`surface`、1px `outline`；Editorial：`surface`、1px `outline-variant`、`none`；Brutal：`var(--brutal-card)`、`var(--brutal-line-thick)`、`0px`；Riso：`surface`、`var(--riso-line)`、`corner-medium`、`var(--riso-misreg)`；Sketch：`var(--sketch-card)`、麥克筆框、`var(--sketch-wobble-md)`、`var(--sketch-retrace)`；Cockpit：`surface-container-high`、1px `var(--cockpit-edge-strong)`、`var(--cockpit-glow-2)`；Ledger：1px `var(--ledger-rule-strong)`、`level2`；Linen：`surface`、1px `outline-variant`、`corner-extra-large`、`none`；Clay：`corner-extra-large`、`var(--clay-shadow-deep)`；Soft UI：`background`；Frosted：`var(--frost-panel)`、1px `var(--frost-border)`、`corner-extra-large`、`level4`、`blur(20px)`；Aero：`var(--aero-panel)`、1px `var(--aero-edge)`、`corner-extra-large`、`level4`、`blur(26px) saturate(1.12)` |
+| `--lib-notif-panel-width` | `380px` | 桌機面板寬度（最多視窗寬減 16px） | （無） |
+| `--lib-notif-divider` | `1px solid --mat-sys-outline-variant` | 篩選列與清單之間、面板底部「查看全部通知」上緣 | Grid：1px `outline`；Editorial：1px `on-surface`（強調線）；Brutal：`var(--brutal-line)`；Riso：`var(--riso-rule)`；Sketch：`var(--sketch-rule)`；Cockpit：1px `var(--cockpit-edge)` |
+| `--lib-notif-item-divider` / `-item-gap` / `-item-radius` / `-list-inset` | `0 solid transparent` / `0px` / `0px` / `0px` | 通知之間的分隔線（border 簡寫）、間距、每則的圓角、清單左右內縮 | 分隔線：Grid、Editorial 1px `outline-variant`；Brutal `var(--brutal-line)`；Riso `var(--riso-rule)`；Sketch `var(--sketch-rule)`；Ledger 1px `var(--ledger-rule)`；Cockpit 1px `var(--cockpit-edge)`。Clay：間距 `0.25rem`、圓角 `corner-medium`、內縮 `0.5rem`（每則是一塊小黏土片） |
+| `--lib-notif-item-padding-block` / `-inline` | `0.75rem` / `1rem` | 每則通知的內距（工具列、分組標題也跟著左右內距） | Ledger `0.375rem` / `0.75rem` |
+| `--lib-notif-unread-bg` / `-hover-bg` | 主色 4% 疊加 / `--app-state-hover` | 未讀的底色、滑過的疊加（疊在未讀底色上）；文字對疊加後的底色 ≥ 4.5:1 | 未讀：Editorial `transparent`；Brutal `primary-container`；Riso `var(--riso-overlay)`；Cockpit `var(--cockpit-lit)`；Linen `surface-container-low` |
+| `--lib-notif-unread-weight` | `600` | 未讀標題字重 | Editorial `700` |
+| `--lib-notif-dot-color` / `-size` / `-radius` / `-shadow` | `--mat-sys-primary` / `0.5rem` / `50%` / `none` | 未讀圓點（對底色 ≥ 3:1） | Editorial `on-surface`；Brutal `var(--brutal-ink)`、`0.625rem`、`0px`（方形墨點）；Riso `var(--riso-ink-a)`＋`var(--riso-misreg)`；Sketch 圓角 `var(--sketch-wobble-round)`；Cockpit 主色 70% 的 6px 光 |
+| `--lib-notif-lead-size` / `-radius` / `-frame` | `2.25rem` / `--mat-sys-corner-full` / `0 solid transparent` | 圖示格與名字圓章（Grid、Editorial、Brutal 的 corner-full 很小或是 0，跟著變方；圖示對格子底色 ≥ 3:1） | Ledger `1.75rem`；Brutal 框 `var(--brutal-line)`；Riso `var(--riso-line)`；Sketch 鋼筆框、`var(--sketch-wobble-round)`；Cockpit 1px `var(--cockpit-edge)` |
+| `--lib-notif-title-font` / `-title-size` / `-body-size` / `-meta-size` | `var(--font-body)` / `0.875rem` / `0.8125rem` / `0.75rem` | 標題、兩行說明、時間與類別 | Ledger 標題 `0.8125rem`、說明 `0.75rem` |
+| `--lib-notif-meta-caps` / `-meta-spacing` | `normal` / `normal` | 時間、分組標題的 `font-variant-caps`，時間的字距 | Editorial `small-caps`（只影響英文小寫；`all-small-caps` 會把數字也縮小）、`0.04em` |
+| `--lib-notif-group-font` / `-size` / `-weight` / `-spacing` | `var(--font-body)` / `0.75rem` / `600` / `0.02em` | 今天／昨天／更早分組標題 | Editorial：`var(--font-display)`、`0.8125rem`、字距 `0.08em`；Brutal：`var(--font-display)`、`700`；Ledger `0.6875rem` |
+| `--lib-notif-badge-bg` / `-fg` / `-radius` / `-shadow` | `--mat-sys-error` / `--mat-sys-on-error` / `--mat-sys-corner-full` / 2px `--mat-sys-surface` 外圈 | 頁首鈴鐺的未讀數徽章（Initial bundle）；Grid、Editorial 的 corner-full 是 2px、Brutal 是 0，徽章自然變方 | Editorial：`on-surface`／`surface`（墨色小方籤）；Riso：`var(--riso-ink-a)`／`on-primary`、`var(--riso-misreg)`；Brutal：`0px`、2px 墨框加 2px 墨影（用 box-shadow 畫）；Grid：1px `surface` 外圈加 2px `outline` 硬影；Sketch：`var(--sketch-wobble-round)`、鋼筆外圈；Cockpit：外圈加錯誤色 60% 的 10px 光；Clay `var(--clay-shadow-small)`；Soft UI 外圈改 `background` |
+
+Material 用預設值（surface-container 面板、大圓角、level3 陰影；主色淡底的未讀、主色圓點、錯誤色徽章）。
+
 ### 字體（質地包提供，中英分軌）
 
 `--font-zh`（中文，裝置的系統字）、`--font-en`（英文依質地）、`--font-display`、`--font-body`、`--font-mono`

@@ -617,4 +617,25 @@
     --lib-upload-progress-frame: var(--brutal-line);
     --lib-upload-progress-track: var(--mat-sys-surface-container-lowest);
   }
+
+  // 通知中心（libs/ui notification-center＋頁首鈴鐺）：只設元件暴露的 --lib-notif-* 變數。面板是一張 3px 墨框的白紙＋
+  // 浮層墨影（level3），每則通知之間 2px 墨線；未讀是一塊 primary-container 色塊、方形墨點；圖示格 2px 墨框。
+  // 鈴鐺徽章是方形貼紙：2px 墨框＋2px 墨影。
+  .lib-notification-center {
+    --lib-notif-panel-bg: var(--brutal-card);
+    --lib-notif-panel-frame: var(--brutal-line-thick);
+    --lib-notif-panel-radius: 0px;
+    --lib-notif-panel-shadow: var(--mat-sys-level3);
+    --lib-notif-divider: var(--brutal-line);
+    --lib-notif-item-divider: var(--brutal-line);
+    --lib-notif-unread-bg: var(--mat-sys-primary-container);
+    --lib-notif-dot-color: var(--brutal-ink);
+    --lib-notif-dot-radius: 0px;
+    --lib-notif-dot-size: 0.625rem;
+    --lib-notif-lead-frame: var(--brutal-line);
+    --lib-notif-group-font: var(--font-display);
+    --lib-notif-group-weight: 700;
+    --lib-notif-badge-radius: 0px;
+    --lib-notif-badge-shadow: 0 0 0 2px var(--brutal-ink), 2px 2px 0 2px var(--brutal-ink);
+  }
 }

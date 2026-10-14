@@ -461,4 +461,18 @@
     --lib-upload-progress-track: var(--mat-sys-surface-container-lowest);
     --lib-upload-progress-glow: 0 0 8px color-mix(in srgb, var(--mat-sys-primary) 50%, transparent);
   }
+
+  // 通知中心（libs/ui notification-center＋頁首鈴鐺）：只設元件暴露的 --lib-notif-* 變數。面板是亮一階的儀表面板＋強亮邊、
+  // 外圈一層光；未讀那一則亮起來（cockpit-lit）、未讀點是發光的主色燈號；分隔線與圖示格是暗的亮邊。鈴鐺徽章是紅色警示燈。
+  .lib-notification-center {
+    --lib-notif-panel-bg: var(--mat-sys-surface-container-high);
+    --lib-notif-panel-frame: 1px solid var(--cockpit-edge-strong);
+    --lib-notif-panel-shadow: var(--cockpit-glow-2);
+    --lib-notif-divider: 1px solid var(--cockpit-edge);
+    --lib-notif-item-divider: 1px solid var(--cockpit-edge);
+    --lib-notif-unread-bg: var(--cockpit-lit);
+    --lib-notif-dot-shadow: 0 0 6px color-mix(in srgb, var(--mat-sys-primary) 70%, transparent);
+    --lib-notif-lead-frame: 1px solid var(--cockpit-edge);
+    --lib-notif-badge-shadow: 0 0 0 2px var(--mat-sys-surface), 0 0 10px color-mix(in srgb, var(--mat-sys-error) 60%, transparent);
+  }
 }
