@@ -1,0 +1,229 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="新增專案（線性）"
+    description="一步一步往下填：「下一步」先驗證這一步，後面的步驟還不能點。成員是選填，可以留白跳過。目前步驟寫在網址的 ?step=，重新整理會留在同一步（草稿暫存在這個分頁）；有填內容時按「取消」會先確認。"
+  >
+    <div data-demo="project">
+      @if (created(); as name) {
+        <lib-empty-state
+          icon="task_alt"
+          [message]="'已建立專案「' + name + '」'"
+          detail="完成畫面由頁面自己決定：這裡用空狀態元件，也可以直接導到新專案的詳情頁。"
+          actionLabel="再建立一個"
+          (action)="restartProject()"
+        />
+      } @else {
+        <lib-step-wizard
+          #projectWizard
+          [(selectedIndex)]="projectStep"
+          [submitAction]="createProject"
+          finishLabel="建立專案"
+          [showCancel]="true"
+          [headingLevel]="3"
+          (selectionChange)="onProjectStep($event.selectedIndex)"
+          (cancel)="onProjectCancel()"
+        >
+          <lib-wizard-step
+            label="基本資料"
+            description="專案名稱會顯示在清單與通知裡；代碼用在工單編號前面。"
+            [stepControl]="project.controls.basics"
+            [fieldLabels]="basicsLabels"
+          >
+            <div class="wizard-fields" [formGroup]="project.controls.basics">
+              <mat-form-field appearance="outline" data-field="name">
+                <mat-label>專案名稱</mat-label>
+                <input matInput formControlName="name" required autocomplete="off" />
+                <mat-error>請輸入專案名稱（40 字以內）</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" data-field="code">
+                <mat-label>專案代碼</mat-label>
+                <input matInput formControlName="code" required autocomplete="off" />
+                <mat-hint>大寫英文開頭，2–6 個英數字，例：WEB</mat-hint>
+                <mat-error>大寫英文開頭，2–6 個英數字</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="wizard-fields__wide">
+                <mat-label>說明</mat-label>
+                <textarea matInput formControlName="description" rows="3"></textarea>
+              </mat-form-field>
+            </div>
+          </lib-wizard-step>
+
+          <lib-wizard-step label="成員" optional description="可以先跳過，建立後再邀請。" [stepControl]="project.controls.members">
+            <div class="wizard-fields" [formGroup]="project.controls.members">
+              <lib-relation-select
+                data-field="owner"
+                label="負責人"
+                placeholder="輸入姓名或部門"
+                formControlName="owner"
+                [source]="contactSource"
+                [displayWith]="contactName"
+                [secondaryWith]="contactMeta"
+              />
+              <mat-checkbox formControlName="notifyMembers">建立後寄出邀請給負責人</mat-checkbox>
+            </div>
+          </lib-wizard-step>
+
+          <lib-wizard-step label="設定" [stepControl]="project.controls.settings" [fieldLabels]="settingsLabels">
+            <div class="wizard-fields" [formGroup]="project.controls.settings">
+              <div class="wizard-choice" data-field="visibility">
+                <span class="wizard-choice__label" id="sw-visibility-label">誰看得到 <span aria-hidden="true">*</span></span>
+                <mat-radio-group formControlName="visibility" aria-labelledby="sw-visibility-label" class="wizard-choice__options">
+                  @for (option of visibilityOptions; track option[0]) {
+                    <mat-radio-button [value]="option[0]">{{ option[1] }}</mat-radio-button>
+                  }
+                </mat-radio-group>
+                @if (project.controls.settings.controls.visibility.invalid && project.controls.settings.controls.visibility.touched) {
+                  <mat-error>請選擇誰看得到這個專案</mat-error>
+                }
+              </div>
+              <mat-form-field appearance="outline" data-field="dueDate">
+                <mat-label>預計完成日</mat-label>
+                <input matInput type="date" formControlName="dueDate" />
+                <mat-hint>可以不填</mat-hint>
+              </mat-form-field>
+            </div>
+          </lib-wizard-step>
+
+          <lib-wizard-step label="確認" description="確認內容無誤後按「建立專案」。">
+            <lib-description-list [items]="summaryItems()" [columns]="2" />
+          </lib-wizard-step>
+        </lib-step-wizard>
+      }
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="錯誤狀態與錯誤摘要"
+    description="第一步預先填了不完整的 Email、也漏填了電話。按「下一步」：留在原地、這一步標成錯誤、上方列出要修正的欄位（點欄位名稱會跳過去），焦點移到第一個錯誤欄位。修正後摘要會即時更新。"
+  >
+    <div data-demo="error">
+      <lib-step-wizard [headingLevel]="3" finishLabel="送出" [submitAction]="submitContact">
+        <lib-wizard-step label="聯絡資料" [stepControl]="contact" [fieldLabels]="contactLabels">
+          <div class="wizard-fields" [formGroup]="contact">
+            <mat-form-field appearance="outline" data-field="name">
+              <mat-label>姓名</mat-label>
+              <input matInput formControlName="name" required />
+              <mat-error>請輸入姓名</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" data-field="email">
+              <mat-label>Email</mat-label>
+              <input matInput type="email" formControlName="email" required />
+              <mat-error>Email 格式不正確</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" data-field="phone">
+              <mat-label>電話</mat-label>
+              <input matInput type="tel" formControlName="phone" required />
+              <mat-hint>例：02-12345678</mat-hint>
+              <mat-error>請輸入電話，例：02-12345678</mat-error>
+            </mat-form-field>
+          </div>
+        </lib-wizard-step>
+        <lib-wizard-step label="確認">
+          <p class="demo-note">{{ contact.controls.name.value }} · {{ contact.controls.email.value }} · {{ contact.controls.phone.value }}</p>
+        </lib-wizard-step>
+      </lib-step-wizard>
+      <p class="demo-note" aria-live="polite">最近的事件：{{ contactEvent() }}</p>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="非線性＋直式"
+    description="[linear]=&quot;false&quot;：每一步都能直接點，步驟清單也可以用方向鍵移動。orientation=&quot;vertical&quot; 把步驟清單放在左側，適合像設定頁、步驟比較多的精靈。按「儲存設定」時才一次檢查全部步驟。"
+  >
+    <div data-demo="vertical">
+      <lib-step-wizard
+        [linear]="false"
+        orientation="vertical"
+        [headingLevel]="3"
+        finishLabel="儲存設定"
+        [submitAction]="saveSettings"
+      >
+        <lib-wizard-step label="一般" [stepControl]="settings.controls.general" [fieldLabels]="{ name: '專案名稱', code: '專案代碼' }">
+          <div class="wizard-fields" [formGroup]="settings.controls.general">
+            <mat-form-field appearance="outline" data-field="name">
+              <mat-label>專案名稱</mat-label>
+              <input matInput formControlName="name" required />
+              <mat-error>請輸入專案名稱</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" data-field="code">
+              <mat-label>專案代碼</mat-label>
+              <input matInput formControlName="code" required />
+              <mat-error>請輸入專案代碼</mat-error>
+            </mat-form-field>
+          </div>
+        </lib-wizard-step>
+        <lib-wizard-step label="通知" optional [stepControl]="settings.controls.notify">
+          <div class="wizard-stack" [formGroup]="settings.controls.notify">
+            <mat-checkbox formControlName="onCreate">有新工單時通知我</mat-checkbox>
+            <mat-checkbox formControlName="onDue">工單快到期時通知負責人</mat-checkbox>
+            <mat-checkbox formControlName="weekly">每週一寄出進度摘要</mat-checkbox>
+          </div>
+        </lib-wizard-step>
+        <lib-wizard-step label="權限" [stepControl]="settings.controls.access">
+          <div class="wizard-choice" [formGroup]="settings.controls.access" data-field="defaultRole">
+            <span class="wizard-choice__label" id="sw-role-label">新成員的預設角色</span>
+            <mat-radio-group formControlName="defaultRole" aria-labelledby="sw-role-label" class="wizard-choice__options">
+              @for (option of roleOptions; track option[0]) {
+                <mat-radio-button [value]="option[0]">{{ option[1] }}</mat-radio-button>
+              }
+            </mat-radio-group>
+          </div>
+        </lib-wizard-step>
+        <lib-wizard-step label="進階" optional [stepControl]="settings.controls.advanced">
+          <div [formGroup]="settings.controls.advanced">
+            <mat-slide-toggle formControlName="archived">封存這個專案（之後不能新增工單）</mat-slide-toggle>
+          </div>
+        </lib-wizard-step>
+      </lib-step-wizard>
+      <p class="demo-note" aria-live="polite">最近的事件：{{ settingsEvent() }}</p>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="窄容器：精簡列"
+    description="精靈看的是自己的寬度，不是視窗：放在 360px 寬的側欄或卡片裡（小於 600px），步驟清單收成「步驟 1／4 · 問題描述」＋細進度條，按「所有步驟」展開完整清單。"
+  >
+    <div class="narrow-stage" data-demo="compact">
+      <lib-step-wizard [headingLevel]="3" finishLabel="送出" [submitAction]="submitReport">
+        <lib-wizard-step label="問題描述" [stepControl]="report.controls.describe" [fieldLabels]="{ summary: '發生了什麼事' }">
+          <div [formGroup]="report.controls.describe">
+            <mat-form-field appearance="outline" class="wizard-fields__full" data-field="summary">
+              <mat-label>發生了什麼事</mat-label>
+              <textarea matInput formControlName="summary" rows="3" required></textarea>
+              <mat-error>請簡單描述問題</mat-error>
+            </mat-form-field>
+          </div>
+        </lib-wizard-step>
+        <lib-wizard-step label="分類" [stepControl]="report.controls.category" [fieldLabels]="{ category: '分類' }">
+          <div class="wizard-choice" [formGroup]="report.controls.category" data-field="category">
+            <span class="wizard-choice__label" id="sw-category-label">分類 <span aria-hidden="true">*</span></span>
+            <mat-radio-group formControlName="category" aria-labelledby="sw-category-label" class="wizard-choice__column">
+              @for (option of categoryOptions; track option[0]) {
+                <mat-radio-button [value]="option[0]">{{ option[1] }}</mat-radio-button>
+              }
+            </mat-radio-group>
+          </div>
+        </lib-wizard-step>
+        <lib-wizard-step label="附件" optional [stepControl]="report.controls.attach">
+          <div [formGroup]="report.controls.attach">
+            <mat-form-field appearance="outline" class="wizard-fields__full">
+              <mat-label>截圖或檔案連結</mat-label>
+              <input matInput formControlName="link" />
+            </mat-form-field>
+          </div>
+        </lib-wizard-step>
+        <lib-wizard-step label="確認">
+          <p class="demo-note">{{ report.controls.describe.controls.summary.value || '（未填）' }}</p>
+        </lib-wizard-step>
+      </lib-step-wizard>
+      <p class="demo-note" aria-live="polite">最近的事件：{{ reportEvent() }}</p>
+    </div>
+  </app-demo-block>
+</app-showcase-page>

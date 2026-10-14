@@ -1,0 +1,52 @@
+// 步驟精靈展示頁。只用語意 token；精靈、欄位、按鈕的外觀交給 libs/ui 與質地 recipe。
+
+.wizard-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 0.5rem 1.25rem;
+  align-items: start;
+}
+
+.wizard-fields__wide {
+  grid-column: 1 / -1;
+}
+
+.wizard-fields__full {
+  width: 100%;
+}
+
+.wizard-stack {
+  display: grid;
+  gap: 0.25rem;
+  justify-items: start;
+}
+
+.wizard-choice {
+  display: grid;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.wizard-choice__label {
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.wizard-choice__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.5rem;
+}
+
+.wizard-choice__column {
+  display: grid;
+  justify-items: start;
+}
+
+// 窄容器示範：模擬放在 360px 寬的側欄或卡片裡。
+.narrow-stage {
+  max-width: 22.5rem;
+  padding: 1rem;
+  border: 1px dashed var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+}

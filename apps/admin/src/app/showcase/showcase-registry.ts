@@ -107,6 +107,13 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
       import('../features/relation-select/relation-select-page.component').then((m) => m.RelationSelectPageComponent),
   },
   {
+    id: 'step-wizard',
+    title: '步驟精靈',
+    group: 'input',
+    icon: 'linear_scale',
+    load: () => import('../features/step-wizard/step-wizard-page.component').then((m) => m.StepWizardPageComponent),
+  },
+  {
     id: 'date-range-picker',
     title: '雙月日期區間',
     group: 'input',

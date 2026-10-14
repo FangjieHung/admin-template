@@ -51,6 +51,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '輸入就搜尋，從大量資料裡挑一筆（負責人、專案、聯絡人）；表單存 id，初始值自動查出名稱，找不到時可以當場建立。',
     source: 'libs/ui/src/lib/relation-select',
   },
+  'step-wizard': {
+    summary: '把長表單拆成幾步填：線性時下一步先驗證、錯誤時列出要修正的欄位，已完成的步驟可以點回去；窄容器自動收成「步驟 2／4」精簡列。',
+    source: 'libs/ui/src/lib/step-wizard',
+  },
   'date-range-picker': {
     summary: '並排兩個月曆選起訖日，滑過時預覽區間；適合跨月的期間選擇。',
     source: 'libs/ui/src/lib/dual-month-range-picker',
@@ -153,7 +157,6 @@ export const PLANNED_ITEMS: readonly PlannedItem[] = [
   { title: '表格內直接編輯', kind: '元件', priority: 'P1', summary: '行內編輯與批次修改。' },
   { title: '共用日曆與排程', kind: '元件', priority: 'P1', summary: '月／週檢視與資源時間軸，含拖曳。' },
   { title: '看板', kind: '元件', priority: 'P1', summary: '卡片拖曳換欄。' },
-  { title: '步驟精靈', kind: '元件', priority: 'P1', summary: '多步驟表單共用版：步驟清單、目前、已完成、錯誤。' },
   { title: '樹狀選單與樹狀表', kind: '元件', priority: 'P2', summary: '組織架構、分類。' },
   { title: '列印與 PDF 版面', kind: '元件', priority: 'P2', summary: '單據可列印、可寄送。' },
   { title: '富文字、留言與 @提及', kind: '元件', priority: 'P2', summary: '備註與內部協作。' },
