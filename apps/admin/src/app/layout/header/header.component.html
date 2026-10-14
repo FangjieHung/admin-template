@@ -34,34 +34,38 @@
     </div>
   }
 
-  <!-- 全域指令面板（⌘K）：對話框與搜尋結果在 layout/command-palette，第一次打開時才載入。寬螢幕在按鈕裡顯示快捷鍵
-       （::after，內容是 data-kbd），造型變數 --lib-cmdk-kbd-* 由質地設在 .lib-command-palette。 -->
-  <button
-    mat-icon-button
-    type="button"
-    class="topbar-search lib-command-palette"
-    aria-haspopup="dialog"
-    [attr.aria-label]="t.search"
-    [attr.aria-keyshortcuts]="kbd[1]"
-    [attr.data-kbd]="kbd[0]"
-    (click)="togglePalette()"
-  >
-    <span class="material-symbols-rounded" aria-hidden="true">search</span>
-  </button>
+  <!-- 全站動作：⌘K 全站搜尋＋通知鈴鐺是一組（一起換行），有頁面工具列時兩組之間畫一條分隔線（.topbar-global::before）。 -->
+  <div class="topbar-global">
+    <!-- 全域指令面板（⌘K）：對話框與搜尋結果在 layout/command-palette，第一次打開時才載入。寬螢幕（≥ 1280px）長得像搜尋框：
+         放大鏡＋「搜尋全站…」（::after，內容是 aria-label）＋快捷鍵框（::before，內容是 data-kbd）；窄螢幕只有圖示。
+         框線讀 --lib-cmdk-kbd-frame（質地設在 .lib-command-palette）。 -->
+    <button
+      mat-icon-button
+      type="button"
+      class="topbar-search lib-command-palette"
+      aria-haspopup="dialog"
+      [attr.aria-label]="t.search"
+      [attr.aria-keyshortcuts]="kbd[1]"
+      [attr.data-kbd]="kbd[0]"
+      (click)="togglePalette()"
+    >
+      <span class="material-symbols-rounded" aria-hidden="true">search</span>
+    </button>
 
-  <!-- 通知鈴鐺：面板與通知清單在 layout/notification-bell，第一次打開時才載入。徽章是 ::after（data-count），
-       造型變數 --lib-notif-badge-* 由質地設在 .lib-notification-center。 -->
-  <button
-    mat-icon-button
-    type="button"
-    class="topbar-bell lib-notification-center"
-    aria-haspopup="dialog"
-    [attr.aria-label]="bellLabel()"
-    [attr.data-count]="badge()"
-    [attr.aria-expanded]="notifications.panelOpen()"
-    [attr.aria-controls]="notifications.panelOpen() ? 'app-notification-panel' : null"
-    (click)="notifications.toggle()"
-  >
-    <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
-  </button>
+    <!-- 通知鈴鐺：面板與通知清單在 layout/notification-bell，第一次打開時才載入。徽章是 ::after（data-count），
+         造型變數 --lib-notif-badge-* 由質地設在 .lib-notification-center。 -->
+    <button
+      mat-icon-button
+      type="button"
+      class="topbar-bell lib-notification-center"
+      aria-haspopup="dialog"
+      [attr.aria-label]="bellLabel()"
+      [attr.data-count]="badge()"
+      [attr.aria-expanded]="notifications.panelOpen()"
+      [attr.aria-controls]="notifications.panelOpen() ? 'app-notification-panel' : null"
+      (click)="notifications.toggle()"
+    >
+      <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
+    </button>
+  </div>
 </header>

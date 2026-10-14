@@ -76,7 +76,7 @@ providers: [...LIST_TOOLBAR_LABEL_PROVIDERS]`;
         { name: '(searchSubmit)', type: 'string', description: '按 Enter 或送出鈕（伺服器搜尋用）。' },
         { name: '(clearAll)', type: 'void', description: '按下「清除篩選」。' },
         { name: '[filters]（內容投影）', type: '—', description: '放在搜尋框旁的篩選元件，加上 filters 屬性。' },
-        { name: 'PAGE_TOOLBAR_LABELS', type: 'PageToolbarLabels', default: '必填（注入）', description: '搜尋、收合、清除等文字。' },
+        { name: 'PAGE_TOOLBAR_LABELS', type: 'PageToolbarLabels', default: '必填（注入）', description: '搜尋框 placeholder、列表搜尋鈕（toggleSearch，例「搜尋此列表」，跟頁首的全站搜尋分開）、收合、清除等文字。' },
       ],
     },
     {

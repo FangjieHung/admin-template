@@ -67,7 +67,7 @@ describe('全域指令面板（頁首 ⌘K 打開的 overlay）', () => {
   });
 
   it('頁首的搜尋鈕：aria-haspopup、快捷鍵說明；點了打開對話框並聚焦搜尋框', async () => {
-    expect(trigger.getAttribute('aria-label')).toBe('搜尋');
+    expect(trigger.getAttribute('aria-label')).toBe('搜尋全站');
     expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');
     expect(trigger.getAttribute('aria-keyshortcuts')).toBe('Control+K /');
     expect(trigger.dataset['kbd']).toBe('Ctrl K');

@@ -20,36 +20,58 @@
   margin-right: auto;
 }
 
-// 全域指令面板的按鈕：跟鈴鐺排在一起（DOM 順序在前）。寬螢幕把圓鈕拉成膠囊、裡面多一個快捷鍵小框（::after，
-// 內容是 data-kbd），框線讀 --lib-cmdk-kbd-frame（質地在 .lib-command-palette 上設，CONTRACT.md「指令面板」）。
-// 這裡在 Initial bundle，只放兩條（order 跟鈴鐺寫在同一條）。
-@media (min-width: 1024px) {
-  .topbar-search {
-    display: inline-flex;
+// 全站動作（⌘K 全站搜尋＋通知鈴鐺）是一組：排在頁面工具列第一列之後、篩選列（order: 2，獨佔一列）之前，兩顆一起換行。
+// 這裡在 Initial bundle（每條規則都會被加上 [_ngcontent-…]），規則越少越好。
+.topbar-global {
+  order: 1;
+  display: flex;
+}
+
+// 有頁面工具列時，兩組之間一條分隔線（outline-variant）：左右負邊距相加為 0，線落在 .topbar 的欄間距正中、不佔寬度
+// （工單頁在 1024px、側欄展開時仍排得進同一列）；上下各內縮 8px。768px 以下頁面動作移到底部固定列、標題長時這組會換到
+// 第二列開頭，線會落在行首，所以只在 ≥ 768px 畫；窄螢幕靠兩顆搜尋鈕不同的圖示分辨。
+@media (min-width: 768px) {
+  .topbar-toolbar + .topbar-global::before {
+    content: '';
+    margin: 8px 6px 8px -7px;
+    border-left: 1px solid var(--mat-sys-outline-variant);
+  }
+}
+
+// 全站搜尋（⌘K）：寬螢幕（≥ 1280px：工單頁的頁面工具列＋這個 15rem 的框，在側欄展開時也放得下）長得像搜尋框——
+// 放大鏡、「搜尋全站…」（::after，內容是 aria-label，看得到的字與念出來的名稱一致）、靠右的快捷鍵框（::before 用 order
+// 排到最後，內容是 data-kbd）。外框讀 --lib-cmdk-kbd-frame（質地在 .lib-command-palette 上設，CONTRACT.md「指令面板」），
+// 快捷鍵框沿用同一條框與按鈕的圓角（inherit）；內距沿用圖示按鈕的（四邊 8px）、底色維持質地給圖示按鈕的樣子。
+// 權重：[data-kbd] 讓這條是 0-3-0，跟質地在圖示按鈕上設 border 的規則（:root[data-paradigm] .mat-mdc-icon-button）同權重，
+// 元件樣式（<style>）永遠排在質地的 <link> 之後，所以這裡贏。窄螢幕只有圖示。
+// 這裡在 Initial bundle，寫法盡量省（px、inherit、order 只寫一次）。
+@media (min-width: 1280px) {
+  .topbar-search[data-kbd] {
+    display: flex;
     align-items: center;
-    gap: 0.5rem;
-    width: auto;
-    padding: 0 0.625rem 0 0.5rem;
+    gap: 8px;
+    width: 15rem;
+    border: var(--lib-cmdk-kbd-frame, 1px solid var(--app-field-border));
+    font-size: 14px;
   }
 
   .topbar-search::after {
+    content: attr(aria-label) '…';
+    margin-right: auto;
+  }
+
+  .topbar-search::before {
     content: attr(data-kbd);
-    padding: 0 0.375rem;
-    border: var(--lib-cmdk-kbd-frame, 1px solid var(--app-field-border));
-    border-radius: var(--mat-sys-corner-small);
-    font: 500 0.75rem / 1.25rem var(--font-body);
+    order: 1;
+    padding: 0 6px;
+    border: inherit;
+    border-radius: inherit;
+    font: 500 12px / 20px var(--font-body);
   }
 }
 
-// 通知鈴鐺：排在頁面工具列第一列之後、篩選列（order: 2，獨佔一列）之前。
-// 徽章是 ::after（data-count，0 時沒有這個屬性），讀 --lib-notif-badge-*（質地在 .lib-notification-center 上設，
-// CONTRACT.md「通知中心」）。這裡在 Initial bundle，只放兩條。
-.topbar-search,
-.topbar-bell {
-  order: 1;
-  position: relative;
-}
-
+// 通知鈴鐺的徽章是 ::after（data-count，0 時沒有這個屬性），讀 --lib-notif-badge-*（質地在 .lib-notification-center 上設，
+// CONTRACT.md「通知中心」）。定位基準是圖示按鈕本身（MDC 已給 position: relative）。
 .topbar-bell[data-count]::after {
   content: attr(data-count);
   position: absolute;

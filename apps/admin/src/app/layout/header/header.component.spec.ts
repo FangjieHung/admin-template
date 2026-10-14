@@ -121,6 +121,43 @@ describe('HeaderComponent 右側 toolbar 插槽（既有行為，維持不變）
   });
 });
 
+describe('HeaderComponent 全站動作一組（全站搜尋＋通知），跟頁面工具列分開', () => {
+  // 通知中心換成替身：真的服務會在畫面渲染後動態載入通知資料，載入完成時這個測試檔可能已經結束（EnvironmentTeardownError）。
+  function setupGlobal() {
+    const center = { unread: signal(0), panelOpen: signal(false), toggle: vi.fn(), load: vi.fn() };
+    TestBed.configureTestingModule({
+      providers: [provideRouter([]), { provide: NotificationCenterService, useValue: center }],
+    });
+    const fixture = TestBed.createComponent(HeaderComponent);
+    fixture.componentRef.setInput('defaultTitle', { title: '工單', breadcrumbs: [] });
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  it('全站搜尋與鈴鐺放在同一個 .topbar-global；全站搜尋的名稱讀得出「全站」，保留快捷鍵說明', () => {
+    const fixture = setupGlobal();
+    const group = fixture.nativeElement.querySelector('.topbar-global') as HTMLElement;
+    expect(Array.from(group.children).map((b) => b.classList.contains('topbar-search') || b.classList.contains('topbar-bell'))).toEqual([true, true]);
+    const search = group.querySelector('.topbar-search') as HTMLButtonElement;
+    // 寬螢幕的「搜尋全站…」是 ::before 的 attr(aria-label)，看得到的字與念出來的名稱是同一個。
+    expect(search.getAttribute('aria-label')).toBe('搜尋全站');
+    expect(search.getAttribute('aria-keyshortcuts')).toMatch(/^(Meta|Control)\+K \/$/);
+    expect(search.dataset['kbd']).toMatch(/^(⌘K|Ctrl K)$/);
+    expect(search.textContent?.trim()).toBe('search');
+  });
+
+  it('有頁面工具列時，.topbar-toolbar 緊接在全站動作前面（分隔線 .topbar-toolbar + .topbar-global::before 才畫得出來）', () => {
+    const fixture = setupGlobal();
+    expect(fixture.nativeElement.querySelector('.topbar-toolbar + .topbar-global')).toBeNull();
+
+    const hostFixture = TestBed.createComponent(ExtraTemplateHost);
+    hostFixture.detectChanges();
+    TestBed.inject(HeaderToolbarSlot).template.set(hostFixture.componentInstance.tpl);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.topbar-toolbar + .topbar-global')).not.toBeNull();
+  });
+});
+
 describe('HeaderComponent 通知鈴鐺', () => {
   function setupBell() {
     const center = { unread: signal(0), panelOpen: signal(false), toggle: vi.fn(), load: vi.fn() };
