@@ -1,5 +1,5 @@
 import { DestroyRef, EnvironmentInjector, signal } from '@angular/core';
-import { NotificationItem, createDemoNotificationSource } from '@admin-template/ui';
+import { NewNotification, NotificationItem, createDemoNotificationSource } from '@admin-template/ui';
 import type { NotificationCenterService, NotificationRuntime } from './notification-center.service';
 import { demoNotifications, incomingNotification } from './demo-notification-data';
 
@@ -21,14 +21,24 @@ export function startDemoNotifications(center: NotificationCenterService, inject
   const sub = source.changes.subscribe(syncCount);
   syncCount();
 
-  const deliver = (count: number) => {
-    const items: NotificationItem[] = [];
-    for (let i = 0; i < Math.max(1, count); i++) items.push(source.push(incomingNotification(++seq)));
+  const announce = (items: NotificationItem[]) => {
     if (!center.panelOpen()) {
       void import('../../shared/ui/notification-toast').then(
         (m) => stopped || m.notifyNewNotifications(injector, items, () => center.toggle(true)),
       );
     }
+  };
+
+  const deliver = (count: number) => {
+    const items: NotificationItem[] = [];
+    for (let i = 0; i < Math.max(1, count); i++) items.push(source.push(incomingNotification(++seq)));
+    announce(items);
+  };
+
+  const notify = (item: NewNotification) => {
+    const added = source.push(item);
+    announce([added]);
+    return added;
   };
 
   const setAutoPush = (on: boolean) => {
@@ -50,5 +60,5 @@ export function startDemoNotifications(center: NotificationCenterService, inject
     stop();
   }
 
-  return { source, autoPush, push: deliver, setAutoPush };
+  return { source, autoPush, push: deliver, notify, setAutoPush };
 }

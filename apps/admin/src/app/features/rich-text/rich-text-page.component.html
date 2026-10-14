@@ -1,0 +1,81 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="搭配 reactive form：HTML 輸出與 @提及"
+    description="表單的值是 HTML 字串；被提及的人另外從 (mentions) 拿到 id。輸入 @ 會出現同事清單（中文名字、英文名字或部門都能找），↑↓ 選擇、Enter 或 Tab 確認、Esc 關閉；用注音、倉頡輸入時，選字確定之後才搜尋（看下方的「搜尋紀錄」）。從 Word 或網頁貼上時，字型、顏色、大小都會拿掉，只留粗體、斜體、清單、引用與連結。"
+  >
+    <lib-rich-text-editor
+      data-demo="form"
+      [formControl]="note"
+      ariaLabel="工單備註"
+      placeholder="寫下備註，輸入 @ 提及同事"
+      [mentionSource]="mentionSource"
+      (mentions)="mentionIds.set($event)"
+    />
+    <div class="rt-outputs">
+      <section class="rt-output" aria-labelledby="rt-html-title">
+        <h3 id="rt-html-title" class="ui-text-caption">HTML 輸出（表單的值）</h3>
+        <pre class="demo-json" data-output="html"><code>{{ noteValue() || '（空字串）' }}</code></pre>
+      </section>
+      <section class="rt-output" aria-labelledby="rt-mentions-title">
+        <h3 id="rt-mentions-title" class="ui-text-caption">mentions</h3>
+        <pre class="demo-json" data-output="mentions"><code>{{ mentionIds().length ? '[' + mentionIds().join(', ') + ']' : '[]' }}</code></pre>
+        <p class="demo-note" data-output="mention-names">{{ mentionNames().length ? '會通知：' + mentionNames().join('、') : '還沒有提及任何人' }}</p>
+        <h3 class="ui-text-caption rt-log-title">搜尋紀錄（最近 6 次查詢字）</h3>
+        <ol class="rt-log" data-output="search-log">
+          @for (query of searchLog(); track $index) {
+            <li><code>{{ query === '' ? '（空白：剛輸入 @）' : query }}</code></li>
+          } @empty {
+            <li class="demo-note">還沒有搜尋</li>
+          }
+        </ol>
+      </section>
+      <section class="rt-output rt-output--wide" aria-labelledby="rt-view-title">
+        <h3 id="rt-view-title" class="ui-text-caption">lib-rich-text-view 顯示</h3>
+        <lib-rich-text-view class="rt-view" data-output="view" [html]="noteValue()" />
+      </section>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="字數上限"
+    description="上限 60 字（純文字長度，段落之間的換行不算，提及算「@名字」）。剩 10 字以內時欄位下方顯示「剩 N 字」，超過時外框與訊息變成錯誤色、編輯區 aria-invalid，表單得到 maxlength 錯誤。"
+  >
+    <lib-rich-text-editor data-demo="limit" [formControl]="limited" ariaLabel="有字數上限的備註" [maxLength]="60" minHeight="4.5rem" />
+    <p class="demo-note" data-output="limit-status">表單狀態：{{ limitedStatus() }}</p>
+  </app-demo-block>
+
+  <app-demo-block heading="唯讀與停用" description="唯讀時可以選取、複製，不顯示工具列；停用時整個欄位與工具列都不能操作。">
+    <div class="demo-grid">
+      <lib-rich-text-editor data-demo="readonly" [formControl]="readonlyValue" ariaLabel="唯讀的備註" [readonly]="true" minHeight="3rem" />
+      <lib-rich-text-editor data-demo="disabled" [formControl]="disabledValue" ariaLabel="停用的備註" minHeight="3rem" />
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="留言串"
+    description="12 則留言由舊到新，先顯示最新的 5 則，較早的摺疊在「顯示較早的 7 則」。你是林雅婷：自己的留言可以編輯、刪除；有一則已編輯（滑過看編輯時間）。輸入框可以 @提及，⌘↵／Ctrl+↵ 送出；送出中停用，打開「下一次失敗」可以看失敗時保留內容、按重試。"
+  >
+    <div class="demo-row rt-thread-controls">
+      <mat-slide-toggle data-toggle="fail-next" [checked]="failNext()" (change)="failNext.set($event.checked)">下一次失敗</mat-slide-toggle>
+      <button type="button" class="ui-nav-pill" data-action="reset-comments" (click)="resetComments()">還原示範留言</button>
+    </div>
+    <lib-comment-thread
+      data-demo="thread"
+      [comments]="comments()"
+      [currentUserId]="me.id"
+      [mentionSource]="mentionSource"
+      [visibleCount]="5"
+      [maxLength]="500"
+      (commentSubmit)="onSubmit($event)"
+      (commentEdit)="onEdit($event)"
+      (commentDelete)="onDelete($event)"
+    />
+  </app-demo-block>
+</app-showcase-page>

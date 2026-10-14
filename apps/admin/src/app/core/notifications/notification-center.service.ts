@@ -1,6 +1,6 @@
 import { EnvironmentInjector, Injectable, afterNextRender, inject, signal } from '@angular/core';
 // 只拿型別（編譯後消失）：這個服務在 Initial bundle 裡，不能真的 import @admin-template/ui（整個 barrel 會跟著進來）。
-import type { NotificationSource } from '@admin-template/ui';
+import type { NewNotification, NotificationItem, NotificationSource } from '@admin-template/ui';
 import type { WritableSignal } from '@angular/core';
 
 /** 示範通知的執行期（demo-notifications.ts，lazy 載入）。 */
@@ -10,6 +10,8 @@ export interface NotificationRuntime {
   readonly autoPush: WritableSignal<boolean>;
   /** 馬上送達 `count` 則示範通知。 */
   push(count?: number): void;
+  /** 送達一則指定內容的通知（例：工單留言 @提及；鈴鐺數字加一，面板關著時跳提示訊息）。 */
+  notify(item: NewNotification): NotificationItem;
   setAutoPush(on: boolean): void;
 }
 

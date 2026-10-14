@@ -108,6 +108,22 @@
         }
       </mat-tab-nav-panel>
 
+      @if (state() === 'ready') {
+        <section class="ui-card p-4 sm:p-6 ticket-comments" aria-labelledby="ticket-comments-title" data-panel="comments">
+          <h3 id="ticket-comments-title" class="ui-text-subtitle ticket-section-title">留言（{{ comments().length }}）</h3>
+          <lib-comment-thread
+            [comments]="comments()"
+            [currentUserId]="me()?.id ?? null"
+            [mentionSource]="mentionSource"
+            [canComment]="canComment()"
+            [maxLength]="1000"
+            (commentSubmit)="onCommentSubmit($event)"
+            (commentEdit)="onCommentEdit($event)"
+            (commentDelete)="onCommentDelete($event)"
+          />
+        </section>
+      }
+
       <section libDetailAside class="ui-card p-4 sm:p-6" aria-labelledby="ticket-summary-title">
         <h3 id="ticket-summary-title" class="ui-text-subtitle">摘要</h3>
         <lib-description-list [items]="summaryItems()" (copied)="onCopied($event.text)">

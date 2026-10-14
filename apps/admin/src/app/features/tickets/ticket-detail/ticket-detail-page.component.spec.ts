@@ -1,7 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { By } from '@angular/platform-browser';
+import { DOMParser as PmDOMParser } from 'prosemirror-model';
+import type { EditorView } from 'prosemirror-view';
+import { RichTextEditorComponent } from '@admin-template/ui';
+import { NotificationCenterService } from '../../../core/notifications/notification-center.service';
 import { setupTicketPage } from '../testing/ticket-page-host';
 import { TicketListMemory } from '../ticket-list/ticket-list-url';
 import { TicketDetailPageComponent } from './ticket-detail-page.component';
@@ -11,6 +15,13 @@ function overlayToast(): HTMLElement | null {
 }
 
 describe('TicketDetailPageComponent（詳情頁樣板）', () => {
+  beforeAll(() => {
+    // jsdom 沒有版面：留言輸入框（ProseMirror）算游標座標時要用的 API 補上空的版本。
+    Range.prototype.getBoundingClientRect ??= () => new DOMRect(0, 0, 0, 0);
+    Range.prototype.getClientRects ??= () => Object.assign([] as DOMRect[], { item: () => null }) as unknown as DOMRectList;
+    document.elementFromPoint ??= () => null;
+  });
+
   it('顯示標題、狀態、編號與摘要；返回列表帶著列表的篩選與頁碼', async () => {
     const h = await setupTicketPage();
     TestBed.inject(TicketListMemory).queryParams = { page: '2', q: '網路' };
@@ -96,5 +107,46 @@ describe('TicketDetailPageComponent（詳情頁樣板）', () => {
     await h.settle();
     expect(await h.repo.get('TK-2048')).toBeNull();
     expect(h.router.url).toBe('/templates/tickets');
+  });
+  it('留言：顯示示範留言；留言並 @同事後多一則留言，頁首鈴鐺的未讀數加一；檢視者沒有輸入框', async () => {
+    const h = await setupTicketPage();
+    await h.navigate('/templates/tickets/TK-2048');
+    const section = h.el.querySelector('[data-panel="comments"]') as HTMLElement;
+    expect(section.querySelector('h3')?.textContent).toContain('留言（3）');
+    expect(section.querySelectorAll('.lc-item')).toHaveLength(3);
+    // 示範身分林雅婷（u-admin）自己的那一則可以編輯、刪除
+    expect(section.querySelectorAll('[data-comment-action]')).toHaveLength(2);
+
+    const center = TestBed.inject(NotificationCenterService);
+    const runtime = await center.load();
+    runtime.setAutoPush(false);
+    await h.settle();
+    const unreadBefore = center.unread();
+
+    const composer = section.querySelector('.lc-composer lib-rich-text-editor') as HTMLElement;
+    const editorCmp = h.fixture.debugElement.query((d) => d.nativeElement === composer).componentInstance as RichTextEditorComponent;
+    await editorCmp.whenReady();
+    const view = (composer.querySelector('.lib-rte__mount') as HTMLElement & { libRichTextView: EditorView }).libRichTextView;
+    const box = document.createElement('div');
+    box.innerHTML = '<p>請 <span data-type="mention" data-id="staff-06" data-label="黃冠宇">@黃冠宇</span> 協助送修</p>';
+    view.dispatch(view.state.tr.replaceSelection(PmDOMParser.fromSchema(view.state.schema).parseSlice(box)));
+    await h.settle();
+    (section.querySelector('[data-comment-send]') as HTMLButtonElement).click();
+    await h.settle();
+    await new Promise((r) => setTimeout(r, 400));
+    await h.settle();
+
+    expect(section.querySelector('h3')?.textContent).toContain('留言（4）');
+    const comments = await h.repo.comments('TK-2048');
+    expect(comments.at(-1)?.author.name).toBe('林雅婷');
+    expect(comments.at(-1)?.html).toContain('data-id="staff-06"');
+    const list = await runtime.source.list({ filter: 'all', limit: 1 }, new AbortController().signal);
+    expect(list.items[0].title).toBe('林雅婷在 TK-2048 提到 黃冠宇');
+    expect(center.unread()).toBe(unreadBefore + 1);
+
+    h.access.signIn('u-viewer');
+    await h.settle();
+    expect(section.querySelector('.lc-composer')).toBeNull();
+    expect(section.querySelectorAll('[data-comment-action]')).toHaveLength(0);
   });
 });

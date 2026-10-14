@@ -1,5 +1,6 @@
 import { Injectable, InjectionToken, inject } from '@angular/core';
-import type { ActivityChange, ActivityEntry, RelationSource } from '@admin-template/ui';
+import type { ActivityChange, ActivityEntry, CommentAuthor, CommentItem, RelationSource } from '@admin-template/ui';
+import { makeTicketComments } from './ticket-comment-demo-data';
 import { TICKET_ASSIGNEES, TicketDemoData, makeTicketDemoData } from './ticket-demo-data';
 import {
   TICKET_CATEGORY_LABELS,
@@ -89,6 +90,8 @@ export class TicketRepository {
   private readonly delayMs = inject(TICKET_REPOSITORY_DELAY);
   private readonly data: TicketDemoData = makeTicketDemoData(inject(TICKET_DEMO_TODAY)());
   private createdRequesters = 0;
+  private readonly commentData: Map<string, CommentItem[]> = makeTicketComments(Date.now());
+  private commentSeq = 0;
 
   /** 負責人的選項來源（relation-select）。 */
   readonly assigneeSource: RelationSource<TicketPerson> = this.personSource(() => TICKET_ASSIGNEES);
@@ -152,6 +155,37 @@ export class TicketRepository {
       if (done.length) result.set(id, new Date(Math.min(...done.map((e) => new Date(e.at).getTime()))).toISOString());
     }
     return result;
+  }
+
+  // ---- 留言（lib-comment-thread；換成後端時改這四個方法） ----
+
+  /** 一張工單的留言（舊到新）。 */
+  async comments(id: string): Promise<CommentItem[]> {
+    await this.delay();
+    return [...(this.commentData.get(id) ?? [])];
+  }
+
+  async addComment(id: string, author: CommentAuthor, html: string): Promise<CommentItem> {
+    await this.delay();
+    this.require(id);
+    const comment: CommentItem = { id: `${id}-n${++this.commentSeq}`, author: { ...author }, html, createdAt: Date.now() };
+    this.commentData.set(id, [...(this.commentData.get(id) ?? []), comment]);
+    return comment;
+  }
+
+  async editComment(id: string, commentId: string, html: string): Promise<CommentItem> {
+    await this.delay();
+    const list = this.commentData.get(id) ?? [];
+    const found = list.find((c) => c.id === commentId);
+    if (!found) throw new Error(`找不到留言 ${commentId}`);
+    const updated: CommentItem = { ...found, html, editedAt: Date.now() };
+    this.commentData.set(id, list.map((c) => (c.id === commentId ? updated : c)));
+    return updated;
+  }
+
+  async removeComment(id: string, commentId: string): Promise<void> {
+    await this.delay();
+    this.commentData.set(id, (this.commentData.get(id) ?? []).filter((c) => c.id !== commentId));
   }
 
   /** 名字（清單、詳情顯示用）；找不到回 id 本身。 */

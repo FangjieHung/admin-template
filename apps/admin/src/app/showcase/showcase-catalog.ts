@@ -87,6 +87,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '上傳 CSV 或 Excel → 欄位自動對應 → 預覽時直接修正錯誤、決定重複怎麼處理 → 分批匯入並顯示進度，結束後可以下載錯誤報告。',
     source: 'libs/ui/src/lib/import-wizard',
   },
+  'rich-text': {
+    summary: '備註與內部協作：粗體、清單、引用、連結的富文字編輯器，輸入 @ 提及同事（中文輸入法選字後才搜尋）；留言串可以編輯、刪除，送出失敗時內容不會不見；顯示時用白名單清理 HTML。',
+    source: 'libs/ui/src/lib/rich-text',
+  },
   'signature-pad': {
     summary: '手寫或打字簽名，存檔後只回傳不透明的資產代碼；可要求先勾選確認。',
     source: 'libs/ui/src/lib/signature-pad',
@@ -197,6 +201,4 @@ export interface PlannedItem {
   summary: string;
 }
 
-export const PLANNED_ITEMS: readonly PlannedItem[] = [
-  { title: '富文字、留言與 @提及', kind: '元件', priority: 'P2', summary: '備註與內部協作。' },
-];
+export const PLANNED_ITEMS: readonly PlannedItem[] = [];

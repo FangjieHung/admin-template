@@ -172,6 +172,13 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     load: () => import('../features/signature-pad/signature-pad-page.component').then((m) => m.SignaturePadPageComponent),
   },
   {
+    id: 'rich-text',
+    title: '富文字、留言與 @提及',
+    group: 'input',
+    icon: 'forum',
+    load: () => import('../features/rich-text/rich-text-page.component').then((m) => m.RichTextPageComponent),
+  },
+  {
     id: 'language-switcher',
     title: '語言切換',
     group: 'input',

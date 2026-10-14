@@ -3,10 +3,15 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
-import { CanDirective } from '@admin-template/access';
+import { AccessService, CanDirective } from '@admin-template/access';
 import {
   ActivityEntry,
   ActivityTimelineComponent,
+  CommentDeleteEvent,
+  CommentEditEvent,
+  CommentItem,
+  CommentSubmitEvent,
+  CommentThreadComponent,
   DescriptionItem,
   DescriptionListComponent,
   DescriptionValueDirective,
@@ -17,10 +22,13 @@ import {
   DetailTitleDirective,
   EmptyStateComponent,
   ErrorStateComponent,
+  MentionSource,
   StatusChipComponent,
   ToastService,
+  mentionIdsOf,
   openConfirmDialog,
 } from '@admin-template/ui';
+import { NotificationCenterService } from '../../../core/notifications/notification-center.service';
 import { provideHeaderTitle } from '../../../layout/header/header-title';
 import { HeaderToolbarDirective } from '../../../layout/header/header-toolbar-slot';
 import {
@@ -34,7 +42,9 @@ import {
   DETAIL_LAYOUT_LABEL_PROVIDERS,
 } from '../../../shared/ui/detail-labels';
 import { RELATION_SELECT_LABEL_PROVIDERS } from '../../../shared/ui/relation-select-labels';
+import { RICH_TEXT_LABEL_PROVIDERS } from '../../../shared/ui/rich-text-labels';
 import { TemplateInfo, TemplateInfoComponent } from '../../../shared/ui/template-info.component';
+import { TICKET_MENTION_PEOPLE } from '../data/ticket-comment-demo-data';
 import { TICKET_ACTIVITY_KINDS } from '../data/ticket-demo-data';
 import { formatCreatedAt, formatDueDate, isOverdue } from '../data/ticket-format';
 import {
@@ -61,6 +71,7 @@ const INFO: TemplateInfo = {
   summary: '詳情頁樣板：一張工單的標題、狀態、動作、分頁與摘要。編輯、指派、關閉、刪除都會記進活動紀錄；找不到工單時顯示專屬畫面。',
   components: [
     'lib-detail-layout（返回、標題、資訊列、動作與「更多」、分頁、摘要側欄、捲動後的精簡頁首）',
+    'lib-comment-thread（留言：@提及同事會送一則通知到頁首的鈴鐺；示範的通知中心不分使用者）',
     'lib-description-list（概覽與摘要）、lib-activity-timeline（活動紀錄）',
     'lib-relation-select（指派對話框）、確認對話框、lib-toast、lib-empty-state、lib-error-state',
     'libs/access 的 *libCan（檢視者看不到編輯、指派、關閉、刪除）',
@@ -70,6 +81,7 @@ const INFO: TemplateInfo = {
     'ticket.repository.ts：get()、activity()、assign()、setStatus()、remove() 換成呼叫後端',
     '概覽與摘要的欄位（overviewItems、summaryItems）',
     '活動紀錄的種類對照（TICKET_ACTIVITY_KINDS）',
+    'ticket.repository.ts 的 comments()、addComment()、editComment()、removeComment()，與提及名單（TICKET_MENTION_PEOPLE）；@提及的通知改由後端送出',
   ],
   files: [
     'apps/admin/src/app/features/tickets/ticket-detail/',
@@ -96,6 +108,7 @@ const INFO: TemplateInfo = {
     DescriptionListComponent,
     DescriptionValueDirective,
     ActivityTimelineComponent,
+    CommentThreadComponent,
     StatusChipComponent,
     EmptyStateComponent,
     ErrorStateComponent,
@@ -109,6 +122,7 @@ const INFO: TemplateInfo = {
     ...FEEDBACK_STATE_LABEL_PROVIDERS,
     ...CONFIRM_DIALOG_LABEL_PROVIDERS,
     ...RELATION_SELECT_LABEL_PROVIDERS,
+    ...RICH_TEXT_LABEL_PROVIDERS,
     ...TOAST_PROVIDERS,
   ],
   templateUrl: './ticket-detail-page.component.html',
@@ -120,6 +134,8 @@ export class TicketDetailPageComponent {
   private readonly injector = inject(Injector);
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
+  private readonly access = inject(AccessService);
+  private readonly notifications = inject(NotificationCenterService);
   protected readonly listParams = inject(TicketListMemory).queryParams;
 
   protected readonly info = INFO;
@@ -131,6 +147,18 @@ export class TicketDetailPageComponent {
   protected readonly state = signal<LoadState>('loading');
   protected readonly ticket = signal<Ticket | null>(null);
   protected readonly activity = signal<readonly ActivityEntry[]>([]);
+  protected readonly comments = signal<readonly CommentItem[]>([]);
+  /** 留言的作者：目前登入的示範身分（libs/access）。 */
+  protected readonly me = computed(() => {
+    const user = this.access.currentUser();
+    return user ? { id: user.id, name: user.name } : null;
+  });
+  /** 能編輯工單的人才能留言（檢視者只能看）。 */
+  protected readonly canComment = computed(() => !!this.me() && this.access.can('ticket:edit'));
+  protected readonly mentionSource: MentionSource = async (query) => {
+    const q = query.trim().toLocaleLowerCase();
+    return TICKET_MENTION_PEOPLE.filter((p) => !q || p.name.includes(q) || (p.description ?? '').toLocaleLowerCase().includes(q)).slice(0, 8);
+  };
   protected readonly tab = signal<DetailTab>('overview');
   protected readonly busy = signal(false);
   /** 路由參數 :id。換一張工單時 Router 會重建這個元件，所以讀一次就好。 */
@@ -186,9 +214,10 @@ export class TicketDetailPageComponent {
     const id = this.ticketId;
     this.state.set('loading');
     try {
-      const [ticket, activity] = await Promise.all([this.repo.get(id), this.repo.activity(id)]);
+      const [ticket, activity, comments] = await Promise.all([this.repo.get(id), this.repo.activity(id), this.repo.comments(id)]);
       this.ticket.set(ticket);
       this.activity.set(activity);
+      this.comments.set(comments);
       this.state.set(ticket ? 'ready' : 'not-found');
     } catch {
       this.state.set('error');
@@ -282,6 +311,63 @@ export class TicketDetailPageComponent {
 
   protected onCopied(text: string): void {
     this.toast.success(`已複製「${text}」`);
+  }
+
+  // ---- 留言 ----
+
+  protected onCommentSubmit(event: CommentSubmitEvent): void {
+    const t = this.ticket();
+    const me = this.me();
+    if (!t || !me) return;
+    event.respondWith(
+      this.repo.addComment(t.id, me, event.html).then(async () => {
+        this.comments.set(await this.repo.comments(t.id));
+        this.notifyMentions(t.id, me.name, event.mentions, event.text);
+      }),
+    );
+  }
+
+  protected onCommentEdit(event: CommentEditEvent): void {
+    const t = this.ticket();
+    const me = this.me();
+    if (!t || !me) return;
+    const before = mentionIdsOf(this.comments().find((c) => c.id === event.id)?.html);
+    event.respondWith(
+      this.repo.editComment(t.id, event.id, event.html).then(async () => {
+        this.comments.set(await this.repo.comments(t.id));
+        // 編輯時只通知新加進來的人。
+        this.notifyMentions(t.id, me.name, event.mentions.filter((id) => !before.includes(id)), event.text);
+      }),
+    );
+  }
+
+  protected onCommentDelete(event: CommentDeleteEvent): void {
+    const t = this.ticket();
+    if (!t) return;
+    event.respondWith(
+      this.repo.removeComment(t.id, event.id).then(async () => {
+        this.comments.set(await this.repo.comments(t.id));
+        this.toast.success('已刪除留言');
+      }),
+    );
+  }
+
+  /**
+   * 被 @提及的人收到一則通知（示範：通知中心不分使用者，直接出現在頁首的鈴鐺）。
+   * 接後端時由伺服器在留言存檔後送出，這裡就不需要了。
+   */
+  private notifyMentions(ticketId: string, author: string, mentions: readonly string[], text: string): void {
+    const names = mentions.map((id) => TICKET_MENTION_PEOPLE.find((p) => p.id === id)?.name ?? id);
+    if (names.length === 0) return;
+    void this.notifications.load().then((runtime) =>
+      runtime.notify({
+        title: `${author}在 ${ticketId} 提到 ${names.join('、')}`,
+        body: text.length > 80 ? `${text.slice(0, 80)}…` : text,
+        category: 'mention',
+        avatar: Array.from(author)[0] ?? '',
+        link: `/templates/tickets/${ticketId}`,
+      }),
+    );
   }
 
   /** 寫入資料後重新讀一次；進行中時其他動作不會重複送出。 */
