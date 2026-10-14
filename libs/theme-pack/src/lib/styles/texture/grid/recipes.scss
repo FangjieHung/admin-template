@@ -220,6 +220,10 @@
   .dt-table {
     --dt-frame: 1px solid var(--mat-sys-outline);
     --dt-col-divider: 1px solid var(--mat-sys-outline-variant);
+    // 表格內直接編輯：目前的格子是一條貼齊格線的 2px 直線框，沒有圓角與光暈（工程圖的格子）。
+    --dt-active-radius: 0;
+    --dt-active-outline-offset: -1px;
+    --dt-editing-shadow: none;
   }
   .mat-mdc-snack-bar-container .mdc-snackbar__surface {
     border-radius: var(--mat-sys-corner-medium) !important;

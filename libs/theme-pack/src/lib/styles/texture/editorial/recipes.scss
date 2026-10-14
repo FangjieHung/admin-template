@@ -182,6 +182,15 @@
   // libs/ui data-table 的固定欄：橫向捲動時要蓋住底下捲過去的欄，底色要跟本質地的卡片（surface-container-low）一樣。
   .dt-table {
     --dt-frozen-bg: var(--mat-sys-surface-container-low);
+    // 表格內直接編輯：目前的格子只有底下一條墨色底線（編輯中換焦點色），像在排版稿上畫線；已修改是一個小圓點。
+    --dt-active-outline: 0 solid transparent;
+    --dt-active-shadow: inset 0 -2px 0 var(--mat-sys-on-surface);
+    --dt-active-radius: 0;
+    --dt-editing-outline: 0 solid transparent;
+    --dt-editing-shadow: inset 0 -2px 0 var(--app-focus-ring);
+    --dt-editing-bg: var(--mat-sys-surface-container-high);
+    --dt-dirty-shape: circle(50%);
+    --dt-dirty-size: 0.4375rem;
   }
   // 表頭：小字 caption 樣式＋下方一條深色強調線；資料列之間 1px 髮絲線，不加欄線。
   .mat-mdc-header-row {

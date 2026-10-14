@@ -297,6 +297,10 @@
   // 不覆寫屬性。列高 = 狀態徽章 22px（或 13px × 1.45 行高的文字）+ 上下各 6px ≈ 35px；表頭同一組留白，加底色與 1px 深線。
   .dt-table {
     --dt-font-size: 0.8125rem;
+    // 表格內直接編輯：像試算表——2px 直角框、沒有光暈，已修改是小小的角落三角。
+    --dt-active-radius: 0;
+    --dt-editing-shadow: none;
+    --dt-dirty-size: 0.375rem;
     --dt-cell-padding-block: 0.375rem;
     --dt-cell-padding-inline: 0.625rem;
     --dt-row-stripe-bg: var(--ledger-stripe);

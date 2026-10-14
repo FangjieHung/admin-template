@@ -298,6 +298,10 @@
   // Admin 的資料表是 libs/ui 的 data-table（.dt-table）：只設元件暴露的外觀變數（CONTRACT.md「--dt-*」），不覆寫屬性。
   .dt-table {
     --dt-header-bg: var(--mat-sys-surface-container);
+    // 表格內直接編輯：目前的格子像亮起的指示燈（焦點框＋光暈），編輯中光暈再亮一階；已修改的格子淡淡發亮。
+    --dt-active-shadow: var(--cockpit-glow-active);
+    --dt-editing-shadow: var(--cockpit-glow-active), 0 0 0 4px color-mix(in srgb, var(--app-focus-ring) 28%, transparent);
+    --dt-dirty-bg: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
     --dt-head-border-color: var(--cockpit-edge-strong);
     --dt-row-border-color: var(--mat-sys-outline-variant);
     --dt-row-hover-bg: color-mix(in srgb, var(--mat-sys-primary) 10%, var(--mat-sys-surface));

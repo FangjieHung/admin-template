@@ -39,7 +39,7 @@
 ## 新增頁面規則
 
 - **卡片**：`.ui-card`，`surface` 底、3px 墨框、5px 墨影、直角；卡片標題列下緣一條 2px 墨線。可點卡片 `.ui-card--clickable` 滑過時往左上翹 2px、影子變 7px，按下時壓平。`.ui-card--inverse` 是一整塊墨色（`inverse-surface`），影子換成 `primary-container` 色——全站唯一一張彩色影子的卡片，用在需要最搶眼的重點卡。
-- **表格**：一律用 `lib-data-table`；外框 2px 墨線，表頭是 `primary-container` 色塊＋標題字粗體＋墨色下緣，滑過的列換 `secondary-container` 色塊。數字欄給 `align: 'end'`（`.ui-text-numeric`，tabular-nums）。
+- **表格**：一律用 `lib-data-table`；外框 2px 墨線，表頭是 `primary-container` 色塊＋標題字粗體＋墨色下緣，滑過的列換 `secondary-container` 色塊。數字欄給 `align: 'end'`（`.ui-text-numeric`，tabular-nums）。 表格內直接編輯：目前的格子是 3px 墨框，編輯中再加 4px 實心墨影；已修改是大一號的墨色三角，錯誤格 2px 錯誤色框（匯入精靈的錯誤格一起變粗）。
 - **表單**：欄位是白色（`surface-container-lowest`）填寫格、2px 墨框、直角、標籤粗體；滑過多一道 3px 墨影，聚焦時框換主色、右下一道 4px 主色硬影。相連欄位用 `.ui-field-group`（中間只留一條 2px 墨線）。
 - **空狀態**：卡片內一張便條——`surface-container-low` 底、2px 墨色虛線框（`--app-empty-*`），裡面置中圖示、說明、動作按鈕。
 - **對話框**：`primary-container` 整塊色紙、3px 墨框、8px 墨影、直角；標題 24px Space Grotesk 粗體，標題列與動作列各一條 2px 墨線。遮罩用配色的 `--app-scrim`。

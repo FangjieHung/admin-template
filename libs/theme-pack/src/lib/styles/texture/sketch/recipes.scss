@@ -417,6 +417,15 @@
   // Admin 的資料表是 libs/ui 的 data-table（.dt-table）：只設元件暴露的外觀變數（CONTRACT.md「--dt-*」），不覆寫屬性。
   .dt-table {
     --dt-frame: 1px solid var(--mat-sys-outline);
+    // 表格內直接編輯：表格線永遠是直的（ADR 0016），目前的格子是一圈墨色筆框（規則圓角、不抖），
+    // 編輯中外面再一圈淡墨；已修改是一顆墨點。
+    --dt-active-outline: 2px solid var(--mat-sys-on-surface);
+    --dt-active-outline-offset: -2px;
+    --dt-active-radius: var(--mat-sys-corner-small);
+    --dt-editing-shadow: 0 0 0 3px color-mix(in srgb, var(--mat-sys-on-surface) 16%, transparent);
+    --dt-dirty-color: var(--mat-sys-on-surface);
+    --dt-dirty-shape: circle(50%);
+    --dt-dirty-size: 0.4375rem;
     --dt-head-border-color: var(--mat-sys-on-surface);
   }
   .dt-table th {

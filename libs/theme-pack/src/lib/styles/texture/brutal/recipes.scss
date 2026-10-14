@@ -421,6 +421,14 @@
   // Admin 的資料表是 libs/ui 的 data-table（.dt-table）：只設元件暴露的外觀變數（CONTRACT.md「--dt-*」），不覆寫屬性。
   .dt-table {
     --dt-frame: var(--brutal-line);
+    // 表格內直接編輯：目前的格子是 3px 墨框，編輯中再加一塊實心墨影；已修改是大一號的墨色三角，錯誤格 2px 框。
+    --dt-active-outline: 3px solid var(--brutal-ink);
+    --dt-active-outline-offset: -3px;
+    --dt-active-radius: 0;
+    --dt-editing-shadow: 4px 4px 0 var(--brutal-ink);
+    --dt-dirty-color: var(--brutal-ink);
+    --dt-dirty-size: 0.75rem;
+    --dt-cell-error-border-width: 2px;
     --dt-header-bg: var(--mat-sys-primary-container);
     --dt-head-border-color: var(--brutal-ink);
     --dt-row-hover-bg: var(--brutal-raised);

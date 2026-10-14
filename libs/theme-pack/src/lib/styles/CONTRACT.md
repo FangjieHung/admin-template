@@ -133,6 +133,31 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 
 `--dt-frozen-offset` 是元件內部用的（量勾選欄實際寬度後寫在 `.dt-table` 上，讓固定欄貼在勾選欄右邊），質地不要設。
 
+#### 表格內直接編輯（data-table 的 `editor` 欄位）
+
+編輯中儲存格的樣式跟著編輯控制器 lazy 載入（`data-table-edit-chrome.component.scss`，不封裝），沒有編輯的表格不下載。
+**預設值就是 Material**（常駐質地的主樣式裡不寫任何規則）；其他質地一樣只在 `.dt-table` 上設變數。
+目前格子的框線畫在格子裡一個絕對定位的 `span` 上（border-collapse 的儲存格畫不出 box-shadow），所以光暈、底線都能用。
+文字對錯誤底、已修改淡底、編輯中底色 ≥ 4.5:1；框線、已修改標記、鉛筆提示對儲存格底色 ≥ 3:1（狀態一律另有文字或圖示，不只靠顏色）。
+
+| 變數 | 預設 | 用途 | 目前設定的質地 |
+| --- | --- | --- | --- |
+| `--dt-active-outline` / `-offset` | `var(--app-focus-ring-width) solid var(--app-focus-ring)` / 往內一個線寬 | 目前格子（鍵盤方向鍵所在）的框線，只在表格有焦點時出現 | Editorial：`0 solid transparent`（改用底線）；Brutal：`3px solid` 墨色 / `-3px`；Sketch：`2px solid var(--mat-sys-on-surface)`；Riso：`2px solid` 主墨；Grid：位移 `-1px`（貼齊格線） |
+| `--dt-active-shadow` | `none` | 目前格子的光暈或底線（box-shadow） | Editorial：`inset 0 -2px 0 var(--mat-sys-on-surface)`；Cockpit：`var(--cockpit-glow-active)` |
+| `--dt-active-radius` | `var(--mat-sys-corner-extra-small)` | 框線圓角 | Grid、Editorial、Brutal、Ledger、Riso：`0`；Sketch：`var(--mat-sys-corner-small)` |
+| `--dt-editing-outline` | 同 `--dt-active-outline` | 編輯中格子的框線 | Editorial：`0 solid transparent` |
+| `--dt-editing-shadow` | `0 0 0 4px` focus-ring 22%（柔和光圈） | 編輯中格子的光暈 | Grid、Ledger、Riso：`none`；Editorial：`inset 0 -2px 0 var(--app-focus-ring)`；Brutal：`4px 4px 0` 墨色實影；Cockpit：發光＋4px focus-ring 28%；Sketch：3px 文字墨 16% |
+| `--dt-editing-bg` | `var(--mat-sys-surface)` | 編輯中格子的底色 | Editorial：`var(--mat-sys-surface-container-high)`（同本質地的欄位底） |
+| `--dt-edit-icon-color` | `var(--mat-sys-on-surface-variant)` | 滑過／目前格子的鉛筆提示 | （無） |
+| `--dt-dirty-color` / `-size` / `-shape` | `var(--mat-sys-primary)` / `0.5rem` / 右上三角形（`clip-path`） | 批次修改「已修改」的角落標記（報讀器另念「已修改」） | Brutal：墨色、`0.75rem`；Ledger：`0.375rem`；Editorial、Sketch：`circle(50%)` 小圓點（Sketch 用文字墨）；Riso：主墨（第二墨對淡底不到 3:1） |
+| `--dt-dirty-bg` | primary 6%（`color-mix`） | 已修改格子的淡底 | Cockpit：primary 12%；Riso：第二墨 10% 平網 |
+| `--dt-cell-error-bg` / `-fg` | `--mat-sys-error-container` / `--mat-sys-on-error-container` | 有錯的格子（批次修改的錯誤、即時儲存失敗）的底色與文字；**匯入精靈預覽的錯誤格也吃這組**（`data-table/_cell-error.scss`） | （無） |
+| `--dt-cell-error-border` / `-border-width` | `--mat-sys-error` / `1px` | 有錯的格子的內框 | Brutal：`2px` |
+
+其他固定的 token：開關欄的軌道外框與未開圓點 `--app-field-border`、開啟時 `--mat-sys-primary`／`--mat-sys-on-primary`；儲存中轉圈同指令面板（`--mat-sys-primary` 疊在 `--mat-sys-outline-variant`），存好的打勾 `--app-positive-fg`；
+批次列（「已修改 N 格 · 有 M 個錯誤」）是 `.ui-card`，同設定頁的「有未儲存的變更」列，sticky 貼在捲動容器底部（外層到捲動容器為止不能是 `overflow: hidden`）；
+編輯器是原生 `input`／`select`（沒有自己的框，格子的框線就是邊界），關聯欄是 relation-select（吃欄位 recipe）；手機整列表單的欄位框 `--app-field-border`。
+
 #### 其他 libs/ui 清單元件
 
 分頁列（`.dt-pager`）、欄位選擇面板、進階篩選面板（`lib-advanced-filter`）、已儲存檢視（`lib-saved-views`）的浮層都只用上面的語意 token：
@@ -324,13 +349,13 @@ Material 用預設值（surface-container-high 面板、extra-large 圓角、lev
 
 - 外框全部是現有元件：步驟是 lib-step-wizard（吃上面的 `--lib-step-*`）、選檔是 lib-file-upload（`--lib-upload-*`）、預覽是 lib-data-table（`--dt-*`）、狀態是 `.ui-chip`、停止前確認是確認對話框、匯入進度是 Material 的 `mat-progress-bar`（吃配色）。按鈕、下拉（`mat-form-field` 裡的原生 `select`）、勾選框與單選鈕（`_choice-controls.scss`）也都吃各質地既有的 recipe，所以沒有質地需要另寫規則。
 - 文字：欄位名稱、計數、儲存格 `--mat-sys-on-surface`；說明、範例值、表頭、空白格的「（空白）」`--mat-sys-on-surface-variant`；必填的 * 與「有問題」計數的圖示 `--mat-sys-error`；「可匯入」圖示 `--app-positive-fg`；比對失敗的提示圖示 `--app-warning-fg`。分隔線與重複處理的外框是 `--mat-sys-outline-variant`（裝飾，旁邊有文字）。
-- 每一格是一顆按鈕：滑過 `--app-state-hover`、焦點 `--app-focus-ring`（`-width`），圓角 `--mat-sys-corner-small`；修改中的輸入框框線 `--app-field-border`、底 `--mat-sys-surface`。有錯的格子一律寫出錯誤圖示與訊息（不只靠顏色），預設是錯誤容器色；質地要換時在 `.lib-import-wizard` 上設下列變數（元件裡是 `var()` 的第二個值）。文字對錯誤底色 ≥ 4.5:1、框線對格子外的底色 ≥ 3:1。
+- 每一格是一顆按鈕：滑過 `--app-state-hover`、焦點 `--app-focus-ring`（`-width`），圓角 `--mat-sys-corner-small`；修改中的輸入框框線 `--app-field-border`、底 `--mat-sys-surface`。有錯的格子一律寫出錯誤圖示與訊息（不只靠顏色），樣子與資料表「表格內直接編輯」的錯誤格共用（`data-table/_cell-error.scss`，預設錯誤容器色）：質地在 `.dt-table` 上設 `--dt-cell-error-*` 時兩邊一起變；只想改匯入精靈時在 `.lib-import-wizard` 上設下列變數（優先於 `--dt-cell-error-*`）。文字對錯誤底色 ≥ 4.5:1、框線對格子外的底色 ≥ 3:1。
 - 匯入中的轉圈（比對現有資料）同指令面板：`--mat-sys-primary` 疊在 `--mat-sys-outline-variant` 上，時長 `--app-motion-loop` / 8，減少動態時停住。
 
 | 變數 | 預設 | 用途 | 目前設定的質地 |
 | --- | --- | --- | --- |
-| `--lib-import-cell-error-bg` / `-fg` | `--mat-sys-error-container` / `--mat-sys-on-error-container` | 有錯的格子的底色與文字（值、圖示、訊息） | （無） |
-| `--lib-import-cell-error-border` / `-border-width` | `--mat-sys-error` / `1px` | 有錯的格子的內框（`box-shadow: inset`） | （無） |
+| `--lib-import-cell-error-bg` / `-fg` | `--dt-cell-error-bg` / `-fg`（→ `--mat-sys-error-container` / `--mat-sys-on-error-container`） | 有錯的格子的底色與文字（值、圖示、訊息） | （無） |
+| `--lib-import-cell-error-border` / `-border-width` | `--dt-cell-error-border` / `-border-width`（→ `--mat-sys-error` / `1px`） | 有錯的格子的內框（`box-shadow: inset`） | （無；Brutal 的 `--dt-cell-error-border-width: 2px` 也套到這裡） |
 
 ### 字體（質地包提供，中英分軌）
 

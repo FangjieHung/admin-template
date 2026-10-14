@@ -398,6 +398,13 @@
   // Admin 的資料表是 libs/ui 的 data-table（.dt-table）：只設元件暴露的外觀變數（CONTRACT.md「--dt-*」），不覆寫屬性。
   .dt-table {
     --dt-frame: var(--riso-line);
+    // 表格內直接編輯：目前的格子是一圈主墨線（表格不做網點與錯位），已修改是主墨的角落三角＋第二墨平網
+    // （第二墨的三角對淡底只有 2.7:1，不到非文字 3:1，所以標記用主墨）。
+    --dt-active-outline: 2px solid var(--riso-ink-a);
+    --dt-active-radius: 0;
+    --dt-editing-shadow: none;
+    --dt-dirty-color: var(--riso-ink-a);
+    --dt-dirty-bg: color-mix(in srgb, var(--riso-ink-b) 10%, transparent);
     --dt-header-bg: var(--riso-header);
     --dt-head-border-color: var(--riso-ink-a);
     --dt-row-border-color: color-mix(in srgb, var(--riso-ink-a) 22%, transparent);
