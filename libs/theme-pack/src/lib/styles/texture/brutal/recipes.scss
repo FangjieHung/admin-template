@@ -675,4 +675,52 @@
     --lib-cmdk-crumb-frame: var(--brutal-line);
     --lib-cmdk-crumb-radius: 0px;
   }
+
+  // 共用日曆（libs/ui calendar）：只設元件暴露的 --lib-cal-* 變數。3px 墨框、2px 墨色格線，星期是粗體展示字；
+  // 活動是 2px 墨框的直角色塊（類別色 34% 混進卡片底，字仍是墨色）、粗體；今天是 primary-container 方塊＋墨框＋小墨影；
+  // 拖曳中的活動浮起來、拖出最長的墨影；現在線是 3px 墨線；浮層與提示是墨框的白紙＋墨影。
+  .lib-calendar {
+    --lib-cal-surface: var(--brutal-card);
+    --lib-cal-frame: var(--brutal-line-thick);
+    --lib-cal-line: var(--brutal-ink);
+    --lib-cal-line-width: 2px;
+    --lib-cal-line-minor: color-mix(in srgb, var(--brutal-ink) 28%, transparent);
+    --lib-cal-head-divider: var(--brutal-line-thick);
+    --lib-cal-head-rule: var(--brutal-ink);
+    --lib-cal-head-font: var(--font-display);
+    --lib-cal-head-weight: 800;
+    --lib-cal-title-weight: 800;
+    --lib-cal-event-frame: 2px solid var(--brutal-ink);
+    --lib-cal-event-radius: 0px;
+    --lib-cal-event-tint: 34%;
+    --lib-cal-event-tint-strong: 44%;
+    --lib-cal-event-tint-hover: 48%;
+    --lib-cal-event-weight: 700;
+    --lib-cal-event-bar-width: 4px;
+    --lib-cal-today-bg: var(--mat-sys-primary-container);
+    --lib-cal-today-fg: var(--mat-sys-on-primary-container);
+    --lib-cal-today-frame: 2px solid var(--brutal-ink);
+    --lib-cal-today-shadow: 2px 2px 0 0 var(--brutal-ink);
+    --lib-cal-today-radius: 0px;
+    --lib-cal-now-color: var(--brutal-ink);
+    --lib-cal-now-width: 3px;
+    --lib-cal-now-dot-radius: 0px;
+    --lib-cal-conflict-width: 3px;
+    --lib-cal-drag-shadow: var(--brutal-shadow-lg);
+    --lib-cal-select-bg: var(--mat-sys-secondary-container);
+    --lib-cal-select-frame: inset 0 0 0 2px var(--brutal-ink);
+    --lib-cal-slot-hover: color-mix(in srgb, var(--mat-sys-secondary-container) 60%, transparent);
+    --lib-cal-pop-bg: var(--brutal-card);
+    --lib-cal-pop-frame: var(--brutal-line-thick);
+    --lib-cal-pop-radius: 0px;
+    --lib-cal-pop-shadow: var(--brutal-shadow);
+    --lib-cal-tip-bg: var(--brutal-card);
+    --lib-cal-tip-fg: var(--mat-sys-on-surface);
+    --lib-cal-tip-frame: var(--brutal-line);
+    --lib-cal-tip-radius: 0px;
+    --lib-cal-tip-shadow: var(--brutal-shadow-sm);
+    --lib-cal-swatch-radius: 0px;
+    --lib-cal-swatch-frame: 0 0 0 2px var(--brutal-ink);
+    --lib-cal-group-bg: var(--brutal-raised);
+  }
 }

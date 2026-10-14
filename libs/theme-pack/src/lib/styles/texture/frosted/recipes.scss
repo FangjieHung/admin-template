@@ -287,4 +287,14 @@
     --lib-cmdk-inline-shadow: var(--mat-sys-level2);
     --lib-cmdk-backdrop: blur(20px);
   }
+
+  // 共用日曆（libs/ui calendar）：只設元件暴露的 --lib-cal-* 變數。毛玻璃：格線是玻璃邊的亮線，浮層是霧面玻璃；
+  // 黏住的標題列用不透明的 surface（下面捲過去的活動不會透出來）。
+  .lib-calendar {
+    --lib-cal-line: var(--frost-border);
+    --lib-cal-event-radius: var(--mat-sys-corner-medium);
+    --lib-cal-pop-bg: var(--frost-panel);
+    --lib-cal-pop-frame: 1px solid var(--frost-border);
+    --lib-cal-pop-radius: var(--mat-sys-corner-large);
+  }
 }

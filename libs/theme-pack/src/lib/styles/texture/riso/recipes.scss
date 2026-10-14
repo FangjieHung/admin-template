@@ -616,4 +616,37 @@
     --lib-cmdk-crumb-fg: var(--mat-sys-on-surface);
     --lib-cmdk-crumb-frame: var(--riso-line);
   }
+
+  // 共用日曆（libs/ui calendar）：只設元件暴露的 --lib-cal-* 變數。孔版印刷：外框是主墨線、格線是主墨 22% 的淡線；
+  // 活動是類別色的平網（不錯位，字不動），左緣一條實墨；今天是主墨圓章、色塊外帶套色錯位（字本身不錯位）；
+  // 拖曳中的活動帶錯位影；浮層與提示是主墨框的紙。
+  .lib-calendar {
+    --lib-cal-surface: var(--riso-card);
+    --lib-cal-frame: var(--riso-line);
+    --lib-cal-line: color-mix(in srgb, var(--riso-ink-a) 22%, transparent);
+    --lib-cal-head-divider: var(--riso-rule);
+    --lib-cal-head-rule: var(--riso-ink-a);
+    --lib-cal-num-font: var(--font-mono);
+    --lib-cal-event-tint: 20%;
+    --lib-cal-event-tint-strong: 28%;
+    --lib-cal-event-tint-hover: 30%;
+    --lib-cal-event-base: var(--riso-card);
+    --lib-cal-today-bg: var(--riso-ink-a);
+    --lib-cal-today-fg: var(--mat-sys-on-primary);
+    --lib-cal-today-shadow: var(--riso-misreg);
+    --lib-cal-drag-shadow: var(--riso-misreg), var(--mat-sys-level2);
+    --lib-cal-drag-frame: var(--riso-line);
+    --lib-cal-select-bg: color-mix(in srgb, var(--riso-ink-a) 16%, transparent);
+    --lib-cal-select-frame: inset 0 0 0 var(--riso-line-w) var(--riso-ink-a);
+    --lib-cal-slot-hover: var(--app-state-hover);
+    --lib-cal-group-bg: color-mix(in srgb, var(--riso-ink-a) 9%, var(--riso-card));
+    --lib-cal-pop-bg: var(--riso-card);
+    --lib-cal-pop-frame: var(--riso-line);
+    --lib-cal-pop-shadow: var(--riso-misreg);
+    --lib-cal-tip-bg: color-mix(in srgb, var(--riso-ink-a) 10%, var(--mat-sys-surface));
+    --lib-cal-tip-fg: var(--mat-sys-on-surface);
+    --lib-cal-tip-frame: var(--riso-line);
+    --lib-cal-tip-radius: var(--mat-sys-corner-medium);
+    --lib-cal-tip-shadow: none;
+  }
 }

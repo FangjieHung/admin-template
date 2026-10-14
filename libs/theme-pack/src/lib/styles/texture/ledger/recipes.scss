@@ -489,4 +489,38 @@
     --lib-cmdk-group-size: 0.6875rem;
     --lib-cmdk-list-max-height: min(30rem, 64vh);
   }
+
+  // 共用日曆（libs/ui calendar）：只設元件暴露的 --lib-cal-* 變數。高密度：月曆格 4.75rem、時段 1.125rem、資源列每條 1.375rem、
+  // 活動 11px 字、直角；帳簿格線（ledger-rule，表頭下 rule-strong）、日期數字等寬字；分組列是帳簿表頭的底色，今天是直角的主色方塊。
+  .lib-calendar {
+    --lib-cal-frame: 1px solid var(--ledger-rule-strong);
+    --lib-cal-line: var(--ledger-rule);
+    --lib-cal-head-divider: 1px solid var(--ledger-rule-strong);
+    --lib-cal-head-rule: var(--ledger-rule-strong);
+    --lib-cal-head-size: 0.6875rem;
+    --lib-cal-num-font: var(--font-mono);
+    --lib-cal-num-size: 0.75rem;
+    --lib-cal-day-size: 1rem;
+    --lib-cal-title-size: 1rem;
+    --lib-cal-cell-height: 4.75rem;
+    --lib-cal-slot-height: 1.125rem;
+    --lib-cal-lane-height: 1.375rem;
+    --lib-cal-event-height: 1.125rem;
+    --lib-cal-event-size: 0.6875rem;
+    --lib-cal-event-radius: 0px;
+    --lib-cal-event-bar-width: 2px;
+    --lib-cal-event-gap: 1px;
+    --lib-cal-agenda-size: 0.8125rem;
+    --lib-cal-today-radius: 0px;
+    --lib-cal-col-hour: 3rem;
+    --lib-cal-col-day: 5rem;
+    --lib-cal-col-month: 2.25rem;
+    --lib-cal-resource-width: 9rem;
+    --lib-cal-group-bg: var(--ledger-head-bg);
+    --lib-cal-pop-radius: 0px;
+    --lib-cal-pop-frame: 1px solid var(--ledger-rule-strong);
+    --lib-cal-pop-shadow: var(--mat-sys-level2);
+    --lib-cal-tip-radius: 0px;
+    --lib-cal-swatch-radius: 0px;
+  }
 }

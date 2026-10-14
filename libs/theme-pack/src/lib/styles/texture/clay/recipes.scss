@@ -340,4 +340,15 @@
     --lib-cmdk-active-shadow: var(--clay-shadow-small);
     --lib-cmdk-kbd-shadow: var(--clay-shadow-small);
   }
+
+  // 共用日曆（libs/ui calendar）：只設元件暴露的 --lib-cal-* 變數。黏土：活動是圓潤的小黏土塊（大圓角＋小陰影），
+  // 浮層是厚黏土；黏住的標題列用不透明的 surface（卡片是半透明的）。
+  .lib-calendar {
+    --lib-cal-event-radius: var(--mat-sys-corner-medium);
+    --lib-cal-event-shadow: var(--clay-shadow-small);
+    --lib-cal-drag-shadow: var(--clay-shadow-deep);
+    --lib-cal-pop-radius: var(--mat-sys-corner-extra-large);
+    --lib-cal-pop-frame: 0 solid transparent;
+    --lib-cal-pop-shadow: var(--clay-shadow-deep);
+  }
 }

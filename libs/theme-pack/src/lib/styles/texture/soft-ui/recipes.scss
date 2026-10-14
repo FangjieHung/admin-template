@@ -363,4 +363,19 @@
     --lib-cmdk-active-shadow: var(--soft-inset-small);
     --lib-cmdk-kbd-shadow: var(--soft-inset-small);
   }
+
+  // 共用日曆（libs/ui calendar）：只設元件暴露的 --lib-cal-* 變數。卡片就是背景色：黏住的標題列用背景色；
+  // 格線是 outline 22% 的淡線；活動、今天微微浮起（soft 外影），選取的時段是壓下去的內凹。
+  .lib-calendar {
+    --lib-cal-surface: var(--mat-sys-background);
+    --lib-cal-line: color-mix(in srgb, var(--mat-sys-outline) 22%, transparent);
+    --lib-cal-event-base: var(--mat-sys-background);
+    --lib-cal-event-radius: var(--mat-sys-corner-medium);
+    --lib-cal-today-shadow: 2px 2px 5px var(--soft-shadow-dark), -2px -2px 5px var(--soft-shadow-light);
+    --lib-cal-select-bg: var(--mat-sys-background);
+    --lib-cal-select-frame: var(--soft-inset-small);
+    --lib-cal-group-bg: transparent;
+    --lib-cal-pop-bg: var(--mat-sys-background);
+    --lib-cal-pop-frame: 0 solid transparent;
+  }
 }

@@ -50,6 +50,7 @@
 
 - **卡片**：`.ui-card`，`--frost-panel` 底＋背景模糊、1px `--frost-border` 霧邊、24px 圓角、level2。可點的加 `.ui-card--clickable`（hover 上移 2px、升到 level3）。重點數字卡用 `.ui-card--inverse`（深色漸層玻璃）。卡片內分區用留白，不再疊一層玻璃——兩層模糊會變髒。
 - **表格**：放在 `.ui-card` 裡，表格本身透明，讓卡片的玻璃透上來；不替表頭另加不透明底色。
+- **日曆**：`lib-calendar` 只設 `--lib-cal-*`（CONTRACT.md「共用日曆」）。格線是玻璃邊亮線，浮層是霧面玻璃；黏住的標題列用不透明 surface。
 - **表單**：Material filled 欄位，16px 圓角、`--mat-sys-surface-container-high` 80% 透明、淺內凹（`--frost-well`）、無底線；邊框 1px `--app-field-border`（霧邊 `--frost-border` 對底色不到 3:1，欄位不用它；霧感留給半透明填色與內凹）。錯誤時框線換 error 色。相連欄位用 `.ui-field-group`。
 - **空狀態**：卡片內置中：一個圖示、一行 `.ui-text-subtitle`、一行 `.ui-text-caption`、一顆主色膠囊按鈕。留白充足，不另加色塊。
 - **對話框**：24px 圓角、`--frost-panel` 底＋背景模糊、1px 霧邊、level4。

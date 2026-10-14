@@ -269,4 +269,14 @@
     --lib-cmdk-active-fg: var(--mat-sys-on-surface);
     --lib-cmdk-active-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mat-sys-primary) 40%, transparent);
   }
+
+  // 共用日曆（libs/ui calendar）：只設元件暴露的 --lib-cal-* 變數。Aero 玻璃：格線是玻璃亮邊，活動與浮層是大圓角的亮玻璃；
+  // 黏住的標題列用不透明的 surface。
+  .lib-calendar {
+    --lib-cal-line: var(--aero-edge);
+    --lib-cal-event-radius: var(--mat-sys-corner-medium);
+    --lib-cal-pop-bg: color-mix(in srgb, var(--mat-sys-surface) 92%, transparent);
+    --lib-cal-pop-frame: 1px solid var(--aero-edge);
+    --lib-cal-pop-radius: var(--mat-sys-corner-large);
+  }
 }

@@ -48,6 +48,7 @@
 
 - **卡片**：`.ui-card`，與畫布同色、無框、32px 圓角、level2 凸起。可點的加 `.ui-card--clickable`（hover 升到 level3、上移 2px）。卡片內要分區，用一塊內凹（`--soft-inset-small`）的區域，不要再疊一張凸起的卡片。
 - **表格**：放在 `.ui-card` 裡，表格本身透明，列之間只有一條極淡的線；不要替列或表頭另加凸起效果。
+- **日曆**：`lib-calendar` 只設 `--lib-cal-*`（CONTRACT.md「共用日曆」）。標題列底色是背景色；格線 outline 22%，今天的標記微微浮起，選取的時段是內凹。
 - **表單**：Material filled 欄位，16px 圓角、無底線、內凹（`--soft-inset`），外加 1px inset 細框 `--app-field-border`（填色與畫布同色、內陰影太柔，單靠浮雕對底色不到 3:1；用 inset box-shadow 不改尺寸，錯誤時細框換 error 色）。相連欄位用 `.ui-field-group`（中間接縫改直角）。
 - **勾選框／單選鈕**：原生控制項由全域 `_choice-controls.scss` 重畫（外框 `--app-field-border`、勾選底 `--mat-sys-primary`、記號 `--mat-sys-on-primary`）；本質地只在未勾選時加 `--soft-inset-small` 小內凹（欄位的 6px 內凹放不進 18px 方塊），勾選後是主色實心、不內凹。
 - **空狀態**：卡片內置中：一個圖示、一行 `.ui-text-subtitle`、一行 `.ui-text-caption`、一顆主要按鈕（凸起的膠囊）。可把整塊放進一個淺內凹的區域，當作「空的凹槽」。

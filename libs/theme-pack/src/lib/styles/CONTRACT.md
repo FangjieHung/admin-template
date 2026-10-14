@@ -357,6 +357,42 @@ Material 用預設值（surface-container-high 面板、extra-large 圓角、lev
 | `--lib-import-cell-error-bg` / `-fg` | `--dt-cell-error-bg` / `-fg`（→ `--mat-sys-error-container` / `--mat-sys-on-error-container`） | 有錯的格子的底色與文字（值、圖示、訊息） | （無） |
 | `--lib-import-cell-error-border` / `-border-width` | `--dt-cell-error-border` / `-border-width`（→ `--mat-sys-error` / `1px`） | 有錯的格子的內框（`box-shadow: inset`） | （無；Brutal 的 `--dt-cell-error-border-width: 2px` 也套到這裡） |
 
+#### 共用日曆（`libs/ui` calendar）
+
+- 外框只用語意 token：工具列的「今天」是 `matButton="outlined"`、前後是 `matIconButton`、檢視與刻度切換是 `.ui-nav-pill`（按下時 `.is-active`＋aria-pressed）、資源篩選是原生 `select`（`--app-field-border`），都吃各質地既有的 recipe；載入中是蓋在檢視上的 `--app-skeleton-*` 閃光，載入失敗是 `lib-error-state`，議程沒有活動是 `lib-empty-state`。
+- 活動：左緣一條類別色條＋同色淡底（`color-mix` 混進 `--lib-cal-event-base`），字一律 `--mat-sys-on-surface`、時間與狀態 `--mat-sys-on-surface-variant`。類別色是 `--app-chart-1…6`（`CalendarCategory.color` 給 1–6）或使用端給的語意 token；類別名稱也念給報讀器、下方有圖例，不只靠顏色。衝突（同一個資源時間重疊）多一圈 `--lib-cal-conflict-color`（預設 `--mat-sys-error`）＋警告圖示＋「時間衝突」文字。
+- 「+N 筆」浮動清單與月份選擇器同其他浮層：`--mat-sys-surface-container-high` 底、hairline、`--mat-sys-corner-medium`、`--mat-sys-level3`；拖曳中的提示預設 `--mat-sys-inverse-surface`／`--mat-sys-inverse-on-surface`。滑過的時段 `--app-state-hover`、焦點 `--app-focus-ring`（`-width`／`-offset`）、動畫 `--app-motion-fast`（減少動態時不轉場）。
+- 時間格與資源排程的標題列、資源欄在自己的捲動容器裡黏住，底色是 `--lib-cal-surface`（要等於卡片底色，同 `--dt-frozen-bg` 的作法；卡片半透明的質地維持不透明的 surface）。
+- 4 個檢視的外層都有 `.lib-calendar`；質地要換造型時**只在 `.lib-calendar` 上設下列變數**（元件裡是 `var()` 的第二個值），不覆寫屬性。Material 用預設值（主樣式裡沒有任何日曆規則）。
+- 對比：活動文字對每一種類別色的淡底 ≥ 4.5:1；日期數字、星期、時間刻度、資源名稱 ≥ 4.5:1；今天的標記、現在線、衝突標記、類別色條 ≥ 3:1（13 個質地的預設配色都量過）。
+
+| 變數 | 預設 | 用途 | 目前設定的質地 |
+| --- | --- | --- | --- |
+| `--lib-cal-surface` | `var(--mat-sys-surface)` | 黏住的標題列、資源欄、分組列文字底 | Editorial：`surface-container-low`；Soft UI：`background`；Brutal：`var(--brutal-card)`；Riso：`var(--riso-card)`；Sketch：`var(--sketch-card)` |
+| `--lib-cal-frame` / `--lib-cal-radius` | `0 solid transparent` / `0` | 檢視外框（border 簡寫） | Grid：1px `outline`；Brutal：`var(--brutal-line-thick)`；Ledger：1px `var(--ledger-rule-strong)`；Cockpit：1px `var(--cockpit-edge-strong)`；Riso：`var(--riso-line)`；Sketch：1px `outline`（直線，ADR 0016） |
+| `--lib-cal-line` / `-line-width` / `-line-minor` | `outline-variant` / `1px` / line 45% | 格線（日子之間、每個鐘點）／時段的淡線（只畫背景，永遠是直線） | Brutal：墨色 `2px`、淡線墨 28%；Ledger：`var(--ledger-rule)`；Cockpit：`var(--cockpit-edge)`；Riso：主墨 22%；Linen：`--app-border-emphasis`；Soft UI：outline 22%；Frosted：`var(--frost-border)`；Aero：`var(--aero-edge)` |
+| `--lib-cal-head-divider` / `-head-rule` | 同格線 | 星期／時間標題下緣（border 簡寫）／時間格黏住區塊下緣的顏色 | Grid：1px `outline`；Editorial：1px 墨線；Brutal：`var(--brutal-line-thick)`；Ledger：`rule-strong`；Cockpit：`edge-strong`；Riso：`var(--riso-rule)`；Sketch：1px 文字墨 |
+| `--lib-cal-head-font` / `-size` / `-weight` / `-tracking` / `-transform` / `-items` | 繼承 / `0.75rem` / `500` / `normal` / `none` / `center` | 星期、時間軸、資源欄的欄名 | Editorial：展示字 13px 600、字距 0.06em；Brutal：展示字 800；Ledger：11px |
+| `--lib-cal-num-font` / `-num-size` / `-day-size` | 繼承 / `0.8125rem` / `1.125rem` | 日期數字（月曆格／週檢視標題） | Grid、Ledger、Cockpit、Riso、Sketch：`--font-mono`；Editorial：展示字；Ledger：12px／16px |
+| `--lib-cal-title-font` / `-size` / `-weight` | `--font-display` / `1.125rem` / `600` | 工具列的期間標題 | Editorial：展示字 24px 500；Brutal：800；Ledger：16px |
+| `--lib-cal-today-bg` / `-fg` / `-frame` / `-shadow` / `-radius` | `primary` / `on-primary` / 無 / `none` / `corner-full` | 今天的日期標記 | Editorial：反白墨色方塊；Brutal：`primary-container`＋2px 墨框＋墨影、直角；Cockpit：`var(--cockpit-lit)`＋主色框與光；Riso：主墨＋`var(--riso-misreg)`（字不錯位）；Soft UI：浮起的外影；Grid、Ledger：直角 |
+| `--lib-cal-today-cell` / `-today-column` | `transparent` / 資源排程 primary 6% | 今天那一格／那一欄的淡底 | Cockpit：primary 6% |
+| `--lib-cal-now-color` / `-now-width` / `-now-glow` / `-now-dot-radius` | `error` / `2px` / `none` / `50%` | 現在線（週／日、資源排程） | Cockpit：主色＋發光；Brutal：墨色 `3px`、方頭；Editorial：`1.5px` |
+| `--lib-cal-event-tint` / `-tint-strong` / `-tint-hover` | `16%` / `26%` / `26%` | 活動淡底的類別色濃度（整天的活動用 strong） | Brutal：34%／44%／48%；Cockpit：22%／30%／32%；Riso：20%／28%／30%；Editorial：10%／16%／18% |
+| `--lib-cal-event-base` | `var(--mat-sys-surface)` | 淡底混進去的底色 | Editorial：`surface-container-low`；Soft UI：`background`；Riso：`var(--riso-card)`；Sketch：`var(--sketch-card)` |
+| `--lib-cal-event-radius` / `-frame` / `-shadow` / `-bar-width` / `-weight` / `-size` / `-height` / `-gap` | `corner-small` / 無 / 無 / `3px` / `500` / `0.75rem` / `1.375rem` / `0.125rem` | 活動的圓角、框、陰影、色條寬、字、月曆列高、列距 | Grid、Editorial、Brutal、Ledger：直角；Brutal：2px 墨框、色條 4px、700；Ledger：11px、列高 1.125rem、色條 2px；Editorial：色條 2px；Cockpit：同色淡光；Clay：`var(--clay-shadow-small)`；Sketch：`var(--sketch-wobble-xs)`＋鋼筆框；Soft UI、Clay、Frosted、Aero：`corner-medium` |
+| `--lib-cal-drag-shadow` / `-drag-frame` / `-drag-source-opacity` | `level3` / 同活動 / `0.4` | 拖曳中的預覽／原位置變淡 | Grid：4px 硬影；Brutal：`var(--brutal-shadow-lg)`；Editorial：不加陰影、1px 墨框；Cockpit：`var(--cockpit-glow-2)`；Riso：錯位影；Sketch：`var(--sketch-retrace)`；Clay：`var(--clay-shadow-deep)` |
+| `--lib-cal-conflict-color` / `-conflict-width` | `error` / `2px` | 衝突的外圈與警告色 | Brutal：`3px` |
+| `--lib-cal-select-bg` / `-select-frame` / `-slot-hover` | primary 14% / 2px 主色內框 / `--app-state-hover` | 拖出的選取範圍、滑過的時段 | Brutal：`secondary-container`＋2px 墨框；Soft UI：內凹；Cockpit：主色光；Riso、Sketch、Grid、Editorial：細框 |
+| `--lib-cal-cell-height` / `-mini-cell-height` / `-slot-height` / `-lane-height` | `6.5rem` / `2.75rem` / `1.5rem` / `1.75rem` | 月曆格高／迷你月曆格高／每個時段高／資源排程每一條的高 | Ledger：4.75rem／—／1.125rem／1.375rem |
+| `--lib-cal-col-hour` / `-col-day` / `-col-month` / `-resource-width` | `4rem` / `6.5rem` / `2.75rem` / `11rem` | 資源排程的欄寬下限（日／週／月刻度）與資源欄寬 | Ledger：3rem／5rem／2.25rem／9rem |
+| `--lib-cal-grid-height` / `-timeline-height` / `-gutter-width` | `36rem` / `36rem` / `3.75rem` | 時間格與資源排程的最大高度（超過就在自己的容器捲動）、時間刻度欄寬 | （無） |
+| `--lib-cal-group-bg` | `surface-container-low` | 資源排程的分組列 | Ledger：`var(--ledger-head-bg)`；Cockpit：`surface-container`；Brutal：`var(--brutal-raised)`；Riso：主墨 9%；Editorial、Soft UI、Sketch：透明 |
+| `--lib-cal-pop-bg` / `-pop-frame` / `-pop-radius` / `-pop-shadow` | `surface-container-high` / hairline / `corner-medium` / `level3` | 「+N 筆」清單與月份選擇器 | Grid：直角 1px outline；Editorial：直角、無陰影；Brutal：3px 墨框＋墨影；Ledger：直角；Cockpit：發光；Riso：主墨框＋錯位；Sketch：麥克筆＋再描一次；Clay：厚黏土；Frosted、Aero：玻璃；Linen：不加陰影 |
+| `--lib-cal-tip-bg` / `-tip-fg` / `-tip-frame` / `-tip-radius` / `-tip-shadow` | `inverse-surface` / `inverse-on-surface` / 無 / `corner-small` / `level2` | 拖曳中跟著指標的新時間（成對設定，對比 4.5:1） | Grid、Editorial、Brutal、Sketch、Cockpit、Riso：紙色底＋框（同圖表提示框） |
+| `--lib-cal-swatch-radius` / `-swatch-frame` | `min(3px, corner-small)` / `none` | 圖例色塊 | Grid、Editorial、Brutal、Ledger：直角；Brutal：2px 墨框 |
+| `--lib-cal-cell-bg` / `-outside-bg` / `-body-bg` / `-body-shadow` / `-agenda-size` | 透明 / 透明 / 透明 / `none` / `0.875rem` | 格子底、其他月份的日子、檢視區的底與陰影、議程字級 | Ledger：議程 13px |
+
 ### 字體（質地包提供，中英分軌）
 
 `--font-zh`（中文，裝置的系統字）、`--font-en`（英文依質地）、`--font-display`、`--font-body`、`--font-mono`

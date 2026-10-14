@@ -372,4 +372,25 @@
     --lib-cmdk-row-radius: 0px;
     --lib-cmdk-active-shadow: inset 0 0 0 1px var(--mat-sys-outline);
   }
+
+  // 共用日曆（libs/ui calendar）：只設元件暴露的 --lib-cal-* 變數。工程圖的格子：外框 1px outline、內格線 outline-variant
+  // （直線）、日期數字等寬字；活動是直角的淡色塊＋左緣色條，今天是直角的主色方塊；拖曳中是硬影，浮層與提示同對話框（直角、1px 實框）。
+  .lib-calendar {
+    --lib-cal-frame: 1px solid var(--mat-sys-outline);
+    --lib-cal-head-divider: 1px solid var(--mat-sys-outline);
+    --lib-cal-num-font: var(--font-mono);
+    --lib-cal-event-radius: 0px;
+    --lib-cal-today-radius: 0px;
+    --lib-cal-drag-shadow: 4px 4px 0 0 var(--mat-sys-outline);
+    --lib-cal-drag-frame: 1px solid var(--mat-sys-outline);
+    --lib-cal-select-frame: inset 0 0 0 1px var(--mat-sys-primary);
+    --lib-cal-pop-frame: 1px solid var(--mat-sys-outline);
+    --lib-cal-pop-radius: 0px;
+    --lib-cal-pop-bg: var(--mat-sys-surface);
+    --lib-cal-tip-bg: var(--mat-sys-surface);
+    --lib-cal-tip-fg: var(--mat-sys-on-surface);
+    --lib-cal-tip-frame: 1px solid var(--mat-sys-outline);
+    --lib-cal-tip-radius: 0px;
+    --lib-cal-swatch-radius: 0px;
+  }
 }

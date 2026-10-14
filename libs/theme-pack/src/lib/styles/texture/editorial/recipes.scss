@@ -388,4 +388,43 @@
     --lib-cmdk-crumb-fg: var(--mat-sys-on-surface);
     --lib-cmdk-crumb-frame: 1px solid var(--mat-sys-on-surface);
   }
+
+  // 共用日曆（libs/ui calendar）：只設元件暴露的 --lib-cal-* 變數。版面靠字：星期與期間標題用襯線展示字、標題下一條墨線，
+  // 格線是髮絲線；活動不上色塊，只有淡淡一層底＋左緣色條，直角；今天是反白的墨色方塊；拖曳中不加陰影，改一圈墨線。
+  .lib-calendar {
+    --lib-cal-surface: var(--mat-sys-surface-container-low);
+    --lib-cal-head-font: var(--font-display);
+    --lib-cal-head-size: 0.8125rem;
+    --lib-cal-head-weight: 600;
+    --lib-cal-head-tracking: 0.06em;
+    --lib-cal-head-divider: 1px solid var(--mat-sys-on-surface);
+    --lib-cal-head-rule: var(--mat-sys-on-surface);
+    --lib-cal-num-font: var(--font-display);
+    --lib-cal-title-font: var(--font-display);
+    --lib-cal-title-size: 1.5rem;
+    --lib-cal-title-weight: 500;
+    --lib-cal-event-base: var(--mat-sys-surface-container-low);
+    --lib-cal-event-tint: 10%;
+    --lib-cal-event-tint-strong: 16%;
+    --lib-cal-event-tint-hover: 18%;
+    --lib-cal-event-radius: 0px;
+    --lib-cal-event-bar-width: 2px;
+    --lib-cal-today-bg: var(--mat-sys-on-surface);
+    --lib-cal-today-fg: var(--mat-sys-surface);
+    --lib-cal-today-radius: 0px;
+    --lib-cal-now-width: 1.5px;
+    --lib-cal-drag-shadow: none;
+    --lib-cal-drag-frame: 1px solid var(--mat-sys-on-surface);
+    --lib-cal-select-frame: inset 0 0 0 1px var(--mat-sys-on-surface);
+    --lib-cal-pop-bg: var(--mat-sys-surface);
+    --lib-cal-pop-radius: 0px;
+    --lib-cal-pop-shadow: none;
+    --lib-cal-tip-bg: var(--mat-sys-surface);
+    --lib-cal-tip-fg: var(--mat-sys-on-surface);
+    --lib-cal-tip-frame: 1px solid var(--mat-sys-outline-variant);
+    --lib-cal-tip-radius: 0px;
+    --lib-cal-tip-shadow: none;
+    --lib-cal-swatch-radius: 0px;
+    --lib-cal-group-bg: transparent;
+  }
 }

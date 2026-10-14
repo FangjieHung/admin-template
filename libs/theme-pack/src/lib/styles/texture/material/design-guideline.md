@@ -47,6 +47,7 @@ Google 風的親切工作台：大圓角、白色卡片輕輕浮在畫布上，�
 
 - **卡片**：用 `.ui-card`（白底、hairline 邊、22px 圓角、level1）。可點的加 `.ui-card--clickable`。重點數字卡用 `.ui-card--inverse`（無邊無影）。卡片內再分區用 16px 以上的間距，不再套一層卡片。
 - **表格**：放在 `.ui-card` 裡，表格本身透明無框；列之間只用 `--mat-sys-outline-variant` 細線。數字欄靠右對齊。 表格內直接編輯（data-table 的 `editor` 欄位）用元件預設：目前的格子是 2px 焦點框、極小圓角，編輯中外面多一圈 4px 的柔和光圈；已修改是右上角主色三角＋淡底，錯誤格是錯誤容器色＋內框＋訊息。
+- **日曆**：`lib-calendar` 只設 `--lib-cal-*`（CONTRACT.md「共用日曆」）。圓角的淡色活動片（左緣類別色條＋同色淡底），今天是主色圓點，現在線是錯誤色細線，拖曳中浮起一層陰影；全部是元件預設值，主樣式裡沒有日曆規則。
 - **表單**：用 Material filled 欄位（上緣 16px 圓角、下緣直角，M3 filled 標準形狀），底部 1px 底線當可見邊界（MDC active indicator，顏色 `--app-field-border`，對欄位外側底色 ≥ 3:1；下緣直角讓底線完整一條）；hover 加深成 `--mat-sys-on-surface`，focus 是 MDC 的 2px 主色底線，錯誤是 error 色底線。相連欄位用 `.ui-field-group`。區塊標題用 `.ui-text-subtitle`。
 - **空狀態**：卡片內置中，一個大圖示（`--mat-sys-on-surface-variant`）、一行 `.ui-text-subtitle`、一行 `.ui-text-caption` 說明、一顆主要按鈕。不另加陰影或邊框。
 - **對話框**：28px 圓角、level4 陰影，底下有遮罩（`--app-scrim`）。標題用 `.ui-text-subtitle`，動作按鈕靠右。

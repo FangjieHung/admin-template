@@ -268,4 +268,13 @@
     --lib-cmdk-active-fg: var(--mat-sys-on-surface);
     --lib-cmdk-active-shadow: inset 0 0 0 1px var(--mat-sys-outline-variant);
   }
+
+  // 共用日曆（libs/ui calendar）：只設元件暴露的 --lib-cal-* 變數。紙感：格線用強調邊框（較淡的紙線），分組列是紙的淡底，
+  // 浮層同對話框（hairline、不加陰影）。活動、今天沿用預設。
+  .lib-calendar {
+    --lib-cal-line: var(--app-border-emphasis);
+    --lib-cal-line-minor: color-mix(in srgb, var(--mat-sys-outline-variant) 18%, transparent);
+    --lib-cal-pop-bg: var(--mat-sys-surface);
+    --lib-cal-pop-shadow: none;
+  }
 }

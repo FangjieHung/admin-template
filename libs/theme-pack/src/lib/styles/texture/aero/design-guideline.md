@@ -27,6 +27,7 @@
 
 - **卡片**：使用 `.ui-card`，透明面板、1px 亮邊與 level2；可點卡片加 `.ui-card--clickable`。
 - **表格**：放在 `.ui-card`，表格維持透明；以列距和卡片玻璃承接層次。
+- **日曆**：`lib-calendar` 只設 `--lib-cal-*`（CONTRACT.md「共用日曆」）。格線是玻璃亮邊，活動與浮層大圓角；黏住的標題列用不透明 surface。
 - **表單**：filled 欄位使用半透明 surface、`--aero-well` 與 `--app-field-border`；相連欄位使用 `.ui-field-group`。
 - **空狀態**：一個圖示、標題、說明與主操作按鈕，避免加入額外色塊。
 - **對話框**：使用 28px 圓角、透明面板、亮邊、level4 與 26px 背景模糊。

@@ -499,4 +499,37 @@
     --lib-cmdk-crumb-fg: var(--mat-sys-on-surface);
     --lib-cmdk-crumb-frame: 1px solid var(--cockpit-edge-strong);
   }
+
+  // 共用日曆（libs/ui calendar）：只設元件暴露的 --lib-cal-* 變數。深色儀表：格線是 cockpit-edge、外框 edge-strong；
+  // 活動是類別色 22% 的發光片（外圈一道同色淡光）；現在線是會發光的主色線；今天是亮起來的方塊＋主色光；拖曳中的活動最亮、光最強。
+  .lib-calendar {
+    --lib-cal-frame: 1px solid var(--cockpit-edge-strong);
+    --lib-cal-line: var(--cockpit-edge);
+    --lib-cal-head-divider: 1px solid var(--cockpit-edge-strong);
+    --lib-cal-head-rule: var(--cockpit-edge-strong);
+    --lib-cal-num-font: var(--font-mono);
+    --lib-cal-event-tint: 22%;
+    --lib-cal-event-tint-strong: 30%;
+    --lib-cal-event-tint-hover: 32%;
+    --lib-cal-event-shadow: 0 0 6px color-mix(in srgb, var(--cal-ev-color) 35%, transparent);
+    --lib-cal-today-bg: var(--cockpit-lit);
+    --lib-cal-today-fg: var(--mat-sys-on-surface);
+    --lib-cal-today-frame: 1px solid var(--mat-sys-primary);
+    --lib-cal-today-shadow: 0 0 8px color-mix(in srgb, var(--mat-sys-primary) 55%, transparent);
+    --lib-cal-today-column: color-mix(in srgb, var(--mat-sys-primary) 6%, transparent);
+    --lib-cal-now-color: var(--mat-sys-primary);
+    --lib-cal-now-glow: 0 0 6px var(--mat-sys-primary), 0 0 14px color-mix(in srgb, var(--mat-sys-primary) 55%, transparent);
+    --lib-cal-drag-shadow: var(--cockpit-glow-2);
+    --lib-cal-drag-frame: 1px solid var(--cockpit-edge-strong);
+    --lib-cal-select-bg: color-mix(in srgb, var(--mat-sys-primary) 16%, transparent);
+    --lib-cal-select-frame: inset 0 0 0 1px var(--mat-sys-primary), 0 0 10px color-mix(in srgb, var(--mat-sys-primary) 30%, transparent);
+    --lib-cal-group-bg: var(--mat-sys-surface-container);
+    --lib-cal-pop-bg: var(--mat-sys-surface-container-highest);
+    --lib-cal-pop-frame: 1px solid var(--cockpit-edge-strong);
+    --lib-cal-pop-shadow: var(--cockpit-glow-2);
+    --lib-cal-tip-bg: var(--mat-sys-surface-container-highest);
+    --lib-cal-tip-fg: var(--mat-sys-on-surface);
+    --lib-cal-tip-frame: 1px solid var(--cockpit-edge-strong);
+    --lib-cal-tip-shadow: var(--cockpit-glow-2);
+  }
 }

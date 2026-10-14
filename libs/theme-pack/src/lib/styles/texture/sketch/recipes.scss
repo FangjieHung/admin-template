@@ -654,4 +654,30 @@
     --lib-cmdk-kbd-radius: var(--sketch-wobble-xs);
     --lib-cmdk-crumb-radius: var(--sketch-wobble-sm);
   }
+
+  // 共用日曆（libs/ui calendar）：只設元件暴露的 --lib-cal-* 變數。日曆格線永遠是直的（ADR 0016）：1px outline 外框、
+  // 表頭下一條文字墨直線、格線用預設淡線；活動是手繪小圓框（wobble-xs）＋鋼筆框，拖曳中再描一次；浮層與提示是麥克筆框＋再描一次。
+  .lib-calendar {
+    --lib-cal-surface: var(--sketch-card);
+    --lib-cal-frame: 1px solid var(--mat-sys-outline);
+    --lib-cal-head-divider: 1px solid var(--mat-sys-on-surface);
+    --lib-cal-head-rule: var(--mat-sys-on-surface);
+    --lib-cal-num-font: var(--font-mono);
+    --lib-cal-event-base: var(--sketch-card);
+    --lib-cal-event-radius: var(--sketch-wobble-xs);
+    --lib-cal-event-frame: var(--sketch-pen-w) solid var(--sketch-pen);
+    --lib-cal-drag-shadow: var(--sketch-retrace);
+    --lib-cal-drag-frame: var(--sketch-marker-w) solid var(--sketch-ink);
+    --lib-cal-select-frame: inset 0 0 0 var(--sketch-pen-w) var(--sketch-pen);
+    --lib-cal-pop-bg: var(--sketch-card);
+    --lib-cal-pop-frame: var(--sketch-marker-w) solid var(--sketch-ink);
+    --lib-cal-pop-radius: var(--sketch-wobble-md);
+    --lib-cal-pop-shadow: var(--sketch-retrace);
+    --lib-cal-tip-bg: var(--sketch-card);
+    --lib-cal-tip-fg: var(--mat-sys-on-surface);
+    --lib-cal-tip-frame: var(--sketch-pen-w) solid var(--sketch-ink);
+    --lib-cal-tip-radius: var(--sketch-wobble-sm);
+    --lib-cal-tip-shadow: var(--sketch-retrace);
+    --lib-cal-group-bg: transparent;
+  }
 }

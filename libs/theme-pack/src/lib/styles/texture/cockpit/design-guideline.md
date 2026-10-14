@@ -41,6 +41,7 @@
 
 - **卡片**：`.ui-card`，`--mat-sys-surface` 底、1px `--cockpit-edge` 亮邊、8px 圓角、頂端一條 1px 內側反光；不要加陰影。可點卡片 `.ui-card--clickable` 滑過時換 `surface-container`、亮邊變強、外面一圈光，不位移。`.ui-card--inverse` 在這個質地是「點亮的顯示面板」：主色容器底＋強亮邊＋光暈。
 - **表格**：一律用 `lib-data-table`；表頭是 `surface-container` 的標示帶、窄體字、下緣一條強亮邊；列線是暗的 outline-variant；滑過的列疊 primary 10%。數字欄給 `align: 'end'`，自動掛 `.ui-text-numeric`（等寬字）。 表格內直接編輯：目前的格子像亮起的指示燈（焦點框＋`--cockpit-glow-active`），編輯中光暈再亮一階；已修改的格子 primary 12% 淡淡發亮。
+- **日曆**：`lib-calendar` 只設 `--lib-cal-*`（CONTRACT.md「共用日曆」）。格線是 cockpit-edge，活動是類別色 22% 的發光片，現在線是會發光的主色線，今天是亮起來的方塊，拖曳中光最強。
 - **表單**：欄位是凹進去的讀數窗——最暗的 `surface-container-lowest` 底、1px `--app-field-border` 實線框、4px 圓角；聚焦時框換主色、外面亮一圈。數字輸入自動用等寬字。相連欄位用 `.ui-field-group`。
 - **空狀態**：卡片內置中，一個圖示、一句說明、一個動作；不加色塊或框（`--app-empty-*` 維持預設）。
 - **對話框**：`surface-container-highest` 底（全站最亮的表面）、強亮邊＋最大光暈、8px 圓角；標題 22px 窄體。遮罩用配色的 `--app-scrim`。

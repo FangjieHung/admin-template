@@ -38,6 +38,7 @@
 
 - **卡片**：`.ui-card`，1px outline-variant 框、4px 圓角、沒有陰影；內距用 `p-4 sm:p-6`（在 Ledger 是 12／18px）。可點卡片 `.ui-card--clickable` 滑過時底色淡淡加深，不位移、不加影子。
 - **表格**：一律用 `lib-data-table`；質地已設好 `--dt-*`（字級、列高、斑馬紋、表頭底、勾選欄 32px）。數字欄給 `align: 'end'`，自動掛 `.ui-text-numeric`（等寬字）。自己寫的原生表格要斑馬紋，就在 recipe 的 `:is(.showcase__api, .pm, …)` 清單加上它的 class，或改用 data-table。 表格內直接編輯：像試算表——2px 直角框、沒有光暈，已修改是 6px 的角落小三角；列高不因編輯而改變（編輯器是無框的原生輸入框）。
+- **日曆**：`lib-calendar` 只設 `--lib-cal-*`（CONTRACT.md「共用日曆」）。高密度：月曆格 4.75rem、時段 1.125rem、活動 11px、直角，帳簿格線與等寬日期數字，分組列用帳簿表頭底色。
 - **表單**：欄位 48px、2px 圓角、1px `--app-field-border` 實線框，聚焦時換主色並加粗為 2px（內側 1px 陰影補粗，不改外框尺寸）。數字輸入（`type="number"`）自動用等寬字。相連欄位用 `.ui-field-group`，接縫是一條完整的直線。
 - **空狀態**：卡片內置中，一個圖示、一句說明、一個動作；不加色塊或框（`--app-empty-*` 維持預設）。
 - **對話框**：4px 圓角、1px outline 框、沒有陰影；標題 16px 粗體，標題下一條 outline 線、動作列上一條 outline-variant 線。

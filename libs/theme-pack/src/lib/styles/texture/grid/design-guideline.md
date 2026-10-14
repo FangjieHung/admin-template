@@ -41,6 +41,7 @@ hover 的回饋是「影子多推出去一格」，按下時影子歸零、元�
 
 - **卡片**：`.ui-card`，直角、1px `--mat-sys-outline` 實框、level1 硬影。卡片標題列下方用一條 1px 內格線隔開。可點卡片 hover 升到 level2。
 - **表格**：外框 1px `outline`，列線與欄線都畫（`outline-variant`）。列高 44px。所有數字欄用 `--font-mono`、`font-variant-numeric: tabular-nums`、靠右對齊，讓個位數上下對齊。表頭與內容之間原本要用 `outline` 實線加強，但那條規則權重輸給共用元件、從未生效（見「已知限制」）。 表格內直接編輯：目前的格子是一條貼齊格線的 2px 直角框，編輯中不加光暈（`--dt-active-*`、`--dt-editing-shadow`）。
+- **日曆**：`lib-calendar` 只設 `--lib-cal-*`（CONTRACT.md「共用日曆」）。工程圖的格子：1px outline 外框、內格線直線、日期數字等寬字；活動是直角淡色塊＋左緣色條，今天是直角主色方塊，拖曳中是 4px 硬影。
 - **表單**：欄位 2px 圓角、1px `--app-field-border` 實框（對外側底色 ≥ 3:1），聚焦時框線換成 2px `--mat-sys-primary`，錯誤時換 error 色。標籤可以用全大寫英文或小字 caption，像工程圖的欄位標示。數字輸入（金額、里程、天數）用 mono。
 - **空狀態**：卡片內畫一個虛線框（1px dashed `outline-variant`），裡面置中圖示＋一行 mono 小字狀態（例如「0 筆」）＋說明＋按鈕。
 - **對話框**：直角、1px `outline` 實框、level4 硬影（6px 偏移）。標題列與動作列各用 1px 內格線與內容分開。
