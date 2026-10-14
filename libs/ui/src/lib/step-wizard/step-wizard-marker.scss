@@ -1,0 +1,73 @@
+// 步驟標記（lib-step-wizard 內部）。框、底色、陰影畫在 ::before（不含文字），質地可以加 filter；
+// 數字與圖示疊在上面，永遠不變形。只讀 .lib-step-wizard 上的 --lib-step-* 變數（CONTRACT.md），預設是「未開始」。
+:host {
+  position: relative;
+  z-index: 0;
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--_size);
+  block-size: var(--_size);
+  font-family: var(--lib-step-marker-font, var(--font-body));
+  font-size: var(--lib-step-marker-font-size, 0.875rem);
+  font-weight: var(--lib-step-marker-font-weight, 600);
+  line-height: 1;
+  color: var(--_m-fg);
+
+  --_m-bg: var(--lib-step-upcoming-bg, transparent);
+  --_m-fg: var(--lib-step-upcoming-fg, var(--mat-sys-on-surface-variant));
+  --_m-border: var(--lib-step-upcoming-border-color, var(--app-field-border));
+  --_m-shadow: var(--lib-step-upcoming-shadow, none);
+}
+
+:host::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: var(--lib-step-marker-border-width, 2px) var(--_m-style, solid) var(--_m-border);
+  border-radius: var(--lib-step-marker-radius, var(--mat-sys-corner-full));
+  background: var(--_m-bg);
+  box-shadow: var(--_m-shadow);
+  filter: var(--lib-step-marker-filter, none);
+}
+
+svg {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  fill: currentColor;
+}
+
+// 鎖住：跟未開始同色，框線改虛線（還不能去）。
+:host([data-state='locked']) {
+  --_m-style: var(--lib-step-locked-border-style, dashed);
+}
+
+:host([data-state='current']) {
+  --_m-bg: var(--lib-step-current-bg, var(--mat-sys-primary));
+  --_m-fg: var(--lib-step-current-fg, var(--mat-sys-on-primary));
+  --_m-border: var(--lib-step-active-border-color, var(--_m-bg));
+  --_m-shadow: var(--lib-step-current-shadow, 0 0 0 4px color-mix(in srgb, var(--mat-sys-primary) 18%, transparent));
+}
+
+:host([data-state='done']) {
+  --_m-bg: var(--lib-step-done-bg, var(--mat-sys-primary));
+  --_m-fg: var(--lib-step-done-fg, var(--mat-sys-on-primary));
+  --_m-border: var(--lib-step-active-border-color, var(--lib-step-done-border-color, var(--_m-bg)));
+  --_m-shadow: var(--lib-step-done-shadow, none);
+}
+
+// 有錯：錯誤色優先。目前這一步有錯時：質地設了 error-shadow 就用它，否則沿用目前步驟的外圈（current-shadow）。
+:host([data-state='error']) {
+  --_m-bg: var(--lib-step-error-bg, var(--mat-sys-error));
+  --_m-fg: var(--lib-step-error-fg, var(--mat-sys-on-error));
+  --_m-border: var(--lib-step-active-border-color, var(--_m-bg));
+  --_m-shadow: var(--lib-step-error-shadow, none);
+}
+
+:host([data-state='error'].is-current) {
+  --_m-shadow: var(
+    --lib-step-error-shadow,
+    var(--lib-step-current-shadow, 0 0 0 4px color-mix(in srgb, var(--mat-sys-error) 18%, transparent))
+  );
+}

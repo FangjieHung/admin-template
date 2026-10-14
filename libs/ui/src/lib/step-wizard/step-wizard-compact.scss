@@ -1,0 +1,72 @@
+// 窄版精簡列（lib-step-wizard 內部）。進度條的造型讀 .lib-step-wizard 上的 --lib-step-progress-* 變數（CONTRACT.md）。
+:host {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.swc-text {
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--lib-step-label-font, var(--font-body));
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--mat-sys-on-surface);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: var(--lib-step-button-min-height, 2.75rem);
+  margin: 0;
+  padding: 0 0.5rem 0 0.75rem;
+  border: 0;
+  border-radius: var(--mat-sys-corner-small);
+  background: transparent;
+  color: var(--mat-sys-primary);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--app-state-hover);
+  }
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+}
+
+svg {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  fill: currentColor;
+  transition: transform var(--app-motion-fast) var(--app-ease-standard);
+}
+
+[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
+.swc-progress {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  block-size: var(--lib-step-progress-height, 4px);
+  border: var(--lib-step-progress-frame, 0 solid transparent);
+  border-radius: var(--lib-step-progress-radius, var(--mat-sys-corner-full));
+  background: var(--lib-step-progress-track, var(--mat-sys-surface-container-high));
+  box-shadow: var(--lib-step-progress-shadow, none);
+
+  span {
+    display: block;
+    block-size: 100%;
+    background: var(--lib-step-progress-fill, var(--mat-sys-primary));
+    transition: inline-size var(--app-motion-base) var(--app-ease-standard);
+  }
+}

@@ -54,3 +54,7 @@ export * from './lib/stat-card/stat-card.component';
 export * from './lib/line-chart/line-chart.component';
 export * from './lib/bar-chart/bar-chart.component';
 export * from './lib/donut-chart/donut-chart.component';
+export * from './lib/step-wizard/step-wizard-labels';
+export * from './lib/step-wizard/step-wizard-fields';
+export * from './lib/step-wizard/wizard-step.component';
+export * from './lib/step-wizard/step-wizard.component';

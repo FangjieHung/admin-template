@@ -1,0 +1,116 @@
+<!-- 換步驟時報讀器念的字（一開始就在 DOM 裡，之後換內容才念得出來）。 -->
+<p class="sw-sr-only" aria-live="polite">{{ announcement() }}</p>
+
+<div class="sw-head">
+  @if (compact()) {
+    <lib-step-wizard-compact
+      [text]="compactText(currentView())"
+      [toggleLabel]="labels.stepListToggle"
+      [progress]="progress()"
+      [expanded]="listOpen()"
+      [controls]="uid + '-list'"
+      (toggle)="toggleList()"
+    />
+  }
+
+  @if (!compact() || listOpen()) {
+    <nav class="sw-nav" [attr.aria-label]="labels.stepList" [id]="uid + '-list'">
+      <ol class="sw-steps">
+        @for (view of views(); track view.step) {
+          <li class="sw-step" [attr.data-state]="view.state" [class.is-current]="view.current">
+            <button
+              type="button"
+              libStepWizardHeader
+              class="sw-step__button"
+              [disabled]="view.state === 'locked' || (busy() && !view.current)"
+              [attr.aria-current]="view.current ? 'step' : null"
+              [attr.tabindex]="tabIndexOf(view.index)"
+              (click)="selectStep(view.index)"
+              (keydown)="onHeaderKeydown($event)"
+            >
+              <lib-step-wizard-marker [state]="view.state" [number]="view.index + 1" [current]="view.current" />
+              <span class="sw-step__text">
+                <span class="sw-step__label">{{ view.step.label }}</span>
+                @if (view.step.optional) {
+                  <span class="sw-step__hint">{{ labels.optional }}</span>
+                }
+                @if (stateText(view.state); as status) {
+                  <span class="sw-sr-only">{{ status }}</span>
+                }
+              </span>
+            </button>
+          </li>
+        }
+      </ol>
+    </nav>
+  }
+</div>
+
+<div class="sw-main">
+  @for (step of currentSteps(); track step) {
+    <section
+      #panel
+      class="sw-panel"
+      [class.sw-panel--forward]="direction() === 'forward'"
+      [class.sw-panel--back]="direction() === 'back'"
+      [attr.aria-labelledby]="uid + '-heading'"
+    >
+      @if (summary(); as s) {
+        <lib-step-wizard-summary #summaryBox [title]="s.title" [detail]="s.detail" [fields]="s.fields" (focusField)="focusField($event)" />
+      }
+
+      <div
+        #heading
+        class="sw-panel__heading ui-text-subtitle"
+        role="heading"
+        [attr.aria-level]="headingLevel()"
+        tabindex="-1"
+        [id]="uid + '-heading'"
+      >
+        {{ step.label }}
+      </div>
+      @if (step.description()) {
+        <p class="sw-panel__description">{{ step.description() }}</p>
+      }
+      <div class="sw-panel__content">
+        <ng-container [ngTemplateOutlet]="step.content" />
+      </div>
+    </section>
+  }
+
+  <div class="sw-actions">
+    @if (showCancel()) {
+      <button type="button" matButton class="sw-actions__cancel" [disabled]="busy()" (click)="cancel.emit()">
+        {{ labels.cancel }}
+      </button>
+    }
+    <div class="sw-actions__nav">
+      @if (selectedIndex > 0) {
+        <button type="button" matButton="outlined" class="sw-actions__previous" [disabled]="busy()" (click)="goPrevious()">
+          {{ labels.previous }}
+        </button>
+      }
+      @if (isLast()) {
+        <button
+          type="button"
+          matButton="filled"
+          class="sw-actions__finish"
+          [class.is-loading]="busy()"
+          [attr.aria-disabled]="busy() ? 'true' : null"
+          (click)="submit()"
+        >
+          @if (busy()) {
+            <span class="sw-spinner" aria-hidden="true"></span>
+            {{ labels.submitting }}
+          } @else {
+            {{ finishLabel() || labels.finish }}
+          }
+        </button>
+      } @else {
+        <button type="button" matButton="filled" class="sw-actions__next" [disabled]="busy()" (click)="goNext()">
+          {{ labels.next }}
+        </button>
+      }
+    </div>
+  </div>
+</div>
