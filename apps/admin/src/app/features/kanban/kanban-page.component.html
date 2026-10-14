@@ -1,0 +1,133 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="工單看板"
+    description="拖曳卡片排序或換欄（手機長按 250ms 再拖）；也可以聚焦卡片按 Alt＋方向鍵，或用卡片右上角的「移動」選單。「進行中」的 WIP 上限是 3，一開始就放滿 3 張，再放一張欄位就會提醒超過上限。示範規則：沒有負責人的工單不能移到「已完成」，會被擋下並跳出提示。「待處理」欄底可以新增卡片。"
+  >
+    <div data-demo="board">
+      <lib-kanban-board
+        label="工單看板"
+        [columns]="columns"
+        [items]="tickets()"
+        [cardKey]="key"
+        [cardColumn]="column"
+        [cardTitle]="title"
+        [canMove]="canMove"
+        (moved)="onMoved($event)"
+        (moveRejected)="onRejected($event)"
+        (addCard)="onAdd($event)"
+      >
+        <ng-template libKanbanCard [libKanbanCardOf]="tickets()" let-ticket>
+          <div class="kanban-ticket">
+            <div class="kanban-ticket__top">
+              <span class="kanban-ticket__id ui-text-numeric">{{ ticket.id }}</span>
+              <span class="ui-chip" [class]="'ui-chip--' + priorityTones[ticket.priority]">
+                <span class="ui-chip__dot"></span>{{ priorityLabels[ticket.priority] }}
+              </span>
+            </div>
+            <p class="kanban-ticket__title">{{ ticket.title }}</p>
+            <div class="kanban-ticket__meta">
+              <span class="kanban-ticket__person" [class.is-unassigned]="!ticket.assignee">
+                <span class="material-symbols-rounded" aria-hidden="true">{{ ticket.assignee ? 'person' : 'person_off' }}</span>
+                {{ ticket.assignee ?? '未指派' }}
+              </span>
+              <span class="kanban-ticket__due">
+                <span class="material-symbols-rounded" aria-hidden="true">event</span>
+                <span class="ui-text-numeric">期限 {{ formatDue(ticket.dueDate) }}</span>
+              </span>
+            </div>
+          </div>
+        </ng-template>
+      </lib-kanban-board>
+
+      <div class="kanban-demo-actions">
+        <button matButton="outlined" type="button" data-demo-action="reset" (click)="reset()">重設示範資料</button>
+      </div>
+      <h3 class="ui-text-caption kanban-demo-log-title">最近的事件</h3>
+      <ul class="demo-list kanban-demo-log" aria-live="off">
+        @for (line of log(); track $index) {
+          <li>{{ line }}</li>
+        } @empty {
+          <li class="demo-list__empty">（還沒有移動或新增）</li>
+        }
+      </ul>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="載入中與空看板"
+    description="看板本身不管載入：資料還在路上時，頁面用骨架（lib-skeleton）排出欄位的樣子；完全沒有資料時用空狀態（lib-empty-state）帶出第一個動作；有欄位但某一欄沒有卡片時，看板自己顯示「沒有卡片」。"
+  >
+    <div data-demo="states">
+      <div class="kanban-states-switch" role="group" aria-label="切換示範狀態">
+        @for (option of stateOptions; track option.id) {
+          <button
+            type="button"
+            class="ui-nav-pill"
+            [class.is-active]="statesDemo() === option.id"
+            [attr.aria-pressed]="statesDemo() === option.id"
+            [attr.data-state]="option.id"
+            (click)="showStates(option.id)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
+
+      @switch (statesDemo()) {
+        @case ('loading') {
+          <div class="kanban-skeleton" aria-busy="true">
+            @for (col of statesColumns; track col.id) {
+              <div class="kanban-skeleton__column">
+                <lib-skeleton variant="text" [count]="1" [label]="'正在載入「' + col.title + '」'" />
+                <!-- lib-skeleton 的 card 形狀含 16:9 圖片區，比看板卡片高很多；這裡用 .ui-card＋四行文字排出接近真實卡片
+                     （編號列、標題、負責人／到期日）的高度。報讀器只念欄頭那一句「正在載入」，卡片的骨架藏起來。 -->
+                <div class="kanban-skeleton__cards" aria-hidden="true">
+                  @for (n of $index === 1 ? [0, 1, 2] : [0, 1]; track n) {
+                    <div class="ui-card kanban-skeleton__card">
+                      <lib-skeleton variant="text" [count]="4" />
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+        @case ('empty') {
+          <lib-empty-state
+            message="還沒有工單"
+            detail="建立第一張工單後，就會依狀態排進看板。"
+            icon="view_kanban"
+            actionLabel="開始建立"
+            (action)="showStates('ready')"
+          />
+        }
+        @default {
+          <lib-kanban-board
+            label="空的工單看板"
+            [columns]="statesColumns"
+            [items]="statesTickets()"
+            [cardKey]="key"
+            [cardColumn]="column"
+            [cardTitle]="title"
+            (moved)="onStatesMoved($event)"
+            (addCard)="onStatesAdd($event)"
+          >
+            <ng-template libKanbanCard [libKanbanCardOf]="statesTickets()" let-ticket>
+              <div class="kanban-ticket">
+                <span class="kanban-ticket__id ui-text-numeric">{{ ticket.id }}</span>
+                <p class="kanban-ticket__title">{{ ticket.title }}</p>
+              </div>
+            </ng-template>
+          </lib-kanban-board>
+        }
+      }
+    </div>
+  </app-demo-block>
+</app-showcase-page>

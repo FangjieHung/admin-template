@@ -55,6 +55,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '打開一筆資料的整頁骨架：標題、狀態、主要動作、分頁與摘要側欄；窄螢幕自動重排，捲動時頁首縮成精簡列。',
     source: 'libs/ui/src/lib/detail-layout',
   },
+  'kanban': {
+    summary: '依狀態分欄的卡片看板：拖曳排序與換欄、WIP 上限提醒、換欄前檢查（不符就回到原位並說明原因）；也能用鍵盤與「移動」選單操作，窄螢幕改成橫向捲動。',
+    source: 'libs/ui/src/lib/kanban-board',
+  },
   'relation-select': {
     summary: '輸入就搜尋，從大量資料裡挑一筆（負責人、專案、聯絡人）；表單存 id，初始值自動查出名稱，找不到時可以當場建立。',
     source: 'libs/ui/src/lib/relation-select',
@@ -186,7 +190,6 @@ export interface PlannedItem {
 }
 
 export const PLANNED_ITEMS: readonly PlannedItem[] = [
-  { title: '看板', kind: '元件', priority: 'P1', summary: '卡片拖曳換欄。' },
   { title: '樹狀選單與樹狀表', kind: '元件', priority: 'P2', summary: '組織架構、分類。' },
   { title: '列印與 PDF 版面', kind: '元件', priority: 'P2', summary: '單據可列印、可寄送。' },
   { title: '富文字、留言與 @提及', kind: '元件', priority: 'P2', summary: '備註與內部協作。' },

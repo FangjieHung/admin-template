@@ -1,0 +1,88 @@
+// 看板展示頁。只用語意 token；欄、卡片外框、拖曳的造型交給 libs/ui 與質地 recipe，這裡只排卡片內容。
+
+.kanban-ticket {
+  display: grid;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.kanban-ticket__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.5rem;
+}
+
+.kanban-ticket__id {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.75rem;
+}
+
+.kanban-ticket__title {
+  margin: 0;
+  color: var(--mat-sys-on-surface);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.kanban-ticket__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.75rem;
+
+  .material-symbols-rounded {
+    font-size: 1rem;
+    vertical-align: -0.1875rem;
+  }
+}
+
+.kanban-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0 0.75rem;
+}
+
+.kanban-demo-log-title {
+  margin: 0 0 0.25rem;
+}
+
+.kanban-demo-log {
+  font-size: 0.875rem;
+}
+
+.kanban-states-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.kanban-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
+}
+
+.kanban-skeleton__column {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: var(--mat-sys-corner-large);
+  background: var(--mat-sys-surface-container-low);
+}
+
+.kanban-skeleton__cards {
+  display: grid;
+  gap: 0.5rem;
+}
+
+// 高度跟看板卡片差不多（卡片內距 0.75rem＋三到四行內容）。
+.kanban-skeleton__card {
+  padding: 0.75rem;
+}

@@ -114,6 +114,13 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     load: () => import('../features/charts/charts-page.component').then((m) => m.ChartsPageComponent),
   },
   {
+    id: 'kanban',
+    title: '看板',
+    group: 'data',
+    icon: 'view_kanban',
+    load: () => import('../features/kanban/kanban-page.component').then((m) => m.KanbanPageComponent),
+  },
+  {
     id: 'relation-select',
     title: '關聯選擇欄位',
     group: 'input',
