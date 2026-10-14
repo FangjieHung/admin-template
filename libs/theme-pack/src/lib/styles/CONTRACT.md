@@ -418,6 +418,27 @@ Material 用預設值（surface-container-high 面板、extra-large 圓角、lev
 
 Material 用預設值（container-low 的欄、白色卡片＋level1、滑過 level2、拖曳中 level3、主色虛線的放置預覽）。
 
+#### 樹狀選單與樹狀表（`libs/ui` tree、tree-table）
+
+- 文字：節點與表格文字 `--mat-sys-on-surface`（節點內容由使用端範本決定）、表頭與「沒有結果」`--mat-sys-on-surface-variant`；載入失敗的訊息 `--mat-sys-on-surface`＋`--mat-sys-error` 的圖示，「重試」是 `--mat-sys-primary` 的底線文字按鈕。文字對各自底色（含目前項目的底色）≥ 4.5:1。
+- 目前項目（`selection="single"`）預設是 `--app-state-selected` 底＋字重 600（不只靠顏色）；那一列裡 `--mat-sys-on-surface-variant` 就地改成目前項目的字色，節點範本裡的次要文字疊在選取底色上仍 ≥ 4.5:1；勾選（`multiple`）用原生勾選框，外觀由 `_choice-controls.scss` 統一（半勾是 `indeterminate`）。搜尋比對到的字是 `<mark>`（`lib-tree-highlight`，預設警示色調的底與字）。焦點框畫在列上（`--app-focus-ring`、`-width`，往內收一個寬度）；轉場 `--app-motion-fast`，載入中的轉圈 `--app-motion-loop / 8`，減少動態時不轉。
+- 樹狀表的表格本身掛 `.dt-table`，讀同一組 `--dt-*`（外框、列線、表頭底色、字級、列高、斑馬紋、固定欄底色與分界）——各質地的表格 recipe 直接適用，不另設變數。窄螢幕（容器窄於 `--lib-tree-table-min-width`，預設 40rem）橫向捲動，第一欄 sticky 在左側。
+- 質地只在 `.lib-tree`（展開鈕另外在 `.lib-tree-table`）上設下列變數，不覆寫屬性。
+
+| 變數 | 預設 | 用途 | 目前設定的質地 |
+| --- | --- | --- | --- |
+| `--lib-tree-indent` / `-row-height` / `-row-padding-inline` / `-font-size` | `1.5rem` / `2.5rem` / `0.5rem` / `0.875rem` | 每層縮排、列的最小高度、列的左右留白、字級 | Ledger：`1.25rem`、`2rem`、—、`0.8125rem` |
+| `--lib-tree-row-radius` | `var(--mat-sys-corner-full)` | 列（滑過、目前項目底色、焦點框）的圓角 | Linen、Grid、Ledger、Cockpit corner-small；Soft UI、Clay、Aero corner-medium；Editorial、Brutal `0px`；Sketch `var(--sketch-wobble-sm)` |
+| `--lib-tree-hover-bg` | `var(--app-state-hover)` | 滑過的列 | Linen `surface-container` |
+| `--lib-tree-current-bg` / `-current-fg` / `-current-weight` | `var(--app-state-selected)` / `var(--mat-sys-on-surface)` / `600` | 目前項目的底、字、字重 | 底：Linen `surface-container-highest`；Soft UI `background`；Clay `surface-container-high`；Editorial `transparent`；Ledger 主色 12% 混 surface（Cockpit、Brutal、Riso 的 `--app-state-selected` 本身就是各自的 lit／實心色塊／平網）。字：Brutal `on-primary-container` |
+| `--lib-tree-current-indicator` | `none` | 目前項目的標記（box-shadow 值） | Grid 1px `outline` 內框；Soft UI `var(--soft-inset-small)`（壓進去）；Clay `var(--clay-shadow-pressed)`；Editorial 底下 2px `on-surface` 墨線；Frosted 1px `var(--frost-border)`；Aero 1px `var(--aero-edge)`；Ledger 左側 2px 主色條；Cockpit 左側 2px 主色條＋主色 22% 內光；Brutal 2px 墨框；Riso 左側 3px 主墨條；Sketch 鋼筆框 |
+| `--lib-tree-guide` | `0 solid transparent`（不畫） | 連接線（border 簡寫）：每一層子節點左側一條直線，對齊父節點展開鈕的中心 | Grid、Editorial 1px `outline-variant`；Ledger 1px `var(--ledger-rule)`；Cockpit 1px `var(--cockpit-edge)`；Brutal `var(--brutal-line)`；Riso `var(--riso-rule)`；Sketch `var(--sketch-rule)`（直線） |
+| `--lib-tree-toggle-size` / `-radius` / `-frame` / `-bg` / `-fg` | `1.75rem` / `50%` / `0 solid transparent` / `transparent` / `var(--mat-sys-on-surface-variant)` | 展開鈕（兩個元件共用；只給滑鼠，鍵盤用 →／←）：大小（圖示跟著縮放）、圓角、框（border 簡寫）、底、圖示色 | 大小：Grid、Ledger、Brutal `1.5rem`。圓角：Grid、Editorial、Ledger、Cockpit corner-small；Brutal `0px`；Sketch `var(--sketch-wobble-xs)`。框：Grid 1px `outline`；Brutal `var(--brutal-line)`。圖示色：Brutal `on-surface` |
+| `--lib-tree-mark-bg` / `-mark-fg` | `var(--app-warning-bg)` / `var(--app-warning-fg)` | 搜尋比對到的字 | （無） |
+| `--lib-tree-table-min-width` | `40rem` | 樹狀表的最小寬度：容器比它窄時橫向捲動 | （無） |
+
+Material 用預設值（膠囊形的列、`--app-state-selected` 的目前項目、圓形展開鈕、不畫連接線）。
+
 ### 字體（質地包提供，中英分軌）
 
 `--font-zh`（中文，裝置的系統字）、`--font-en`（英文依質地）、`--font-display`、`--font-body`、`--font-mono`

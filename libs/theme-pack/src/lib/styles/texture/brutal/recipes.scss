@@ -759,3 +759,23 @@
     --lib-kanban-wip-ring: inset 0 0 0 3px var(--mat-sys-error);
   }
 }
+
+// ── Tree ──
+// 樹狀選單與樹狀表（libs/ui tree、tree-table）：只設元件暴露的 --lib-tree-* 變數（CONTRACT.md「樹狀選單與樹狀表」）；
+// 樹狀表的表格外觀照 .dt-table 的 --dt-*（上方表格 recipe），這裡只補展開鈕。
+// 海報貼紙：直角列，目前項目是實心 primary-container 色塊（--app-state-selected）加 2px 墨框；
+// 連接線是 2px 墨線；展開鈕是 2px 墨框的方形貼紙。
+:root[data-paradigm='brutal'] {
+  .lib-tree {
+    --lib-tree-row-radius: 0px;
+    --lib-tree-guide: var(--brutal-line);
+    --lib-tree-current-fg: var(--mat-sys-on-primary-container);
+    --lib-tree-current-indicator: inset 0 0 0 2px var(--brutal-ink);
+  }
+  :is(.lib-tree, .lib-tree-table) {
+    --lib-tree-toggle-size: 1.5rem;
+    --lib-tree-toggle-radius: 0px;
+    --lib-tree-toggle-frame: var(--brutal-line);
+    --lib-tree-toggle-fg: var(--mat-sys-on-surface);
+  }
+}

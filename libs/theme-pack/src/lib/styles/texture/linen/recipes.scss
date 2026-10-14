@@ -297,3 +297,16 @@
     --lib-kanban-placeholder-bg: var(--mat-sys-surface-container);
   }
 }
+
+// ── Tree ──
+// 樹狀選單與樹狀表（libs/ui tree、tree-table）：只設元件暴露的 --lib-tree-* 變數（CONTRACT.md「樹狀選單與樹狀表」）；
+// 樹狀表的表格外觀照 .dt-table 的 --dt-*（上方表格 recipe），這裡只補展開鈕。
+// 紙張色階：目前項目是最深一階的紙（surface-container-highest），滑過是 surface-container；列只有 4px 小圓角，
+// 不加陰影、不畫連接線。
+:root[data-paradigm='linen'] {
+  .lib-tree {
+    --lib-tree-row-radius: var(--mat-sys-corner-small);
+    --lib-tree-hover-bg: var(--mat-sys-surface-container);
+    --lib-tree-current-bg: var(--mat-sys-surface-container-highest);
+  }
+}

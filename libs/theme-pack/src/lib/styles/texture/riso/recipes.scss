@@ -672,3 +672,14 @@
     --lib-kanban-placeholder-bg: color-mix(in srgb, var(--riso-ink-a) 8%, transparent);
   }
 }
+
+// ── Tree ──
+// 樹狀選單與樹狀表（libs/ui tree、tree-table）：只設元件暴露的 --lib-tree-* 變數（CONTRACT.md「樹狀選單與樹狀表」）；
+// 樹狀表的表格外觀照 .dt-table 的 --dt-*（上方表格 recipe），這裡只補展開鈕。
+// 孔版：目前項目是主墨 16% 的平網（--app-state-selected）加左側 3px 主墨條；連接線是主墨 45% 的細線。
+:root[data-paradigm='riso'] {
+  .lib-tree {
+    --lib-tree-guide: var(--riso-rule);
+    --lib-tree-current-indicator: inset 3px 0 0 var(--riso-ink-a);
+  }
+}

@@ -317,3 +317,13 @@
     --lib-kanban-drag-shadow: var(--mat-sys-level3);
   }
 }
+
+// ── Tree ──
+// 樹狀選單與樹狀表（libs/ui tree、tree-table）：只設元件暴露的 --lib-tree-* 變數（CONTRACT.md「樹狀選單與樹狀表」）；
+// 樹狀表的表格外觀照 .dt-table 的 --dt-*（上方表格 recipe），這裡只補展開鈕。
+// 霧面玻璃：膠囊形的列（corner-full），目前項目在選取底色外再描一圈霧邊。
+:root[data-paradigm='frosted'] {
+  .lib-tree {
+    --lib-tree-current-indicator: inset 0 0 0 1px var(--frost-border);
+  }
+}

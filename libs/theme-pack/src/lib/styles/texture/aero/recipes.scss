@@ -304,3 +304,14 @@
     }
   }
 }
+
+// ── Tree ──
+// 樹狀選單與樹狀表（libs/ui tree、tree-table）：只設元件暴露的 --lib-tree-* 變數（CONTRACT.md「樹狀選單與樹狀表」）；
+// 樹狀表的表格外觀照 .dt-table 的 --dt-*（上方表格 recipe），這裡只補展開鈕。
+// 壓克力：目前項目在選取底色外再描一圈亮邊。
+:root[data-paradigm='aero'] {
+  .lib-tree {
+    --lib-tree-row-radius: var(--mat-sys-corner-medium);
+    --lib-tree-current-indicator: inset 0 0 0 1px var(--aero-edge);
+  }
+}
