@@ -4,6 +4,7 @@ import { PAGE_TOOLBAR_LABELS, PageToolbarComponent } from './page-toolbar.compon
 
 const LABELS = {
   search: '搜尋',
+  toggleSearch: '搜尋此列表',
   collapseSearch: '收合搜尋',
   clearSearch: '清除搜尋',
   submitSearch: '搜尋',
@@ -53,6 +54,23 @@ describe('PageToolbarComponent 展開收合', () => {
 
     expect(component.query()).toBe('');
     expect(component.expanded()).toBe(false);
+  });
+});
+
+describe('PageToolbarComponent 列表搜尋鈕（跟頁首的全站搜尋分開）', () => {
+  it('收合時 aria-label 是 toggleSearch，圖示是 manage_search；展開後改成 collapseSearch', () => {
+    const { fixture, toggleBtn } = setup();
+    expect(toggleBtn().getAttribute('aria-label')).toBe('搜尋此列表');
+    expect(toggleBtn().textContent?.trim()).toBe('manage_search');
+
+    toggleBtn().click();
+    fixture.detectChanges();
+    expect(toggleBtn().getAttribute('aria-label')).toBe('收合搜尋');
+  });
+
+  it('沒給 placeholder 時，搜尋框的 placeholder 仍是 labels.search', () => {
+    const { input } = setup();
+    expect(input().placeholder).toBe('搜尋');
   });
 });
 

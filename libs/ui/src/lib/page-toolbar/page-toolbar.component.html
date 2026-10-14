@@ -6,13 +6,15 @@
         type="button"
         class="search__toggle"
         [class.search__toggle--active]="expanded()"
-        [attr.aria-label]="expanded() ? t.collapseSearch : t.search"
+        [attr.aria-label]="expanded() ? t.collapseSearch : t.toggleSearch"
+        [matTooltip]="expanded() ? t.collapseSearch : t.toggleSearch"
         [attr.aria-expanded]="expanded()"
         [attr.aria-controls]="searchInputId"
         (mousedown)="$event.preventDefault()"
         (click)="toggle()"
       >
-        <span class="material-symbols-rounded" aria-hidden="true">search</span>
+        <!-- manage_search（放大鏡＋清單橫線）：「在這份清單裡找」，跟頁首全站搜尋的單純放大鏡（search）分開。 -->
+        <span class="material-symbols-rounded" aria-hidden="true">manage_search</span>
       </button>
 
       <div class="search-row" [class.search-row--expanded]="expanded()">

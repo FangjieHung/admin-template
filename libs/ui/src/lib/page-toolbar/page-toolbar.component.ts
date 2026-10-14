@@ -12,12 +12,18 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 /** 頁首工具列的畫面文字。libs/ui 不內建使用者可見字串，由使用端提供。 */
 export interface PageToolbarLabels {
-  /** 放大鏡按鈕（收合時）與搜尋框預設的 placeholder，例：「搜尋」。 */
+  /** 搜尋框預設的 placeholder（沒給 `placeholder` input 時），例：「搜尋」。 */
   search: string;
-  /** 放大鏡按鈕（展開時），例：「收合搜尋」。 */
+  /**
+   * 放大鏡按鈕（收合時）的 aria-label 與提示，例：「搜尋此列表」。要讀得出「只搜這一頁的清單」，
+   * 跟頁首的全站搜尋（⌘K）分開——兩顆常常並排在頁首。
+   */
+  toggleSearch: string;
+  /** 放大鏡按鈕（展開時）的 aria-label 與提示，例：「收合搜尋」。 */
   collapseSearch: string;
   /** 例：「清除搜尋」。 */
   clearSearch: string;
@@ -41,7 +47,7 @@ let nextInstanceId = 0;
 
 @Component({
   selector: 'lib-page-toolbar',
-  imports: [FormsModule, MatButtonModule],
+  imports: [FormsModule, MatButtonModule, MatTooltipModule],
   templateUrl: './page-toolbar.component.html',
   styleUrls: ['./page-toolbar.component.scss'],
 })
