@@ -423,3 +423,24 @@
     --lib-print-desk-shadow: var(--soft-inset);
   }
 }
+
+// ── Rich text ──
+// 富文字、留言與 @提及（libs/ui rich-text-editor、rich-text-view、comment-thread）：只在 .lib-rich-text 上設
+// --lib-rt-*／--lib-comment-* 變數（CONTRACT.md「富文字、留言與 @提及」），不覆寫屬性。編輯器、留言串與 CDK 浮層裡的
+// 提及清單、連結小視窗都有這個 class；欄位外框維持 --app-field-border（≥ 3:1），焦點框是元件的 --app-focus-ring。
+// 浮雕：編輯區與提及標籤壓進去（同色底＋內凹），留言氣泡凸起（level1），浮層與畫布同色。
+:root[data-paradigm='soft-ui'] {
+  .lib-rich-text {
+    --lib-rt-bg: var(--mat-sys-background);
+    --lib-rt-shadow: var(--soft-inset-small);
+    --lib-rt-mention-bg: var(--mat-sys-background);
+    --lib-rt-mention-fg: var(--mat-sys-on-surface);
+    --lib-rt-mention-shadow: var(--soft-inset-small);
+    --lib-rt-menu-bg: var(--mat-sys-background);
+    --lib-rt-option-active-bg: var(--mat-sys-background);
+    --lib-rt-option-active-fg: var(--mat-sys-on-surface);
+    --lib-rt-option-active-shadow: var(--soft-inset-small);
+    --lib-comment-bubble-bg: var(--mat-sys-background);
+    --lib-comment-bubble-shadow: var(--mat-sys-level1);
+  }
+}

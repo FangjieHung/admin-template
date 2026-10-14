@@ -398,3 +398,21 @@
     --lib-print-desk-shadow: var(--clay-shadow-pressed);
   }
 }
+
+// ── Rich text ──
+// 富文字、留言與 @提及（libs/ui rich-text-editor、rich-text-view、comment-thread）：只在 .lib-rich-text 上設
+// --lib-rt-*／--lib-comment-* 變數（CONTRACT.md「富文字、留言與 @提及」），不覆寫屬性。編輯器、留言串與 CDK 浮層裡的
+// 提及清單、連結小視窗都有這個 class；欄位外框維持 --app-field-border（≥ 3:1），焦點框是元件的 --app-focus-ring。
+// 黏土：編輯區是捏出來的凹槽、圓角大一階，留言氣泡是一塊小黏土片，浮層是最厚的那塊。
+:root[data-paradigm='clay'] {
+  .lib-rich-text {
+    --lib-rt-radius: var(--mat-sys-corner-large);
+    --lib-rt-shadow: var(--clay-shadow-pressed);
+    --lib-rt-tool-radius: var(--mat-sys-corner-medium);
+    --lib-rt-menu-radius: var(--mat-sys-corner-extra-large);
+    --lib-rt-menu-shadow: var(--clay-shadow-deep);
+    --lib-comment-bubble-bg: var(--mat-sys-surface-container-high);
+    --lib-comment-bubble-radius: var(--mat-sys-corner-large);
+    --lib-comment-bubble-shadow: var(--clay-shadow-small);
+  }
+}

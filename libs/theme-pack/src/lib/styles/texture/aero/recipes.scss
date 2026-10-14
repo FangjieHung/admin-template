@@ -326,3 +326,19 @@
     --lib-print-desk-frame: 1px solid var(--aero-edge);
   }
 }
+
+// ── Rich text ──
+// 富文字、留言與 @提及（libs/ui rich-text-editor、rich-text-view、comment-thread）：只在 .lib-rich-text 上設
+// --lib-rt-*／--lib-comment-* 變數（CONTRACT.md「富文字、留言與 @提及」），不覆寫屬性。編輯器、留言串與 CDK 浮層裡的
+// 提及清單、連結小視窗都有這個 class；欄位外框維持 --app-field-border（≥ 3:1），焦點框是元件的 --app-focus-ring。
+// 雲霧玻璃：浮層是帶亮邊的壓克力（比面板不透明，下面是文字），留言氣泡是淡霧色加亮邊。
+:root[data-paradigm='aero'] {
+  .lib-rich-text {
+    --lib-rt-menu-bg: color-mix(in srgb, var(--mat-sys-surface) 92%, transparent);
+    --lib-rt-menu-frame: 1px solid var(--aero-edge);
+    --lib-rt-menu-radius: var(--mat-sys-corner-extra-large);
+    --lib-rt-menu-shadow: var(--mat-sys-level4);
+    --lib-comment-bubble-bg: color-mix(in srgb, var(--mat-sys-on-surface) 4%, transparent);
+    --lib-comment-bubble-frame: 1px solid var(--aero-edge);
+  }
+}

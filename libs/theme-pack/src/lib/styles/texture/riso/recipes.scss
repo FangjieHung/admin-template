@@ -695,3 +695,28 @@
     --lib-print-sheet-shadow: var(--mat-sys-level1);
   }
 }
+
+// ── Rich text ──
+// 富文字、留言與 @提及（libs/ui rich-text-editor、rich-text-view、comment-thread）：只在 .lib-rich-text 上設
+// --lib-rt-*／--lib-comment-* 變數（CONTRACT.md「富文字、留言與 @提及」），不覆寫屬性。編輯器、留言串與 CDK 浮層裡的
+// 提及清單、連結小視窗都有這個 class；欄位外框維持 --app-field-border（≥ 3:1），焦點框是元件的 --app-focus-ring。
+// 孔版：引用是主墨線，提及是主墨平網加墨線，留言氣泡與浮層是裸紙加主墨線、氣泡錯一版第二墨。
+:root[data-paradigm='riso'] {
+  .lib-rich-text {
+    --lib-rt-toolbar-divider: var(--riso-rule);
+    --lib-rt-quote-line: 3px solid var(--riso-ink-a);
+    --lib-rt-mention-bg: var(--riso-overlay);
+    --lib-rt-mention-fg: var(--mat-sys-on-surface);
+    --lib-rt-mention-frame: 1px solid var(--riso-ink-a);
+    --lib-rt-menu-bg: var(--mat-sys-surface);
+    --lib-rt-menu-frame: var(--riso-line);
+    --lib-rt-option-active-bg: var(--app-state-selected);
+    --lib-rt-option-active-fg: var(--mat-sys-on-surface);
+    --lib-rt-option-active-shadow: inset 3px 0 0 var(--riso-ink-a);
+    --lib-comment-bubble-bg: var(--mat-sys-surface);
+    --lib-comment-bubble-frame: var(--riso-line);
+    --lib-comment-bubble-shadow: var(--riso-misreg);
+    --lib-comment-avatar-frame: var(--riso-line);
+    --lib-comment-composer-divider: var(--riso-rule);
+  }
+}

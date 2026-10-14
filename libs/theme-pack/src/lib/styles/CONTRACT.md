@@ -469,6 +469,38 @@ Material 用預設值（膠囊形的列、`--app-state-selected` 的目前項目
 
 Material 用預設值（container 色的桌面、corner-large、紙張 level2 陰影），主樣式裡沒有列印版面的規則。
 
+#### 富文字、留言與 @提及（`libs/ui` rich-text-editor、rich-text-view、comment-thread）
+
+- **編輯器**：外框是 1px `--app-field-border`（≥ 3:1，WCAG 1.4.11），滑過 `--mat-sys-on-surface`，聚焦時在外框上疊一圈 `--app-focus-ring`（`-width`，不改外框寬度），超過字數上限是 `--mat-sys-error` 外框＋欄位下方的錯誤字（mat-form-field 的 subscript 位置與字級），停用 `--app-disabled-bg` 外框＋`--app-disabled-fg` 字，唯讀改虛線外框、不顯示工具列。內容與 placeholder 用 `--mat-sys-on-surface`／`--mat-sys-on-surface-variant`，連結 `--mat-sys-primary`＋底線。
+- **工具列**：一個 Tab 停點（← → Home End 移動），每顆按鈕有 `aria-pressed`、`aria-keyshortcuts` 與提示（顯示快捷鍵）。滑過 `--app-state-hover`；按下（目前套用中的格式）是實心底＋反白圖示，對工具列底色 ≥ 3:1（預設 `--mat-sys-primary`／`--mat-sys-on-primary`），不只靠顏色變淡；焦點 `--app-focus-ring`。
+- **提及清單與連結小視窗**：掛在 CDK overlay（pane class `lib-rich-text-mention-pane`、`lib-rich-text-link-pane`），內容根元素也有 `.lib-rich-text`，所以下面的變數照樣繼承。清單是 `role=listbox`，編輯區用 `aria-activedescendant` 指到目前那一列；目前那一列的字對底色 ≥ 4.5:1（第二行跟著換色）。頭像沒有圖片時是名字首字，`--mat-sys-primary-container`／`--mat-sys-on-primary-container`。
+- **提及標籤**（`.lib-rich-text-mention`，編輯器與顯示元件相同）：不可分割的「@名字」小標籤，字對標籤底色 ≥ 4.5:1。
+- **留言串**：頭像（同上）、名字 `--mat-sys-on-surface`、相對時間與「已編輯」`--mat-sys-on-surface-variant`（時間掛 `.ui-text-numeric`，滑過看完整時間）、內容放在氣泡裡（`lib-rich-text-view`）；自己的留言的編輯、刪除是 `matIconButton`，送出、儲存是 `matButton="filled"`、重試是 `matButton="outlined"`，錯誤訊息 `--mat-sys-error`；沒有留言時是 `lib-empty-state`。
+- 編輯器與留言串的樣式不封裝（內容是 ProseMirror 動態建立或白名單清理後重建的節點），選擇器都從 `.lib-rich-text-editor`、`.lib-rich-text-content`、`.lib-comment-thread` 開始，跟著 lazy chunk 載入，**主樣式沒有增加任何位元組**。
+- 質地只在 `.lib-rich-text` 上設下列變數，不覆寫屬性（recipe 在各質地 `recipes.scss` 檔尾的「Rich text」區塊）。
+
+| 變數 | 預設 | 用途 | 目前設定的質地 |
+| --- | --- | --- | --- |
+| `--lib-rt-frame` / `-radius` / `-bg` / `-shadow` | 1px `--app-field-border` / `--mat-sys-corner-medium` / `--mat-sys-surface` / `none` | 編輯器外框（border 簡寫，顏色要 ≥ 3:1）、圓角、底、陰影 | Brutal：`var(--brutal-line)`、`0px`、—、`var(--brutal-shadow-sm)`；Soft UI：—、—、`background`、`var(--soft-inset-small)`（壓進去）；Clay：—、`corner-large`、—、`var(--clay-shadow-pressed)`；Sketch：圓角 `var(--sketch-wobble-sm)` |
+| `--lib-rt-padding` / `-font-size` / `-line-height` / `-block-gap` | `0.625rem 0.875rem` / `0.875rem` / `1.6` / `0.5em` | 編輯區內距、內容字級與行高、段落與清單之間的間距（顯示元件同一組） | Ledger：`0.375rem 0.625rem`、`0.8125rem`、`1.5` |
+| `--lib-rt-readonly-bg` / `-readonly-border-style` | `transparent` / `dashed` | 唯讀時的底與外框線型 | （無） |
+| `--lib-rt-toolbar-bg` / `-toolbar-divider` | `transparent` / 1px `outline-variant` | 工具列的底、下緣（border 簡寫） | 底：Linen `surface-container-low`；Ledger `var(--ledger-head-bg)`；Cockpit `surface-container`。下緣：Grid 1px `outline`；Ledger 1px `var(--ledger-rule-strong)`；Cockpit 1px `var(--cockpit-edge)`；Brutal `var(--brutal-line)`；Riso `var(--riso-rule)` |
+| `--lib-rt-tool-radius` | `--mat-sys-corner-small` | 工具列按鈕的圓角 | Clay `corner-medium`；Brutal `0px` |
+| `--lib-rt-tool-on-bg` / `-tool-on-fg` / `-tool-on-shadow` | `--mat-sys-primary` / `--mat-sys-on-primary` / `none` | 按下的工具（對工具列底色 ≥ 3:1） | Editorial：`on-surface`／`surface`（墨色方塊）；Brutal：`primary-container`／`on-primary-container`、2px 墨色內框；Cockpit：主色 55% 的 8px 光 |
+| `--lib-rt-quote-line` / `-quote-bg` / `-quote-fg` / `-quote-radius` / `-quote-style` | 3px `outline-variant` / `transparent` / `on-surface-variant` / `0px` / `normal` | 引用的左線（border 簡寫）、底、字、圓角、字型樣式 | 線：Grid 3px `outline`；Editorial 2px `on-surface`（另改斜體）；Cockpit 2px `var(--cockpit-edge-strong)`；Brutal 4px `var(--brutal-ink)`；Riso 3px `var(--riso-ink-a)`；Sketch 2px 鋼筆虛線。底：Linen `surface-container-low` |
+| `--lib-rt-link-fg` | `--mat-sys-primary` | 連結字色（加底線） | （無） |
+| `--lib-rt-mention-bg` / `-fg` / `-frame` / `-radius` / `-shadow` / `-weight` | `primary-container` / `on-primary-container` / `0 solid transparent` / `corner-small` / `none` / `500` | 提及標籤（字對底 ≥ 4.5:1） | Soft UI：`background`／`on-surface`、`var(--soft-inset-small)`；Editorial：`transparent`／`on-surface`、底下 1px 墨線、`600`；Cockpit：`var(--cockpit-lit)`／`on-surface`、1px `var(--cockpit-edge-strong)`；Brutal：`secondary-container`／`on-secondary-container`、1px 墨框、`0px`、`700`；Riso：`var(--riso-overlay)`／`on-surface`、1px 主墨；Sketch：`transparent`／`on-surface`、1px 鋼筆圈、`var(--sketch-wobble-xs)` |
+| `--lib-rt-menu-bg` / `-frame` / `-radius` / `-shadow` | `surface-container-high` / `0 solid transparent` / `corner-medium` / `level3` | 提及清單與連結小視窗 | Linen：`surface`、1px `outline-variant`、—、`none`；Grid：`surface`、1px `outline`；Soft UI：`background`；Clay：—、`corner-extra-large`、`var(--clay-shadow-deep)`；Editorial：`surface`、1px `outline-variant`、—、`none`；Frosted：`var(--frost-panel)`、1px `var(--frost-border)`、`corner-extra-large`、`level4`；Aero：surface 92%、1px `var(--aero-edge)`、`corner-extra-large`、`level4`；Ledger：`surface`、1px `var(--ledger-rule-strong)`、`corner-small`、`level2`；Cockpit：`surface-container-high`、1px `var(--cockpit-edge-strong)`、—、`var(--cockpit-glow-2)`；Brutal：`var(--brutal-card)`、`var(--brutal-line-thick)`、`0px`、`var(--brutal-shadow)`；Riso：`surface`、`var(--riso-line)`；Sketch：`var(--sketch-card)`、2px 鋼筆框、`var(--sketch-wobble-md)`、`var(--sketch-retrace)` |
+| `--lib-rt-option-active-bg` / `-fg` / `-shadow` | `secondary-container` / `on-secondary-container` / `none` | 清單目前那一列（不只靠底色，質地可以加內框或左線） | Grid：1px `outline` 內框；Soft UI：`background`／`on-surface`、壓進去；Editorial：`surface-container-low`／`on-surface`、左側 3px 墨線；Cockpit：`var(--cockpit-lit)`／`on-surface`、左側 2px 主色；Brutal：`primary-container`／`on-primary-container`、2px 墨框；Riso：`--app-state-selected`／`on-surface`、左側 3px 主墨；Sketch：鋼筆內框 |
+| `--lib-rt-avatar-radius` | `--mat-sys-corner-full` | 清單裡的頭像圓角（Grid、Editorial、Brutal 的 corner-full 很小或是 0，跟著變方） | （無） |
+| `--lib-comment-gap` / `-divider` / `-divider-gap` | `1rem` / `0 solid transparent` / `0px` | 留言之間的間距、分隔線（border 簡寫）與線下的留白 | Editorial：1px `outline-variant`、`1rem`；Ledger：`0.5rem`、1px `var(--ledger-rule)`、`0.5rem` |
+| `--lib-comment-bubble-bg` / `-frame` / `-radius` / `-padding` / `-shadow`、`--lib-comment-own-bubble-bg` | `surface-container-low` / `0 solid transparent` / `corner-medium` / `0.625rem 0.875rem` / `none`、同 `-bubble-bg` | 留言氣泡（內容的字對氣泡底 ≥ 4.5:1）；自己的留言另一個底色 | Linen `surface-container`；Grid：`surface`、1px `outline`、`corner-small`；Soft UI：`background`、`level1`（凸起）；Clay：`surface-container-high`、`corner-large`、`var(--clay-shadow-small)`；Editorial、Ledger：不放氣泡（`transparent`、內距 `0`）；Frosted：文字墨 5%、1px `var(--frost-border)`；Aero：文字墨 4%、1px `var(--aero-edge)`；Cockpit：`surface-container-high`、1px `var(--cockpit-edge)`；Brutal：`var(--brutal-card)`、`var(--brutal-line)`、`0px`、`var(--brutal-shadow-sm)`；Riso：`surface`、`var(--riso-line)`、`var(--riso-misreg)`；Sketch：`var(--sketch-card)`、鋼筆框、`var(--sketch-wobble-md)` |
+| `--lib-comment-avatar-size` / `-radius` / `-frame` | `2rem` / `--mat-sys-corner-full` / `0 solid transparent` | 留言的頭像 | 大小：Ledger `1.75rem`。框：Grid 1px `outline`；Cockpit 1px `var(--cockpit-edge)`；Brutal `var(--brutal-line)`；Riso `var(--riso-line)` |
+| `--lib-comment-name-font` / `-name-weight` | `var(--font-body)` / `600` | 留言的名字 | Editorial：`var(--font-display)` |
+| `--lib-comment-composer-gap` / `-composer-divider` | `1rem` / 1px `outline-variant` | 輸入框與留言之間的間距、上緣（border 簡寫） | Editorial 1px `on-surface`（強調線）；Brutal `var(--brutal-line)`；Riso `var(--riso-rule)`；Sketch `var(--sketch-rule)` |
+
+Material 用預設值（primary 實心的按下工具、primary-container 的提及標籤、surface-container-low 的圓角氣泡、surface-container-high 的浮層與 level3 陰影）。
+
 ### 字體（質地包提供，中英分軌）
 
 `--font-zh`（中文，裝置的系統字）、`--font-en`（英文依質地）、`--font-display`、`--font-body`、`--font-mono`

@@ -321,3 +321,19 @@
     --lib-print-sheet-shadow: 0 0 0 1px var(--mat-sys-outline-variant);
   }
 }
+
+// ── Rich text ──
+// 富文字、留言與 @提及（libs/ui rich-text-editor、rich-text-view、comment-thread）：只在 .lib-rich-text 上設
+// --lib-rt-*／--lib-comment-* 變數（CONTRACT.md「富文字、留言與 @提及」），不覆寫屬性。編輯器、留言串與 CDK 浮層裡的
+// 提及清單、連結小視窗都有這個 class；欄位外框維持 --app-field-border（≥ 3:1），焦點框是元件的 --app-focus-ring。
+// 紙張色階：工具列、引用與留言氣泡是深一階的紙，浮層是一張平放的紙（細線、不加影）。
+:root[data-paradigm='linen'] {
+  .lib-rich-text {
+    --lib-rt-toolbar-bg: var(--mat-sys-surface-container-low);
+    --lib-rt-quote-bg: var(--mat-sys-surface-container-low);
+    --lib-rt-menu-bg: var(--mat-sys-surface);
+    --lib-rt-menu-frame: 1px solid var(--mat-sys-outline-variant);
+    --lib-rt-menu-shadow: none;
+    --lib-comment-bubble-bg: var(--mat-sys-surface-container);
+  }
+}

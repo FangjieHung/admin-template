@@ -586,3 +586,28 @@
     --lib-print-sheet-shadow: 0 0 0 1px var(--ledger-rule);
   }
 }
+
+// ── Rich text ──
+// 富文字、留言與 @提及（libs/ui rich-text-editor、rich-text-view、comment-thread）：只在 .lib-rich-text 上設
+// --lib-rt-*／--lib-comment-* 變數（CONTRACT.md「富文字、留言與 @提及」），不覆寫屬性。編輯器、留言串與 CDK 浮層裡的
+// 提及清單、連結小視窗都有這個 class；欄位外框維持 --app-field-border（≥ 3:1），焦點框是元件的 --app-focus-ring。
+// 帳冊：13px 內文、窄留白；工具列是表頭底色，留言不放氣泡、用帳簿細線分開，頭像小一號。
+:root[data-paradigm='ledger'] {
+  .lib-rich-text {
+    --lib-rt-font-size: 0.8125rem;
+    --lib-rt-line-height: 1.5;
+    --lib-rt-padding: 0.375rem 0.625rem;
+    --lib-rt-toolbar-bg: var(--ledger-head-bg);
+    --lib-rt-toolbar-divider: 1px solid var(--ledger-rule-strong);
+    --lib-rt-menu-bg: var(--mat-sys-surface);
+    --lib-rt-menu-frame: 1px solid var(--ledger-rule-strong);
+    --lib-rt-menu-radius: var(--mat-sys-corner-small);
+    --lib-rt-menu-shadow: var(--mat-sys-level2);
+    --lib-comment-gap: 0.5rem;
+    --lib-comment-divider: 1px solid var(--ledger-rule);
+    --lib-comment-divider-gap: 0.5rem;
+    --lib-comment-bubble-bg: transparent;
+    --lib-comment-bubble-padding: 0;
+    --lib-comment-avatar-size: 1.75rem;
+  }
+}

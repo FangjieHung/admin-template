@@ -792,3 +792,40 @@
     --lib-print-sheet-shadow: 0 0 0 2px var(--brutal-ink), var(--brutal-shadow);
   }
 }
+
+// ── Rich text ──
+// 富文字、留言與 @提及（libs/ui rich-text-editor、rich-text-view、comment-thread）：只在 .lib-rich-text 上設
+// --lib-rt-*／--lib-comment-* 變數（CONTRACT.md「富文字、留言與 @提及」），不覆寫屬性。編輯器、留言串與 CDK 浮層裡的
+// 提及清單、連結小視窗都有這個 class；欄位外框維持 --app-field-border（≥ 3:1），焦點框是元件的 --app-focus-ring。
+// 粗野：編輯區、留言氣泡、浮層都是墨框直角的貼紙（氣泡 3px 墨影），按下的工具是色塊加墨框，提及是第二色的小貼紙。
+:root[data-paradigm='brutal'] {
+  .lib-rich-text {
+    --lib-rt-frame: var(--brutal-line);
+    --lib-rt-radius: 0px;
+    --lib-rt-shadow: var(--brutal-shadow-sm);
+    --lib-rt-toolbar-divider: var(--brutal-line);
+    --lib-rt-tool-radius: 0px;
+    --lib-rt-tool-on-bg: var(--mat-sys-primary-container);
+    --lib-rt-tool-on-fg: var(--mat-sys-on-primary-container);
+    --lib-rt-tool-on-shadow: inset 0 0 0 2px var(--brutal-ink);
+    --lib-rt-quote-line: 4px solid var(--brutal-ink);
+    --lib-rt-mention-bg: var(--mat-sys-secondary-container);
+    --lib-rt-mention-fg: var(--mat-sys-on-secondary-container);
+    --lib-rt-mention-frame: 1px solid var(--brutal-ink);
+    --lib-rt-mention-radius: 0px;
+    --lib-rt-mention-weight: 700;
+    --lib-rt-menu-bg: var(--brutal-card);
+    --lib-rt-menu-frame: var(--brutal-line-thick);
+    --lib-rt-menu-radius: 0px;
+    --lib-rt-menu-shadow: var(--brutal-shadow);
+    --lib-rt-option-active-bg: var(--mat-sys-primary-container);
+    --lib-rt-option-active-fg: var(--mat-sys-on-primary-container);
+    --lib-rt-option-active-shadow: inset 0 0 0 2px var(--brutal-ink);
+    --lib-comment-bubble-bg: var(--brutal-card);
+    --lib-comment-bubble-frame: var(--brutal-line);
+    --lib-comment-bubble-radius: 0px;
+    --lib-comment-bubble-shadow: var(--brutal-shadow-sm);
+    --lib-comment-avatar-frame: var(--brutal-line);
+    --lib-comment-composer-divider: var(--brutal-line);
+  }
+}

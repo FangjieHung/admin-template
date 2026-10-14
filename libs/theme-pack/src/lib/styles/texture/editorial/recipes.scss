@@ -487,3 +487,33 @@
     --lib-print-sheet-shadow: 0 0 0 1px var(--mat-sys-outline-variant);
   }
 }
+
+// ── Rich text ──
+// 富文字、留言與 @提及（libs/ui rich-text-editor、rich-text-view、comment-thread）：只在 .lib-rich-text 上設
+// --lib-rt-*／--lib-comment-* 變數（CONTRACT.md「富文字、留言與 @提及」），不覆寫屬性。編輯器、留言串與 CDK 浮層裡的
+// 提及清單、連結小視窗都有這個 class；欄位外框維持 --app-field-border（≥ 3:1），焦點框是元件的 --app-focus-ring。
+// 版面：留言不放氣泡，一則一則用髮絲線分開、名字用展示字；輸入框上方一條墨線；按下的工具與目前的提及選項是墨色方塊。
+:root[data-paradigm='editorial'] {
+  .lib-rich-text {
+    --lib-rt-tool-on-bg: var(--mat-sys-on-surface);
+    --lib-rt-tool-on-fg: var(--mat-sys-surface);
+    --lib-rt-quote-line: 2px solid var(--mat-sys-on-surface);
+    --lib-rt-quote-style: italic;
+    --lib-rt-mention-bg: transparent;
+    --lib-rt-mention-fg: var(--mat-sys-on-surface);
+    --lib-rt-mention-weight: 600;
+    --lib-rt-mention-shadow: inset 0 -1px 0 var(--mat-sys-on-surface);
+    --lib-rt-menu-bg: var(--mat-sys-surface);
+    --lib-rt-menu-frame: 1px solid var(--mat-sys-outline-variant);
+    --lib-rt-menu-shadow: none;
+    --lib-rt-option-active-bg: var(--mat-sys-surface-container-low);
+    --lib-rt-option-active-fg: var(--mat-sys-on-surface);
+    --lib-rt-option-active-shadow: inset 3px 0 0 var(--mat-sys-on-surface);
+    --lib-comment-bubble-bg: transparent;
+    --lib-comment-bubble-padding: 0;
+    --lib-comment-divider: 1px solid var(--mat-sys-outline-variant);
+    --lib-comment-divider-gap: 1rem;
+    --lib-comment-name-font: var(--font-display);
+    --lib-comment-composer-divider: 1px solid var(--mat-sys-on-surface);
+  }
+}

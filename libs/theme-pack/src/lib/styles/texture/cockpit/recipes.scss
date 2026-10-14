@@ -591,3 +591,29 @@
     --lib-print-sheet-shadow: var(--cockpit-glow-1);
   }
 }
+
+// ── Rich text ──
+// 富文字、留言與 @提及（libs/ui rich-text-editor、rich-text-view、comment-thread）：只在 .lib-rich-text 上設
+// --lib-rt-*／--lib-comment-* 變數（CONTRACT.md「富文字、留言與 @提及」），不覆寫屬性。編輯器、留言串與 CDK 浮層裡的
+// 提及清單、連結小視窗都有這個 class；欄位外框維持 --app-field-border（≥ 3:1），焦點框是元件的 --app-focus-ring。
+// 儀表艙：工具列暗一階，按下的工具亮起並發光；提及標籤是亮起的讀數（lit 底＋亮邊），留言氣泡與浮層亮一階加亮邊。
+:root[data-paradigm='cockpit'] {
+  .lib-rich-text {
+    --lib-rt-toolbar-bg: var(--mat-sys-surface-container);
+    --lib-rt-toolbar-divider: 1px solid var(--cockpit-edge);
+    --lib-rt-tool-on-shadow: 0 0 8px color-mix(in srgb, var(--mat-sys-primary) 55%, transparent);
+    --lib-rt-quote-line: 2px solid var(--cockpit-edge-strong);
+    --lib-rt-mention-bg: var(--cockpit-lit);
+    --lib-rt-mention-fg: var(--mat-sys-on-surface);
+    --lib-rt-mention-frame: 1px solid var(--cockpit-edge-strong);
+    --lib-rt-menu-bg: var(--mat-sys-surface-container-high);
+    --lib-rt-menu-frame: 1px solid var(--cockpit-edge-strong);
+    --lib-rt-menu-shadow: var(--cockpit-glow-2);
+    --lib-rt-option-active-bg: var(--cockpit-lit);
+    --lib-rt-option-active-fg: var(--mat-sys-on-surface);
+    --lib-rt-option-active-shadow: inset 2px 0 0 var(--mat-sys-primary);
+    --lib-comment-bubble-bg: var(--mat-sys-surface-container-high);
+    --lib-comment-bubble-frame: 1px solid var(--cockpit-edge);
+    --lib-comment-avatar-frame: 1px solid var(--cockpit-edge);
+  }
+}
