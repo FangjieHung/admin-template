@@ -122,6 +122,13 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
       import('../features/date-range-picker/date-range-picker-page.component').then((m) => m.DateRangePickerPageComponent),
   },
   {
+    id: 'file-upload',
+    title: '附件上傳',
+    group: 'input',
+    icon: 'upload_file',
+    load: () => import('../features/file-upload/file-upload-page.component').then((m) => m.FileUploadPageComponent),
+  },
+  {
     id: 'signature-pad',
     title: '簽名板',
     group: 'input',

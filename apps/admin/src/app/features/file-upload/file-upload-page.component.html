@@ -1,0 +1,137 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="工單附件"
+    description="一次選多個檔案（點拖放區、拖放進來，或聚焦後貼上截圖），逐一上傳並顯示進度；同時最多上傳 3 個，其餘等待。上傳中可以取消，失敗的可以重試，完成的可以移除。按下方「加入示範檔案」：名稱含「網路設定」的檔案第一次會失敗，按「重試」就會成功。"
+  >
+    <div data-demo="ticket">
+      <lib-file-upload
+        #ticketUploader
+        label="工單附件"
+        hint="任何檔案"
+        [maxSize]="25 * 1024 * 1024"
+        [adapter]="ticketAdapter"
+        [(value)]="ticketFiles"
+        (busyChange)="ticketBusy.set($event)"
+      />
+      <div class="upload-demo-actions">
+        <button matButton="outlined" type="button" data-demo-action="ticket" (click)="addTicketSamples()">加入示範檔案</button>
+      </div>
+      <dl class="demo-state">
+        <div>
+          <dt>表單的值（已上傳完成）</dt>
+          <dd>{{ ticketFiles().length }} 個檔案</dd>
+        </div>
+        <div>
+          <dt>上傳中</dt>
+          <dd>{{ ticketBusy() ? '是' : '否' }}</dd>
+        </div>
+      </dl>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="現場照片"
+    description="layout=&quot;grid&quot; 用縮圖方塊排照片，點縮圖打開預覽（上一張／下一張，也可以按左右方向鍵）。camera=&quot;auto&quot;：手機直接開系統相機；桌機有網路攝影機時打開拍照對話框，沒有權限時說明原因並改為選擇檔案。maxImageDimension 把 3200px 的照片縮到長邊 1600px 再上傳。"
+  >
+    <div data-demo="photos">
+      <lib-file-upload
+        #photoUploader
+        label="現場照片"
+        hint="JPG、PNG 或 HEIC"
+        accept="image/*"
+        camera="auto"
+        layout="grid"
+        [maxImageDimension]="1600"
+        [adapter]="photoAdapter"
+        (uploaded)="onPhotoUploaded($event)"
+      />
+      <div class="upload-demo-actions">
+        <button matButton="outlined" type="button" data-demo-action="photos" (click)="addPhotoSamples()">加入示範照片</button>
+      </div>
+      <ul class="demo-list upload-demo-log" aria-live="polite">
+        @for (line of photoLog(); track line) {
+          <li>{{ line }}</li>
+        } @empty {
+          <li>上傳完成的照片會列在這裡，比對縮小前後的大小。</li>
+        }
+      </ul>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="放在表單裡"
+    description="附件接 formControlName，加上 Validators.required：沒有任何上傳完成的檔案時表單無效，按送出會顯示錯誤。上傳中（busyChange）送出鈕停用，避免送出還沒傳完的附件。"
+  >
+    <form class="upload-form" data-demo="form" [formGroup]="ticketForm" (ngSubmit)="submitTicket()">
+      <mat-form-field appearance="outline">
+        <mat-label>工單主旨</mat-label>
+        <input matInput formControlName="subject" required autocomplete="off" />
+        <mat-error>請輸入工單主旨</mat-error>
+      </mat-form-field>
+      <lib-file-upload
+        formControlName="attachments"
+        label="附件"
+        hint="PDF 或圖片"
+        errorMessage="請至少上傳一個附件"
+        accept="application/pdf,image/*"
+        [adapter]="formAdapter"
+        (busyChange)="formBusy.set($event)"
+      />
+      <div class="upload-form__actions">
+        <button matButton="filled" type="submit" [disabled]="formBusy()">
+          {{ formBusy() ? '附件上傳中…' : '送出工單' }}
+        </button>
+      </div>
+      <p class="demo-note" aria-live="polite">{{ formResult() }}</p>
+    </form>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="唯讀：詳情頁的附件"
+    description="readonly 只列出附件：檔名是下載連結，照片點縮圖預覽；沒有拖放區與動作。同一個元件，詳情頁與表單頁共用。"
+  >
+    <div class="upload-readonly" data-demo="readonly">
+      <section>
+        <h3 class="ui-text-subtitle">文件</h3>
+        <lib-file-upload readonly [value]="readonlyDocs()" />
+      </section>
+      <section>
+        <h3 class="ui-text-subtitle">完工照片</h3>
+        <lib-file-upload readonly layout="grid" [value]="readonlyPhotos()" />
+      </section>
+      <section>
+        <h3 class="ui-text-subtitle">沒有附件時</h3>
+        <lib-file-upload readonly [value]="[]" />
+      </section>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="限制與無法加入的檔案"
+    description="accept 只收 PDF 與圖片、maxSize 5 MB、maxFiles 3 個：不符的檔案留在清單上寫出原因，其他檔案照常上傳；下次再選檔案時這些列就會清掉，也可以按移除。按「加入會被擋下的檔案」一次加入 7 個：一個太大、一個是試算表、最後兩個超過個數。"
+  >
+    <div data-demo="limits">
+      <lib-file-upload
+        #limitUploader
+        label="合約文件"
+        hint="PDF 或圖片"
+        accept="application/pdf,image/*"
+        [maxSize]="5 * 1024 * 1024"
+        [maxFiles]="3"
+        [adapter]="limitAdapter"
+        (rejected)="onLimitRejected($event.length)"
+      />
+      <div class="upload-demo-actions">
+        <button matButton="outlined" type="button" data-demo-action="limits" (click)="addLimitSamples()">加入會被擋下的檔案</button>
+      </div>
+      <p class="demo-note" aria-live="polite">{{ limitLog() }}</p>
+    </div>
+  </app-demo-block>
+</app-showcase-page>

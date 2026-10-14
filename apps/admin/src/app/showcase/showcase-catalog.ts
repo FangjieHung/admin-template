@@ -59,6 +59,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '並排兩個月曆選起訖日，滑過時預覽區間；適合跨月的期間選擇。',
     source: 'libs/ui/src/lib/dual-month-range-picker',
   },
+  'file-upload': {
+    summary: '拖放、選擇或貼上檔案，逐一上傳並顯示進度，可以取消、重試、移除；手機直接拍照，桌機用網路攝影機。表單只存已上傳的檔案參照，詳情頁用唯讀模式列出附件。',
+    source: 'libs/ui/src/lib/file-upload',
+  },
   'signature-pad': {
     summary: '手寫或打字簽名，存檔後只回傳不透明的資產代碼；可要求先勾選確認。',
     source: 'libs/ui/src/lib/signature-pad',
@@ -150,7 +154,6 @@ export interface PlannedItem {
 }
 
 export const PLANNED_ITEMS: readonly PlannedItem[] = [
-  { title: '附件上傳與相機擷取', kind: '元件', priority: 'P1', summary: '拖放、預覽、進度、清單；手機可直接拍照。' },
   { title: '匯入精靈', kind: '元件', priority: 'P1', summary: '上傳 → 欄位對應 → 預覽驗證 → 匯入。' },
   { title: '通知中心', kind: '元件', priority: 'P1', summary: '鈴鐺、未讀數、通知清單。' },
   { title: '全域搜尋與指令面板', kind: '元件', priority: 'P1', summary: '⌘K 找資料、跳頁、執行動作。' },

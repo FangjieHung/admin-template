@@ -1,0 +1,38 @@
+// 附件上傳展示頁。只用語意 token；拖放區、清單、按鈕的外觀交給 libs/ui 與質地 recipe。
+
+.upload-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.upload-demo-log {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.875rem;
+}
+
+.upload-form {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 40rem;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.upload-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.upload-readonly {
+  display: grid;
+  gap: 1.5rem;
+
+  h3 {
+    margin: 0 0 0.5rem;
+  }
+}
