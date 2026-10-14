@@ -33,4 +33,20 @@
       <ng-container [ngTemplateOutlet]="toolbar" />
     </div>
   }
+
+  <!-- 通知鈴鐺：面板與通知清單在 layout/notification-bell，第一次打開時才載入。徽章是 ::after（data-count），
+       造型變數 --lib-notif-badge-* 由質地設在 .lib-notification-center。 -->
+  <button
+    mat-icon-button
+    type="button"
+    class="topbar-bell lib-notification-center"
+    aria-haspopup="dialog"
+    [attr.aria-label]="bellLabel()"
+    [attr.data-count]="badge()"
+    [attr.aria-expanded]="notifications.panelOpen()"
+    [attr.aria-controls]="notifications.panelOpen() ? 'app-notification-panel' : null"
+    (click)="notifications.toggle()"
+  >
+    <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
+  </button>
 </header>

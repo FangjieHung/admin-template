@@ -6,6 +6,7 @@ import { ZH_TW_SHELL } from '../../core/i18n/zh-tw-shell';
 import { HeaderToolbarSlot } from './header-toolbar-slot';
 import { HeaderTitleExtraSlot } from './header-title-extra-slot';
 import { HeaderTitleData, HeaderTitleSlot } from './header-title';
+import { NotificationCenterService } from '../../core/notifications/notification-center.service';
 
 /**
  * 頁首：麵包屑（上層路徑，可點）＋大標題（這一頁的名字，頁面唯一的 h1）。
@@ -34,4 +35,20 @@ export class HeaderComponent {
   protected readonly currentTitle = computed(() => this.current().title);
   protected readonly breadcrumbs = computed(() => this.current().breadcrumbs);
   protected readonly backTo = computed(() => this.current().backTo ?? null);
+
+  /**
+   * 通知鈴鐺：未讀數（0 不顯示徽章，超過 99 顯示 99+）與面板開關都在 NotificationCenterService。
+   * 這裡在 Initial bundle，只放按鈕與徽章；面板、overlay 與 lib-notification-list 在
+   * layout/notification-bell，第一次打開時才動態載入（NotificationCenterService.toggle）。
+   */
+  protected readonly notifications = inject(NotificationCenterService);
+  protected readonly badge = computed(() => {
+    const n = this.notifications.unread();
+    return n ? (n > 99 ? '99+' : n) : null;
+  });
+  protected readonly bellLabel = computed(() => {
+    const t = this.t.notifications;
+    const n = this.notifications.unread();
+    return n ? `${t.bell}，${n}${t.unread}` : t.bell;
+  });
 }

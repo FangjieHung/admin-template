@@ -1,0 +1,30 @@
+// 通知中心展示頁。只用語意 token；清單與按鈕的外觀交給 libs/ui 與質地 recipe。
+
+.notif-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+}
+
+.notif-demo-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  color: var(--mat-sys-on-surface);
+  font-size: 0.875rem;
+}
+
+.notif-demo-card {
+  max-width: 40rem;
+  padding: 0.75rem 0 0.25rem;
+}
+
+.notif-demo-card--narrow {
+  max-width: 24rem;
+}
+
+.notif-demo-state {
+  margin-top: 1rem;
+}

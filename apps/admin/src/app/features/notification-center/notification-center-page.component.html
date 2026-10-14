@@ -1,0 +1,87 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="頁首鈴鐺"
+    description="右上角的鈴鐺就是這個元件：數字是未讀數（超過 99 顯示 99+），點開是通知面板。面板關著時新通知跳提示訊息（按「查看」打開面板），開著時新通知直接出現在最上面並由報讀器念出。示範資料每 45 秒送達一則，也可以按下面的按鈕立刻送達。"
+  >
+    <div data-demo="bell">
+      <div class="notif-demo-actions">
+        <button matButton="filled" type="button" data-demo-action="push-bell" (click)="pushToBell(1)">現在送達一則新通知</button>
+        <button matButton="outlined" type="button" data-demo-action="push-many" (click)="pushToBell(100)">一次送達 100 則（看 99+）</button>
+        <button matButton="outlined" type="button" data-demo-action="open-bell" (click)="openBell()">打開鈴鐺面板</button>
+      </div>
+      <label class="notif-demo-toggle">
+        <input type="checkbox" data-demo-action="auto-push" [checked]="runtime()?.autoPush() ?? true" (change)="toggleAutoPush($event)" />
+        每 45 秒自動送達一則（示範）
+      </label>
+      <dl class="demo-state">
+        <div>
+          <dt>未讀數</dt>
+          <dd data-demo-state="unread">{{ center.unread() }}</dd>
+        </div>
+        <div>
+          <dt>面板</dt>
+          <dd>{{ center.panelOpen() ? '開著' : '關著' }}</dd>
+        </div>
+      </dl>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="通知清單"
+    description="放在卡片裡的清單（自己的示範資料來源，跟頁首鈴鐺分開）：全部／未讀、類別、今天／昨天／更早分組；滑過或鍵盤聚焦時右上角出現「標為已讀」與「移除」（觸控裝置一直顯示）。上下鍵在通知之間移動，Enter 打開，Delete 移除。"
+  >
+    <div data-demo="list">
+      <div class="notif-demo-actions">
+        <button matButton="outlined" type="button" data-demo-action="push-card" (click)="pushToCard()">送達一則新通知到這張卡片</button>
+      </div>
+      <div class="ui-card notif-demo-card">
+        <lib-notification-list
+          [source]="cardSource"
+          [categories]="categories"
+          [pageSize]="6"
+          [(filter)]="cardFilter"
+          [(category)]="cardCategory"
+          (open)="onCardOpen($event)"
+          (action)="onCardOpen($event.item)"
+        />
+      </div>
+      <dl class="demo-state notif-demo-state">
+        <div>
+          <dt>filter／category</dt>
+          <dd>{{ cardFilter() }}／{{ cardCategory() ?? 'null' }}</dd>
+        </div>
+        <div>
+          <dt>最後一次 (open)</dt>
+          <dd>{{ cardLog() }}</dd>
+        </div>
+      </dl>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block heading="沒有通知" description="資料來源沒有任何通知：顯示空狀態；切到「未讀」時說明改成「沒有未讀通知」。">
+    <div data-demo="empty" class="ui-card notif-demo-card notif-demo-card--narrow">
+      <lib-notification-list [source]="emptySource" />
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="載入失敗"
+    description="第一次載入失敗：顯示錯誤與「重試」，按下後重新載入。「再失敗一次」讓下一次載入再失敗一次。"
+  >
+    <div data-demo="error">
+      <div class="notif-demo-actions">
+        <button matButton="outlined" type="button" data-demo-action="fail-again" (click)="failAgain()">再失敗一次</button>
+      </div>
+      <div class="ui-card notif-demo-card notif-demo-card--narrow">
+        <lib-notification-list #errorList [source]="errorSource" />
+      </div>
+    </div>
+  </app-demo-block>
+</app-showcase-page>

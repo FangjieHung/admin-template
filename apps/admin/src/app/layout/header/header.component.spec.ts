@@ -1,11 +1,12 @@
-import { describe, it, expect } from 'vitest';
-import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { describe, it, expect, vi } from 'vitest';
+import { Component, TemplateRef, ViewChild, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { HeaderComponent } from './header.component';
 import { HeaderTitleData, HeaderTitleSlot } from './header-title';
 import { HeaderTitleExtraSlot } from './header-title-extra-slot';
 import { HeaderToolbarSlot } from './header-toolbar-slot';
+import { NotificationCenterService } from '../../core/notifications/notification-center.service';
 
 function setup(defaultTitle: HeaderTitleData) {
   TestBed.configureTestingModule({ providers: [provideRouter([])] });
@@ -117,5 +118,50 @@ describe('HeaderComponent 右側 toolbar 插槽（既有行為，維持不變）
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.topbar-toolbar .extra-badge')?.textContent).toBe('狀態');
+  });
+});
+
+describe('HeaderComponent 通知鈴鐺', () => {
+  function setupBell() {
+    const center = { unread: signal(0), panelOpen: signal(false), toggle: vi.fn(), load: vi.fn() };
+    TestBed.configureTestingModule({
+      providers: [provideRouter([]), { provide: NotificationCenterService, useValue: center }],
+    });
+    const fixture = TestBed.createComponent(HeaderComponent);
+    fixture.componentRef.setInput('defaultTitle', { title: '首頁', breadcrumbs: [] });
+    fixture.detectChanges();
+    const bell = fixture.nativeElement.querySelector('.topbar-bell') as HTMLButtonElement;
+    return { fixture, center, bell };
+  }
+
+  it('沒有未讀時不顯示徽章（沒有 data-count），名稱是「通知」', () => {
+    const { bell } = setupBell();
+    expect(bell.hasAttribute('data-count')).toBe(false);
+    expect(bell.getAttribute('aria-label')).toBe('通知');
+    expect(bell.getAttribute('aria-haspopup')).toBe('dialog');
+    expect(bell.getAttribute('aria-expanded')).toBe('false');
+    expect(bell.hasAttribute('aria-controls')).toBe(false);
+  });
+
+  it('有未讀時顯示數字並念出「N 則未讀」；超過 99 顯示 99+', () => {
+    const { fixture, center, bell } = setupBell();
+    center.unread.set(3);
+    fixture.detectChanges();
+    expect(bell.getAttribute('data-count')).toBe('3');
+    expect(bell.getAttribute('aria-label')).toBe('通知，3 則未讀');
+    center.unread.set(128);
+    fixture.detectChanges();
+    expect(bell.getAttribute('data-count')).toBe('99+');
+    expect(bell.getAttribute('aria-label')).toBe('通知，128 則未讀');
+  });
+
+  it('點鈴鐺切換面板；面板開著時 aria-expanded 與 aria-controls 指向面板', () => {
+    const { fixture, center, bell } = setupBell();
+    bell.click();
+    expect(center.toggle).toHaveBeenCalledTimes(1);
+    center.panelOpen.set(true);
+    fixture.detectChanges();
+    expect(bell.getAttribute('aria-expanded')).toBe('true');
+    expect(bell.getAttribute('aria-controls')).toBe('app-notification-panel');
   });
 });

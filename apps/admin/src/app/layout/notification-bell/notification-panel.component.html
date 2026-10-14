@@ -1,0 +1,19 @@
+<div class="np-header">
+  <h2 class="np-title ui-text-subtitle" id="app-notification-panel-title">{{ t.title }}</h2>
+  <button mat-icon-button type="button" class="np-close" [attr.aria-label]="t.close" (click)="closed.emit(true)">
+    <span class="material-symbols-rounded" aria-hidden="true">close</span>
+  </button>
+</div>
+
+<div class="np-scroll">
+  @if (source(); as s) {
+    <lib-notification-list [source]="s" (open)="openItem($event)" (action)="onAction($event)" />
+  }
+</div>
+
+<div class="np-footer">
+  <a class="np-view-all" routerLink="/templates/notifications" (click)="closed.emit(true)">
+    {{ t.viewAll }}
+    <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
+  </a>
+</div>

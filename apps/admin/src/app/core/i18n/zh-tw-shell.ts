@@ -22,4 +22,6 @@ export const ZH_TW_SHELL = {
     breadcrumbAriaLabel: '麵包屑',
     back: '返回',
   },
+  // 頁首的通知鈴鐺（面板裡的文字在 shared/ui/notification-center-labels.ts，跟面板一起 lazy 載入）。
+  notifications: { bell: '通知', unread: ' 則未讀' },
 } as const;

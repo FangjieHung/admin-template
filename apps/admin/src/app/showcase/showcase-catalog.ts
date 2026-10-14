@@ -79,6 +79,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '操作後的簡短提示：成功、資訊、警告、錯誤 4 類，底部置中、一次一則，最多一個動作（例如復原）；錯誤要手動關閉。',
     source: 'libs/ui/src/lib/toast',
   },
+  'notification-center': {
+    summary: '頁首的鈴鐺與未讀數，點開是通知清單：全部／未讀、類別、今天／昨天／更早分組、標為已讀／未讀、移除、全部標為已讀、載入更多；新通知送達時放到最上面並念出來，資料來源可以換成伺服器的 API 與推播。',
+    source: 'libs/ui/src/lib/notification-center、apps/admin/src/app/layout/notification-bell',
+  },
   'confirm-dialog': {
     summary: '執行刪除等不可復原的動作前，再問一次；影響很大的動作可以要求先輸入確認字樣。回傳使用者是否確認。',
     source: 'libs/ui/src/lib/confirm-dialog',
@@ -131,6 +135,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '設定頁樣板：分組導覽同步到網址（個人資料、通知、安全性、偏好、進階），示範明確存檔（未儲存列、離開前確認）與即時儲存（失敗時還原）兩種模式，以及要輸入確認字樣的刪除帳號。',
     source: 'libs/ui（confirm-dialog、toast）、apps/admin/src/app/features/account-settings',
   },
+  'notifications-page': {
+    summary: '全部通知樣板：頁首鈴鐺面板的「查看全部通知」連到這裡；全部／未讀、類別篩選、今天／昨天／更早分組、載入更多，與鈴鐺共用資料來源，在這裡標為已讀，鈴鐺的未讀數跟著變。',
+    source: 'libs/ui（notification-list）、apps/admin/src/app/features/notifications、apps/admin/src/app/layout/notification-bell',
+  },
   'blank-page': {
     summary: '空白頁樣板：只有殼層、頁首與一張空卡片，附上開新頁面的四個步驟與程式碼片段；整個樣板只有一個檔案。',
     source: 'libs/theme-pack（.ui-card）、apps/admin/src/app/features/blank-page',
@@ -155,7 +163,6 @@ export interface PlannedItem {
 
 export const PLANNED_ITEMS: readonly PlannedItem[] = [
   { title: '匯入精靈', kind: '元件', priority: 'P1', summary: '上傳 → 欄位對應 → 預覽驗證 → 匯入。' },
-  { title: '通知中心', kind: '元件', priority: 'P1', summary: '鈴鐺、未讀數、通知清單。' },
   { title: '全域搜尋與指令面板', kind: '元件', priority: 'P1', summary: '⌘K 找資料、跳頁、執行動作。' },
   { title: '表格內直接編輯', kind: '元件', priority: 'P1', summary: '行內編輯與批次修改。' },
   { title: '共用日曆與排程', kind: '元件', priority: 'P1', summary: '月／週檢視與資源時間軸，含拖曳。' },

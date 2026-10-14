@@ -16,6 +16,31 @@
   align-items: flex-start;
   gap: 0.375rem;
   min-width: 0;
+  // 吃掉剩下的空間：頁面工具列與通知鈴鐺靠右排在一起。
+  margin-right: auto;
+}
+
+// 通知鈴鐺：排在頁面工具列第一列之後、篩選列（order: 2，獨佔一列）之前。
+// 徽章是 ::after（data-count，0 時沒有這個屬性），讀 --lib-notif-badge-*（質地在 .lib-notification-center 上設，
+// CONTRACT.md「通知中心」）。這裡在 Initial bundle，只放兩條。
+.topbar-bell {
+  order: 1;
+  position: relative;
+}
+
+.topbar-bell[data-count]::after {
+  content: attr(data-count);
+  position: absolute;
+  top: 0.25rem;
+  left: 50%;
+  min-width: 0.625rem;
+  padding: 0 0.25rem;
+  border-radius: var(--lib-notif-badge-radius, var(--mat-sys-corner-full));
+  background: var(--lib-notif-badge-bg, var(--mat-sys-error));
+  color: var(--lib-notif-badge-fg, var(--mat-sys-on-error));
+  box-shadow: var(--lib-notif-badge-shadow, 0 0 0 2px var(--mat-sys-surface));
+  font: 700 0.6875rem / 1.125rem var(--font-body);
+  text-align: center;
 }
 
 /* 各頁面透過 appHeaderToolbar 投影進來的 toolbar。

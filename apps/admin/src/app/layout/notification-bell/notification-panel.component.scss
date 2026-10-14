@@ -1,0 +1,95 @@
+// 頁首的通知面板（lazy）。ViewEncapsulation.None：每條規則都以 np- 或 overlay pane 的 class 開頭。
+// 外框讀 --lib-notif-panel-*（質地在 .lib-notification-center 上設，CONTRACT.md「通知中心」）。
+.np-panel {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: min(var(--lib-notif-panel-width, 380px), calc(100vw - 16px));
+  max-height: min(36rem, calc(100vh - 5.5rem));
+  overflow: hidden;
+  border: var(--lib-notif-panel-frame, 0 solid transparent);
+  border-radius: var(--lib-notif-panel-radius, var(--mat-sys-corner-large));
+  background: var(--lib-notif-panel-bg, var(--mat-sys-surface-container));
+  box-shadow: var(--lib-notif-panel-shadow, var(--mat-sys-level3));
+  backdrop-filter: var(--lib-notif-panel-backdrop, none);
+  color: var(--mat-sys-on-surface);
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: calc(var(--app-focus-ring-width) * -1);
+  }
+}
+
+.np-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.5rem 0.25rem 1rem;
+}
+
+.np-title {
+  margin: 0;
+}
+
+.np-close {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.np-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.np-footer {
+  border-top: var(--lib-notif-divider, 1px solid var(--mat-sys-outline-variant));
+}
+
+.np-view-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-height: 2.75rem;
+  color: var(--mat-sys-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+
+  .material-symbols-rounded {
+    width: 1em;
+    height: 1em;
+    overflow: hidden;
+    font-size: 1.125rem;
+  }
+
+  &:hover {
+    background: var(--app-state-hover);
+  }
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: calc(var(--app-focus-ring-width) * -1);
+  }
+}
+
+// 手機（600px 以下）：滿版的面板。CDK 把 pane 寫成 inline 的 position: static＋transform（錨在鈴鐺下方），
+// 這裡用 fixed＋inset 0 蓋過去（bounding box 沒有 transform，fixed 以視窗為準）。
+@media (max-width: 600px) {
+  .cdk-overlay-pane.app-notification-pane {
+    position: fixed !important;
+    inset: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+    transform: none !important;
+  }
+
+  .app-notification-pane .np-panel {
+    width: 100%;
+    max-height: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
