@@ -3,7 +3,7 @@ import { ACCESS_DATA_KEY, AccessCheck, accessGuard, unsavedChangesGuard } from '
 
 /**
  * 工單樣板的路由（app.routes.ts 用 loadChildren 掛在 /templates/tickets，整份都是 lazy）：
- * 列表 → 詳情 → 編輯，列表的「新增」→ 空白表單、「匯入」→ 匯入精靈。每一頁依 libs/access 的「工單」功能守門：
+ * 列表 → 詳情 → 編輯，列表的「新增」→ 空白表單、「匯入」→ 匯入精靈，詳情的「列印」→ 工單服務單。每一頁依 libs/access 的「工單」功能守門：
  * 沒有權限時顯示「沒有權限」頁（網址不變）；表單有未存的變更時離開前先確認（unsavedChangesGuard）。
  */
 function guarded(access: AccessCheck): Partial<Route> {
@@ -33,4 +33,10 @@ export const TICKET_ROUTES: Routes = [
     ...guarded('ticket:view'),
   },
   { path: ':id/edit', loadComponent: loadForm, ...guarded('ticket:edit'), canDeactivate: [unsavedChangesGuard] },
+  // 列印：工單服務單（lib-print-document），看得到工單的人就能列印。
+  {
+    path: ':id/print',
+    loadComponent: () => import('./ticket-print/ticket-print-page.component').then((m) => m.TicketPrintPageComponent),
+    ...guarded('ticket:view'),
+  },
 ];

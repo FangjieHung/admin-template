@@ -63,6 +63,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '有上下層的清單與表格：組織架構、分類、資料夾。單選目前項目或三態勾選、搜尋保留上層、用到才載入（失敗就地重試）；完整鍵盤操作，樹狀表外觀跟資料表一致。',
     source: 'libs/ui/src/lib/tree',
   },
+  'print-document': {
+    summary: '報價單、服務單這類單據的列印版面：螢幕上是依紙張比例的預覽（看得出大約在哪裡分頁），列印時只印單據、一律白紙黑字；表頭每頁重印、列不切開、合計與簽名欄不落單，頁邊印單號與頁碼，「另存為 PDF」就能寄送。',
+    source: 'libs/ui/src/lib/print-document',
+  },
   'relation-select': {
     summary: '輸入就搜尋，從大量資料裡挑一筆（負責人、專案、聯絡人）；表單存 id，初始值自動查出名稱，找不到時可以當場建立。',
     source: 'libs/ui/src/lib/relation-select',
@@ -194,6 +198,5 @@ export interface PlannedItem {
 }
 
 export const PLANNED_ITEMS: readonly PlannedItem[] = [
-  { title: '列印與 PDF 版面', kind: '元件', priority: 'P2', summary: '單據可列印、可寄送。' },
   { title: '富文字、留言與 @提及', kind: '元件', priority: 'P2', summary: '備註與內部協作。' },
 ];

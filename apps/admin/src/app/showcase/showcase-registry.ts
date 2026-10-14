@@ -232,6 +232,13 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     load: () => import('../features/command-palette/command-palette-page.component').then((m) => m.CommandPalettePageComponent),
   },
   {
+    id: 'print-document',
+    title: '列印與 PDF 版面',
+    group: 'layout',
+    icon: 'print',
+    load: () => import('../features/print-document/print-document-page.component').then((m) => m.PrintDocumentPageComponent),
+  },
+  {
     id: 'scroll-shadow',
     title: '捲動陰影',
     group: 'layout',

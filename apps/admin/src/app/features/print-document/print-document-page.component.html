@@ -1,0 +1,105 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="服務報價單：跨頁、表頭重複、合計與簽名欄"
+    description="30 列明細，A4 直式會印成 3 頁：每一頁重印表頭，每一列不會被切開；最後 3 列、合計、備註與簽名欄是一整組，放不下就一起移到下一頁，不會只剩合計或簽名欄。上方切換紙張、方向與簽名欄，紙張預覽跟著換；虛線是大約的分頁位置。按「列印」只印這份報價單（殼層與這頁的說明都不印）。"
+  >
+    <div class="pd-controls" data-demo="quote-controls">
+      <div class="demo-row" role="group" aria-label="紙張">
+        @for (choice of papers; track choice.value) {
+          <button
+            type="button"
+            class="ui-nav-pill"
+            [class.is-active]="paper() === choice.value"
+            [attr.aria-pressed]="paper() === choice.value"
+            [attr.data-paper-choice]="choice.value"
+            (click)="paper.set(choice.value)"
+          >
+            {{ choice.label }}
+          </button>
+        }
+      </div>
+      <div class="demo-row" role="group" aria-label="方向">
+        @for (choice of orientations; track choice.value) {
+          <button
+            type="button"
+            class="ui-nav-pill"
+            [class.is-active]="orientation() === choice.value"
+            [attr.aria-pressed]="orientation() === choice.value"
+            [attr.data-orientation-choice]="choice.value"
+            (click)="orientation.set(choice.value)"
+          >
+            {{ choice.label }}
+          </button>
+        }
+      </div>
+      <mat-slide-toggle [checked]="withSignatures()" (change)="withSignatures.set($event.checked)" data-toggle="signatures">
+        簽名欄
+      </mat-slide-toggle>
+    </div>
+
+    <lib-print-document
+      data-demo="quote"
+      title="服務報價單"
+      number="Q-20261014-07"
+      date="2026/10/14"
+      [paper]="paper()"
+      [orientation]="orientation()"
+      [signatures]="quoteSignatures()"
+    >
+      <div libPrintBrand>
+        <span class="lib-print-brand-name">示範資訊服務有限公司</span>
+        臺北市中正區示範路 100 號 8 樓<br />
+        電話 (02) 2345-6789
+      </div>
+      <dl libPrintInfo class="lib-print-fields">
+        <div><dt>客戶</dt><dd>示範客戶有限公司</dd></div>
+        <div><dt>聯絡人</dt><dd>林雅婷</dd></div>
+        <div><dt>專案</dt><dd>辦公室網路與設備年度保養</dd></div>
+        <div><dt>有效期限</dt><dd class="lib-print-num">2026/11/13</dd></div>
+      </dl>
+      <lib-print-table label="報價明細" [columns]="quoteColumns" [rows]="quoteLines" [summary]="quoteSummary">
+        <ng-template libPrintCell="name" [libPrintCellOf]="quoteLines" let-row>
+          <b class="pd-item">{{ row.name }}</b><br /><span class="pd-item__detail">{{ row.detail }}</span>
+        </ng-template>
+      </lib-print-table>
+      <section libPrintNotes>
+        <p class="lib-print-section-title">備註</p>
+        <p class="lib-print-note">1. 報價有效期限 30 天，逾期請重新詢價。</p>
+        <p class="lib-print-note">2. 施作時間另行約定；停機作業安排在非上班時段。</p>
+        <p class="lib-print-note">3. 付款條件：簽約時付 50%，驗收後 30 天內付清餘款。</p>
+      </section>
+      <p libPrintFooter>本報價單由系統產生。如有疑問請洽業務承辦，電話 (02) 2345-6789。</p>
+    </lib-print-document>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="短單據：只有 3 列"
+    description="領料單只有 3 列明細與 1 列合計，印成 1 頁；簽名欄緊接在合計後面。工具列的「預覽約 1 頁」是依內容高度估計的頁數。"
+  >
+    <lib-print-document
+      data-demo="parts"
+      title="零件領用單"
+      number="MR-20261014-03"
+      date="2026/10/14"
+      [signatures]="['領用人', '發料人']"
+    >
+      <div libPrintBrand>
+        <span class="lib-print-brand-name">示範資訊服務有限公司</span>
+        倉儲組
+      </div>
+      <dl libPrintInfo class="lib-print-fields">
+        <div><dt>領用單位</dt><dd>客服部</dd></div>
+        <div><dt>用途</dt><dd>新進人員座位設置</dd></div>
+      </dl>
+      <lib-print-table label="領用明細" [columns]="partColumns" [rows]="partLines" [summary]="partSummary" />
+      <p libPrintFooter>一式兩聯：第一聯倉儲組留存，第二聯領用單位留存。</p>
+    </lib-print-document>
+  </app-demo-block>
+</app-showcase-page>

@@ -41,6 +41,8 @@ describe('TicketDetailPageComponent（詳情頁樣板）', () => {
     for (const action of ['edit', 'assign', 'close', 'reopen', 'delete']) {
       expect(h.el.querySelector(`[data-action="${action}"]`)).toBeNull();
     }
+    // 列印只要能檢視就看得到，連到工單服務單。
+    expect(h.el.querySelector('[data-action="print"]')?.getAttribute('href')).toBe('/templates/tickets/TK-2048/print');
 
     h.access.signIn('u-admin');
     await h.settle();

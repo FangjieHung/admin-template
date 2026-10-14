@@ -64,6 +64,7 @@ const INFO: TemplateInfo = {
     'lib-description-list（概覽與摘要）、lib-activity-timeline（活動紀錄）',
     'lib-relation-select（指派對話框）、確認對話框、lib-toast、lib-empty-state、lib-error-state',
     'libs/access 的 *libCan（檢視者看不到編輯、指派、關閉、刪除）',
+    '「列印」連到工單服務單（/templates/tickets/:id/print，lib-print-document）',
   ],
   replace: [
     'ticket.repository.ts：get()、activity()、assign()、setStatus()、remove() 換成呼叫後端',

@@ -1,0 +1,42 @@
+// 工單服務單（列印樣板）。紙張、工具列、桌面交給 lib-print-document 與質地 recipe；這裡只排返回連結與手寫欄的橫線。
+
+:host {
+  display: block;
+}
+
+.ticket-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-block-end: 1rem;
+  border-radius: var(--mat-sys-corner-small);
+  color: var(--mat-sys-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+
+  .material-symbols-rounded {
+    font-size: 1.125rem;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+}
+
+// 手寫欄：三條橫線（紙張上一律用列印 token）。
+.tp-lines {
+  display: grid;
+  gap: 0;
+
+  span {
+    display: block;
+    height: 9mm;
+    border-block-end: 0.5pt solid var(--lib-print-rule);
+  }
+}

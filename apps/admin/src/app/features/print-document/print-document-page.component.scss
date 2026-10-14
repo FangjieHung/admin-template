@@ -1,0 +1,19 @@
+// 列印版面展示頁。工具列、桌面、紙張的外觀交給 libs/ui 與質地 recipe；這裡只排切換列與報價明細的兩行文字。
+
+.pd-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  margin-block-end: 1rem;
+}
+
+// 報價明細的品項：名稱一行、說明一行（紙張上的文字一律用列印 token，不分質地）。
+.pd-item {
+  font-weight: 700;
+}
+
+.pd-item__detail {
+  font-size: 8.5pt;
+  color: var(--lib-print-ink-muted);
+}
