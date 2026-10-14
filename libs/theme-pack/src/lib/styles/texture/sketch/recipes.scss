@@ -681,3 +681,36 @@
     --lib-cal-group-bg: transparent;
   }
 }
+
+// ── Kanban board ──
+// 看板（libs/ui kanban-board）：只設元件暴露的 --lib-kanban-* 變數（CONTRACT.md「看板」）。整張是同一張紙：欄是一圈抖動的
+// 鋼筆線（畫在不含文字的 ::before，手繪大圓角），卡片是手繪圓角的鋼筆框（卡片小、不抖：細線一抖就變成階梯），
+// 滑過再描一次，拖曳中換成麥克筆＋再描一次；欄頭下一條直的細分隔；張數是手繪小圓框。高對比時抖動拉直。
+:root[data-paradigm='sketch'] {
+  .lib-kanban-board {
+    --lib-kanban-board-padding: 0.375rem;
+    --lib-kanban-column-bg: var(--sketch-card);
+    --lib-kanban-column-frame: var(--sketch-pen-w) solid var(--sketch-pen);
+    --lib-kanban-column-radius: var(--sketch-wobble-lg);
+    --lib-kanban-column-filter: var(--sketch-jitter);
+    --lib-kanban-head-divider: var(--sketch-rule);
+    --lib-kanban-count-bg: transparent;
+    --lib-kanban-count-frame: var(--sketch-pen-w) solid var(--sketch-pen);
+    --lib-kanban-count-radius: var(--sketch-wobble-xs);
+    --lib-kanban-list-padding: 0.25rem 0.375rem 0.5rem 0.25rem;
+    --lib-kanban-card-frame: var(--sketch-pen-w) solid var(--sketch-pen);
+    --lib-kanban-card-radius: var(--sketch-wobble-md);
+    --lib-kanban-card-shadow: none;
+    --lib-kanban-card-hover-shadow: var(--sketch-retrace);
+    --lib-kanban-drag-frame: var(--sketch-marker-w) solid var(--sketch-ink);
+    --lib-kanban-drag-shadow: var(--sketch-retrace);
+    --lib-kanban-placeholder-frame: var(--sketch-pen-w) dashed var(--sketch-pen);
+    --lib-kanban-placeholder-bg: transparent;
+  }
+
+  @media (prefers-contrast: more), (forced-colors: active) {
+    .lib-kanban-board {
+      --lib-kanban-column-filter: none;
+    }
+  }
+}

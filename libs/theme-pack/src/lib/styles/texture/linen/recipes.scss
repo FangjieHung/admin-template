@@ -278,3 +278,22 @@
     --lib-cal-pop-shadow: none;
   }
 }
+
+// ── Kanban board ──
+// 看板（libs/ui kanban-board）：只設元件暴露的 --lib-kanban-* 變數（CONTRACT.md「看板」）。沒有陰影：每一欄是卡片內嵌的
+// container-low 色塊（不畫框），卡片是最亮的一張紙＋1px 淡框，滑過時往 container-low 走一階；拖曳中的那張換成較深的
+// outline 框（仍然不浮起），放置預覽是 container 底＋outline 虛線。
+:root[data-paradigm='linen'] {
+  .lib-kanban-board {
+    --lib-kanban-column-bg: var(--mat-sys-surface-container-low);
+    --lib-kanban-count-bg: var(--mat-sys-surface-container-highest);
+    --lib-kanban-card-frame: 1px solid var(--mat-sys-outline-variant);
+    --lib-kanban-card-shadow: none;
+    --lib-kanban-card-hover-bg: var(--mat-sys-surface-container-low);
+    --lib-kanban-card-hover-shadow: none;
+    --lib-kanban-drag-frame: 1px solid var(--mat-sys-outline);
+    --lib-kanban-drag-shadow: none;
+    --lib-kanban-placeholder-frame: 1px dashed var(--mat-sys-outline);
+    --lib-kanban-placeholder-bg: var(--mat-sys-surface-container);
+  }
+}

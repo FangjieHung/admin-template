@@ -298,3 +298,22 @@
     --lib-cal-pop-radius: var(--mat-sys-corner-large);
   }
 }
+
+// ── Kanban board ──
+// 看板（libs/ui kanban-board）：只設元件暴露的 --lib-kanban-* 變數（CONTRACT.md「看板」）。卡片已經在一塊玻璃上，欄不再疊
+// 一層模糊的玻璃：欄是極淡的霧色（文字墨 4%）＋霧邊；卡片是霧面面板（frost-panel，減少透明度時變實色）＋霧邊，
+// 滑過升到 level2、拖曳中 level3。
+:root[data-paradigm='frosted'] {
+  .lib-kanban-board {
+    --lib-kanban-board-padding: 0.5rem;
+    --lib-kanban-column-bg: color-mix(in srgb, var(--mat-sys-on-surface) 4%, transparent);
+    --lib-kanban-column-frame: 1px solid var(--frost-border);
+    --lib-kanban-count-bg: var(--frost-panel);
+    --lib-kanban-list-padding: 0.375rem;
+    --lib-kanban-card-bg: var(--frost-panel);
+    --lib-kanban-card-frame: 1px solid var(--frost-border);
+    --lib-kanban-card-shadow: var(--mat-sys-level1);
+    --lib-kanban-card-hover-shadow: var(--mat-sys-level2);
+    --lib-kanban-drag-shadow: var(--mat-sys-level3);
+  }
+}

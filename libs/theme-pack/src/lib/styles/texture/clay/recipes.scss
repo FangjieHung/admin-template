@@ -352,3 +352,26 @@
     --lib-cal-pop-shadow: var(--clay-shadow-deep);
   }
 }
+
+// ── Kanban board ──
+// 看板（libs/ui kanban-board）：只設元件暴露的 --lib-kanban-* 變數（CONTRACT.md「看板」）。每一欄是在黏土上壓出來的凹槽
+// （按壓陰影），卡片是一塊鼓起來的小黏土片（small，滑過換成 card 的厚度），拖曳中被捏起來、微微歪一點；欄名用 Nunito 粗體。
+// 黏土陰影要空間，清單與看板四周多留白。
+:root[data-paradigm='clay'] {
+  .lib-kanban-board {
+    --lib-kanban-board-padding: 0.5rem;
+    --lib-kanban-column-bg: var(--mat-sys-surface-container-high);
+    --lib-kanban-column-shadow: var(--clay-shadow-pressed);
+    --lib-kanban-column-radius: var(--mat-sys-corner-large);
+    --lib-kanban-title-font: var(--font-display);
+    --lib-kanban-title-weight: 800;
+    --lib-kanban-count-bg: var(--mat-sys-surface);
+    --lib-kanban-count-shadow: var(--clay-shadow-small);
+    --lib-kanban-list-padding: 0.625rem;
+    --lib-kanban-card-gap: 0.75rem;
+    --lib-kanban-card-shadow: var(--clay-shadow-small);
+    --lib-kanban-card-hover-shadow: var(--clay-shadow-card);
+    --lib-kanban-drag-shadow: var(--clay-shadow-card-hover);
+    --lib-kanban-drag-tilt: 2deg;
+  }
+}

@@ -650,3 +650,25 @@
     --lib-cal-tip-shadow: none;
   }
 }
+
+// ── Kanban board ──
+// 看板（libs/ui kanban-board）：只設元件暴露的 --lib-kanban-* 變數（CONTRACT.md「看板」）。欄是第二墨 12% 的平網（riso-raised，
+// 不放網點）、欄頭下一條主墨細線；卡片是白紙＋主墨線框，滑過換主墨 10% 平網；拖曳中整張浮起來，影子是固定 8px 的平網影
+// （level1）；張數是主墨線框的膠囊；放置預覽是主墨虛線。表面上不做錯位、不壓網點（都有字）。
+:root[data-paradigm='riso'] {
+  .lib-kanban-board {
+    --lib-kanban-column-bg: var(--riso-raised);
+    --lib-kanban-head-divider: var(--riso-rule);
+    --lib-kanban-title-font: var(--font-display);
+    --lib-kanban-title-weight: 700;
+    --lib-kanban-count-bg: var(--mat-sys-surface);
+    --lib-kanban-count-frame: var(--riso-line);
+    --lib-kanban-card-frame: var(--riso-line);
+    --lib-kanban-card-shadow: none;
+    --lib-kanban-card-hover-bg: var(--riso-overlay);
+    --lib-kanban-card-hover-shadow: none;
+    --lib-kanban-drag-shadow: var(--mat-sys-level1);
+    --lib-kanban-placeholder-frame: var(--riso-line-w) dashed var(--riso-ink-a);
+    --lib-kanban-placeholder-bg: color-mix(in srgb, var(--riso-ink-a) 8%, transparent);
+  }
+}

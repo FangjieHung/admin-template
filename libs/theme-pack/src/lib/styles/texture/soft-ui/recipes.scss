@@ -379,3 +379,24 @@
     --lib-cal-pop-frame: 0 solid transparent;
   }
 }
+
+// ── Kanban board ──
+// 看板（libs/ui kanban-board）：只設元件暴露的 --lib-kanban-* 變數（CONTRACT.md「看板」）。每一欄是壓進卡片的凹槽
+// （同色、小內凹），卡片從凹槽裡凸起來（level1，滑過升到 level3）；張數是小內凹。浮雕陰影要空間，清單與看板四周多留白。
+:root[data-paradigm='soft-ui'] {
+  .lib-kanban-board {
+    --lib-kanban-board-padding: 0.5rem;
+    --lib-kanban-column-bg: var(--mat-sys-background);
+    --lib-kanban-column-shadow: var(--soft-inset-small);
+    --lib-kanban-count-bg: var(--mat-sys-background);
+    --lib-kanban-count-radius: var(--mat-sys-corner-medium);
+    --lib-kanban-count-shadow: var(--soft-inset-small);
+    --lib-kanban-list-padding: 0.75rem;
+    --lib-kanban-card-gap: 0.875rem;
+    --lib-kanban-card-bg: var(--mat-sys-background);
+    --lib-kanban-card-shadow: var(--mat-sys-level1);
+    --lib-kanban-card-hover-shadow: var(--mat-sys-level3);
+    --lib-kanban-drag-shadow: var(--mat-sys-level3);
+    --lib-kanban-placeholder-bg: var(--mat-sys-background);
+  }
+}

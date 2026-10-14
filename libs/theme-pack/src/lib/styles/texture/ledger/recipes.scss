@@ -524,3 +524,30 @@
     --lib-cal-swatch-radius: 0px;
   }
 }
+
+// ── Kanban board ──
+// 看板（libs/ui kanban-board）：只設元件暴露的 --lib-kanban-* 變數（CONTRACT.md「看板」）。帳冊式：欄是白紙＋1px 帳冊框、
+// 欄頭下一條較深的線（同表頭）；卡片貼平（1px 細框、沒有陰影），滑過底色淡淡加深（同滑過的表格列），間距與內距都較密，
+// 字小一號；拖曳中只是一圈 outline 框（level3），不浮起。
+:root[data-paradigm='ledger'] {
+  .lib-kanban-board {
+    --lib-kanban-gap: 0.75rem;
+    --lib-kanban-column-min: 13rem;
+    --lib-kanban-column-bg: var(--mat-sys-surface);
+    --lib-kanban-column-frame: 1px solid var(--ledger-rule);
+    --lib-kanban-column-padding: 0.5rem;
+    --lib-kanban-head-divider: 1px solid var(--ledger-rule-strong);
+    --lib-kanban-title-size: 0.8125rem;
+    --lib-kanban-count-bg: var(--ledger-head-bg);
+    --lib-kanban-count-radius: var(--mat-sys-corner-small);
+    --lib-kanban-card-gap: 0.375rem;
+    --lib-kanban-card-padding: 0.5rem 0.625rem;
+    --lib-kanban-card-frame: 1px solid var(--ledger-rule);
+    --lib-kanban-card-radius: var(--mat-sys-corner-small);
+    --lib-kanban-card-shadow: none;
+    --lib-kanban-card-hover-bg: color-mix(in srgb, var(--mat-sys-primary) 8%, var(--mat-sys-surface));
+    --lib-kanban-card-hover-shadow: none;
+    --lib-kanban-drag-shadow: var(--mat-sys-level3);
+    --lib-kanban-placeholder-frame: 1px dashed var(--mat-sys-primary);
+  }
+}

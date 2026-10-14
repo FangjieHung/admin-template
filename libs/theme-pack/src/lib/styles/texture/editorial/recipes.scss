@@ -428,3 +428,33 @@
     --lib-cal-group-bg: transparent;
   }
 }
+
+// ── Kanban board ──
+// 看板（libs/ui kanban-board）：只設元件暴露的 --lib-kanban-* 變數（CONTRACT.md「看板」）。排版式：欄不是盒子（沒有底色與框），
+// 欄名是襯線字、下方一條墨色強調線；卡片是直角的髮絲框，滑過換成 container-low（本質地最多一階），拖曳中換成墨色細框、
+// 沒有陰影；張數是純文字。狀態外框都改成 1px（髮絲）。
+:root[data-paradigm='editorial'] {
+  .lib-kanban-board {
+    --lib-kanban-gap: 1.5rem;
+    --lib-kanban-column-bg: transparent;
+    --lib-kanban-column-radius: 0px;
+    --lib-kanban-column-padding: 0.5rem 0.25rem;
+    --lib-kanban-head-divider: 2px solid var(--mat-sys-on-surface);
+    --lib-kanban-title-font: var(--font-display);
+    --lib-kanban-title-size: 1.125rem;
+    --lib-kanban-count-bg: transparent;
+    --lib-kanban-count-fg: var(--mat-sys-on-surface-variant);
+    --lib-kanban-card-frame: 1px solid var(--mat-sys-outline-variant);
+    --lib-kanban-card-radius: 0px;
+    --lib-kanban-card-shadow: none;
+    --lib-kanban-card-hover-bg: var(--mat-sys-surface-container-low);
+    --lib-kanban-card-hover-shadow: none;
+    --lib-kanban-drag-frame: 1px solid var(--mat-sys-on-surface);
+    --lib-kanban-drag-shadow: none;
+    --lib-kanban-placeholder-frame: 1px dashed var(--mat-sys-on-surface);
+    --lib-kanban-placeholder-bg: transparent;
+    --lib-kanban-drop-ring: inset 0 0 0 1px var(--mat-sys-on-surface);
+    --lib-kanban-blocked-ring: inset 0 0 0 1px var(--mat-sys-error);
+    --lib-kanban-wip-ring: inset 0 0 0 1px var(--mat-sys-error);
+  }
+}

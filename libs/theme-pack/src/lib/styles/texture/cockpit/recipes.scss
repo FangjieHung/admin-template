@@ -533,3 +533,33 @@
     --lib-cal-tip-shadow: var(--cockpit-glow-2);
   }
 }
+
+// ── Kanban board ──
+// 看板（libs/ui kanban-board）：只設元件暴露的 --lib-kanban-* 變數（CONTRACT.md「看板」）。欄是凹進去的暗槽（最暗的
+// surface-container-lowest＋髮絲亮邊），卡片亮一階（surface-container＋亮邊），滑過再亮一階並開始發光，拖曳中亮邊變強＋
+// 啟用光暈；張數是讀數窗；超過上限的欄亮紅燈（錯誤色框＋紅光），可放下的欄內側亮起主色光。欄名用窄體字。
+:root[data-paradigm='cockpit'] {
+  .lib-kanban-board {
+    --lib-kanban-board-padding: 0.5rem;
+    --lib-kanban-column-bg: var(--mat-sys-surface-container-lowest);
+    --lib-kanban-column-frame: 1px solid var(--cockpit-edge);
+    --lib-kanban-head-divider: 1px solid var(--cockpit-edge);
+    --lib-kanban-title-font: var(--font-display);
+    --lib-kanban-title-size: 1.0625rem;
+    --lib-kanban-count-bg: var(--mat-sys-surface-container-lowest);
+    --lib-kanban-count-frame: 1px solid var(--cockpit-edge-strong);
+    --lib-kanban-count-radius: var(--mat-sys-corner-small);
+    --lib-kanban-list-padding: 0.375rem;
+    --lib-kanban-card-bg: var(--mat-sys-surface-container);
+    --lib-kanban-card-frame: 1px solid var(--cockpit-edge);
+    --lib-kanban-card-shadow: none;
+    --lib-kanban-card-hover-bg: var(--mat-sys-surface-container-high);
+    --lib-kanban-card-hover-shadow: var(--cockpit-glow-1);
+    --lib-kanban-drag-frame: 1px solid var(--cockpit-edge-strong);
+    --lib-kanban-drag-shadow: var(--cockpit-glow-active);
+    --lib-kanban-placeholder-frame: 1px dashed var(--cockpit-edge-strong);
+    --lib-kanban-placeholder-bg: var(--cockpit-lit);
+    --lib-kanban-drop-ring: inset 0 0 0 1px var(--cockpit-edge-strong), inset 0 0 14px color-mix(in srgb, var(--mat-sys-primary) 22%, transparent);
+    --lib-kanban-wip-ring: inset 0 0 0 1px var(--mat-sys-error), 0 0 14px color-mix(in srgb, var(--mat-sys-error) 45%, transparent);
+  }
+}

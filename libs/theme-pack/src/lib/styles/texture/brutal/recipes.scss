@@ -724,3 +724,38 @@
     --lib-cal-group-bg: var(--brutal-raised);
   }
 }
+
+// ── Kanban board ──
+// 看板（libs/ui kanban-board）：只設元件暴露的 --lib-kanban-* 變數（CONTRACT.md「看板」）。欄是一張淡色紙（container-low）
+// 用 2px 墨線框起來、欄頭下一條墨線（四欄不換成四種飽和色塊）；卡片是白色貼紙（2px 墨框＋3px 墨影，滑過 5px），
+// 拖曳中被撕起來、歪一點、影子最長（level3）；放置預覽是一塊 secondary-container 的空位（墨色虛線）；張數是
+// primary-container 的方形貼紙。狀態外框 3px。
+:root[data-paradigm='brutal'] {
+  .lib-kanban-board {
+    --lib-kanban-board-padding: 0.5rem;
+    --lib-kanban-column-bg: var(--mat-sys-surface-container-low);
+    --lib-kanban-column-frame: var(--brutal-line);
+    --lib-kanban-column-radius: 0px;
+    --lib-kanban-head-divider: var(--brutal-line);
+    --lib-kanban-title-font: var(--font-display);
+    --lib-kanban-title-weight: 700;
+    --lib-kanban-count-bg: var(--mat-sys-primary-container);
+    --lib-kanban-count-fg: var(--mat-sys-on-primary-container);
+    --lib-kanban-count-frame: var(--brutal-line);
+    --lib-kanban-count-radius: 0px;
+    --lib-kanban-list-padding: 0.25rem 0.5rem 0.5rem 0.25rem;
+    --lib-kanban-card-gap: 0.75rem;
+    --lib-kanban-card-bg: var(--mat-sys-surface-container-lowest);
+    --lib-kanban-card-frame: var(--brutal-line);
+    --lib-kanban-card-radius: 0px;
+    --lib-kanban-card-shadow: var(--brutal-shadow-sm);
+    --lib-kanban-card-hover-shadow: var(--brutal-shadow);
+    --lib-kanban-drag-shadow: var(--mat-sys-level3);
+    --lib-kanban-drag-tilt: -2deg;
+    --lib-kanban-placeholder-frame: 2px dashed var(--brutal-ink);
+    --lib-kanban-placeholder-bg: var(--brutal-raised);
+    --lib-kanban-drop-ring: inset 0 0 0 3px var(--mat-sys-primary);
+    --lib-kanban-blocked-ring: inset 0 0 0 3px var(--mat-sys-error);
+    --lib-kanban-wip-ring: inset 0 0 0 3px var(--mat-sys-error);
+  }
+}
