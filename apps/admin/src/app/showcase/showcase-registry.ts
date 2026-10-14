@@ -129,6 +129,13 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     load: () => import('../features/file-upload/file-upload-page.component').then((m) => m.FileUploadPageComponent),
   },
   {
+    id: 'import-wizard',
+    title: '匯入精靈',
+    group: 'input',
+    icon: 'drive_folder_upload',
+    load: () => import('../features/import-wizard/import-wizard-page.component').then((m) => m.ImportWizardPageComponent),
+  },
+  {
     id: 'signature-pad',
     title: '簽名板',
     group: 'input',
@@ -238,6 +245,7 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
   { id: 'ticket-list', title: '列表頁', group: 'templates', icon: 'list_alt', path: 'templates/tickets', access: 'ticket:view' },
   { id: 'ticket-detail', title: '詳情頁', group: 'templates', icon: 'article', path: 'templates/tickets/TK-2048', access: 'ticket:view' },
   { id: 'ticket-form', title: '表單頁', group: 'templates', icon: 'edit_document', path: 'templates/tickets/TK-2048/edit', access: 'ticket:edit' },
+  { id: 'ticket-import', title: '匯入頁', group: 'templates', icon: 'upload', path: 'templates/tickets/import', access: 'ticket:create' },
   { id: 'login', title: '登入', group: 'templates', icon: 'login', path: 'login' },
   { id: 'settings-template', title: '設定頁', group: 'templates', icon: 'manage_accounts', path: 'templates/settings' },
   { id: 'notifications-page', title: '通知頁', group: 'templates', icon: 'inbox', path: 'templates/notifications' },

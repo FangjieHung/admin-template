@@ -73,7 +73,7 @@ const INFO: TemplateInfo = {
     'lib-advanced-filter、lib-filter-chips、lib-saved-views（ListViewController）',
     'lib-data-table（分頁、排序、欄位選擇、凍結編號欄、多選、批次操作、骨架、空狀態）',
     'lib-error-state、lib-empty-state、lib-status-chip、lib-toast、確認對話框',
-    'libs/access 的 *libCan（檢視者看不到新增、批次改狀態、刪除）',
+    'libs/access 的 *libCan（檢視者看不到匯入、新增、批次改狀態、刪除）',
   ],
   replace: [
     'ticket.repository.ts：list() 換成呼叫後端（資料量大時改成伺服器分頁）',
@@ -89,7 +89,7 @@ const INFO: TemplateInfo = {
 };
 
 /**
- * 工單列表（頁面樣板，/templates/tickets）：點一列進詳情，「新增工單」進空白表單。
+ * 工單列表（頁面樣板，/templates/tickets）：點一列進詳情，「新增工單」進空白表單，「匯入」進匯入精靈。
  * 篩選、排序、頁碼同步到網址（ticket-list-url.ts）。
  */
 @Component({

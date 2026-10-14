@@ -1,0 +1,58 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="匯入聯絡人"
+    description="沒有檔案也能試：按下方的示範檔案載入。「有問題的 CSV」用全形欄位名稱、多一欄備註，裡面有格式錯誤、檔案內重複、已經存在的 Email，還有一筆匯入時會被拒絕（示範失敗與錯誤報告）。Big5 檔示範台灣 Excel 存的 CSV；Excel 檔有兩個工作表，第一次載入時才下載讀取 Excel 的程式。勾選「記住這次的對應」後，下次的欄位會自動套用。"
+  >
+    <div data-demo="contacts">
+      <div class="import-samples" role="group" aria-label="載入示範檔案">
+        <span class="import-samples__label">載入示範檔案</span>
+        @for (sample of samples; track sample.id) {
+          <button
+            type="button"
+            matButton="outlined"
+            [attr.data-sample]="sample.id"
+            [disabled]="loadingSample() !== null"
+            (click)="loadSample(sample.id)"
+          >
+            {{ sample.label }}
+          </button>
+        }
+      </div>
+
+      <lib-import-wizard
+        [schema]="schema"
+        [target]="target"
+        [mappingStore]="mappingStore"
+        mappingId="contacts"
+        [batchSize]="3"
+        [headingLevel]="3"
+        templateFileName="聯絡人匯入範本.csv"
+        reportFileName="聯絡人匯入錯誤報告.csv"
+        (imported)="lastResult.set($event)"
+        (finished)="onFinished($event)"
+      />
+
+      <dl class="demo-state import-state">
+        <div>
+          <dt>聯絡人（示範資料）</dt>
+          <dd class="ui-text-numeric" data-contact-count>{{ contacts().size }} 位</dd>
+        </div>
+        <div>
+          <dt>(imported)</dt>
+          <dd>{{ resultText(lastResult()) }}</dd>
+        </div>
+        <div>
+          <dt>(finished)</dt>
+          <dd>{{ finishedResult() ? '已按「完成」，回到第一步' : '（尚未按完成）' }}</dd>
+        </div>
+      </dl>
+    </div>
+  </app-demo-block>
+</app-showcase-page>

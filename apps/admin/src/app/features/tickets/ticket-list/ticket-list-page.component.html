@@ -1,4 +1,4 @@
-<!-- 頁首：標題「工單」（provideHeaderTitle）；右邊是搜尋、狀態、進階篩選、新增與樣板說明。 -->
+<!-- 頁首：標題「工單」（provideHeaderTitle）；右邊是搜尋、狀態、進階篩選、匯入、新增與樣板說明。 -->
 <ng-template appHeaderToolbar>
   <lib-page-toolbar
     placeholder="搜尋編號、標題或申請人"
@@ -22,6 +22,9 @@
       (conditionsChange)="setFilters($event)"
     />
     <div actions class="ticket-actions">
+      <a *libCan="'ticket:create'" matButton="outlined" routerLink="import" data-action="import">
+        <span class="material-symbols-rounded" aria-hidden="true">upload</span>匯入
+      </a>
       <a *libCan="'ticket:create'" matButton="filled" routerLink="new" data-action="create">
         <span class="material-symbols-rounded" aria-hidden="true">add</span>新增工單
       </a>

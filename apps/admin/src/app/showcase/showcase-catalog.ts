@@ -63,6 +63,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '拖放、選擇或貼上檔案，逐一上傳並顯示進度，可以取消、重試、移除；手機直接拍照，桌機用網路攝影機。表單只存已上傳的檔案參照，詳情頁用唯讀模式列出附件。',
     source: 'libs/ui/src/lib/file-upload',
   },
+  'import-wizard': {
+    summary: '上傳 CSV 或 Excel → 欄位自動對應 → 預覽時直接修正錯誤、決定重複怎麼處理 → 分批匯入並顯示進度，結束後可以下載錯誤報告。',
+    source: 'libs/ui/src/lib/import-wizard',
+  },
   'signature-pad': {
     summary: '手寫或打字簽名，存檔後只回傳不透明的資產代碼；可要求先勾選確認。',
     source: 'libs/ui/src/lib/signature-pad',
@@ -131,6 +135,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '工單表單樣板：分段表單、欄位驗證與錯誤摘要、底部固定的操作列，未存檔離開會先確認；新增與編輯共用。',
     source: 'libs/ui（relation-select、confirm-dialog、toast）、apps/admin/src/app/features/tickets/ticket-form',
   },
+  'ticket-import': {
+    summary: '工單匯入樣板：從列表的「匯入」進來，上傳 CSV 或 Excel、對應欄位、預覽修正後分批建立工單，完成後回到列表並提示匯入了幾筆。',
+    source: 'libs/ui（import-wizard）、apps/admin/src/app/features/tickets/ticket-import',
+  },
   'login': {
     summary: '登入樣板：帳號密碼、顯示密碼、記住我、送出中與錯誤訊息（帳密錯誤、帳號鎖定）；示範帳號登入後切換成對應的身分。',
     source: 'libs/access（示範身分）、apps/admin/src/app/features/auth',
@@ -166,7 +174,6 @@ export interface PlannedItem {
 }
 
 export const PLANNED_ITEMS: readonly PlannedItem[] = [
-  { title: '匯入精靈', kind: '元件', priority: 'P1', summary: '上傳 → 欄位對應 → 預覽驗證 → 匯入。' },
   { title: '表格內直接編輯', kind: '元件', priority: 'P1', summary: '行內編輯與批次修改。' },
   { title: '共用日曆與排程', kind: '元件', priority: 'P1', summary: '月／週檢視與資源時間軸，含拖曳。' },
   { title: '看板', kind: '元件', priority: 'P1', summary: '卡片拖曳換欄。' },

@@ -50,6 +50,29 @@ export interface TicketSnapshot {
   readonly entries: readonly { index: number; ticket: Ticket; activity: readonly ActivityEntry[] }[];
 }
 
+/** 匯入的一列：標題必填，其他欄位沒給就用預設值（新增）或保留原值（更新）。 */
+export interface TicketImportRow {
+  /** 檔案裡的列號（失敗時回報用）。 */
+  row: number;
+  action: 'create' | 'update';
+  draft: Partial<TicketDraft> & { title: string };
+}
+
+export interface TicketImportResult {
+  created: number;
+  updated: number;
+  failed: { row: number; message: string }[];
+}
+
+function titleKey(title: string): string {
+  return title.normalize('NFKC').trim().toLocaleLowerCase();
+}
+
+/** 只留有值的欄位（更新時檔案裡空白的欄位不覆蓋原值）。 */
+function definedOnly(draft: Partial<TicketDraft>): Partial<TicketDraft> {
+  return Object.fromEntries(Object.entries(draft).filter(([, v]) => v !== undefined && v !== null && v !== '')) as Partial<TicketDraft>;
+}
+
 /** 示範的載入失敗。 */
 export class TicketLoadError extends Error {
   constructor() {
@@ -222,6 +245,56 @@ export class TicketRepository {
       }
       this.data.activity.set(ticket.id, [...activity]);
     }
+  }
+
+  // ---- 匯入 ----
+
+  /** 這些標題裡已經有工單的（不分大小寫與前後空白），回傳傳入時的字串。匯入時判斷重複用；接後端時換成查詢 API。 */
+  async existingTitles(titles: readonly string[], signal?: AbortSignal): Promise<Set<string>> {
+    await this.delay(signal);
+    const have = new Set(this.data.tickets.map((t) => titleKey(t.title)));
+    return new Set(titles.filter((title) => have.has(titleKey(title))));
+  }
+
+  /**
+   * 匯入一批工單：`create` 新增；`update` 依標題找到現有的工單，只改檔案裡有值的欄位（找不到時新增）。
+   * 沒給的分類、優先順序用「其他」「中」，申請人用示範資料的第一位。接後端時換成批次匯入 API。
+   */
+  async importBatch(rows: readonly TicketImportRow[], actor: TicketActor, signal?: AbortSignal): Promise<TicketImportResult> {
+    await this.delay(signal);
+    const result: TicketImportResult = { created: 0, updated: 0, failed: [] };
+    for (const { draft, action } of rows) {
+      const existing = action === 'update' ? this.data.tickets.find((t) => titleKey(t.title) === titleKey(draft.title)) : undefined;
+      if (existing) {
+        const next: Ticket = { ...existing, ...definedOnly(draft), title: draft.title.trim() };
+        const changes = this.diff(existing, next);
+        Object.assign(existing, next);
+        if (changes.length) {
+          const fields = changes.map((c) => c.field).join('、');
+          this.log(existing.id, this.entry(existing.id, actor, 'edit', `${actor.name} 用匯入修改了${fields}`, changes));
+        }
+        result.updated++;
+        continue;
+      }
+      const number = Math.max(...this.data.tickets.map((t) => Number(t.id.slice(3))), 2000) + 1;
+      const ticket: Ticket = {
+        id: `TK-${number}`,
+        title: draft.title.trim(),
+        category: draft.category ?? 'other',
+        priority: draft.priority ?? 'medium',
+        assigneeId: draft.assigneeId ?? null,
+        requesterId: draft.requesterId ?? this.data.requesters[0].id,
+        dueDate: draft.dueDate ?? null,
+        description: draft.description ?? '',
+        status: 'open',
+        createdAt: new Date().toISOString(),
+        attachmentCount: 0,
+      };
+      this.data.tickets.unshift(ticket);
+      this.data.activity.set(ticket.id, [this.entry(ticket.id, actor, 'create', `${actor.name} 用匯入建立了工單`)]);
+      result.created++;
+    }
+    return result;
   }
 
   /** relation-select 的「建立」：新增一位申請人（示範，只存在記憶體）。 */

@@ -1,0 +1,20 @@
+// 匯入精靈展示頁。只用語意 token；精靈、按鈕的外觀交給 libs/ui 與質地 recipe。
+
+.import-samples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.import-samples__label {
+  margin-inline-end: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--mat-sys-on-surface);
+}
+
+.import-state {
+  margin-top: 1.5rem;
+}
