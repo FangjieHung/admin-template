@@ -1,0 +1,259 @@
+// 附件上傳。只用語意 token；拖放區、清單列、縮圖方塊、進度條的造型是元件暴露的變數（--lib-upload-*，見 CONTRACT.md），
+// 質地只在 .lib-file-upload 上設變數，不覆寫屬性。變數沒設時用這裡 var() 的第二個值。
+// 拖放區的框、陰影畫在不含文字的 ::before 上（可以加 filter 而字不變形），拖進來時的網點之類的裝飾畫在 ::after（區塊後面）。
+// 每一列是內部元件 lib-file-upload-item（各自的樣式在 8 kB 預算內）。
+@use '../feedback-state/skeleton-block' as sk;
+
+:host {
+  // 只給報讀器的文字是 absolute：host 當定位基準，避免它跳出外層捲動容器撐出捲軸。
+  position: relative;
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  color: var(--mat-sys-on-surface);
+}
+
+.fu-sr-only {
+  @include sk.sr-only;
+}
+
+.fu-native {
+  display: none;
+}
+
+p {
+  margin: 0;
+}
+
+.fu-label {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.875rem;
+}
+
+.fu-picker {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+}
+
+// ---- 拖放區 ----
+.fu-zone {
+  position: relative;
+  isolation: isolate;
+  justify-self: stretch;
+  display: grid;
+  // column：圖示、文字、說明排成一列（Ledger 的密集版）。
+  grid-auto-flow: var(--lib-upload-zone-flow, row);
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+  gap: 0.375rem 0.75rem;
+  padding: var(--lib-upload-zone-padding, 1.5rem 1rem);
+  border-radius: var(--lib-upload-zone-radius, var(--mat-sys-corner-medium));
+  color: var(--lib-upload-zone-fg, var(--mat-sys-on-surface));
+  text-align: center;
+  cursor: pointer;
+  --_bg: var(--lib-upload-zone-bg, var(--mat-sys-surface-container-low));
+  transition: color var(--app-motion-fast) var(--app-ease-standard);
+
+  // 底色、框線與陰影（不含文字）。底色也畫在這層，::after 的裝飾才會被它蓋住、只露在錯開的那一圈。
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border: var(--lib-upload-zone-border-width, 1px) var(--lib-upload-zone-border-style, dashed)
+      var(--lib-upload-zone-border-color, var(--app-field-border));
+    border-radius: inherit;
+    background: var(--_bg);
+    box-shadow: var(--lib-upload-zone-shadow, none);
+    filter: var(--lib-upload-zone-filter, none);
+    pointer-events: none;
+    transition:
+      background-color var(--app-motion-fast) var(--app-ease-standard),
+      border-color var(--app-motion-fast) var(--app-ease-standard),
+      box-shadow var(--app-motion-fast) var(--app-ease-standard);
+  }
+
+  // 拖進來時的裝飾（Riso 的網點）：在區塊後面、往右下錯開，不壓到字。
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    border-radius: inherit;
+    background: var(--lib-upload-zone-backdrop, none);
+    transform: translate(var(--lib-upload-zone-backdrop-offset, 0px), var(--lib-upload-zone-backdrop-offset, 0px));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--app-motion-fast) var(--app-ease-standard);
+  }
+
+  &:hover:not(.is-disabled) {
+    --_bg: var(--lib-upload-zone-hover-bg, var(--mat-sys-surface-container));
+  }
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+
+  &.is-dragover {
+    --_bg: var(--lib-upload-zone-active-bg, color-mix(in srgb, var(--mat-sys-primary) 8%, var(--mat-sys-surface)));
+    color: var(--lib-upload-zone-active-fg, var(--mat-sys-on-surface));
+
+    &::before {
+      border-width: var(--lib-upload-zone-active-border-width, 2px);
+      border-style: var(--lib-upload-zone-active-border-style, dashed);
+      border-color: var(--lib-upload-zone-active-border-color, var(--mat-sys-primary));
+      box-shadow: var(--lib-upload-zone-active-shadow, none);
+    }
+
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  &.is-invalid::before {
+    border-color: var(--mat-sys-error);
+  }
+
+  &.is-disabled {
+    --_bg: var(--app-disabled-bg);
+    color: var(--app-disabled-fg);
+    cursor: default;
+
+    &::before {
+      border-color: var(--app-disabled-fg);
+    }
+
+    .fu-zone__icon,
+    .fu-zone__action,
+    .fu-zone__hint,
+    .fu-zone__instructions {
+      color: inherit;
+    }
+  }
+}
+
+.fu-zone__icon {
+  color: var(--lib-upload-zone-icon-color, var(--mat-sys-primary));
+  font-size: var(--lib-upload-zone-icon-size, 2rem);
+}
+
+.is-dragover .fu-zone__icon {
+  color: var(--lib-upload-zone-active-icon-color, var(--lib-upload-zone-icon-color, var(--mat-sys-primary)));
+}
+
+.fu-zone__text {
+  display: grid;
+  gap: 0.125rem;
+}
+
+.fu-zone__hint {
+  margin-top: 0.25rem;
+}
+
+.fu-zone__action {
+  color: var(--lib-upload-zone-action-color, var(--mat-sys-primary));
+  font-family: var(--lib-upload-zone-title-font, var(--font-body));
+  font-size: var(--lib-upload-zone-title-size, 1rem);
+  font-weight: var(--lib-upload-zone-title-weight, 600);
+}
+
+.is-dragover .fu-zone__action {
+  color: inherit;
+}
+
+.fu-zone__instructions,
+.fu-zone__hint {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.875rem;
+}
+
+.is-dragover .fu-zone__instructions,
+.is-dragover .fu-zone__hint {
+  color: inherit;
+}
+
+.fu-zone__hint {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 0.5rem;
+  font-size: 0.8125rem;
+
+  span + span::before {
+    content: '·';
+    margin-inline-end: 0.5rem;
+  }
+}
+
+.fu-camera .material-symbols-rounded {
+  font-size: 1.25rem;
+}
+
+.fu-error {
+  color: var(--mat-sys-error);
+  font-size: 0.8125rem;
+}
+
+.fu-notice,
+.fu-empty {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.875rem;
+}
+
+// ---- 清單 ----
+.fu-list {
+  display: grid;
+  gap: var(--lib-upload-row-gap, 0);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fu-list:not(.fu-list--grid) > .fu-item + .fu-item {
+  border-top: var(--lib-upload-row-divider, 1px solid var(--mat-sys-outline-variant));
+}
+
+.fu-list--grid {
+  // 窄容器（手機）至少兩欄：最小寬度不超過一半。
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(var(--lib-upload-tile-min, 10rem), calc((100% - var(--lib-upload-tile-gap, 0.75rem)) / 2)), 1fr)
+  );
+  gap: var(--lib-upload-tile-gap, 0.75rem);
+}
+
+.fu-item {
+  min-width: 0;
+  border-radius: var(--lib-upload-row-radius, var(--mat-sys-corner-small));
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+}
+
+.fu-list--grid > .fu-item {
+  border-radius: var(--lib-upload-tile-radius, var(--mat-sys-corner-medium));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fu-zone,
+  .fu-zone::before,
+  .fu-zone::after {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .fu-zone::before {
+    border-color: CanvasText;
+  }
+
+  .fu-zone.is-dragover::before {
+    border-color: Highlight;
+  }
+}

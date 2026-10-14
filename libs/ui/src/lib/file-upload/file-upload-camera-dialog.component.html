@@ -1,0 +1,62 @@
+<h2 mat-dialog-title>{{ labels.cameraTitle }}</h2>
+
+<mat-dialog-content>
+  <div class="fuc-stage" [attr.data-phase]="phase()">
+    <!-- 影片一直在 DOM 裡（拿到串流就能接上）；不是即時預覽時藏起來。前鏡頭的預覽左右翻轉（像照鏡子），拍出來的照片不翻。 -->
+    <video
+      #video
+      class="fuc-video"
+      [class.fuc-off]="phase() !== 'live'"
+      [class.fuc-mirror]="facing() === 'user'"
+      playsinline
+      muted
+      aria-hidden="true"
+    ></video>
+    @switch (phase()) {
+      @case ('captured') {
+        <img class="fuc-still" [src]="stillUrl()" alt="" />
+      }
+      @case ('starting') {
+        <p class="fuc-message" role="status">
+          <span class="fuc-message__icon material-symbols-rounded" aria-hidden="true">photo_camera</span>
+          <span>{{ labels.cameraStarting }}</span>
+        </p>
+      }
+      @case ('denied') {
+        <div class="fuc-message" role="alert" data-camera-error="denied">
+          <span class="fuc-message__icon material-symbols-rounded" aria-hidden="true">no_photography</span>
+          <p>{{ labels.cameraDenied }}</p>
+          <button matButton="filled" type="button" (click)="pickInstead()">{{ labels.cameraFallback }}</button>
+        </div>
+      }
+      @case ('unavailable') {
+        <div class="fuc-message" role="alert" data-camera-error="unavailable">
+          <span class="fuc-message__icon material-symbols-rounded" aria-hidden="true">no_photography</span>
+          <p>{{ labels.cameraUnavailable }}</p>
+          <button matButton="filled" type="button" (click)="pickInstead()">{{ labels.cameraFallback }}</button>
+        </div>
+      }
+    }
+  </div>
+  <input #fallback class="fuc-native" type="file" tabindex="-1" aria-hidden="true" [accept]="data.accept" (change)="onFallbackFiles($event)" />
+</mat-dialog-content>
+
+<mat-dialog-actions class="fuc-actions">
+  @if (canSwitch() && phase() === 'live') {
+    <button matButton type="button" class="fuc-switch" (click)="switchCamera()">
+      <span class="material-symbols-rounded" aria-hidden="true">cameraswitch</span>
+      {{ labels.cameraSwitch }}
+    </button>
+  }
+  <button matButton type="button" mat-dialog-close>{{ labels.close }}</button>
+  @if (phase() === 'live') {
+    <button matButton="filled" type="button" data-camera="capture" (click)="capture()">
+      <span class="material-symbols-rounded" aria-hidden="true">photo_camera</span>
+      {{ labels.cameraCapture }}
+    </button>
+  }
+  @if (phase() === 'captured') {
+    <button matButton="outlined" type="button" data-camera="retake" (click)="retake()">{{ labels.cameraRetake }}</button>
+    <button matButton="filled" type="button" data-camera="use" (click)="use()">{{ labels.cameraUse }}</button>
+  }
+</mat-dialog-actions>

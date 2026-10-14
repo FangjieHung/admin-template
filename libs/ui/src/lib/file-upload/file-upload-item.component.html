@@ -1,0 +1,68 @@
+<div class="fui-media">
+  @if (thumb(); as src) {
+    <button
+      type="button"
+      class="fui-thumb"
+      [attr.aria-label]="label(labels().previewFile)"
+      (click)="preview.emit()"
+    >
+      <img [src]="src" alt="" loading="lazy" decoding="async" />
+    </button>
+  } @else {
+    <span class="fui-icon material-symbols-rounded" aria-hidden="true">{{ icon() }}</span>
+  }
+</div>
+
+<div class="fui-body">
+  @if (readonly() && url()) {
+    <a class="fui-name fui-name--link" [href]="url()" [attr.download]="item().name" [attr.aria-label]="label(labels().downloadFile)"
+      ><span class="fui-name__start">{{ parts().start }}</span><span class="fui-name__end">{{ parts().end }}</span></a
+    >
+  } @else {
+    <p class="fui-name" [attr.title]="item().name"
+      ><span class="fui-name__start">{{ parts().start }}</span><span class="fui-name__end">{{ parts().end }}</span></p
+    >
+  }
+  <p class="fui-meta">
+    <span class="ui-text-numeric">{{ size() }}</span>
+    @if (!readonly()) {
+      <span class="fui-status">
+        @if (statusIcon(); as name) {
+          <span class="fui-status__icon material-symbols-rounded" aria-hidden="true">{{ name }}</span>
+        }
+        <span>{{ statusText() }}</span>
+      </span>
+    }
+  </p>
+  @if (item().status === 'uploading' || item().status === 'queued') {
+    <div
+      class="fui-progress"
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-valuenow]="percent()"
+      [attr.aria-label]="label(labels().progressLabel)"
+    >
+      <span [style.inline-size.%]="percent()"></span>
+    </div>
+  }
+</div>
+
+@if (!readonly()) {
+  <div class="fui-actions">
+    @if (item().status === 'failed') {
+      <button matButton type="button" class="fui-retry" [disabled]="disabled()" [attr.aria-label]="label(labels().retryFile)" (click)="retry.emit()">
+        {{ labels().retry }}
+      </button>
+    }
+    @if (busy()) {
+      <button matIconButton type="button" data-action="cancel" [disabled]="disabled()" [attr.aria-label]="label(labels().cancelFile)" (click)="cancel.emit()">
+        <span class="material-symbols-rounded" aria-hidden="true">close</span>
+      </button>
+    } @else {
+      <button matIconButton type="button" data-action="remove" [disabled]="disabled()" [attr.aria-label]="label(labels().removeFile)" (click)="remove.emit()">
+        <span class="material-symbols-rounded" aria-hidden="true">delete</span>
+      </button>
+    }
+  </div>
+}

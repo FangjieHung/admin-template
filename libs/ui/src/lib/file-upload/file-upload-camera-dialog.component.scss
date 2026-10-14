@@ -1,0 +1,67 @@
+// 拍照對話框。外框是 MatDialog（造型交給各質地的對話框 recipe）；這裡只排畫面，只用語意 token。
+
+.fuc-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface-container-highest);
+  color: var(--mat-sys-on-surface);
+}
+
+.fuc-video,
+.fuc-still {
+  grid-area: 1 / 1;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+
+.fuc-off {
+  display: none;
+}
+
+.fuc-mirror {
+  transform: scaleX(-1);
+}
+
+.fuc-message {
+  grid-area: 1 / 1;
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  max-inline-size: 26rem;
+  margin: 0;
+  padding: 1.5rem;
+  text-align: center;
+
+  p {
+    margin: 0;
+  }
+}
+
+.fuc-message__icon {
+  font-size: 2.5rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.fuc-native {
+  display: none;
+}
+
+.fuc-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+// 切換鏡頭靠左，其他按鈕靠右。
+.fuc-switch {
+  margin-inline-end: auto;
+}
+
+.fuc-actions .material-symbols-rounded {
+  font-size: 1.25rem;
+}

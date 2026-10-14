@@ -1,0 +1,209 @@
+// lib-file-upload 清單裡的一個檔案。只用語意 token；造型是元件暴露的變數（--lib-upload-*，見 CONTRACT.md），
+// 質地只在 .lib-file-upload 上設變數（這裡繼承），不覆寫屬性。變數沒設時用 var() 的第二個值。
+
+:host {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: var(--lib-upload-row-padding-block, 0.625rem) var(--lib-upload-row-padding-inline, 0);
+  border: var(--lib-upload-row-frame, 0 solid transparent);
+  border-radius: var(--lib-upload-row-radius, var(--mat-sys-corner-small));
+  background: var(--lib-upload-row-bg, transparent);
+  box-shadow: var(--lib-upload-row-shadow, none);
+  color: var(--mat-sys-on-surface);
+  font-size: var(--lib-upload-font-size, 0.875rem);
+  line-height: 1.4;
+}
+
+// 縮圖方塊：上面整塊縮圖（4:3），下面檔名與狀態，動作在右下。
+:host(.fui--grid) {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'media media'
+    'body actions';
+  align-items: start;
+  gap: 0.5rem 0.25rem;
+  padding: var(--lib-upload-tile-padding, 0.5rem);
+  border: var(--lib-upload-tile-frame, 1px solid var(--mat-sys-outline-variant));
+  border-radius: var(--lib-upload-tile-radius, var(--mat-sys-corner-medium));
+  background: var(--lib-upload-tile-bg, var(--mat-sys-surface));
+  box-shadow: var(--lib-upload-tile-shadow, none);
+}
+
+p {
+  margin: 0;
+}
+
+// ---- 縮圖／類型圖示 ----
+.fui-media {
+  display: grid;
+  place-items: center;
+  inline-size: var(--lib-upload-thumb-size, 2.5rem);
+  block-size: var(--lib-upload-thumb-size, 2.5rem);
+  overflow: hidden;
+  border: var(--lib-upload-thumb-frame, 1px solid var(--mat-sys-outline-variant));
+  border-radius: var(--lib-upload-thumb-radius, var(--mat-sys-corner-small));
+  background: var(--lib-upload-thumb-bg, var(--mat-sys-surface-container-high));
+}
+
+:host(.fui--grid) .fui-media {
+  grid-area: media;
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 4 / 3;
+}
+
+.fui-thumb {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: calc(-1 * var(--app-focus-ring-width));
+  }
+
+  img {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+}
+
+.fui-icon {
+  color: var(--lib-upload-icon-color, var(--mat-sys-on-surface-variant));
+  font-size: calc(var(--lib-upload-thumb-size, 2.5rem) * 0.6);
+}
+
+:host(.fui--grid) .fui-icon {
+  font-size: 2.5rem;
+}
+
+// ---- 檔名、大小、狀態 ----
+.fui-body {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+:host(.fui--grid) .fui-body {
+  grid-area: body;
+}
+
+// 中間省略：前段太長時先省略，後段（最後幾個字＋副檔名）盡量完整；窄到連後段都放不下（縮圖方塊）時後段也省略。
+.fui-name {
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.fui-name__start,
+.fui-name__end {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// 後段不參與縮小（否則差零點幾 px 也會冒出省略號）；只有比整個欄位還寬時才被 max-width 夾住、自己省略。
+.fui-name__start {
+  flex: 0 1 auto;
+}
+
+.fui-name__end {
+  flex: none;
+  max-width: 100%;
+}
+
+.fui-name--link {
+  color: var(--mat-sys-primary);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+}
+
+.fui-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.8125em;
+}
+
+.fui-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.fui-status__icon {
+  font-size: 1.125rem;
+}
+
+:host([data-status='done']) .fui-status {
+  color: var(--app-positive-fg);
+}
+
+:host([data-status='failed']) .fui-status,
+:host([data-status='rejected']) .fui-status {
+  color: var(--mat-sys-error);
+}
+
+:host([data-status='rejected']) .fui-name {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// ---- 進度條 ----
+.fui-progress {
+  block-size: var(--lib-upload-progress-height, 4px);
+  margin-top: 0.25rem;
+  overflow: hidden;
+  border: var(--lib-upload-progress-frame, 0 solid transparent);
+  border-radius: var(--lib-upload-progress-radius, var(--mat-sys-corner-full));
+  background: var(--lib-upload-progress-track, var(--mat-sys-surface-container-highest));
+  box-shadow: var(--lib-upload-progress-shadow, none);
+
+  span {
+    display: block;
+    block-size: 100%;
+    border-radius: inherit;
+    background: var(--lib-upload-progress-fill, var(--mat-sys-primary));
+    box-shadow: var(--lib-upload-progress-glow, none);
+    transition: inline-size var(--app-motion-fast) var(--app-ease-standard);
+  }
+}
+
+// ---- 動作 ----
+.fui-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+:host(.fui--grid) .fui-actions {
+  grid-area: actions;
+}
+
+:host(.fui--grid) .fui-retry {
+  // 方塊窄：重試只留在狀態列下方一行（按鈕本身的字），刪除鈕緊貼。
+  padding-inline: 0.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fui-progress span {
+    transition: none;
+  }
+}

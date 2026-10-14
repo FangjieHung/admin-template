@@ -58,3 +58,9 @@ export * from './lib/step-wizard/step-wizard-labels';
 export * from './lib/step-wizard/step-wizard-fields';
 export * from './lib/step-wizard/wizard-step.component';
 export * from './lib/step-wizard/step-wizard.component';
+export * from './lib/file-upload/file-upload-labels';
+export * from './lib/file-upload/upload-adapter';
+// 一律用 export *：barrel 裡混用 `export type { … } from`／`export { a, b } from` 時，整個 libs/ui 被併成一個 760 kB 的共用 chunk（每個展示頁都要下載）。
+export * from './lib/file-upload/file-upload.types';
+export * from './lib/file-upload/file-upload-utils';
+export * from './lib/file-upload/file-upload.component';

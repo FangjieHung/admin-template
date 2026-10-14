@@ -1,0 +1,91 @@
+@if (label()) {
+  <p class="fu-label" [id]="uid + '-label'">
+    {{ label() }}
+    @if (isRequired() && !readonly()) {
+      <span aria-hidden="true">*</span>
+    }
+  </p>
+}
+
+@if (!readonly()) {
+  <div class="fu-picker">
+    @if (showZone()) {
+      <!-- 整個拖放區是一個按鈕（Enter／Space 打開檔案選擇器）；聚焦時可以貼上圖片。裡面沒有其他可聚焦的元素。 -->
+      <div
+        #zone
+        class="fu-zone"
+        role="button"
+        [attr.tabindex]="isDisabled() ? -1 : 0"
+        [attr.aria-disabled]="isDisabled() ? 'true' : null"
+        [attr.aria-labelledby]="(label() ? uid + '-label ' : '') + uid + '-action'"
+        [attr.aria-describedby]="uid + '-instructions ' + (hintParts().length ? uid + '-hint ' : '') + (invalidShown() ? uid + '-error' : '')"
+        [class.is-dragover]="dragOver()"
+        [class.is-invalid]="invalidShown()"
+        [class.is-disabled]="isDisabled()"
+        (click)="openFilePicker()"
+        (keydown)="onZoneKeydown($event)"
+        (blur)="onBlur()"
+        (paste)="onPaste($event)"
+        (dragenter)="onDragEnter($event)"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event)"
+      >
+        <span class="fu-zone__icon material-symbols-rounded" aria-hidden="true">{{ dragOver() ? 'file_download' : 'upload_file' }}</span>
+        <span class="fu-zone__text">
+          <span class="fu-zone__action" [id]="uid + '-action'">{{ dragOver() ? labels.dropActive : labels.dropAction }}</span>
+          <span class="fu-zone__instructions" [id]="uid + '-instructions'"
+            >{{ labels.dropInstructions }}@if (canPasteImages()) {<span class="fu-zone__paste"> · {{ labels.pasteHint }}</span>}</span
+          >
+          @if (hintParts().length) {
+            <span class="fu-zone__hint" [id]="uid + '-hint'">
+              @for (part of hintParts(); track $index) {
+                <span>{{ part }}</span>
+              }
+            </span>
+          }
+        </span>
+      </div>
+    }
+    @if (cameraVisible()) {
+      <button matButton="outlined" type="button" class="fu-camera" data-camera-button [disabled]="isDisabled()" (click)="openCamera()">
+        <span class="material-symbols-rounded" aria-hidden="true">photo_camera</span>
+        {{ labels.camera }}
+      </button>
+    }
+  </div>
+
+  <input #fileInput class="fu-native" type="file" tabindex="-1" aria-hidden="true" [accept]="accept()" [multiple]="multiple()" (change)="onInputChange($event)" />
+  <input #captureInput class="fu-native" type="file" tabindex="-1" aria-hidden="true" accept="image/*" capture="environment" (change)="onInputChange($event)" />
+
+  @if (invalidShown() && errorMessage()) {
+    <p class="fu-error" [id]="uid + '-error'">{{ errorMessage() }}</p>
+  }
+  @if (cameraNotice()) {
+    <p class="fu-notice" role="status">{{ cameraNotice() }}</p>
+  }
+}
+
+@if (items().length) {
+  <ul class="fu-list" [class.fu-list--grid]="layout() === 'grid'" [attr.aria-label]="label() || labels.listLabel">
+    @for (item of items(); track item.key) {
+      <li class="fu-item" tabindex="-1" [attr.data-item-key]="item.key">
+        <lib-file-upload-item
+          [item]="item"
+          [labels]="labels"
+          [layout]="layout()"
+          [readonly]="readonly()"
+          [disabled]="isDisabled()"
+          (preview)="preview(item)"
+          (cancel)="cancel(item)"
+          (retry)="retry(item)"
+          (remove)="remove(item)"
+        />
+      </li>
+    }
+  </ul>
+} @else if (readonly()) {
+  <p class="fu-empty">{{ labels.readonlyEmpty }}</p>
+}
+
+<div class="fu-sr-only" aria-live="polite">{{ announcement() }}</div>

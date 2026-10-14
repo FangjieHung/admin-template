@@ -1,0 +1,35 @@
+// 圖片預覽對話框。外框是 MatDialog（造型交給各質地的對話框 recipe）；這裡只排畫面，只用語意 token。
+
+.fup-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fup-content {
+  display: grid;
+  place-items: center;
+}
+
+.fup-image {
+  display: block;
+  max-inline-size: 100%;
+  max-block-size: min(70vh, 40rem);
+  object-fit: contain;
+  border-radius: var(--mat-sys-corner-small);
+  background: var(--mat-sys-surface-container-high);
+}
+
+.fup-actions {
+  gap: 0.25rem;
+}
+
+.fup-counter {
+  min-inline-size: 3.5rem;
+  color: var(--mat-sys-on-surface-variant);
+  text-align: center;
+}
+
+.fup-close {
+  margin-inline-start: auto;
+}
