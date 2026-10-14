@@ -37,7 +37,7 @@ import { provideHeaderTitle } from '../../layout/header/header-title';
           <lib-empty-state
             icon="task_alt"
             message="所有規劃中的樣板都已完成"
-            detail="還在規劃中的是元件，列在首頁的元件目錄。之後要加新的頁面樣板時，先加進規劃中清單，這裡就會列出來。"
+            [detail]="otherPlanned ? '還在規劃中的是元件，列在首頁的元件目錄。之後要加新的頁面樣板時，先加進規劃中清單，這裡就會列出來。' : '規劃中的元件也都已完成。之後要加新的頁面樣板時，先加進規劃中清單，這裡就會列出來。'"
           />
         </div>
       }
@@ -95,6 +95,8 @@ import { provideHeaderTitle } from '../../layout/header/header-title';
 })
 export class TemplatesPageComponent {
   protected readonly templates = PLANNED_ITEMS.filter((item) => item.kind === '頁面樣板');
+  /** 規劃中清單裡還有沒有頁面樣板以外的項目（決定「都已完成」的說明怎麼寫）。 */
+  protected readonly otherPlanned = PLANNED_ITEMS.length > this.templates.length;
 
   constructor() {
     provideHeaderTitle(() => ({ title: '規劃中的樣板', breadcrumbs: [{ label: '頁面樣板' }] }));

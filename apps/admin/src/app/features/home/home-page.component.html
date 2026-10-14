@@ -12,10 +12,12 @@
         <p class="ui-text-display ui-text-numeric text-4xl">{{ doneCount }}</p>
         <p class="ui-text-caption">已完成的元件與樣板頁</p>
       </div>
-      <div>
-        <p class="ui-text-display ui-text-numeric text-4xl">{{ plannedCount }}</p>
-        <p class="ui-text-caption">規劃中的元件與頁面樣板</p>
-      </div>
+      @if (plannedCount) {
+        <div>
+          <p class="ui-text-display ui-text-numeric text-4xl">{{ plannedCount }}</p>
+          <p class="ui-text-caption">規劃中的元件與頁面樣板</p>
+        </div>
+      }
     </div>
   </section>
 
@@ -39,16 +41,22 @@
       <div>
         <h2 id="home-catalog" class="ui-text-subtitle">元件目錄</h2>
         <p class="home__note">
-          規劃中的項目來自
+          @if (plannedCount) {
+            規劃中的項目來自
+          } @else {
+            這份目錄依據的
+          }
           <a [href]="gapListUrl" target="_blank" rel="noopener">ERP／CRM 元件缺口清單</a>
-          與 <code>docs/plans/2026-10-13-template-pivot.md</code>。
+          與 <code>docs/plans/2026-10-13-template-pivot.md</code>@if (plannedCount) {。} @else {，清單上的項目都已完成。之後要加新項目，先加進 <code>showcase-catalog.ts</code> 的 <code>PLANNED_ITEMS</code>。}
         </p>
       </div>
-      <div class="home__filter" role="group" aria-label="依狀態篩選">
-        <button type="button" class="ui-nav-pill" [class.is-active]="filter() === 'all'" [attr.aria-pressed]="filter() === 'all'" (click)="filter.set('all')">全部</button>
-        <button type="button" class="ui-nav-pill" [class.is-active]="filter() === 'done'" [attr.aria-pressed]="filter() === 'done'" (click)="filter.set('done')">已完成</button>
-        <button type="button" class="ui-nav-pill" [class.is-active]="filter() === 'planned'" [attr.aria-pressed]="filter() === 'planned'" (click)="filter.set('planned')">規劃中</button>
-      </div>
+      @if (plannedCount) {
+        <div class="home__filter" role="group" aria-label="依狀態篩選">
+          <button type="button" class="ui-nav-pill" [class.is-active]="filter() === 'all'" [attr.aria-pressed]="filter() === 'all'" (click)="filter.set('all')">全部</button>
+          <button type="button" class="ui-nav-pill" [class.is-active]="filter() === 'done'" [attr.aria-pressed]="filter() === 'done'" (click)="filter.set('done')">已完成</button>
+          <button type="button" class="ui-nav-pill" [class.is-active]="filter() === 'planned'" [attr.aria-pressed]="filter() === 'planned'" (click)="filter.set('planned')">規劃中</button>
+        </div>
+      }
     </div>
 
     <lib-data-table
