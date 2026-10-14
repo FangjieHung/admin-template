@@ -1,0 +1,88 @@
+<div class="rt__scroll" role="region" tabindex="0" [attr.aria-label]="gridLabel()">
+  <div class="rt" role="table" [attr.aria-label]="gridLabel()" [attr.data-scale]="scale()" [style.--rt-cols]="columns().length">
+    <div class="rt__head" role="rowgroup">
+      <div class="rt__row" role="row">
+        <div class="rt__corner" role="columnheader">{{ store.labels().resourceColumn }}</div>
+        @for (col of columns(); track col.key) {
+          <div class="rt__colhead" role="columnheader" [class.is-today]="col.today" [attr.aria-label]="col.label">
+            <span class="rt__colhead-top" aria-hidden="true">{{ col.top }}</span>
+            @if (col.bottom) {
+              <span class="rt__colhead-num ui-text-numeric" aria-hidden="true">{{ col.bottom }}</span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="rt__body" role="rowgroup">
+      @if (todayBand(); as band) {
+        <div class="rt__today" aria-hidden="true" [style.--rt-at]="band.left / 100" [style.--rt-w]="band.width / 100"></div>
+      }
+      @if (nowLeft() !== null) {
+        <div class="rt__now" aria-hidden="true" [style.--rt-at]="nowLeft()"></div>
+      }
+      @for (group of groups(); track group.key) {
+        @if (group.title) {
+          <div class="rt__row rt__group" role="row">
+            <div class="rt__group-label" role="rowheader" [attr.aria-colspan]="columns().length + 1">{{ group.title }}</div>
+          </div>
+        }
+        @for (row of group.rows; track row.resource.id) {
+          <div class="rt__row" role="row" [attr.data-resource-row]="row.resource.id" [style.--rt-lanes]="row.lanes">
+            <div class="rt__res" role="rowheader">
+              <span class="rt__res-title">{{ row.resource.title }}</span>
+              @if (row.resource.subtitle) {
+                <span class="rt__res-sub">{{ row.resource.subtitle }}</span>
+              }
+            </div>
+            <div
+              class="rt__track"
+              role="cell"
+              [attr.aria-colspan]="columns().length"
+              (pointerdown)="onTrackPointerDown($event, row.resource.id)"
+              (click)="onTrackClick($event, row.resource.id)"
+            >
+              @if (selection(); as sel) {
+                @if (sel.resourceId === row.resource.id) {
+                  <div class="rt__selection" aria-hidden="true" [style.left.%]="sel.left" [style.width.%]="sel.width"></div>
+                }
+              }
+              @for (item of row.items; track item.event.id) {
+                <button
+                  libCalEvent
+                  [event]="item.event"
+                  variant="timeline"
+                  [source]="store.preview()?.event?.id === item.event.id"
+                  [class.is-cont-before]="item.cutStart"
+                  [class.is-cont-after]="item.cutEnd"
+                  [style.left.%]="item.left"
+                  [style.width]="'calc(' + item.width + '% - 2px)'"
+                  [style.--rt-lane]="item.lane"
+                  (click)="open(item.event)"
+                  (pointerdown)="onEventPointerDown($event, item.event)"
+                  (keydown)="onEventKey($event, item.event)"
+                ></button>
+              }
+              @if (ghost(); as g) {
+                @if (g.resourceId === row.resource.id) {
+                  <button
+                    libCalEvent
+                    [event]="g.preview.event"
+                    variant="timeline"
+                    [ghost]="true"
+                    [tip]="g.preview.tip"
+                    [previewConflict]="g.preview.conflict"
+                    [tabbable]="false"
+                    [style.left.%]="g.left"
+                    [style.width]="'calc(' + g.width + '% - 2px)'"
+                    [style.--rt-lane]="0"
+                  ></button>
+                }
+              }
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>

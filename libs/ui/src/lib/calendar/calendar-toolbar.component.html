@@ -1,0 +1,93 @@
+<div class="cal-tb__nav">
+  <button type="button" matButton="outlined" class="cal-tb__today" (click)="today.emit()">{{ store.labels().today }}</button>
+  <button type="button" matIconButton class="cal-tb__step" [attr.aria-label]="store.labels().previous" (click)="step.emit(-1)">
+    <span class="material-symbols-rounded" aria-hidden="true">chevron_left</span>
+  </button>
+  <button type="button" matIconButton class="cal-tb__step" [attr.aria-label]="store.labels().next" (click)="step.emit(1)">
+    <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
+  </button>
+  <div class="cal-tb__period">
+    <button
+      type="button"
+      class="cal-tb__title"
+      [attr.aria-expanded]="pickerOpen()"
+      [attr.aria-controls]="pickerId"
+      [attr.aria-description]="store.labels().pickMonth"
+      (click)="togglePicker()"
+    >
+      <span class="cal-tb__title-text">{{ title() }}</span>
+      <span class="material-symbols-rounded cal-tb__caret" aria-hidden="true">arrow_drop_down</span>
+    </button>
+    @if (pickerOpen()) {
+      <div class="cal-tb__picker" role="dialog" [id]="pickerId" [attr.aria-label]="store.labels().pickMonth" (keydown)="onPickerKey($event)">
+        <div class="cal-tb__year">
+          <button type="button" matIconButton [attr.aria-label]="store.labels().previousYear" (click)="pickerYear.set(pickerYear() - 1)">
+            <span class="material-symbols-rounded" aria-hidden="true">chevron_left</span>
+          </button>
+          <span class="cal-tb__year-label ui-text-numeric" aria-live="polite">{{ store.format(store.labels().yearTitle, { year: pickerYear() }) }}</span>
+          <button type="button" matIconButton [attr.aria-label]="store.labels().nextYear" (click)="pickerYear.set(pickerYear() + 1)">
+            <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
+          </button>
+        </div>
+        <div class="cal-tb__months">
+          @for (month of months(); track month.m) {
+            <button
+              type="button"
+              class="cal-tb__month ui-text-numeric"
+              [class.is-current]="month.current"
+              [attr.aria-current]="month.current ? 'true' : null"
+              (click)="choose(month.m)"
+            >
+              {{ month.label }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<div class="cal-tb__tools">
+  @if (showFilter() && resources().length) {
+    <select class="cal-tb__filter" [attr.aria-label]="store.labels().resourceFilter" (change)="onFilter($event)">
+      <option value="" [selected]="filter() === ''">{{ store.labels().allResources }}</option>
+      @for (group of groups(); track group) {
+        <option [value]="'g:' + group" [selected]="filter() === 'g:' + group">{{ group }}</option>
+      }
+      @for (res of resources(); track res.id) {
+        <option [value]="'r:' + res.id" [selected]="filter() === 'r:' + res.id">{{ res.title }}</option>
+      }
+    </select>
+  }
+  @if (view() === 'resource') {
+    <div class="cal-tb__pills" role="group" [attr.aria-label]="store.labels().scaleSwitcher">
+      @for (opt of scaleOptions(); track opt.id) {
+        <button
+          type="button"
+          class="ui-nav-pill cal-tb__pill"
+          [class.is-active]="scale() === opt.id"
+          [attr.aria-pressed]="scale() === opt.id"
+          (click)="scaleChange.emit(opt.id)"
+        >
+          {{ opt.label }}
+        </button>
+      }
+    </div>
+  }
+  @if (viewOptions().length > 1) {
+    <div class="cal-tb__pills" role="group" [attr.aria-label]="store.labels().viewSwitcher">
+      @for (opt of viewOptions(); track opt.id) {
+        <button
+          type="button"
+          class="ui-nav-pill cal-tb__pill"
+          [attr.data-view]="opt.id"
+          [class.is-active]="view() === opt.id"
+          [attr.aria-pressed]="view() === opt.id"
+          (click)="viewChange.emit(opt.id)"
+        >
+          {{ opt.label }}
+        </button>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,173 @@
+// 日曆工具列。只用語意 token；按鈕與 .ui-nav-pill 的造型交給質地 recipe。期間標題的字讀 --lib-cal-title-*。
+
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.cal-tb__nav,
+.cal-tb__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  min-width: 0;
+}
+
+.cal-tb__nav {
+  gap: 0.25rem;
+}
+
+.cal-tb__tools:empty {
+  display: none;
+}
+
+.cal-tb__today {
+  margin-inline-end: 0.25rem;
+}
+
+.cal-tb__step .material-symbols-rounded,
+.cal-tb__year .material-symbols-rounded {
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
+}
+
+.cal-tb__period {
+  position: relative;
+  min-width: 0;
+}
+
+.cal-tb__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  max-width: 100%;
+  min-height: 2.5rem;
+  padding: 0 0.5rem;
+  border: 0;
+  border-radius: var(--mat-sys-corner-small);
+  background: transparent;
+  color: var(--mat-sys-on-surface);
+  font-family: var(--lib-cal-title-font, var(--font-display, inherit));
+  font-size: var(--lib-cal-title-size, 1.125rem);
+  font-weight: var(--lib-cal-title-weight, 600);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--app-state-hover);
+  }
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+}
+
+.cal-tb__title-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cal-tb__caret {
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 1.5rem;
+}
+
+// 月份選擇器（同其他浮層：surface-container-high、hairline、corner-medium、level3）。
+.cal-tb__picker {
+  position: absolute;
+  z-index: 8;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  width: 16rem;
+  max-width: calc(100vw - 2rem);
+  padding: 0.5rem;
+  border: var(--lib-cal-pop-frame, 1px solid var(--mat-sys-outline-variant));
+  border-radius: var(--lib-cal-pop-radius, var(--mat-sys-corner-medium));
+  background: var(--lib-cal-pop-bg, var(--mat-sys-surface-container-high));
+  box-shadow: var(--lib-cal-pop-shadow, var(--mat-sys-level3));
+  color: var(--mat-sys-on-surface);
+}
+
+.cal-tb__year {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cal-tb__year-label {
+  font-weight: 700;
+}
+
+.cal-tb__months {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.cal-tb__month {
+  min-height: 2.5rem;
+  border: 0;
+  border-radius: var(--mat-sys-corner-small);
+  background: transparent;
+  color: var(--mat-sys-on-surface);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--app-state-hover);
+  }
+
+  &.is-current {
+    background: var(--app-state-selected);
+    font-weight: 700;
+  }
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: calc(var(--app-focus-ring-width) * -1);
+  }
+}
+
+.cal-tb__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+// 兩層 class：壓過質地 recipe 裡 .ui-nav-pill 的大尺寸（顏色、圓角、框線照質地）。
+.cal-tb__pills .cal-tb__pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0.25rem 0.875rem;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.cal-tb__filter {
+  min-height: 2.25rem;
+  max-width: 12rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--app-field-border);
+  border-radius: var(--mat-sys-corner-small);
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: inherit;
+  font-size: 0.875rem;
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+}

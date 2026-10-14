@@ -1,0 +1,284 @@
+// 一筆活動。只用語意 token；造型讀 --lib-cal-event-*（var() 的第二個值就是預設＝Material），質地在 .lib-calendar 上設
+// （各質地 recipes.scss，CONTRACT.md「共用日曆」）。顏色：左緣 --cal-ev-color 色條＋同色淡底，字一律 on-surface。
+
+:host {
+  --_tint: var(--lib-cal-event-tint, 16%);
+  --_bar: var(--lib-cal-event-bar-width, 3px);
+  --_conflict: var(--lib-cal-conflict-color, var(--mat-sys-error));
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0.0625rem 0.375rem 0.0625rem calc(var(--_bar) + 0.3125rem);
+  border: var(--lib-cal-event-frame, 0 solid transparent);
+  border-radius: var(--lib-cal-event-radius, var(--mat-sys-corner-small));
+  background: color-mix(in srgb, var(--cal-ev-color) var(--_tint), var(--lib-cal-event-base, var(--mat-sys-surface)));
+  box-shadow:
+    inset var(--_bar) 0 0 0 var(--cal-ev-color),
+    var(--lib-cal-event-shadow, 0 0 transparent);
+  color: var(--mat-sys-on-surface);
+  font: inherit;
+  font-size: var(--lib-cal-event-size, 0.75rem);
+  font-weight: var(--lib-cal-event-weight, 500);
+  line-height: 1.35;
+  text-align: start;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--app-motion-fast) var(--app-ease-standard),
+    opacity var(--app-motion-fast) var(--app-ease-standard);
+
+  &:hover {
+    --_tint: var(--lib-cal-event-tint-hover, 26%);
+  }
+
+  &:focus-visible {
+    z-index: 3;
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+}
+
+:host(.is-editable) {
+  touch-action: pan-y;
+}
+
+:host(.is-all-day) {
+  --_tint: var(--lib-cal-event-tint-strong, 26%);
+}
+
+:host(.is-cont-before) {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+:host(.is-cont-after) {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+// 衝突：色條外再圍一圈錯誤色（另有警告圖示與「時間衝突」文字，不只靠顏色）。
+:host(.is-conflict) {
+  box-shadow:
+    inset var(--_bar) 0 0 0 var(--cal-ev-color),
+    inset 0 0 0 var(--lib-cal-conflict-width, 2px) var(--_conflict),
+    var(--lib-cal-event-shadow, 0 0 transparent);
+}
+
+:host(.is-source) {
+  opacity: var(--lib-cal-drag-source-opacity, 0.4);
+}
+
+:host(.is-ghost) {
+  z-index: 4;
+  border: var(--lib-cal-drag-frame, var(--lib-cal-event-frame, 0 solid transparent));
+  box-shadow:
+    inset var(--_bar) 0 0 0 var(--cal-ev-color),
+    var(--lib-cal-drag-shadow, var(--mat-sys-level3));
+  pointer-events: none;
+  --_tint: var(--lib-cal-event-tint-hover, 26%);
+}
+
+:host(.is-ghost.is-conflict) {
+  box-shadow:
+    inset var(--_bar) 0 0 0 var(--cal-ev-color),
+    inset 0 0 0 var(--lib-cal-conflict-width, 2px) var(--_conflict),
+    var(--lib-cal-drag-shadow, var(--mat-sys-level3));
+}
+
+.cal-ev__body {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cal-ev__title {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 次要字也用 on-surface（on-surface-variant 疊在類別色淡底上會掉到 4.5:1 以下），改用字重區分。
+.cal-ev__time,
+.cal-ev__status {
+  flex: 0 0 auto;
+  color: var(--mat-sys-on-surface);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.cal-ev__warn {
+  flex: 0 0 auto;
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
+  color: var(--_conflict);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+// 「時間衝突」的字用 on-surface＋粗體（錯誤色疊在淡底上不一定到 4.5:1）；錯誤色留給圖示與外圈。
+.cal-ev__flag {
+  flex: 0 100 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--mat-sys-on-surface);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+// 時間格：由外層給 top／height／left／width。內容貼齊上緣（按鈕預設把內容垂直置中，短的活動會把標題擠出上緣），
+// 標題與時間同一行放得下就同一行、放不下換行，超出高度的裁掉。
+:host([data-variant='grid']) {
+  position: absolute;
+  min-height: 1.125rem;
+  overflow: hidden;
+
+  .cal-ev__body {
+    position: absolute;
+    inset: 0.0625rem 0.25rem 0.0625rem calc(var(--_bar) + 0.3125rem);
+    flex-wrap: wrap;
+    align-content: flex-start;
+    align-items: baseline;
+    gap: 0 0.375rem;
+  }
+
+  .cal-ev__title {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+:host([data-variant='grid'].is-ghost),
+:host([data-variant='grid']:focus-visible) {
+  overflow: visible;
+}
+
+:host([data-variant='timeline']) {
+  position: absolute;
+  height: calc(var(--lib-cal-lane-height, 1.75rem) - 0.25rem);
+}
+
+:host([data-variant='agenda']) {
+  min-height: 2.75rem;
+  padding-block: 0.375rem;
+  font-size: var(--lib-cal-agenda-size, 0.875rem);
+
+  .cal-ev__body {
+    flex-wrap: wrap;
+    gap: 0.125rem 0.5rem;
+  }
+
+  .cal-ev__title {
+    flex: 1 1 12rem;
+    white-space: normal;
+  }
+}
+
+:host([data-variant='month']),
+:host([data-variant='allday']) {
+  min-height: var(--lib-cal-event-height, 1.375rem);
+}
+
+// 拉把：上下緣（時間格）或左右緣（整天列、資源排程），滑過時出現一條細線。
+.cal-ev__edge {
+  position: absolute;
+  z-index: 1;
+  inset-inline: 0;
+  height: 0.5rem;
+  cursor: ns-resize;
+
+  &[data-edge='start'] {
+    top: -0.125rem;
+  }
+
+  &[data-edge='end'] {
+    bottom: -0.125rem;
+  }
+
+  &::after {
+    position: absolute;
+    inset-inline: 35%;
+    top: calc(50% - 1px);
+    height: 2px;
+    border-radius: 999px;
+    background: var(--mat-sys-on-surface-variant);
+    content: '';
+    opacity: 0;
+    transition: opacity var(--app-motion-fast) var(--app-ease-standard);
+  }
+}
+
+:host(:hover) .cal-ev__edge::after {
+  opacity: 0.6;
+}
+
+:host([data-variant='allday']),
+:host([data-variant='timeline']) {
+  .cal-ev__edge {
+    inset-block: 0;
+    inset-inline: auto;
+    width: 0.5rem;
+    height: auto;
+    cursor: ew-resize;
+
+    &[data-edge='start'] {
+      top: 0;
+      left: -0.125rem;
+    }
+
+    &[data-edge='end'] {
+      bottom: 0;
+      right: -0.125rem;
+    }
+
+    &::after {
+      inset-block: 30%;
+      inset-inline: auto;
+      top: auto;
+      left: calc(50% - 1px);
+      width: 2px;
+      height: auto;
+    }
+  }
+}
+
+// 拖曳中的提示：新的時間（與資源）。
+.cal-ev__tip {
+  position: absolute;
+  z-index: 5;
+  bottom: calc(100% + 0.25rem);
+  left: 0;
+  padding: 0.25rem 0.5rem;
+  border: var(--lib-cal-tip-frame, 0 solid transparent);
+  border-radius: var(--lib-cal-tip-radius, var(--mat-sys-corner-small));
+  background: var(--lib-cal-tip-bg, var(--mat-sys-inverse-surface));
+  box-shadow: var(--lib-cal-tip-shadow, var(--mat-sys-level2));
+  color: var(--lib-cal-tip-fg, var(--mat-sys-inverse-on-surface));
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host,
+  .cal-ev__edge::after {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  :host {
+    border: 1px solid CanvasText;
+  }
+}

@@ -1,0 +1,113 @@
+<div
+  class="cal-month__grid"
+  role="grid"
+  [attr.aria-label]="gridLabel()"
+  [class.has-weeks]="showWeekNumbers()"
+  (keydown)="onGridKey($event)"
+>
+  <div class="cal-month__row cal-month__head" role="row">
+    @if (showWeekNumbers()) {
+      <div class="cal-month__wk" role="columnheader">{{ store.labels().weekColumn }}</div>
+    }
+    @for (wd of weekdayHeads(); track wd.key) {
+      <div class="cal-month__weekday" role="columnheader">
+        <span aria-hidden="true">{{ wd.short }}</span>
+        <span class="cal-sr">{{ wd.long }}</span>
+      </div>
+    }
+  </div>
+
+  @for (week of weeks(); track week.key) {
+    <div class="cal-month__row" role="row">
+      @if (showWeekNumbers()) {
+        <div class="cal-month__wk ui-text-numeric" role="rowheader" [attr.aria-label]="store.format(store.labels().weekNumber, { week: week.number })">
+          {{ week.number }}
+        </div>
+      }
+      @for (cell of week.cells; track cell.key) {
+        <div
+          class="cal-day"
+          role="gridcell"
+          [attr.data-date]="cell.key"
+          [attr.aria-label]="cell.label"
+          [attr.aria-current]="cell.today ? 'date' : null"
+          [attr.tabindex]="cell.key === focusKey() ? 0 : -1"
+          [class.is-outside]="cell.outside"
+          [class.is-today]="cell.today"
+          [class.is-selected]="isSelected(cell)"
+          (click)="onCellClick($event, cell)"
+          (pointerdown)="onCellPointerDown($event, cell)"
+        >
+          <span class="cal-day__num ui-text-numeric" aria-hidden="true">{{ cell.date.getDate() }}</span>
+          @if (compact()) {
+            @if (cell.dots.length) {
+              <span class="cal-day__dots" aria-hidden="true">
+                @for (dot of cell.dots; track $index) {
+                  <span class="cal-day__dot" [style.--cal-ev-color]="dot"></span>
+                }
+              </span>
+            }
+          } @else {
+            <div class="cal-day__events">
+              @if (cell.ghost; as ghost) {
+                @if (store.preview(); as p) {
+                  <button libCalEvent [event]="ghost.event" [segment]="ghost" variant="month" [ghost]="true" [tip]="p.tip" [previewConflict]="p.conflict" [tabbable]="false"></button>
+                }
+              }
+              @for (seg of cell.visible; track seg.event.id) {
+                <button
+                  libCalEvent
+                  [event]="seg.event"
+                  [segment]="seg"
+                  variant="month"
+                  [source]="store.preview()?.event?.id === seg.event.id"
+                  [tabbable]="cell.key === focusKey()"
+                  (click)="openEvent(seg.event)"
+                  (pointerdown)="onEventPointerDown($event, seg, cell)"
+                  (keydown)="onEventKey($event, seg.event)"
+                ></button>
+              }
+              @if (cell.hidden) {
+                <button
+                  type="button"
+                  class="cal-more"
+                  [attr.tabindex]="cell.key === focusKey() ? null : -1"
+                  [attr.aria-label]="store.format(store.labels().moreLabel, { date: store.fmt().dateLong(cell.date), count: cell.hidden })"
+                  [attr.aria-expanded]="popover()?.key === cell.key"
+                  (click)="openMore($event, cell)"
+                >
+                  {{ store.format(store.labels().more, { count: cell.hidden }) }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (popover(); as pop) {
+  @if (popoverCell(); as cell) {
+    <div
+      class="cal-pop"
+      role="dialog"
+      [attr.aria-label]="store.format(store.labels().dayEvents, { date: store.fmt().dateLong(cell.date) })"
+      [style.top.px]="pop.top"
+      [style.left.px]="pop.left"
+      (keydown)="onPopoverKey($event)"
+    >
+      <div class="cal-pop__head">
+        <span class="cal-pop__title">{{ store.format(store.labels().dayEvents, { date: store.fmt().dateLong(cell.date) }) }}</span>
+        <button type="button" class="cal-pop__close" [attr.aria-label]="store.labels().close" (click)="closePopover()">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="cal-pop__list">
+        @for (seg of cell.all; track seg.event.id) {
+          <button libCalEvent [event]="seg.event" [segment]="seg" variant="month" (click)="openEvent(seg.event)" (keydown)="onEventKey($event, seg.event)"></button>
+        }
+      </div>
+    </div>
+  }
+}

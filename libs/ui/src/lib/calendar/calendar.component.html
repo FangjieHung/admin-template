@@ -1,0 +1,59 @@
+<lib-cal-toolbar
+  [title]="title()"
+  [anchor]="date()"
+  [view]="activeView()"
+  [views]="views()"
+  [scale]="resourceScale()"
+  [resources]="resources()"
+  [showFilter]="resourceFilter()"
+  [filter]="filterValue()"
+  (today)="goToday()"
+  (step)="step($event)"
+  (viewChange)="setView($event)"
+  (scaleChange)="resourceScale.set($event)"
+  (pick)="date.set($event)"
+  (filterChange)="filterValue.set($event)"
+/>
+
+<div class="cal-body">
+  @if (status() === 'error') {
+    <lib-error-state [message]="labels.error" [retryLabel]="labels.retry" [compact]="true" (retry)="reload()" />
+  } @else {
+    @switch (activeView()) {
+      @case ('month') {
+        <lib-cal-month
+          [anchor]="date()"
+          [maxEvents]="maxEventsPerDay()"
+          [showWeekNumbers]="showWeekNumbers()"
+          [compact]="compact()"
+          [gridLabel]="title()"
+          (anchorChange)="date.set($event)"
+        />
+      }
+      @case ('agenda') {
+        <lib-cal-agenda [range]="range()" [headingLevel]="headingLevel()" />
+      }
+      @case ('resource') {
+        <lib-cal-resource [range]="range()" [scale]="resourceScale()" [resources]="visibleResources()" [gridLabel]="title()" />
+      }
+      @default {
+        <lib-cal-time-grid [days]="days()" [scrollToHour]="scrollToHour()" [gridLabel]="title()" (dayClick)="openDay($event)" />
+      }
+    }
+    @if (status() === 'loading') {
+      <div class="cal-loading" role="status" [attr.aria-label]="labels.loading"></div>
+    }
+  }
+</div>
+
+@if (legend().length) {
+  <ul class="cal-legend">
+    @for (item of legend(); track item.id) {
+      <li class="cal-legend__item">
+        <span class="cal-legend__swatch" aria-hidden="true" [style.--cal-ev-color]="item.css"></span>{{ item.label }}
+      </li>
+    }
+  </ul>
+}
+
+<div class="cal-sr" aria-live="polite">{{ announcement() }}</div>

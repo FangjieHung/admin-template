@@ -1,0 +1,113 @@
+<div
+  #scroller
+  class="tg__scroll"
+  role="region"
+  tabindex="0"
+  [attr.aria-label]="gridLabel()"
+  [style.--tg-days]="days().length"
+  [style.--tg-hours]="hours().length"
+  [style.--tg-slots]="60 / slot()"
+>
+  <div class="tg__sticky">
+    <div class="tg__row tg__head">
+      <div class="tg__gutter" aria-hidden="true"></div>
+      @for (day of grid(); track day.key) {
+        <button type="button" class="tg__day" [class.is-today]="day.today" [attr.aria-label]="day.label" [attr.aria-current]="day.today ? 'date' : null" (click)="onDayClick(day.date)">
+          <span class="tg__weekday" aria-hidden="true">{{ store.fmt().weekdayShort(day.date) }}</span>
+          <span class="tg__date ui-text-numeric" aria-hidden="true">{{ day.date.getDate() }}</span>
+        </button>
+      }
+    </div>
+    <div class="tg__row tg__allday">
+      <div class="tg__gutter tg__allday-label">{{ store.labels().allDay }}</div>
+      @for (day of grid(); track day.key; let i = $index) {
+        <div class="tg__allday-cell" role="group" [attr.aria-label]="day.label + '，' + store.labels().allDay" [attr.data-date]="day.key" (click)="onAllDayClick($event, day)">
+          @if (ghosts().get(day.key)?.allDay; as ghost) {
+            @if (store.preview(); as p) {
+              <button libCalEvent [event]="ghost.event" [segment]="ghost" variant="allday" [ghost]="true" [tip]="p.tip" [previewConflict]="p.conflict" [tabbable]="false"></button>
+            }
+          }
+          @for (seg of day.allDay; track seg.event.id) {
+            <button
+              libCalEvent
+              [event]="seg.event"
+              [segment]="seg"
+              variant="allday"
+              [source]="store.preview()?.event?.id === seg.event.id"
+              (click)="open(seg.event)"
+              (pointerdown)="onEventPointerDown($event, seg, i)"
+              (keydown)="onEventKey($event, seg.event)"
+            ></button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <div #body class="tg__row tg__body">
+    <div class="tg__gutter tg__hours" aria-hidden="true">
+      @for (h of hours(); track h.hour; let i = $index) {
+        <span class="tg__hour ui-text-numeric" [style.--tg-i]="i">{{ h.label }}</span>
+      }
+    </div>
+    @for (day of grid(); track day.key; let i = $index) {
+      <div
+        class="tg__col"
+        role="group"
+        [attr.aria-label]="day.label"
+        [attr.data-date]="day.key"
+        [class.is-today]="day.today"
+        (pointerdown)="onColPointerDown($event, day)"
+        (pointermove)="onColPointerMove($event, day.key)"
+        (pointerleave)="hover.set(null)"
+        (click)="onColClick($event, day)"
+      >
+        @if (hoverTop(day.key) !== null) {
+          <div class="tg__hover" aria-hidden="true" [style.top.%]="hoverTop(day.key)"></div>
+        }
+        @if (selectionStyle(day.key); as sel) {
+          <div class="tg__selection" aria-hidden="true" [style.top.%]="sel.top" [style.height.%]="sel.height"></div>
+        }
+        <div class="tg__lane">
+          @for (item of day.timed; track item.segment.event.id) {
+            <button
+              libCalEvent
+              [event]="item.segment.event"
+              [segment]="item.segment"
+              variant="grid"
+              [source]="store.preview()?.event?.id === item.segment.event.id"
+              [style.top.%]="item.top"
+              [style.height.%]="item.height"
+              [style.left.%]="item.left"
+              [style.width]="'calc(' + item.width + '% - 2px)'"
+              (click)="open(item.segment.event)"
+              (pointerdown)="onEventPointerDown($event, item.segment, i)"
+              (keydown)="onEventKey($event, item.segment.event)"
+            ></button>
+          }
+          @if (ghosts().get(day.key)?.timed; as ghost) {
+            @if (store.preview(); as p) {
+              <button
+                libCalEvent
+                [event]="ghost.segment.event"
+                [segment]="ghost.segment"
+                variant="grid"
+                [ghost]="true"
+                [tip]="p.tip"
+                [previewConflict]="p.conflict"
+                [tabbable]="false"
+                [style.top.%]="ghost.top"
+                [style.height.%]="ghost.height"
+                [style.left.%]="0"
+                [style.width.%]="100"
+              ></button>
+            }
+          }
+        </div>
+        @if (day.today && nowTop() !== null) {
+          <div class="tg__now" aria-hidden="true" [style.top.%]="nowTop()"></div>
+        }
+      </div>
+    }
+  </div>
+</div>

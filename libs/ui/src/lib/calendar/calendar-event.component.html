@@ -1,0 +1,27 @@
+@if (handles().start) {
+  <span class="cal-ev__edge" data-edge="start" aria-hidden="true"></span>
+}
+<span class="cal-ev__body">
+  @if (conflict()) {
+    <span class="material-symbols-rounded cal-ev__warn" aria-hidden="true">warning</span>
+  }
+  @if (time() && variant() === 'month') {
+    <span class="cal-ev__time ui-text-numeric" aria-hidden="true">{{ time() }}</span>
+  }
+  <span class="cal-ev__title" aria-hidden="true">{{ event().title }}</span>
+  @if (time() && variant() !== 'month') {
+    <span class="cal-ev__time ui-text-numeric" aria-hidden="true">{{ time() }}</span>
+  }
+  @if (conflict() && variant() !== 'month') {
+    <span class="cal-ev__flag" aria-hidden="true">{{ store.labels().conflict }}</span>
+  }
+  @if (event().status && variant() === 'agenda') {
+    <span class="cal-ev__status" aria-hidden="true">{{ event().status }}</span>
+  }
+</span>
+@if (handles().end) {
+  <span class="cal-ev__edge" data-edge="end" aria-hidden="true"></span>
+}
+@if (ghost() && tip()) {
+  <span class="cal-ev__tip ui-text-numeric" aria-hidden="true">{{ tip() }}</span>
+}

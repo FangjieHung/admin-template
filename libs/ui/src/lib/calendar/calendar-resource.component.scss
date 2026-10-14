@@ -1,0 +1,236 @@
+// 資源排程。只用語意 token；造型讀 --lib-cal-*（CONTRACT.md「共用日曆」），質地在 .lib-calendar 上設。
+// 資源欄（左）與時間標題（上）黏在自己的捲動容器裡；黏住的格子底色 --lib-cal-surface 要等於卡片底色。
+
+:host {
+  --_lw: var(--lib-cal-line-width, 1px);
+  --_line-color: var(--lib-cal-line, var(--mat-sys-outline-variant));
+  --_line: var(--_lw) solid var(--_line-color);
+  --_res: var(--lib-cal-resource-width, 11rem);
+  --_lane: var(--lib-cal-lane-height, 1.75rem);
+  --_surface: var(--lib-cal-surface, var(--mat-sys-surface));
+
+  display: block;
+  container-type: inline-size;
+}
+
+@container (max-width: 600px) {
+  .rt {
+    --_res: var(--lib-cal-resource-width-compact, 7rem);
+  }
+}
+
+.rt__scroll {
+  max-height: var(--lib-cal-timeline-height, 36rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: calc(var(--app-focus-ring-width) * -1);
+  }
+}
+
+.rt {
+  --_col: var(--lib-cal-col-day, 6.5rem);
+
+  position: relative;
+  min-width: calc(var(--_res) + var(--rt-cols, 7) * var(--_col));
+
+  &[data-scale='day'] {
+    --_col: var(--lib-cal-col-hour, 4rem);
+  }
+
+  &[data-scale='month'] {
+    --_col: var(--lib-cal-col-month, 2.75rem);
+  }
+}
+
+.rt__row {
+  display: grid;
+  grid-template-columns: var(--_res) minmax(0, 1fr);
+}
+
+.rt__head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--_surface);
+
+  .rt__row {
+    grid-template-columns: var(--_res) repeat(var(--rt-cols, 7), minmax(0, 1fr));
+    border-block-end: var(--lib-cal-head-divider, var(--_line));
+  }
+}
+
+.rt__corner,
+.rt__res,
+.rt__group-label {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  box-sizing: border-box;
+  background: var(--_surface);
+  border-inline-end: var(--_line);
+}
+
+.rt__corner {
+  z-index: 6;
+  display: flex;
+  align-items: flex-end;
+  padding: 0.5rem 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+  font-family: var(--lib-cal-head-font, inherit);
+  font-size: var(--lib-cal-head-size, 0.75rem);
+  font-weight: var(--lib-cal-head-weight, 500);
+  text-transform: var(--lib-cal-head-transform, none);
+}
+
+.rt__colhead {
+  display: flex;
+  flex-direction: column;
+  align-items: var(--lib-cal-head-items, center);
+  justify-content: flex-end;
+  gap: 0.125rem;
+  min-width: 0;
+  padding: 0.375rem 0.25rem;
+  border-inline-start: var(--_line);
+  color: var(--mat-sys-on-surface-variant);
+  font-family: var(--lib-cal-head-font, inherit);
+  font-size: var(--lib-cal-head-size, 0.75rem);
+  font-weight: var(--lib-cal-head-weight, 500);
+  letter-spacing: var(--lib-cal-head-tracking, normal);
+  text-transform: var(--lib-cal-head-transform, none);
+  white-space: nowrap;
+
+  &:nth-child(2) {
+    border-inline-start: 0;
+  }
+}
+
+.rt__colhead-num {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.625rem;
+  height: 1.625rem;
+  box-sizing: border-box;
+  border-radius: var(--lib-cal-today-radius, var(--mat-sys-corner-full));
+  color: var(--mat-sys-on-surface);
+  font-family: var(--lib-cal-num-font, inherit);
+  font-size: 0.875rem;
+  line-height: 1;
+}
+
+.rt__colhead.is-today .rt__colhead-num {
+  border: var(--lib-cal-today-frame, 0 solid transparent);
+  background: var(--lib-cal-today-bg, var(--mat-sys-primary));
+  box-shadow: var(--lib-cal-today-shadow, none);
+  color: var(--lib-cal-today-fg, var(--mat-sys-on-primary));
+  font-weight: 700;
+}
+
+.rt__body {
+  position: relative;
+}
+
+.rt__group {
+  border-block-end: var(--_line);
+  background: var(--lib-cal-group-bg, var(--mat-sys-surface-container-low));
+}
+
+.rt__group-label {
+  grid-column: 1 / -1;
+  width: max-content;
+  min-width: var(--_res);
+  padding: 0.25rem 0.75rem;
+  border-inline-end: 0;
+  background: transparent;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: var(--lib-cal-head-tracking, normal);
+  text-transform: var(--lib-cal-head-transform, none);
+}
+
+.rt__body > .rt__row:not(.rt__group) {
+  border-block-end: var(--_line);
+}
+
+.rt__res {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 0.25rem 0.75rem;
+}
+
+.rt__res-title {
+  overflow: hidden;
+  color: var(--mat-sys-on-surface);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rt__res-sub {
+  overflow: hidden;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 每一欄一條直線（只畫背景，Sketch 也是直線）；列高跟著疊了幾條。
+.rt__track {
+  position: relative;
+  min-height: max(2.75rem, calc(var(--rt-lanes, 1) * var(--_lane) + 0.5rem));
+  background-image: linear-gradient(to right, var(--_line-color) var(--_lw), transparent var(--_lw));
+  background-position: calc(-1 * var(--_lw)) 0;
+  background-size: calc(100% / var(--rt-cols, 7)) 100%;
+  cursor: default;
+
+  &:hover {
+    background-color: var(--lib-cal-slot-hover, var(--app-state-hover));
+  }
+
+  // 活動蓋在現在線（z 2）上面、黏住的資源欄（z 4）下面。
+  > .cal-ev {
+    z-index: 3;
+    top: calc(0.25rem + var(--rt-lane, 0) * var(--_lane));
+    margin-inline-start: 1px;
+  }
+}
+
+.rt__selection {
+  position: absolute;
+  z-index: 1;
+  inset-block: 0.125rem;
+  border-radius: var(--lib-cal-event-radius, var(--mat-sys-corner-small));
+  background: var(--lib-cal-select-bg, color-mix(in srgb, var(--mat-sys-primary) 14%, transparent));
+  box-shadow: var(--lib-cal-select-frame, inset 0 0 0 2px var(--mat-sys-primary));
+  pointer-events: none;
+}
+
+// 今天那一欄的淡底、現在的直線：從資源欄右邊開始算位置。
+.rt__today,
+.rt__now {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--_res) + (100% - var(--_res)) * var(--rt-at, 0));
+  pointer-events: none;
+}
+
+.rt__today {
+  z-index: 0;
+  width: calc((100% - var(--_res)) * var(--rt-w, 0));
+  background: var(--lib-cal-today-column, color-mix(in srgb, var(--mat-sys-primary) 6%, transparent));
+}
+
+.rt__now {
+  z-index: 2;
+  width: var(--lib-cal-now-width, 2px);
+  background: var(--lib-cal-now-color, var(--mat-sys-error));
+  box-shadow: var(--lib-cal-now-glow, none);
+  translate: -50% 0;
+}
