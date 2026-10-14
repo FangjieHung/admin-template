@@ -1,0 +1,67 @@
+<button
+  type="button"
+  class="ni-main"
+  [attr.data-notification-main]="item().id"
+  [tabIndex]="tabIndex()"
+  [attr.aria-labelledby]="baseId() + '-state ' + baseId() + '-title'"
+  [attr.aria-describedby]="(item().body ? baseId() + '-body ' : '') + baseId() + '-meta'"
+  (click)="activate.emit()"
+  (keydown)="navigate.emit($event)"
+  (focus)="focused.emit()"
+>
+  <span class="ni-dot" aria-hidden="true"></span>
+  @if (lead().avatar) {
+    <span class="ni-lead ni-lead--avatar" aria-hidden="true">{{ lead().avatar }}</span>
+  } @else {
+    <span class="ni-lead" aria-hidden="true" [attr.data-tone]="item().tone || 'neutral'">
+      <span class="material-symbols-rounded">{{ lead().icon }}</span>
+    </span>
+  }
+  <span class="ni-text">
+    <span class="ni-sr" [id]="baseId() + '-state'">{{ item().read ? '' : labels().unread }}</span>
+    <span class="ni-title" [id]="baseId() + '-title'">{{ item().title }}</span>
+    @if (item().body) {
+      <span class="ni-body" [id]="baseId() + '-body'">{{ item().body }}</span>
+    }
+    <span class="ni-meta" [id]="baseId() + '-meta'">
+      <time class="ui-text-numeric" [attr.datetime]="time().iso" [attr.title]="time().full">{{ time().ago }}</time>
+      @if (categoryLabel()) {
+        <span class="ni-sep" aria-hidden="true">·</span>
+        <span>{{ categoryLabel() }}</span>
+      }
+    </span>
+  </span>
+</button>
+
+@if (item().action; as action) {
+  <div class="ni-extra">
+    <button type="button" matButton="outlined" class="ni-action" [tabIndex]="tabIndex()" (click)="runAction.emit()">
+      {{ action.label }}
+    </button>
+  </div>
+}
+
+<div class="ni-tools">
+  <button
+    type="button"
+    matIconButton
+    class="ni-tool"
+    [tabIndex]="tabIndex()"
+    [attr.aria-label]="readLabel()"
+    [attr.title]="readLabel()"
+    (click)="toggleRead.emit()"
+  >
+    <span class="material-symbols-rounded" aria-hidden="true">{{ item().read ? 'mark_email_unread' : 'drafts' }}</span>
+  </button>
+  <button
+    type="button"
+    matIconButton
+    class="ni-tool"
+    [tabIndex]="tabIndex()"
+    [attr.aria-label]="removeLabel()"
+    [attr.title]="removeLabel()"
+    (click)="remove.emit()"
+  >
+    <span class="material-symbols-rounded" aria-hidden="true">close</span>
+  </button>
+</div>

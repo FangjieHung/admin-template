@@ -1,0 +1,199 @@
+// 一則通知。只用語意 token；造型讀 --lib-notif-* 變數（var() 的第二個值就是預設），質地要特調時在
+// `.lib-notification-center` 上設這些變數（各質地 recipes.scss，CONTRACT.md「通知中心」）。
+@use '../feedback-state/skeleton-block' as sk;
+
+:host {
+  // sr-only 是 absolute：host 當定位基準。
+  position: relative;
+  display: block;
+  border-bottom: var(--lib-notif-item-divider, 0 solid transparent);
+  border-radius: var(--lib-notif-item-radius, 0px);
+  background-color: var(--_surface, transparent);
+  font-size: var(--lib-notif-title-size, 0.875rem);
+
+  --_pad-block: var(--lib-notif-item-padding-block, 0.75rem);
+  --_pad-inline: var(--lib-notif-item-padding-inline, 1rem);
+  --_lead: var(--lib-notif-lead-size, 2.25rem);
+  --_dot: var(--lib-notif-dot-size, 0.5rem);
+  --_tools: 4.25rem;
+}
+
+:host(:last-child) {
+  border-bottom-color: transparent;
+}
+
+:host(.is-unread) {
+  --_surface: var(--lib-notif-unread-bg, color-mix(in srgb, var(--mat-sys-primary) 4%, transparent));
+}
+
+// 滑過：疊在未讀底色上面（兩層都是半透明的疊加）。
+:host(:hover) {
+  background-image: linear-gradient(
+    var(--lib-notif-hover-bg, var(--app-state-hover)),
+    var(--lib-notif-hover-bg, var(--app-state-hover))
+  );
+}
+
+.ni-main {
+  display: grid;
+  grid-template-columns: var(--_dot) var(--_lead) minmax(0, 1fr);
+  column-gap: 0.625rem;
+  align-items: start;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: var(--_pad-block) var(--_pad-inline) var(--_pad-block) calc(var(--_pad-inline) - 0.375rem);
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: var(--mat-sys-on-surface);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: calc(var(--app-focus-ring-width) * -1);
+  }
+}
+
+.ni-dot {
+  // 對齊圖示格的中線（第一行），不是整則通知的中線。
+  margin-top: calc((var(--_lead) - var(--_dot)) / 2);
+  width: var(--_dot);
+  height: var(--_dot);
+  border-radius: var(--lib-notif-dot-radius, 50%);
+  box-shadow: var(--lib-notif-dot-shadow, none);
+  // 已讀時保留位置（版面不跳），只是不畫。
+  visibility: hidden;
+  background-color: var(--lib-notif-dot-color, var(--mat-sys-primary));
+}
+
+:host(.is-unread) .ni-dot {
+  visibility: visible;
+}
+
+.ni-lead {
+  display: grid;
+  box-sizing: border-box;
+  place-items: center;
+  width: var(--_lead);
+  height: var(--_lead);
+  border: var(--lib-notif-lead-frame, 0 solid transparent);
+  border-radius: var(--lib-notif-lead-radius, var(--mat-sys-corner-full));
+  background-color: var(--_tone-bg, var(--app-neutral-bg));
+  color: var(--_tone-fg, var(--app-neutral-fg));
+
+  .material-symbols-rounded {
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+}
+
+.ni-lead[data-tone='info'] {
+  --_tone-bg: var(--app-info-bg);
+  --_tone-fg: var(--app-info-fg);
+}
+
+.ni-lead[data-tone='positive'] {
+  --_tone-bg: var(--app-positive-bg);
+  --_tone-fg: var(--app-positive-fg);
+}
+
+.ni-lead[data-tone='warning'] {
+  --_tone-bg: var(--app-warning-bg);
+  --_tone-fg: var(--app-warning-fg);
+}
+
+.ni-lead[data-tone='danger'] {
+  --_tone-bg: var(--app-danger-bg);
+  --_tone-fg: var(--app-danger-fg);
+}
+
+.ni-lead--avatar {
+  --_tone-bg: var(--mat-sys-primary-container);
+  --_tone-fg: var(--mat-sys-on-primary-container);
+
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.ni-text {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.ni-sr {
+  @include sk.sr-only;
+}
+
+.ni-title {
+  // 右上角留給「標為已讀」「移除」兩顆按鈕。
+  padding-inline-end: var(--_tools);
+  font-family: var(--lib-notif-title-font, var(--font-body));
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+:host(.is-unread) .ni-title {
+  font-weight: var(--lib-notif-unread-weight, 600);
+}
+
+.ni-body {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: var(--lib-notif-body-size, 0.8125rem);
+  line-height: 1.45;
+}
+
+.ni-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.375rem;
+  margin-top: 0.125rem;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: var(--lib-notif-meta-size, 0.75rem);
+  font-variant-caps: var(--lib-notif-meta-caps, normal);
+  letter-spacing: var(--lib-notif-meta-spacing, normal);
+}
+
+.ni-extra {
+  padding: 0 var(--_pad-inline) var(--_pad-block)
+    calc(var(--_pad-inline) - 0.375rem + var(--_dot) + var(--_lead) + 1.25rem);
+  margin-top: calc(var(--_pad-block) * -0.5);
+}
+
+.ni-tools {
+  position: absolute;
+  top: calc(var(--_pad-block) - 0.375rem);
+  right: calc(var(--_pad-inline) - 0.5rem);
+  display: flex;
+
+  --mat-icon-button-state-layer-size: 2rem;
+  --mat-icon-button-icon-size: 1.125rem;
+
+  .material-symbols-rounded {
+    font-size: 1.125rem;
+  }
+}
+
+.ni-tool {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// 能滑過的裝置：滑過或鍵盤聚焦在這一則時才出現（位置一直保留，不會擠動文字）；觸控裝置一直顯示。
+@media (hover: hover) {
+  .ni-tools {
+    opacity: 0;
+    transition: opacity var(--app-motion-fast) var(--app-ease-standard);
+  }
+
+  :host(:hover) .ni-tools,
+  :host(:focus-within) .ni-tools {
+    opacity: 1;
+  }
+}

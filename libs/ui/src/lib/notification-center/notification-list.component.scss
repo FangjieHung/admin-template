@@ -1,0 +1,97 @@
+// 通知清單。只用語意 token；造型讀 --lib-notif-* 變數（var() 的第二個值就是預設），質地要特調時在
+// `.lib-notification-center` 上設這些變數（各質地 recipes.scss，CONTRACT.md「通知中心」）。每一則的樣式在
+// notification-item.component.scss。
+@use '../feedback-state/skeleton-block' as sk;
+
+:host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  color: var(--mat-sys-on-surface);
+
+  --_pad-inline: var(--lib-notif-item-padding-inline, 1rem);
+}
+
+.nl-sr {
+  @include sk.sr-only;
+}
+
+.nl-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.25rem var(--_pad-inline) 0.5rem;
+}
+
+.nl-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+// 兩層 class：壓過質地 recipe 裡 .ui-nav-pill 的大尺寸（顏色、圓角、框線照質地）。
+.nl-pills .nl-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.875rem;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.nl-pills .nl-pill--small {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.nl-categories {
+  padding: 0 var(--_pad-inline) 0.5rem;
+}
+
+.nl-count {
+  font-weight: 700;
+}
+
+.nl-mark-all {
+  margin-inline-start: auto;
+}
+
+.nl-body {
+  min-height: 0;
+  border-top: var(--lib-notif-divider, 1px solid var(--mat-sys-outline-variant));
+}
+
+.nl-skeleton,
+lib-empty-state,
+lib-error-state {
+  margin: 0.75rem var(--_pad-inline);
+}
+
+.nl-group__heading {
+  padding: 0.75rem var(--_pad-inline) 0.25rem;
+  color: var(--mat-sys-on-surface-variant);
+  font-family: var(--lib-notif-group-font, var(--font-body));
+  font-size: var(--lib-notif-group-size, 0.75rem);
+  font-weight: var(--lib-notif-group-weight, 600);
+  font-variant-caps: var(--lib-notif-meta-caps, normal);
+  letter-spacing: var(--lib-notif-group-spacing, 0.02em);
+}
+
+.nl-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lib-notif-item-gap, 0px);
+  margin: 0;
+  padding: 0 var(--lib-notif-list-inset, 0px);
+  list-style: none;
+}
+
+.nl-more {
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem var(--_pad-inline);
+}

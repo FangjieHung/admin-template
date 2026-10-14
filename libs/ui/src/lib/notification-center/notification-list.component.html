@@ -1,0 +1,131 @@
+<div class="nl-toolbar">
+  <div class="nl-pills" role="group" [attr.aria-label]="labels.filterGroup">
+    <button
+      type="button"
+      class="ui-nav-pill nl-pill"
+      data-filter="all"
+      [class.is-active]="filter() === 'all'"
+      [attr.aria-pressed]="filter() === 'all'"
+      (click)="setFilter('all')"
+    >
+      {{ labels.filterAll }}
+    </button>
+    <button
+      type="button"
+      class="ui-nav-pill nl-pill"
+      data-filter="unread"
+      [class.is-active]="filter() === 'unread'"
+      [attr.aria-pressed]="filter() === 'unread'"
+      (click)="setFilter('unread')"
+    >
+      {{ labels.filterUnread }}
+      @if (unreadBadge()) {
+        <span class="nl-count ui-text-numeric">{{ unreadBadge() }}</span>
+      }
+    </button>
+  </div>
+  <button
+    type="button"
+    matButton
+    class="nl-mark-all"
+    [disabled]="!canMarkAll()"
+    (click)="markAllRead()"
+  >
+    {{ labels.markAllRead }}
+  </button>
+</div>
+
+@if (categories().length > 0) {
+  <div class="nl-pills nl-categories" role="group" [attr.aria-label]="labels.categoryGroup">
+    <button
+      type="button"
+      class="ui-nav-pill nl-pill nl-pill--small"
+      [class.is-active]="category() === null"
+      [attr.aria-pressed]="category() === null"
+      (click)="setCategory(null)"
+    >
+      {{ labels.categoryAll }}
+    </button>
+    @for (c of categories(); track c.id) {
+      <button
+        type="button"
+        class="ui-nav-pill nl-pill nl-pill--small"
+        [attr.data-category]="c.id"
+        [class.is-active]="category() === c.id"
+        [attr.aria-pressed]="category() === c.id"
+        (click)="setCategory(c.id)"
+      >
+        {{ c.label }}
+      </button>
+    }
+  </div>
+}
+
+<div class="nl-body">
+  @switch (status()) {
+    @case ('loading') {
+      <lib-skeleton class="nl-skeleton" variant="list" [count]="4" [label]="labels.loading" />
+    }
+    @case ('error') {
+      <lib-error-state
+        [compact]="true"
+        [message]="labels.error"
+        [hint]="labels.errorHint"
+        [retryLabel]="labels.retry"
+        (retry)="refresh()"
+      />
+    }
+    @default {
+      @if (items().length === 0) {
+        <lib-empty-state
+          [compact]="true"
+          [icon]="filter() === 'unread' ? 'mark_email_read' : 'notifications_off'"
+          [message]="filter() === 'unread' ? labels.emptyUnread : labels.empty"
+          [detail]="filter() === 'unread' ? '' : labels.emptyDetail"
+        />
+      } @else {
+        @for (group of groups(); track group.kind) {
+          <section class="nl-group" [attr.aria-labelledby]="idPrefix + '-' + group.kind">
+            <div
+              class="nl-group__heading"
+              role="heading"
+              [attr.aria-level]="headingLevel()"
+              [id]="idPrefix + '-' + group.kind"
+              [attr.data-group]="group.kind"
+            >
+              {{ groupHeading(group.kind) }}
+            </div>
+            <ul class="nl-list" role="list" [attr.aria-label]="labels.list + '・' + groupHeading(group.kind)">
+              @for (item of group.items; track item.id) {
+                <li
+                  lib-notification-item
+                  [item]="item"
+                  [time]="timeOf(item)"
+                  [labels]="labels"
+                  [categoryLabel]="categoryOf(item)"
+                  [tabbable]="item.id === tabbableId()"
+                  [idPrefix]="idPrefix"
+                  (activate)="onActivate(item)"
+                  (toggleRead)="onToggleRead(item)"
+                  (remove)="onRemove(item)"
+                  (runAction)="onAction(item)"
+                  (navigate)="onKeydown(item, $event)"
+                  (focused)="onFocused(item)"
+                ></li>
+              }
+            </ul>
+          </section>
+        }
+        @if (hasMore()) {
+          <div class="nl-more">
+            <button type="button" matButton="outlined" [disabled]="loadingMore()" (click)="loadMore()">
+              {{ loadingMore() ? labels.loading : labels.loadMore }}
+            </button>
+          </div>
+        }
+      }
+    }
+  }
+</div>
+
+<div class="nl-sr" aria-live="polite" aria-atomic="true">{{ announcement() }}</div>

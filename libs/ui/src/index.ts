@@ -64,3 +64,6 @@ export * from './lib/file-upload/upload-adapter';
 export * from './lib/file-upload/file-upload.types';
 export * from './lib/file-upload/file-upload-utils';
 export * from './lib/file-upload/file-upload.component';
+export * from './lib/notification-center/notification-center-labels';
+export * from './lib/notification-center/notification-source';
+export * from './lib/notification-center/notification-list.component';
