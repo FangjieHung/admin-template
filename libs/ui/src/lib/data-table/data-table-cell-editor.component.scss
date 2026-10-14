@@ -1,0 +1,76 @@
+@use 'cell-error' as ce;
+
+// 儲存格裡的編輯器：沒有自己的框（格子外圈的「目前格子」框線就是邊界，見 data-table-edit-chrome 的樣式），
+// 字級、字體、顏色都跟儲存格一樣，打開時列高不跳。手機整列表單（--form）才有一般欄位的框。
+
+:host {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.dt-ed__field {
+  box-sizing: border-box;
+  width: 100%;
+  // size="1"＋min-width 0：輸入框不用自己的預設寬度撐開欄寬，打開編輯器時欄寬不跳。
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  text-align: inherit;
+
+  // 格子外圈的框線已經標出焦點（≥ 3:1），輸入框本身不再畫第二圈。
+  &:focus {
+    outline: none;
+  }
+
+  &[type='date'] {
+    min-width: 8.5rem;
+  }
+}
+
+:host(.dt-ed--end) .dt-ed__field {
+  text-align: end;
+}
+
+.dt-ed__error {
+  @include ce.message;
+  color: var(--mat-sys-error);
+}
+
+// ---- 手機整列表單 ----
+
+:host(.dt-ed--form) .dt-ed__field {
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--app-field-border);
+  border-radius: var(--mat-sys-corner-small);
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  text-align: start;
+  // 16px：iOS Safari 聚焦字級小於 16px 的輸入框會自動放大整頁。
+  font-size: 1rem;
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: 1px;
+  }
+
+  &[aria-invalid='true'] {
+    border-color: var(--mat-sys-error);
+  }
+}
+
+.dt-ed__switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  color: var(--mat-sys-on-surface);
+  cursor: pointer;
+}

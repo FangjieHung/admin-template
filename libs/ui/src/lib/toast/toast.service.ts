@@ -33,7 +33,8 @@ export class ToastService {
   }
 
   show(type: ToastType, message: string, options: ToastOptions = {}): ToastRef {
-    const duration = TOAST_DURATIONS[type];
+    const preset = TOAST_DURATIONS[type];
+    const duration = preset === null ? null : (options.duration ?? preset);
     const data: ToastData = {
       type,
       message,

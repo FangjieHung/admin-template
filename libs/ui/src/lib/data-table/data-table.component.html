@@ -101,7 +101,20 @@
       />
     }
   } @else {
-    <table class="dt-table" #tableEl [attr.aria-busy]="isLoading() ? 'true' : null">
+    @let ed = edit();
+    @let grid = !!ed && !editFormMode() && !isLoading();
+    <table
+      class="dt-table"
+      #tableEl
+      [class.dt-editable]="!!ed"
+      [class.dt-grid]="grid"
+      [attr.role]="grid ? 'grid' : null"
+      [attr.aria-busy]="isLoading() ? 'true' : null"
+      (keydown)="ed?.onKeydown($event)"
+      (paste)="ed?.onPaste($event)"
+      (focusin)="ed?.onFocusIn($event)"
+      (focusout)="ed?.onFocusOut($event)"
+    >
       @if (isCustom()) {
         <thead>
           <ng-container [ngTemplateOutlet]="headDirective()!.template" />
@@ -132,6 +145,7 @@
                 scope="col"
                 [class]="'dt-align-' + (col.align ?? 'start') + (col.align === 'end' ? ' ui-text-numeric' : '')"
                 [class.dt-frozen]="frozenActive() && col.key === frozenKey()"
+                [class.dt-col--editable]="grid && !!col.editor"
                 [attr.aria-sort]="ariaSort(col)"
               >
                 @if (isColumnSortable(col)) {
@@ -190,7 +204,7 @@
               </tr>
             }
           } @else {
-          @for (row of displayRows(); track rowId()(row)) {
+          @for (row of displayRows(); track rowId()(row); let r = $index) {
             <tr
               [class]="rowClass()(row)"
               [class.is-expanded]="isExpanded(row)"
@@ -213,25 +227,92 @@
                       class="dt-selection-checkbox"
                       [checked]="isSelected(row)"
                       [attr.aria-label]="rowSelectionLabel(row)"
+                      [attr.tabindex]="grid ? ed!.selectTabindex(row) : null"
+                      [attr.data-dt-row]="grid ? r : null"
+                      [attr.data-dt-col]="grid ? selectKey : null"
+                      (focus)="grid && ed!.onSelectFocus(row)"
                       (change)="toggleRowSelection(row)"
                     />
                   </label>
                 </td>
               }
               @for (col of resolvedColumns(); track col.key) {
+                @let cs = grid ? ed!.cell(row, col) : null;
                 <td
                   [attr.data-label]="col.label"
                   [class]="'dt-align-' + (col.align ?? 'start') + (col.align === 'end' ? ' ui-text-numeric' : '')"
                   [class.is-secondary]="!col.primary"
                   [class.dt-frozen]="frozenActive() && col.key === frozenKey()"
+                  [class.dt-col--editable]="grid && !!col.editor"
+                  [class.dt-cell--editable]="cs?.editable"
+                  [class.dt-cell--active]="cs?.active"
+                  [class.dt-cell--editing]="cs?.editing"
+                  [class.dt-cell--dirty]="cs?.dirty"
+                  [class.dt-cell--error]="!!cs?.error"
+                  [attr.tabindex]="cs ? cs.tabindex : null"
+                  [attr.data-dt-row]="cs ? r : null"
+                  [attr.data-dt-col]="cs ? col.key : null"
+                  [attr.aria-readonly]="cs && !cs.editable ? 'true' : null"
+                  [attr.aria-invalid]="cs?.error ? 'true' : null"
+                  [attr.aria-busy]="cs?.status === 'saving' ? 'true' : null"
+                  (click)="cs && ed!.onCellClick(row, col, $event)"
+                  (dblclick)="cs && ed!.onCellDblClick(row, col)"
                 >
-                  @if (cellTemplates().get(col.key); as tpl) {
-                    <ng-container
-                      [ngTemplateOutlet]="tpl"
-                      [ngTemplateOutletContext]="cellContext(row)"
-                    />
+                  @if (cs?.active) {
+                    <span class="dt-ring" aria-hidden="true"></span>
+                  }
+                  @if (cs?.editing) {
+                    <ng-container [dtEditorHost]="ed!.editorSpec()" />
                   } @else {
-                    {{ valueOf(row, col) }}
+                    @if (cs?.dirty || cs?.error) {
+                      <span class="dt-cell-deco" aria-hidden="true"></span>
+                    }
+                    @if (cellTemplates().get(col.key); as tpl) {
+                      <ng-container
+                        [ngTemplateOutlet]="tpl"
+                        [ngTemplateOutletContext]="cellContext(row)"
+                      />
+                    } @else if (isToggle(col)) {
+                      <span class="dt-switch" [class.is-on]="toggleOn(row, col)">
+                        <span class="dt-switch__track" aria-hidden="true"></span>
+                        {{ toggleOn(row, col) ? editingLabels().toggleOn : editingLabels().toggleOff }}
+                      </span>
+                    } @else {
+                      {{ valueOf(row, col) }}
+                    }
+                    @if (cs?.dirty) {
+                      <span class="dt-sr-only">{{ editingLabels().dirty }}</span>
+                    }
+                    @if (cs?.error; as message) {
+                      <span class="dt-cell-error">
+                        <span class="material-symbols-rounded" aria-hidden="true">error</span>{{ message }}
+                      </span>
+                    }
+                    @if (cs?.status === 'saving') {
+                      <span class="dt-cell-status" aria-hidden="true"><span class="dt-spinner"></span></span>
+                    } @else if (cs?.status === 'saved') {
+                      <span class="dt-cell-status dt-cell-status--saved material-symbols-rounded" aria-hidden="true">check_circle</span>
+                    } @else if (cs?.editable && !isToggle(col)) {
+                      <span class="dt-edit-icon material-symbols-rounded" aria-hidden="true">edit</span>
+                    }
+                  }
+                </td>
+              }
+              @if (ed && editFormMode()) {
+                <td class="dt-row-edit-cell" (click)="$event.stopPropagation()">
+                  @if (ed.isFormRow(row)) {
+                    <ng-container [dtEditorHost]="ed.formSpec()" />
+                  } @else if (rowEditable(row)) {
+                    <button
+                      type="button"
+                      matButton="outlined"
+                      class="dt-row-edit-btn"
+                      [attr.data-dt-edit-row]="r"
+                      [attr.aria-label]="editRowLabel(row)"
+                      (click)="ed.openForm(row)"
+                    >
+                      <span class="material-symbols-rounded" aria-hidden="true">edit</span>{{ editingLabels().editRow }}
+                    </button>
                   }
                 </td>
               }
@@ -258,6 +339,10 @@
     </table>
   }
 </div>
+
+@if (edit(); as ed) {
+  <ng-container [dtEditorHost]="ed.chromeSpec" />
+}
 
 @if (pageable() && !isCustom() && !isEmpty() && !isLoading()) {
   <lib-data-table-pager

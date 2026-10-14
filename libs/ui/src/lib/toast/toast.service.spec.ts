@@ -60,6 +60,17 @@ describe('ToastService', () => {
     });
   }
 
+  it('duration 取代預設時長（例：「復原」給 5 秒）；錯誤提示仍不自動消失', async () => {
+    const { dismissed } = await open(() => toast.success('已儲存標題', { action: '復原', duration: 5000 }));
+    await advance(4500);
+    expect(dismissed()).toBe(false);
+    await advance(500 + ANIMATION);
+    expect(dismissed()).toBe(true);
+    const error = await open(() => toast.error('儲存失敗', { duration: 1000 }));
+    await advance(3000);
+    expect(error.dismissed()).toBe(false);
+  });
+
   it('錯誤不會自動消失，有「關閉」鈕；按關閉後 actionClicked 為 false', async () => {
     const { ref, dismissed } = await open(() => toast.error('儲存失敗，請再試一次'));
     await advance(10 * 60 * 1000);

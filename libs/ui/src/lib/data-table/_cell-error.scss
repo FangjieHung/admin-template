@@ -1,0 +1,23 @@
+// 有錯的儲存格：資料表的「表格內直接編輯」與匯入精靈的預覽共用同一個樣子——錯誤容器色的底、
+// 一圈內框、錯誤圖示＋訊息（一律寫出文字，不只靠顏色）。質地要換時在 `.dt-table` 上設 --dt-cell-error-*
+// （CONTRACT.md「共用元件的外觀變數」）；兩個元件的格子都在 .dt-table 裡，所以一起跟著變。
+
+$bg: var(--dt-cell-error-bg, var(--mat-sys-error-container));
+$fg: var(--dt-cell-error-fg, var(--mat-sys-on-error-container));
+$border: var(--dt-cell-error-border, var(--mat-sys-error));
+$border-width: var(--dt-cell-error-border-width, 1px);
+
+// 錯誤訊息那一行：圖示＋文字。
+@mixin message {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+
+  .material-symbols-rounded {
+    flex: 0 0 auto;
+    font-size: 1rem;
+    line-height: 1.25rem;
+  }
+}

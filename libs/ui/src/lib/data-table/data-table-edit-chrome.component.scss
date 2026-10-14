@@ -1,0 +1,310 @@
+@use 'cell-error' as ce;
+
+// 表格內直接編輯的樣式（不封裝，跟著編輯控制器 lazy 載入；沒有編輯的表格不下載）。
+// 選擇器一律從 `lib-data-table .dt-table.dt-editable` 開始：權重（0-3-2 起）高過資料表封裝後的 `.dt-table td`（0-3-1），
+// 又低於固定欄的 sticky／底色規則（0-4-0 以上），固定欄照常固定。
+//
+// 預設值就是 Material（常駐質地，主樣式裡不必再寫規則）；其他質地只在 `.dt-table` 上設下列變數（CONTRACT.md「--dt-*」），不覆寫屬性：
+//   --dt-active-outline / -offset   目前格子的框線（outline 簡寫）/ 位移      預設 focus-ring 寬的 focus-ring 實線 / 往內一個線寬
+//   --dt-active-shadow              目前格子的光暈或底線（box-shadow）         預設 none
+//   --dt-active-radius              框線的圓角                                預設 corner-extra-small
+//   --dt-editing-outline            編輯中格子的框線                           預設同目前格子
+//   --dt-editing-shadow             編輯中格子的光暈                           預設 4px focus-ring 22% 的柔和光圈
+//   --dt-editing-bg                 編輯中格子的底色                           預設 surface
+//   --dt-edit-icon-color            鉛筆提示的顏色                             預設 on-surface-variant
+//   --dt-dirty-color / -size / -shape  已修改的角落標記（顏色 / 邊長 / clip-path）  預設 primary / 0.5rem / 右上三角形
+//   --dt-dirty-bg                   已修改格子的底色                           預設 primary 6%
+//   --dt-cell-error-*               有錯的格子（與匯入精靈共用，見 _cell-error.scss）
+
+lib-data-table .dt-table.dt-editable {
+  td {
+    position: relative;
+  }
+
+  // 鉛筆提示的位置：可編輯欄的表頭與儲存格右側多留一點，數字欄的字和表頭仍然對齊。
+  :is(th, td).dt-col--editable {
+    padding-inline-end: max(var(--dt-cell-padding-inline, 1rem), 1.375rem);
+  }
+
+  td.dt-cell--editable {
+    cursor: cell;
+  }
+
+  td.dt-cell--editing {
+    background: var(--dt-editing-bg, var(--mat-sys-surface));
+    cursor: auto;
+  }
+
+  td:focus {
+    outline: none; // 框線畫在 .dt-ring 上（border-collapse 的儲存格畫不出 box-shadow）
+  }
+}
+
+// 目前的格子：只在表格有焦點（或正在編輯）時出現，滑鼠點別處就消失。
+lib-data-table .dt-ring {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: var(--dt-active-radius, var(--mat-sys-corner-extra-small));
+  outline: var(--dt-active-outline, var(--app-focus-ring-width) solid var(--app-focus-ring));
+  outline-offset: var(--dt-active-outline-offset, calc(-1 * var(--app-focus-ring-width)));
+  box-shadow: var(--dt-active-shadow, none);
+  pointer-events: none;
+  opacity: 0;
+}
+
+lib-data-table .dt-table.dt-grid:focus-within .dt-ring {
+  opacity: 1;
+}
+
+lib-data-table .dt-table.dt-editable td.dt-cell--editing .dt-ring {
+  opacity: 1;
+  outline: var(--dt-editing-outline, var(--dt-active-outline, var(--app-focus-ring-width) solid var(--app-focus-ring)));
+  box-shadow: var(--dt-editing-shadow, 0 0 0 4px color-mix(in srgb, var(--app-focus-ring) 22%, transparent));
+}
+
+// 鉛筆提示：滑過或鍵盤停在可編輯的格子時出現（不只靠顏色：多一個圖示）。點它也會開始編輯。
+lib-data-table .dt-edit-icon {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1;
+  color: var(--dt-edit-icon-color, var(--mat-sys-on-surface-variant));
+  transform: translateY(-50%);
+  opacity: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+lib-data-table .dt-table.dt-editable td.dt-cell--editable:hover .dt-edit-icon,
+lib-data-table .dt-table.dt-grid:focus-within td.dt-cell--active .dt-edit-icon {
+  opacity: 1;
+}
+
+// 已修改（批次）：右上角的標記＋淡底；報讀器另外念「已修改」。
+lib-data-table .dt-table.dt-editable td.dt-cell--dirty {
+  background-color: var(--dt-dirty-bg, color-mix(in srgb, var(--mat-sys-primary) 6%, transparent));
+}
+
+lib-data-table .dt-cell-deco {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    inset-inline-end: 0;
+    width: var(--dt-dirty-size, 0.5rem);
+    height: var(--dt-dirty-size, 0.5rem);
+    background: var(--dt-dirty-color, var(--mat-sys-primary));
+    clip-path: var(--dt-dirty-shape, polygon(0 0, 100% 0, 100% 100%));
+    opacity: 0;
+  }
+}
+
+lib-data-table td.dt-cell--dirty .dt-cell-deco::after {
+  opacity: 1;
+}
+
+// 有錯的格子：與匯入精靈的預覽同一個樣子（錯誤容器色＋內框＋圖示與訊息）。
+lib-data-table .dt-table.dt-editable td.dt-cell--error {
+  background: ce.$bg;
+  color: ce.$fg;
+}
+
+lib-data-table td.dt-cell--error .dt-cell-deco::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 ce.$border-width ce.$border;
+}
+
+lib-data-table .dt-cell-error {
+  @include ce.message;
+  display: flex;
+  margin-top: 0.125rem;
+  max-width: 16rem;
+}
+
+// 開關欄：軌道＋圓點＋文字（是／否），不只靠顏色。
+lib-data-table .dt-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+lib-data-table .dt-switch__track {
+  position: relative;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 2.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--app-field-border);
+  border-radius: var(--mat-sys-corner-full);
+  background: var(--mat-sys-surface-container-highest);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    inset-inline-start: 0.1875rem;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 50%;
+    background: var(--app-field-border);
+    transform: translateY(-50%);
+    transition: inset-inline-start var(--app-motion-fast) var(--app-ease-standard);
+  }
+}
+
+lib-data-table .dt-switch.is-on .dt-switch__track {
+  border-color: var(--mat-sys-primary);
+  background: var(--mat-sys-primary);
+
+  &::after {
+    inset-inline-start: 1.125rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    background: var(--mat-sys-on-primary);
+  }
+}
+
+// 即時儲存：儲存中轉圈、存好打勾一下（在鉛筆的位置）。
+lib-data-table .dt-cell-status {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 0.25rem;
+  display: inline-flex;
+  font-size: 0.875rem;
+  line-height: 1;
+  transform: translateY(-50%);
+}
+
+lib-data-table .dt-cell-status--saved {
+  color: var(--app-positive-fg);
+}
+
+lib-data-table .dt-spinner,
+.dt-edit-chrome .dt-spinner {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 0.8125rem;
+  height: 0.8125rem;
+  border: 2px solid var(--mat-sys-outline-variant);
+  border-top-color: var(--mat-sys-primary);
+  border-radius: 50%;
+  animation: dt-edit-spin calc(var(--app-motion-loop) / 8) linear infinite;
+}
+
+@keyframes dt-edit-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  lib-data-table .dt-spinner,
+  .dt-edit-chrome .dt-spinner {
+    animation: none;
+  }
+}
+
+// ---- 手機卡片版：每張卡片一顆「編輯」，按下在卡片裡展開整列表單 ----
+lib-data-table .dt-table.dt-editable td.dt-row-edit-cell {
+  display: block;
+  padding: 0.25rem 0 0;
+  border-right: 0; // 卡片裡不畫欄線（Grid 的 --dt-col-divider）
+
+  &::before {
+    content: none;
+  }
+}
+
+lib-data-table .dt-row-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+// ---- 報讀器通知與批次列 ----
+.dt-edit-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+// 批次列 sticky 貼在捲動容器底部（同設定頁的「有未儲存的變更」列）。外層到捲動容器為止不能是 overflow: hidden。
+.dt-edit-chrome {
+  display: block;
+}
+
+.dt-edit-chrome--bar {
+  position: sticky;
+  bottom: 0.75rem;
+  z-index: var(--app-z-sticky);
+  margin-top: 0.75rem;
+}
+
+.dt-batch-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
+}
+
+.dt-batch-bar__text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  margin: 0 auto 0 0;
+  color: var(--mat-sys-on-surface);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.dt-batch-bar__icon {
+  font-size: 1.25rem;
+  color: var(--mat-sys-primary);
+}
+
+.dt-batch-bar__sep {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.dt-batch-bar__errors {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--mat-sys-error);
+
+  .material-symbols-rounded {
+    font-size: 1.125rem;
+  }
+}
+
+.dt-batch-bar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  .material-symbols-rounded {
+    margin-inline-end: 0.25rem;
+    font-size: 1.125rem;
+  }
+
+  .dt-spinner {
+    margin-inline-end: 0.5rem;
+    border-color: currentColor;
+    border-top-color: transparent;
+  }
+}

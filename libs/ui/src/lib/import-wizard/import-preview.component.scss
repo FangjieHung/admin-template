@@ -1,4 +1,7 @@
-// 預覽與檢查。只用語意 token；有錯的格子用 --lib-import-cell-error-*（預設錯誤容器色，見 CONTRACT.md），
+@use '../data-table/cell-error' as ce;
+
+// 預覽與檢查。只用語意 token；有錯的格子與資料表「表格內直接編輯」的錯誤格同一個樣子（data-table/_cell-error.scss：
+// 吃 .dt-table 上的 --dt-cell-error-*，匯入精靈另可用 --lib-import-cell-error-* 單獨覆寫，見 CONTRACT.md），
 // 一律附圖示與文字，不只靠顏色。資料表本身的外觀交給 lib-data-table 與質地 recipe。
 
 :host {
@@ -146,10 +149,10 @@
   }
 
   &.is-invalid {
-    background: var(--lib-import-cell-error-bg, var(--mat-sys-error-container));
-    color: var(--lib-import-cell-error-fg, var(--mat-sys-on-error-container));
-    box-shadow: inset 0 0 0 var(--lib-import-cell-error-border-width, 1px)
-      var(--lib-import-cell-error-border, var(--mat-sys-error));
+    background: var(--lib-import-cell-error-bg, #{ce.$bg});
+    color: var(--lib-import-cell-error-fg, #{ce.$fg});
+    box-shadow: inset 0 0 0 var(--lib-import-cell-error-border-width, #{ce.$border-width})
+      var(--lib-import-cell-error-border, #{ce.$border});
   }
 }
 
@@ -166,16 +169,7 @@
 }
 
 .iwp-cell__error {
-  display: inline-flex;
-  align-items: flex-start;
-  gap: 0.25rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-
-  .material-symbols-rounded {
-    font-size: 1rem;
-    line-height: 1.25rem;
-  }
+  @include ce.message;
 }
 
 // 寬版：值不折行（Email、電話被拆成兩行很難讀），錯誤訊息保留可讀的寬度；表格太寬時由資料表橫向捲動。

@@ -1,0 +1,64 @@
+@let ctx = context();
+@switch (type()) {
+  @case ('select') {
+    <select
+      class="dt-ed__field"
+      data-dt-editor
+      [id]="ctx.inputId"
+      [attr.aria-label]="ctx.mode === 'cell' ? ctx.label : null"
+      [attr.aria-invalid]="error() ? 'true' : null"
+      [attr.aria-describedby]="error() ? errorId : null"
+      (keydown)="onKeydown($event)"
+      (change)="onInput()"
+      (blur)="onBlur()"
+    >
+      @if (showEmptyOption()) {
+        <option value="" [selected]="selectedIndex() === -1"></option>
+      }
+      @for (option of options(); track $index) {
+        <option [value]="$index" [selected]="$index === selectedIndex()">{{ option.label }}</option>
+      }
+    </select>
+  }
+  @case ('toggle') {
+    <label class="dt-ed__switch">
+      <input
+        type="checkbox"
+        role="switch"
+        data-dt-editor
+        [id]="ctx.inputId"
+        [checked]="checked()"
+        [attr.aria-invalid]="error() ? 'true' : null"
+        [attr.aria-describedby]="error() ? errorId : null"
+        (keydown)="onKeydown($event)"
+        (change)="onInput()"
+      />
+      <span>{{ checked() ? ctx.labels.toggleOn : ctx.labels.toggleOff }}</span>
+    </label>
+  }
+  @default {
+    <input
+      class="dt-ed__field"
+      data-dt-editor
+      autocomplete="off"
+      [type]="type() === 'date' ? 'date' : 'text'"
+      [attr.inputmode]="type() === 'number' ? 'decimal' : null"
+      [attr.size]="ctx.mode === 'cell' ? 1 : null"
+      [id]="ctx.inputId"
+      [value]="ctx.text"
+      [attr.placeholder]="ctx.editor.placeholder || null"
+      [attr.aria-label]="ctx.mode === 'cell' ? ctx.label : null"
+      [attr.aria-invalid]="error() ? 'true' : null"
+      [attr.aria-describedby]="error() ? errorId : null"
+      [attr.aria-required]="ctx.editor.required ? 'true' : null"
+      (keydown)="onKeydown($event)"
+      (input)="onInput()"
+      (blur)="onBlur()"
+    />
+  }
+}
+@if (error(); as message) {
+  <span class="dt-ed__error" [id]="errorId">
+    <span class="material-symbols-rounded" aria-hidden="true">error</span>{{ message }}
+  </span>
+}

@@ -4,6 +4,7 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  Injector,
   TemplateRef,
   afterRenderEffect,
   computed,
@@ -26,6 +27,9 @@ import { DataTableColumnChooserComponent } from './data-table-column-chooser.com
 import { DataTablePagerComponent } from './data-table-pager.component';
 import { EmptyStateComponent, EmptyStateKind } from '../feedback-state/empty-state.component';
 import { exportRows, exportTableElement } from './data-table-export';
+import { DataTableEditorHostDirective } from './data-table-editor-host.directive';
+import { editorOf, hasEditableColumns, isCellEditable } from './data-table-editor-access';
+import type { DataTableEditController, DataTableEditHost } from './data-table-edit.controller';
 import {
   cellValue,
   clampPage,
@@ -44,9 +48,13 @@ import {
   DataTableHeadDirective,
 } from './data-table-slot.directives';
 import {
+  DataTableBatchSaveFn,
+  DataTableCellSaveFn,
   DataTableColumn,
   DataTableColumnChooserLabels,
   DataTableColumnPrefs,
+  DataTableEditMode,
+  DataTableEditingLabels,
   DataTableLabels,
   DataTableMobileMode,
   DataTablePagingLabels,
@@ -67,6 +75,7 @@ const SKELETON_WIDTHS = [72, 54, 86, 46, 64, 78, 58];
     MatTooltipModule,
     DataTableColumnChooserComponent,
     DataTablePagerComponent,
+    DataTableEditorHostDirective,
     EmptyStateComponent,
   ],
   templateUrl: './data-table.component.html',
@@ -123,6 +132,17 @@ export class DataTableComponent<T> {
   /** null＝預設欄位。使用者排回預設時也會回到 null。 */
   readonly columnPrefs = model<DataTableColumnPrefs | null>(null);
 
+  // ---- 表格內直接編輯（columns 裡有 editor 的欄位才會開啟；控制器與編輯器是 lazy chunk）----
+
+  /** instant：改一格存一格（onCellSave）；batch：先標成已修改，按「儲存全部」才送出（onBatchSave）。 */
+  readonly editMode = input<DataTableEditMode>('instant');
+  /** 即時儲存一格（editMode 是 instant 時必填）。 */
+  readonly onCellSave = input<DataTableCellSaveFn<T> | null>(null);
+  /** 批次儲存（editMode 是 batch 時必填）。 */
+  readonly onBatchSave = input<DataTableBatchSaveFn<T> | null>(null);
+  /** 批次修改有沒有未儲存的格子（頁面的 canDeactivate 用；也可以直接讀 `dirty()`）。 */
+  readonly dirtyChange = output<boolean>();
+
   readonly selectionChange = output<readonly T[]>();
   readonly batchDelete = output<readonly T[]>();
   readonly rowClick = output<T>();
@@ -155,6 +175,10 @@ export class DataTableComponent<T> {
   /** 手機斷點（matchMedia）；測試環境沒有 matchMedia 時視為桌機。 */
   protected readonly isCompact = signal(false);
 
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly hostEl = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
+
   constructor() {
     effect(() => {
       const externalSelection = this.selection();
@@ -185,12 +209,27 @@ export class DataTableComponent<T> {
       }
     });
 
+    // 有可編輯的欄位才載入編輯控制器（動態 import）；欄位不再可編輯（例如關掉「快速編輯」）時拆掉。
+    effect(() => {
+      const enabled = this.editingEnabled();
+      // 少了 labels.editing 時在這裡就丟出錯誤（開發期設定錯誤），不要等控制器載入完才發現。
+      if (enabled) this.editingLabels();
+      untracked(() => {
+        if (enabled) void this.loadEditing();
+        else this.unloadEditing();
+      });
+    });
+    this.destroyRef.onDestroy(() => {
+      this.destroyed = true;
+      this.unloadEditing();
+    });
+
     if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
       const mql = window.matchMedia(COMPACT_QUERY);
       this.isCompact.set(mql.matches);
       const onChange = (e: MediaQueryListEvent) => this.isCompact.set(e.matches);
       mql.addEventListener('change', onChange);
-      inject(DestroyRef).onDestroy(() => mql.removeEventListener('change', onChange));
+      this.destroyRef.onDestroy(() => mql.removeEventListener('change', onChange));
     }
 
     // 固定欄前面若有勾選欄，固定欄的 left 要等於勾選欄的實際寬度（勾選欄寬度由內容撐出，量了才準）。
@@ -305,8 +344,10 @@ export class DataTableComponent<T> {
     return `${SKELETON_WIDTHS[(row * 3 + col) % SKELETON_WIDTHS.length]}%`;
   }
 
+  /** 編輯中（批次草稿、儲存中）的列，dtCell 範本拿到的是改過的樣子。 */
   protected cellContext(row: T): DataTableCellContext<T> {
-    return { $implicit: row };
+    const ed = this.edit();
+    return { $implicit: ed ? ed.view(row) : row };
   }
 
   protected readonly hasSecondary = computed(() =>
@@ -359,8 +400,105 @@ export class DataTableComponent<T> {
   }
 
   protected onRowClick(row: T): void {
-    if (!this.rowClickable()) return;
+    if (!this.rowClickable() || this.edit()?.editing()) return;
     this.rowClick.emit(row);
+  }
+
+  // ---- 表格內直接編輯 ----
+
+  /** 編輯控制器（lazy 載入完成後才有）。範本用 `ed` 取它。 */
+  protected readonly edit = signal<DataTableEditController<T> | null>(null);
+  private editLoading: Promise<void> | null = null;
+  private destroyed = false;
+
+  /** 有欄位設了 editor（逃生門模式不支援編輯）。 */
+  protected readonly editingEnabled = computed(() => !this.isCustom() && hasEditableColumns(this.columns()));
+
+  protected readonly editingLabels = computed<DataTableEditingLabels>(() => {
+    const editing = this.labels().editing;
+    if (this.editingEnabled() && !editing) {
+      throw new Error('DataTable：有欄位設了 editor 時 labels.editing 為必填');
+    }
+    return editing as DataTableEditingLabels;
+  });
+
+  /** 手機卡片版：不做儲存格層級的編輯，改成每張卡片一顆「編輯」打開整列表單。 */
+  protected readonly editFormMode = computed(() => this.isCompact() && this.mobileMode() === 'cards');
+
+  /** 批次修改有未儲存的格子。 */
+  readonly dirty = computed(() => this.edit()?.dirty() ?? false);
+
+  /** 儲存全部批次修改（頁面離開前的「儲存」用）。有錯或失敗時回傳 false。 */
+  saveChanges(): Promise<boolean> {
+    return this.edit()?.saveAll() ?? Promise.resolve(true);
+  }
+
+  /** 捨棄全部批次修改。 */
+  discardChanges(): void {
+    this.edit()?.discard();
+  }
+
+  private async loadEditing(): Promise<void> {
+    if (this.edit() || this.editLoading) return this.editLoading ?? undefined;
+    const hasRelation = this.columns().some((c) => editorOf(c)?.type === 'relation');
+    this.editLoading = (async () => {
+      const m = await import('./data-table-edit.controller');
+      if (hasRelation) await m.preloadRelationEditor();
+      // 載入期間表格已經被移除（換頁）或欄位不再可編輯：不建立控制器。
+      if (this.destroyed || !this.editingEnabled() || this.edit()) return;
+      this.edit.set(new m.DataTableEditController<T>(this.editHost()));
+    })().finally(() => (this.editLoading = null));
+    return this.editLoading;
+  }
+
+  private unloadEditing(): void {
+    const ed = untracked(() => this.edit());
+    if (!ed) return;
+    ed.destroy();
+    this.edit.set(null);
+  }
+
+  private editHost(): DataTableEditHost<T> {
+    return {
+      element: this.hostEl.nativeElement,
+      injector: this.injector,
+      columns: this.resolvedColumns,
+      rows: this.rows,
+      processedRows: this.processedRows,
+      displayRows: this.displayRows,
+      rowId: this.rowId,
+      labels: this.editingLabels,
+      mode: this.editMode,
+      cellSave: this.onCellSave,
+      batchSave: this.onBatchSave,
+      selectable: this.selectable,
+      formMode: this.editFormMode,
+      pageable: this.pageable,
+      pageSize: this.pageSize,
+      goToPage: (page) => this.goToPage(page),
+      rowLabel: (row) => this.rowLabel(row),
+      dirtyChange: (dirty) => this.dirtyChange.emit(dirty),
+    };
+  }
+
+  /** 這一列的識別文字：固定欄（或第一欄）的文字，沒有時用 rowId。 */
+  protected rowLabel(row: T): string {
+    const columns = this.resolvedColumns();
+    const col = columns.find((c) => c.key === this.frozenKey()) ?? columns[0];
+    const text = col ? this.valueOf(row, col) : '';
+    return text || String(this.rowId()(row));
+  }
+
+  /** 勾選欄在方向鍵導覽裡的 key。 */
+  protected readonly selectKey = '\u0000select';
+
+  /** 這一列至少有一欄可以改（手機卡片才顯示「編輯」）。 */
+  protected rowEditable(row: T): boolean {
+    return this.resolvedColumns().some((c) => isCellEditable(c, row));
+  }
+
+  protected editRowLabel(row: T): string {
+    return this.editingLabels().editRowLabel.replace('{row}', this.rowLabel(row));
   }
 
   /**
@@ -387,8 +525,24 @@ export class DataTableComponent<T> {
   }
 
   protected valueOf(row: T, col: DataTableColumn<T>): string {
-    const value = cellValue(col, row);
-    return value === null || value === undefined ? '' : String(value);
+    const ed = this.edit();
+    const view = ed ? ed.view(row) : row;
+    const value = cellValue(col, view);
+    if (value === null || value === undefined) return '';
+    // 下拉欄沒有 dtCell 時顯示選項文字，不是存的值。
+    const editor = editorOf(col);
+    if (editor?.type === 'select') return editor.options.find((o) => o.value === value)?.label ?? String(value);
+    return String(value);
+  }
+
+  /** 開關欄（editor.type 'toggle'）沒有 dtCell 時畫成開關＋文字。 */
+  protected isToggle(col: DataTableColumn<T>): boolean {
+    return editorOf(col)?.type === 'toggle';
+  }
+
+  protected toggleOn(row: T, col: DataTableColumn<T>): boolean {
+    const ed = this.edit();
+    return !!cellValue(col, ed ? ed.view(row) : row);
   }
 
   // ---- 排序 ----

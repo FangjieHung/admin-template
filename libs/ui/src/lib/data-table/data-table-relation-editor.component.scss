@@ -1,0 +1,27 @@
+@use 'cell-error' as ce;
+
+// 儲存格裡的 relation-select：把 mat-form-field 壓到接近列高（Material 的欄位 token 是繼承的 CSS 變數，
+// 設在宿主上就好）；外框、浮層照常吃質地的欄位 recipe。手機整列表單（--form）用一般欄位的高度。
+:host {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 12rem;
+  --mat-form-field-container-height: 2.25rem;
+  --mat-form-field-container-vertical-padding: 0.375rem;
+}
+
+:host(.dt-rel--form) {
+  min-width: 0;
+  --mat-form-field-container-height: 3.5rem;
+  --mat-form-field-container-vertical-padding: 1rem;
+}
+
+lib-relation-select {
+  display: block;
+  width: 100%;
+}
+
+.dt-rel__error {
+  @include ce.message;
+  color: var(--mat-sys-error);
+}

@@ -2,6 +2,7 @@
   class="rs-field"
   [class.rs-field--invalid]="invalidShown()"
   [appearance]="appearance()"
+  [subscriptSizing]="subscriptSizing()"
   [floatLabel]="resolving() ? 'always' : 'auto'"
 >
   @if (label()) {
@@ -22,6 +23,7 @@
     [matAutocomplete]="auto"
     [matAutocompleteDisabled]="readonly() || isDisabled()"
     [attr.aria-busy]="resolving() ? 'true' : null"
+    [attr.aria-label]="ariaLabel()"
     (input)="onInput($event)"
     (focus)="onFocus()"
     (blur)="onBlur()"

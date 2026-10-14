@@ -20,6 +20,8 @@ export const TOAST_DURATIONS: Readonly<Record<ToastType, number | null>> = {
 export interface ToastOptions {
   /** 唯一一個動作鈕的文字，例：「復原」。按下時 `ToastRef.actionClicked` 會 resolve 成 true。 */
   action?: string;
+  /** 顯示多久（毫秒），取代該類型的預設時長；例：「復原」提示給 5 秒。錯誤提示一律不自動消失，不吃這個值。 */
+  duration?: number;
 }
 
 /** `ToastService` 每次顯示回傳的控制柄。 */

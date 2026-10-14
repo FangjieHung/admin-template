@@ -19,7 +19,7 @@ import { Subscription } from 'rxjs';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { ErrorStateMatcher } from '@angular/material/core';
-import { MatFormFieldAppearance, MatFormFieldModule } from '@angular/material/form-field';
+import { MatFormFieldAppearance, MatFormFieldModule, SubscriptSizing } from '@angular/material/form-field';
 import { MatInput, MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RELATION_SELECT_LABELS, assertRelationSelectLabels, formatRelationLabel } from './relation-select-labels';
@@ -87,6 +87,10 @@ export class RelationSelectComponent<T> implements ControlValueAccessor, DoCheck
   readonly readonly = input(false);
   /** 預設 outline（一般表單）；篩選列、`ui-field-group` 用 fill。 */
   readonly appearance = input<MatFormFieldAppearance>('outline');
+  /** 沒有看得到的 label 時的無障礙名稱（例：資料表儲存格裡的編輯器）。 */
+  readonly ariaLabel = input<string | null>(null);
+  /** dynamic：欄位下方不預留提示與錯誤的高度（放在表格儲存格裡時用）。 */
+  readonly subscriptSizing = input<SubscriptSizing>('fixed');
   readonly source = input.required<RelationSource<T>>();
   /** 選項與輸入框顯示的主文字。 */
   readonly displayWith = input.required<(item: T) => string>();
