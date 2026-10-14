@@ -1,0 +1,152 @@
+@use '../feedback-state/skeleton-block' as sk;
+@use './tree-shared' as shared;
+
+@include shared.spinner-keyframes;
+
+// ---- 可被質地覆寫的外觀 ----
+// 質地 recipe 只在 `.lib-tree` 上設下列變數（CONTRACT.md「樹狀選單與樹狀表」），不覆寫屬性；沒設時用 var() 的 fallback：
+//   --lib-tree-indent              每一層的縮排                         預設 1.5rem
+//   --lib-tree-row-height          列的最小高度                         預設 2.5rem
+//   --lib-tree-row-padding-inline  列的左右留白                         預設 0.5rem
+//   --lib-tree-row-radius          列（滑過、目前項目底色）的圓角       預設 corner-full
+//   --lib-tree-font-size           字級                                 預設 0.875rem
+//   --lib-tree-hover-bg            滑過的底色                           預設 --app-state-hover
+//   --lib-tree-current-bg / -fg    目前項目（single）的底色／字色       預設 --app-state-selected／on-surface
+//   --lib-tree-current-indicator   目前項目的標記（box-shadow 值）      預設 none（另有字重 600，不只靠顏色）
+//   --lib-tree-current-weight      目前項目的字重                       預設 600
+//   --lib-tree-guide               連接線（border 簡寫，畫在每一層子節點的左側）  預設 0 solid transparent（不畫）
+//   --lib-tree-toggle-*            展開鈕：-size／-radius／-frame（border 簡寫）／-bg／-fg（兩個元件共用）
+//   --lib-tree-mark-bg / -fg       搜尋比對到的字（lib-tree-highlight）  預設 --app-warning-bg／--app-warning-fg
+:host {
+  display: block;
+  position: relative; // .tr-sr 是 absolute：host 當定位基準
+  font-size: var(--lib-tree-font-size, 0.875rem);
+}
+
+.tr-sr {
+  @include sk.sr-only;
+}
+
+.tr-tree,
+.tr-group {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tr-item {
+  outline: none; // 焦點框畫在列上（li 包著整棵子樹）
+}
+
+.tr-row {
+  @include shared.indent(var(--tr-depth, 0));
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-block-size: var(--lib-tree-row-height, 2.5rem);
+  padding-inline-end: var(--lib-tree-row-padding-inline, 0.5rem);
+  border-radius: var(--lib-tree-row-radius, var(--mat-sys-corner-full));
+  color: var(--mat-sys-on-surface);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--app-motion-fast) var(--app-ease-standard);
+
+  &:hover {
+    background: var(--lib-tree-hover-bg, var(--app-state-hover));
+  }
+
+  &.is-current {
+    // 次要文字（節點範本裡的 on-surface-variant、展開鈕）疊在選取底色上會掉到 4.5:1 以下（Verdant 實測 4.02）：
+    // 這一列裡就地改成目前項目的字色。
+    --mat-sys-on-surface-variant: var(--lib-tree-current-fg, var(--mat-sys-on-surface));
+    background: var(--lib-tree-current-bg, var(--app-state-selected));
+    color: var(--lib-tree-current-fg, var(--mat-sys-on-surface));
+    box-shadow: var(--lib-tree-current-indicator, none);
+    font-weight: var(--lib-tree-current-weight, 600);
+  }
+}
+
+.tr-item:focus-visible > .tr-row {
+  outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+  outline-offset: calc(-1 * var(--app-focus-ring-width));
+}
+
+.tr-toggle {
+  @include shared.toggle;
+
+  &.is-forced {
+    cursor: default;
+    opacity: 0.6;
+  }
+}
+
+.tr-chevron {
+  @include shared.chevron;
+}
+
+.tr-toggle.is-open .tr-chevron {
+  transform: rotate(90deg);
+}
+
+.tr-spinner {
+  @include shared.spinner;
+}
+
+// 勾選框外觀由 theme-pack 的 _choice-controls.scss 統一重畫，這裡只管位置。
+.tr-check {
+  flex: 0 0 auto;
+  margin: 0;
+  cursor: pointer;
+}
+
+.tr-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-block: 0.375rem;
+}
+
+// 連接線：每一層子節點的左側一條直線，對齊父節點展開鈕的中心。
+.tr-group {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: calc(
+      var(--lib-tree-row-padding-inline, 0.5rem) + (var(--tr-depth, 1) - 1) * var(--lib-tree-indent, 1.5rem) +
+        var(--lib-tree-toggle-size, 1.75rem) / 2
+    );
+    border-inline-start: var(--lib-tree-guide, 0 solid transparent);
+    pointer-events: none;
+  }
+}
+
+.tr-error {
+  @include shared.indent(var(--tr-depth, 1));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  padding-block: 0.25rem 0.5rem;
+  padding-inline-end: var(--lib-tree-row-padding-inline, 0.5rem);
+  color: var(--mat-sys-error);
+}
+
+.tr-error-icon {
+  font-size: 1.125rem;
+}
+
+.tr-error-text {
+  color: var(--mat-sys-on-surface);
+}
+
+.tr-retry {
+  @include shared.retry-button;
+}
+
+.tr-empty {
+  margin: 0;
+  padding: 0.75rem var(--lib-tree-row-padding-inline, 0.5rem);
+  color: var(--mat-sys-on-surface-variant);
+}

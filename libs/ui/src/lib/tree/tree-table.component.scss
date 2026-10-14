@@ -1,0 +1,181 @@
+@use '../feedback-state/skeleton-block' as sk;
+@use './tree-shared' as shared;
+
+@include shared.spinner-keyframes;
+
+// 外觀跟 lib-data-table 一致：表格掛 `.dt-table`，讀同一組 --dt-* 變數（質地在 `.dt-table` 上設，見 CONTRACT.md「--dt-*」），
+// fallback 等於 data-table 的預設值。縮排與展開鈕吃 lib-tree 的 --lib-tree-indent／--lib-tree-toggle-*（質地設在 .lib-tree-table 上）。
+:host {
+  display: block;
+  position: relative; // .tt-sr 是 absolute：host 當定位基準
+}
+
+.tt-sr {
+  @include sk.sr-only;
+}
+
+.tt-wrap {
+  overflow-x: auto;
+}
+
+.tt-table {
+  width: 100%;
+  // 窄螢幕不擠成卡片：保留表格形態、橫向捲動，第一欄固定在左側。
+  min-width: var(--lib-tree-table-min-width, 40rem);
+  border-collapse: collapse;
+  font-size: var(--dt-font-size, 0.875rem);
+  border: var(--dt-frame, 0 solid);
+}
+
+.tt-table thead tr {
+  text-align: left;
+  border-bottom: 1px solid var(--dt-head-border-color, var(--mat-sys-outline-variant));
+  background: var(--dt-header-bg, transparent);
+}
+
+.tt-table th {
+  color: var(--mat-sys-on-surface-variant);
+  font-weight: 500;
+  padding: var(--dt-cell-padding-block, 0.75rem) var(--dt-cell-padding-inline, 1rem);
+  white-space: nowrap;
+}
+
+.tt-table td {
+  padding: var(--dt-cell-padding-block, 0.75rem) var(--dt-cell-padding-inline, 1rem);
+  color: var(--mat-sys-on-surface);
+  vertical-align: middle;
+}
+
+.tt-table th:not(:last-child),
+.tt-table td:not(:last-child) {
+  border-right: var(--dt-col-divider, 0 solid);
+}
+
+.tt-table tbody tr {
+  border-bottom: 1px solid var(--dt-row-border-color, var(--mat-sys-outline-variant));
+}
+
+.tt-table tbody tr:last-child {
+  border-bottom: 0;
+}
+
+// 斑馬紋（Ledger）：同 data-table，畫成 background-image 疊在列底色之上。
+.tt-table tbody tr:nth-child(even) {
+  --dt-row-stripe: linear-gradient(var(--dt-row-stripe-bg, transparent), var(--dt-row-stripe-bg, transparent));
+  background-image: var(--dt-row-stripe);
+}
+
+.tt-row {
+  cursor: pointer;
+
+  &:hover {
+    --dt-row-tint: var(--dt-row-hover-bg, var(--mat-sys-surface-container-high));
+    background-color: var(--dt-row-tint);
+  }
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: calc(-1 * var(--app-focus-ring-width));
+  }
+}
+
+.dt-align-start {
+  text-align: left;
+}
+
+.dt-align-end {
+  text-align: right;
+}
+
+// 第一欄：縮排＋展開鈕＋名稱；固定在左側（sticky 永遠開著，底色與右緣分界只在真的橫向捲過時才畫，同 data-table）。
+.tt-table .tt-first {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: var(--tt-first-min, 14rem);
+  padding-inline-start: 0;
+}
+
+// 表頭的「名稱」對齊第一層節點的名稱（跳過展開鈕）。
+.tt-table th.tt-first {
+  padding-inline-start: calc(var(--lib-tree-row-padding-inline, 0.5rem) + var(--lib-tree-toggle-size, 1.75rem) + 0.375rem);
+}
+
+.tt-wrap--scrolled .tt-table .tt-first {
+  background:
+    var(--dt-row-stripe, linear-gradient(transparent, transparent)),
+    linear-gradient(var(--dt-row-tint, transparent), var(--dt-row-tint, transparent)),
+    var(--dt-frozen-bg, var(--mat-sys-surface));
+
+  // 右緣分界：Chrome 不畫 border-collapse 儲存格自己的 box-shadow，改畫在貼右緣的 1px 偽元素上。
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1px;
+    box-shadow: var(--dt-frozen-edge, 1px 0 0 0 var(--mat-sys-outline-variant));
+    pointer-events: none;
+  }
+}
+
+.tt-first-inner {
+  @include shared.indent(var(--tr-depth, 0));
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.tt-name {
+  min-width: 0;
+}
+
+.tt-toggle {
+  @include shared.toggle;
+}
+
+.tt-chevron {
+  @include shared.chevron;
+}
+
+.tt-toggle.is-open .tt-chevron {
+  transform: rotate(90deg);
+}
+
+.tt-spinner {
+  @include shared.spinner;
+}
+
+// 載入失敗：那一列下面多一列，錯誤訊息縮排到子列的位置（不固定在左側，整列寬）。
+.tt-table .tt-status-cell {
+  position: static;
+  padding-block: 0.25rem 0.5rem;
+}
+
+.tt-error {
+  @include shared.indent(var(--tr-depth, 1));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  color: var(--mat-sys-error);
+}
+
+.tt-error-icon {
+  font-size: 1.125rem;
+}
+
+.tt-error-text {
+  color: var(--mat-sys-on-surface);
+}
+
+.tt-retry {
+  @include shared.retry-button;
+}
+
+.tt-empty {
+  margin: 0;
+  padding: 1rem;
+  color: var(--mat-sys-on-surface-variant);
+}

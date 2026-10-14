@@ -1,0 +1,102 @@
+@let v = view();
+@let cols = columns();
+@if (v.roots.length === 0) {
+  <p class="tt-empty">{{ labels.noRows }}</p>
+} @else {
+  <div class="tt-wrap" [class.tt-wrap--scrolled]="scrolledX()" (scroll)="onScroll($event)">
+    <table
+      class="dt-table tt-table"
+      role="treegrid"
+      [attr.aria-label]="label() || null"
+      [style.--tt-first-min]="firstColumnMinWidth()"
+      (keydown)="onKeydown($event)"
+      (focusin)="onFocusIn($event)"
+    >
+      <thead>
+        <tr>
+          @for (col of cols; track col.key; let first = $first) {
+            <th
+              scope="col"
+              role="columnheader"
+              [class]="'dt-align-' + (col.align ?? 'start')"
+              [class.tt-first]="first"
+              [style.width]="col.width ?? null"
+            >
+              {{ col.label }}
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (vn of v.flat; track vn.key) {
+          <tr
+            class="tt-row"
+            data-tree-row
+            [id]="vn.domId"
+            [attr.tabindex]="vn.key === tabKey() ? 0 : -1"
+            [attr.aria-level]="vn.level"
+            [attr.aria-setsize]="vn.setsize"
+            [attr.aria-posinset]="vn.posinset"
+            [attr.aria-expanded]="vn.expandable ? vn.expanded : null"
+            [attr.aria-busy]="vn.loading ? 'true' : null"
+            [attr.aria-describedby]="vn.error ? vn.domId + '-error' : null"
+            (click)="onRowClick(vn)"
+          >
+            @for (col of cols; track col.key; let first = $first) {
+              <td
+                role="gridcell"
+                [class]="'dt-align-' + (col.align ?? 'start') + (col.align === 'end' ? ' ui-text-numeric' : '')"
+                [class.tt-first]="first"
+              >
+                @if (first) {
+                  <div class="tt-first-inner" [style.--tr-depth]="vn.level - 1">
+                    <span
+                      class="tt-toggle"
+                      aria-hidden="true"
+                      [class.is-open]="vn.expanded"
+                      [class.is-leaf]="!vn.expandable && !vn.loading"
+                      (click)="onToggleClick($event, vn)"
+                    >
+                      @if (vn.loading) {
+                        <span class="tt-spinner"></span>
+                      } @else if (vn.expandable) {
+                        <span class="material-symbols-rounded tt-chevron">chevron_right</span>
+                      }
+                    </span>
+                    <span class="tt-name">
+                      <ng-container [ngTemplateOutlet]="cell" [ngTemplateOutletContext]="{ $implicit: col, row: vn.node }" />
+                    </span>
+                    @if (vn.loading) {
+                      <span class="tt-sr">{{ labels.loading }}</span>
+                    }
+                  </div>
+                } @else {
+                  <ng-container [ngTemplateOutlet]="cell" [ngTemplateOutletContext]="{ $implicit: col, row: vn.node }" />
+                }
+              </td>
+            }
+          </tr>
+          @if (vn.error) {
+            <tr class="tt-status-row">
+              <td role="gridcell" class="tt-first tt-status-cell" [attr.colspan]="cols.length">
+                <div class="tt-error" [style.--tr-depth]="vn.level">
+                  <span class="material-symbols-rounded tt-error-icon" aria-hidden="true">error</span>
+                  <span class="tt-error-text" [id]="vn.domId + '-error'">{{ loadFailedText(vn) }}<span class="tt-sr">{{ labels.retryHint }}</span></span>
+                  <button type="button" class="tt-retry" tabindex="-1" (click)="onRetry($event, vn)">{{ labels.retry }}</button>
+                </div>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+<ng-template #cell let-col let-row="row">
+  @if (cellTemplates().get(col.key); as tpl) {
+    <ng-container [ngTemplateOutlet]="tpl" [ngTemplateOutletContext]="{ $implicit: row }" />
+  } @else {
+    {{ cellText(col, row) }}
+  }
+</ng-template>

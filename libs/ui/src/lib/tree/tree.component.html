@@ -1,0 +1,93 @@
+@let v = view();
+@if (filtering() && v.roots.length === 0) {
+  <p class="tr-empty" role="status">{{ noResultsText() }}</p>
+} @else {
+  <ul
+    class="tr-tree"
+    role="tree"
+    [attr.aria-label]="label() || null"
+    (keydown)="onKeydown($event)"
+    (focusin)="onFocusIn($event)"
+  >
+    <ng-container [ngTemplateOutlet]="branch" [ngTemplateOutletContext]="{ $implicit: v.roots }" />
+  </ul>
+}
+
+<ng-template #branch let-nodes>
+  @for (vn of nodes; track vn.key) {
+    @let mode = selection();
+    @let state = checkState(vn);
+    <li
+      class="tr-item"
+      role="treeitem"
+      [id]="vn.domId"
+      [attr.tabindex]="vn.key === tabKey() ? 0 : -1"
+      [attr.aria-level]="vn.level"
+      [attr.aria-setsize]="vn.setsize"
+      [attr.aria-posinset]="vn.posinset"
+      [attr.aria-expanded]="vn.expandable ? vn.expanded : null"
+      [attr.aria-selected]="mode === 'single' ? vn.key === currentKey() : null"
+      [attr.aria-checked]="ariaChecked(vn)"
+      [attr.aria-busy]="vn.loading ? 'true' : null"
+      [attr.aria-labelledby]="vn.domId + '-label'"
+      [attr.aria-describedby]="vn.error ? vn.domId + '-error' : null"
+    >
+      <div
+        class="tr-row"
+        [style.--tr-depth]="vn.level - 1"
+        [class.is-current]="mode === 'single' && vn.key === currentKey()"
+        [class.is-checked]="mode === 'multiple' && state === 'checked'"
+        (click)="onRowClick(vn)"
+      >
+        <span
+          class="tr-toggle"
+          aria-hidden="true"
+          [class.is-open]="vn.expanded"
+          [class.is-leaf]="!vn.expandable && !vn.loading"
+          [class.is-forced]="vn.forced"
+          (click)="onToggleClick($event, vn)"
+        >
+          @if (vn.loading) {
+            <span class="tr-spinner"></span>
+          } @else if (vn.expandable) {
+            <span class="material-symbols-rounded tr-chevron">chevron_right</span>
+          }
+        </span>
+        @if (mode === 'multiple') {
+          <input
+            type="checkbox"
+            class="tr-check"
+            tabindex="-1"
+            aria-hidden="true"
+            [checked]="state === 'checked'"
+            [indeterminate]="state === 'mixed'"
+            (mousedown)="$event.preventDefault()"
+            (click)="onCheckClick($event, vn)"
+          />
+        }
+        <span class="tr-content" [id]="vn.domId + '-label'">
+          @if (nodeTemplate(); as tpl) {
+            <ng-container [ngTemplateOutlet]="tpl" [ngTemplateOutletContext]="context(vn)" />
+          } @else {
+            <lib-tree-highlight [text]="labelOf(vn)" [query]="query()" />
+          }
+        </span>
+        @if (vn.loading) {
+          <span class="tr-sr">{{ labels.loading }}</span>
+        }
+      </div>
+      @if (vn.error) {
+        <div class="tr-error" [style.--tr-depth]="vn.level">
+          <span class="material-symbols-rounded tr-error-icon" aria-hidden="true">error</span>
+          <span class="tr-error-text" [id]="vn.domId + '-error'">{{ loadFailedText(vn) }}<span class="tr-sr">{{ labels.retryHint }}</span></span>
+          <button type="button" class="tr-retry" tabindex="-1" (click)="onRetry($event, vn)">{{ labels.retry }}</button>
+        </div>
+      }
+      @if (vn.children.length > 0) {
+        <ul class="tr-group" role="group" [style.--tr-depth]="vn.level">
+          <ng-container [ngTemplateOutlet]="branch" [ngTemplateOutletContext]="{ $implicit: vn.children }" />
+        </ul>
+      }
+    </li>
+  }
+</ng-template>

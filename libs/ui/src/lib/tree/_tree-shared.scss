@@ -1,0 +1,79 @@
+// lib-tree 與 lib-tree-table 共用的展開鈕、轉圈、重試鈕樣式（各自 @use，封裝後各有一份）。
+// 外觀變數見 tree.component.scss 開頭；展開鈕的 --lib-tree-toggle-* 兩個元件共用。
+
+@mixin indent($depth) {
+  padding-inline-start: calc(var(--lib-tree-row-padding-inline, 0.5rem) + #{$depth} * var(--lib-tree-indent, 1.5rem));
+}
+
+// 展開鈕只給滑鼠用（aria-hidden）：鍵盤用 →／←，狀態由 aria-expanded 告訴輔助科技。
+@mixin toggle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--lib-tree-toggle-size, 1.75rem);
+  height: var(--lib-tree-toggle-size, 1.75rem);
+  border: var(--lib-tree-toggle-frame, 0 solid transparent);
+  border-radius: var(--lib-tree-toggle-radius, 50%);
+  background: var(--lib-tree-toggle-bg, transparent);
+  color: var(--lib-tree-toggle-fg, var(--mat-sys-on-surface-variant));
+  cursor: pointer;
+
+  &:hover {
+    background:
+      linear-gradient(var(--app-state-hover), var(--app-state-hover)),
+      var(--lib-tree-toggle-bg, transparent);
+  }
+
+  // 葉節點：保留位置（名稱對齊），不畫鈕。
+  &.is-leaf {
+    visibility: hidden;
+  }
+}
+
+@mixin chevron {
+  // 跟著展開鈕大小（預設 1.75rem → 約 1.25rem 的圖示）。
+  font-size: calc(var(--lib-tree-toggle-size, 1.75rem) * 0.72);
+  transition: transform var(--app-motion-fast) var(--app-ease-standard);
+}
+
+@mixin spinner {
+  box-sizing: border-box;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--mat-sys-outline-variant);
+  border-top-color: var(--mat-sys-primary);
+  border-radius: 50%;
+  animation: lib-tree-spin calc(var(--app-motion-loop) / 8) linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@mixin spinner-keyframes {
+  @keyframes lib-tree-spin {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+}
+
+// 重試鈕：文字按鈕（tabindex=-1，鍵盤用 → 重試）；最小點擊高度 24px。
+@mixin retry-button {
+  min-height: 1.5rem;
+  padding: 0.125rem 0.5rem;
+  border: 0;
+  border-radius: var(--mat-sys-corner-small);
+  background: transparent;
+  color: var(--mat-sys-primary);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--app-state-hover);
+  }
+}
