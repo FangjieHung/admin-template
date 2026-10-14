@@ -582,4 +582,32 @@
     --lib-step-progress-track: var(--mat-sys-surface);
     --lib-step-actions-divider: var(--sketch-rule);
   }
+
+  // 附件上傳（libs/ui file-upload）：只設元件暴露的 --lib-upload-* 變數。拖放區是一張便利貼：紙底、手繪圓角、
+  // 抖動的鋼筆虛線（框與底色畫在 ::before，經過 --sketch-jitter；字不變形）；檔案拖進來時換成麥克筆線＋再描一次、
+  // 底色淡淡塗一層主色。縮圖方塊是鋼筆線的手繪框；清單分隔線、縮圖、進度條維持直線（--sketch-jitter 套在細線上會變成階梯）。
+  .lib-file-upload {
+    --lib-upload-zone-bg: var(--mat-sys-surface);
+    --lib-upload-zone-hover-bg: var(--mat-sys-surface);
+    --lib-upload-zone-radius: var(--sketch-wobble-lg);
+    --lib-upload-zone-border-width: var(--sketch-pen-w);
+    --lib-upload-zone-border-color: var(--sketch-pen);
+    --lib-upload-zone-filter: var(--sketch-jitter);
+    --lib-upload-zone-active-bg: color-mix(in srgb, var(--mat-sys-primary) 10%, var(--mat-sys-surface));
+    --lib-upload-zone-active-border-width: var(--sketch-marker-w);
+    --lib-upload-zone-active-border-color: var(--sketch-ink);
+    --lib-upload-zone-active-shadow: var(--sketch-retrace);
+    --lib-upload-tile-frame: var(--sketch-pen-w) solid var(--sketch-pen);
+    --lib-upload-tile-radius: var(--sketch-wobble-md);
+    --lib-upload-progress-height: 8px;
+    --lib-upload-progress-radius: var(--sketch-wobble-xs);
+    --lib-upload-progress-frame: var(--sketch-pen-w) solid var(--sketch-pen);
+    --lib-upload-progress-track: var(--mat-sys-surface);
+  }
+
+  @media (prefers-contrast: more), (forced-colors: active) {
+    .lib-file-upload {
+      --lib-upload-zone-filter: none;
+    }
+  }
 }

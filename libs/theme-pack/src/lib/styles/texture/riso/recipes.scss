@@ -544,4 +544,28 @@
     --lib-step-progress-fill: var(--riso-ink-a);
     --lib-step-actions-divider: var(--riso-rule);
   }
+
+  // 附件上傳（libs/ui file-upload）：只設元件暴露的 --lib-upload-* 變數。拖放區是紙底、主墨虛線框；檔案拖進來時
+  // 框變成實線、整塊疊主墨 10% 平網，右下 8px 露出一塊第二墨的密網點（畫在區塊後面，網點不壓到字）。
+  // 縮圖與方塊是主墨線框，列與列之間是 --riso-rule；進度條是主墨線框、主墨 12% 平網的槽。
+  .lib-file-upload {
+    --lib-upload-zone-bg: var(--mat-sys-surface);
+    --lib-upload-zone-hover-bg: var(--riso-raised);
+    --lib-upload-zone-border-width: var(--riso-line-w);
+    --lib-upload-zone-border-color: var(--riso-ink-a);
+    --lib-upload-zone-icon-color: var(--riso-ink-a);
+    --lib-upload-zone-active-bg: var(--riso-overlay);
+    --lib-upload-zone-active-border-width: var(--riso-line-w);
+    --lib-upload-zone-active-border-style: solid;
+    --lib-upload-zone-active-border-color: var(--riso-ink-a);
+    --lib-upload-zone-backdrop: var(--riso-screen-dense);
+    --lib-upload-zone-backdrop-offset: var(--riso-offset);
+    --lib-upload-row-divider: var(--riso-rule);
+    --lib-upload-thumb-frame: var(--riso-line);
+    --lib-upload-tile-frame: var(--riso-line);
+    --lib-upload-progress-height: 8px;
+    --lib-upload-progress-frame: var(--riso-line);
+    --lib-upload-progress-track: color-mix(in srgb, var(--riso-ink-a) 12%, var(--mat-sys-surface));
+    --lib-upload-progress-fill: var(--riso-ink-a);
+  }
 }

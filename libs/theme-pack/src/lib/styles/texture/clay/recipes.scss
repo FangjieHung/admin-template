@@ -301,4 +301,22 @@
     --lib-step-progress-height: 10px;
     --lib-step-progress-shadow: var(--clay-shadow-pressed);
   }
+
+  // 附件上傳（libs/ui file-upload）：只設元件暴露的 --lib-upload-* 變數。拖放區是壓出來的凹槽（按壓陰影＋1px 欄位虛線框），
+  // 拖進來時鼓起來（small 陰影）；縮圖方塊是有厚度的黏土塊（不畫框、大圓角）；進度條是凹槽。
+  .lib-file-upload {
+    --lib-upload-zone-radius: var(--mat-sys-corner-large);
+    --lib-upload-zone-shadow: var(--clay-shadow-pressed);
+    --lib-upload-zone-active-shadow: var(--clay-shadow-small);
+    --lib-upload-zone-title-font: var(--font-display);
+    --lib-upload-zone-title-weight: 800;
+    --lib-upload-tile-frame: 0 solid transparent;
+    --lib-upload-tile-radius: var(--mat-sys-corner-large);
+    --lib-upload-tile-shadow: var(--clay-shadow-small);
+    --lib-upload-tile-gap: 1rem;
+    --lib-upload-thumb-radius: var(--mat-sys-corner-medium);
+    --lib-upload-thumb-frame: 0 solid transparent;
+    --lib-upload-progress-height: 10px;
+    --lib-upload-progress-shadow: var(--clay-shadow-pressed);
+  }
 }

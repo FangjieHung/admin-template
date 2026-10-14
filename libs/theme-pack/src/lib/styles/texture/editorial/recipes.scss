@@ -301,4 +301,32 @@
     --lib-step-progress-track: var(--mat-sys-outline-variant);
     --lib-step-progress-fill: var(--mat-sys-on-surface);
   }
+
+  // 附件上傳（libs/ui file-upload）：只設元件暴露的 --lib-upload-* 變數。排版式、極簡：拖放區是一個 1px 髮絲實線框，
+  // 沒有底色，「選擇檔案」是襯線大字（墨色）；拖進來時框變成 2px 墨線、底色淡一階。清單只靠分隔線，縮圖方塊不畫框，
+  // 進度條是一條 2px 的墨線。
+  .lib-file-upload {
+    --lib-upload-zone-radius: 0px;
+    --lib-upload-zone-bg: transparent;
+    --lib-upload-zone-hover-bg: var(--mat-sys-surface-container-low);
+    --lib-upload-zone-border-style: solid;
+    --lib-upload-zone-icon-color: var(--mat-sys-on-surface);
+    --lib-upload-zone-action-color: var(--mat-sys-on-surface);
+    --lib-upload-zone-title-font: var(--font-display);
+    --lib-upload-zone-title-size: 1.25rem;
+    --lib-upload-zone-title-weight: 400;
+    --lib-upload-zone-active-bg: var(--mat-sys-surface-container-low);
+    --lib-upload-zone-active-border-style: solid;
+    --lib-upload-zone-active-border-color: var(--mat-sys-on-surface);
+    --lib-upload-thumb-radius: 0px;
+    --lib-upload-thumb-bg: var(--mat-sys-surface-container-low);
+    --lib-upload-tile-frame: 0 solid transparent;
+    --lib-upload-tile-radius: 0px;
+    --lib-upload-tile-padding: 0px;
+    --lib-upload-tile-bg: transparent;
+    --lib-upload-progress-height: 2px;
+    --lib-upload-progress-radius: 0px;
+    --lib-upload-progress-track: var(--mat-sys-outline-variant);
+    --lib-upload-progress-fill: var(--mat-sys-on-surface);
+  }
 }

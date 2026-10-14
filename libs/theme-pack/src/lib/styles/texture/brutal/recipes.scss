@@ -578,4 +578,43 @@
     --lib-step-progress-track: var(--mat-sys-surface-container-lowest);
     --lib-step-actions-divider: var(--brutal-line);
   }
+
+  // 附件上傳（libs/ui file-upload）：只設元件暴露的 --lib-upload-* 變數。拖放區是一張白紙、3px 墨色粗虛線框、直角，
+  // 「選擇檔案」是 Space Grotesk 粗體墨字；檔案拖進來時換成 primary-container 色塊＋5px 墨影（貼紙翹起來）。
+  // 每個檔案是一張 2px 墨框的白紙＋3px 墨影，縮圖也是墨框；進度條是 2px 墨框的直角量尺。
+  .lib-file-upload {
+    --lib-upload-zone-radius: 0px;
+    --lib-upload-zone-bg: var(--mat-sys-surface-container-lowest);
+    --lib-upload-zone-hover-bg: var(--mat-sys-surface-container-low);
+    --lib-upload-zone-border-width: 3px;
+    --lib-upload-zone-border-color: var(--brutal-ink);
+    --lib-upload-zone-icon-color: var(--brutal-ink);
+    --lib-upload-zone-action-color: var(--mat-sys-on-surface);
+    --lib-upload-zone-title-font: var(--font-display);
+    --lib-upload-zone-title-weight: 700;
+    --lib-upload-zone-active-bg: var(--mat-sys-primary-container);
+    --lib-upload-zone-active-fg: var(--mat-sys-on-primary-container);
+    --lib-upload-zone-active-icon-color: var(--mat-sys-on-primary-container);
+    --lib-upload-zone-active-border-width: 3px;
+    --lib-upload-zone-active-border-color: var(--brutal-ink);
+    --lib-upload-zone-active-shadow: var(--brutal-shadow);
+    --lib-upload-row-frame: var(--brutal-line);
+    --lib-upload-row-bg: var(--mat-sys-surface-container-lowest);
+    --lib-upload-row-radius: 0px;
+    --lib-upload-row-shadow: var(--brutal-shadow-sm);
+    --lib-upload-row-divider: 0 solid transparent;
+    --lib-upload-row-gap: 0.75rem;
+    --lib-upload-row-padding-inline: 0.75rem;
+    --lib-upload-thumb-radius: 0px;
+    --lib-upload-thumb-frame: var(--brutal-line);
+    --lib-upload-tile-frame: var(--brutal-line);
+    --lib-upload-tile-radius: 0px;
+    --lib-upload-tile-shadow: var(--brutal-shadow-sm);
+    --lib-upload-tile-bg: var(--mat-sys-surface-container-lowest);
+    --lib-upload-tile-gap: 1rem;
+    --lib-upload-progress-height: 12px;
+    --lib-upload-progress-radius: 0px;
+    --lib-upload-progress-frame: var(--brutal-line);
+    --lib-upload-progress-track: var(--mat-sys-surface-container-lowest);
+  }
 }

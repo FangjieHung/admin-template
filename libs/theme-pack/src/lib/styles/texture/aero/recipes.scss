@@ -237,4 +237,11 @@
   .lib-step-wizard {
     --lib-step-current-shadow: var(--mat-sys-level1);
   }
+
+  // 附件上傳（libs/ui file-upload）：只設元件暴露的 --lib-upload-* 變數。拖進來時用 level1 的短淡投影＋亮邊；
+  // 縮圖方塊也浮一層 level1。
+  .lib-file-upload {
+    --lib-upload-zone-active-shadow: var(--mat-sys-level1);
+    --lib-upload-tile-shadow: var(--mat-sys-level1);
+  }
 }

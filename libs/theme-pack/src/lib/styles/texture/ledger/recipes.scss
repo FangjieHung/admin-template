@@ -424,4 +424,24 @@
     --lib-step-progress-height: 3px;
     --lib-step-progress-radius: 0px;
   }
+
+  // 附件上傳（libs/ui file-upload）：只設元件暴露的 --lib-upload-* 變數。高密度：拖放區收成一列（圖示、文字、說明並排），
+  // 每個檔案一列 13px、32px 縮圖、帳冊的細分隔線；縮圖方塊更小、更密；進度條是 3px 的直角細條。
+  .lib-file-upload {
+    --lib-upload-zone-flow: column;
+    --lib-upload-zone-padding: 0.625rem 1rem;
+    --lib-upload-zone-radius: var(--mat-sys-corner-small);
+    --lib-upload-zone-icon-size: 1.5rem;
+    --lib-upload-zone-title-size: 0.875rem;
+    --lib-upload-font-size: 0.8125rem;
+    --lib-upload-row-padding-block: 0.25rem;
+    --lib-upload-row-divider: 1px solid var(--ledger-rule);
+    --lib-upload-thumb-size: 2rem;
+    --lib-upload-tile-min: 8rem;
+    --lib-upload-tile-gap: 0.5rem;
+    --lib-upload-tile-padding: 0.375rem;
+    --lib-upload-tile-radius: var(--mat-sys-corner-small);
+    --lib-upload-progress-height: 3px;
+    --lib-upload-progress-radius: 0px;
+  }
 }

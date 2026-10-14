@@ -235,4 +235,14 @@
     --lib-step-current-shadow: none;
     --lib-step-progress-track: var(--mat-sys-surface-container);
   }
+
+  // 附件上傳（libs/ui file-upload）：只設元件暴露的 --lib-upload-* 變數。沒有陰影：拖放區是一張深一階的紙，
+  // 縮圖方塊也是同一張紙（不畫框），縮圖底是再深一階的紙。
+  .lib-file-upload {
+    --lib-upload-zone-hover-bg: var(--mat-sys-surface-container);
+    --lib-upload-tile-bg: var(--mat-sys-surface-container-low);
+    --lib-upload-tile-frame: 0 solid transparent;
+    --lib-upload-thumb-bg: var(--mat-sys-surface-container);
+    --lib-upload-progress-track: var(--mat-sys-surface-container);
+  }
 }

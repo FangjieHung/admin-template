@@ -237,6 +237,38 @@ Material、Linen、Soft UI、Clay、Frosted、Aero 用預設值（陰影、紙�
 
 Material 用預設值（實心主色圓＋淡淡的主色外圈）。
 
+#### 附件上傳（`libs/ui` file-upload）
+
+- 文字：拖放區的「選擇檔案」預設 `--mat-sys-primary`、說明與限制 `--mat-sys-on-surface-variant`；檔名 `--mat-sys-on-surface`（唯讀時是 `--mat-sys-primary` 的下載連結）、大小與狀態 `--mat-sys-on-surface-variant`，完成 `--app-positive-fg`，失敗與無法加入 `--mat-sys-error`（一律附圖示與文字，不只靠顏色）；欄位錯誤時拖放區框線換 `--mat-sys-error`，停用時底 `--app-disabled-bg`、字與框 `--app-disabled-fg`。焦點 `--app-focus-ring`（`-width`／`-offset`），轉場 `--app-motion-fast`（減少動態時不轉場）。
+- 動作是 Material 的 `matIconButton`／`matButton`（吃各質地的按鈕 recipe）；拍照與預覽是 MatDialog（吃各質地的對話框 recipe，另掛 `.lib-file-upload-dialog`），裡面的取景區 `--mat-sys-surface-container-highest`、圓角 `--mat-sys-corner-medium`。圖示是 Material Symbols。
+- 拖放區的底色、框線、陰影畫在不含文字的 `::before` 上（可以加 filter 而字不變形）；拖進來時的裝飾（`--lib-upload-zone-backdrop`）畫在區塊**後面**的 `::after`，往右下錯開，只露在區塊外側、不壓到字。框線要對外側底色 ≥ 3:1（預設 `--app-field-border`）。
+- 質地只在 `.lib-file-upload` 上設下列變數，不覆寫屬性（清單的每一列是內部元件，變數會繼承下去）。
+
+| 變數 | 預設 | 用途 | 目前設定的質地 |
+| --- | --- | --- | --- |
+| `--lib-upload-zone-bg` / `-hover-bg` / `-fg` | `--mat-sys-surface-container-low` / `--mat-sys-surface-container` / `--mat-sys-on-surface` | 拖放區底色（靜止／滑過）與文字色 | Grid、Riso、Sketch 底 `surface`；Brutal 底 `surface-container-lowest`、滑過 `-low`；Editorial 底 `transparent`、滑過 `surface-container-low`；Soft UI 底與滑過 `background`；Cockpit 底 `surface-container-lowest`、滑過 `-low`；Riso 滑過 `var(--riso-raised)`；Linen 滑過 `surface-container` |
+| `--lib-upload-zone-border-width` / `-style` / `-color` | `1px` / `dashed` / `--app-field-border` | 拖放區框線 | Brutal：`3px`、`var(--brutal-ink)`；Riso：`var(--riso-line-w)`、`var(--riso-ink-a)`；Sketch：`var(--sketch-pen-w)`、`var(--sketch-pen)`；Editorial：`solid`（髮絲實線框） |
+| `--lib-upload-zone-radius` | `--mat-sys-corner-medium` | 拖放區圓角 | Grid、Editorial、Brutal `0px`；Clay `corner-large`；Ledger `corner-small`；Sketch `var(--sketch-wobble-lg)` |
+| `--lib-upload-zone-shadow` / `-filter` | `none` / `none` | 拖放區陰影與框的 filter（只套在 `::before`） | Soft UI 陰影 `var(--soft-inset-small)`；Clay `var(--clay-shadow-pressed)`；Sketch filter `var(--sketch-jitter)`（高對比時 `none`） |
+| `--lib-upload-zone-padding` / `-flow` | `1.5rem 1rem` / `row` | 拖放區內距與排法（`column`：圖示、文字、說明排成一列） | Ledger：`0.625rem 1rem`、`column` |
+| `--lib-upload-zone-icon-color` / `-icon-size` | `--mat-sys-primary` / `2rem` | 拖放區圖示 | Editorial `on-surface`；Brutal `var(--brutal-ink)`；Riso `var(--riso-ink-a)`；Ledger 尺寸 `1.5rem` |
+| `--lib-upload-zone-action-color` / `-title-font` / `-title-size` / `-title-weight` | `--mat-sys-primary` / `var(--font-body)` / `1rem` / `600` | 「選擇檔案」那一行 | Editorial：`on-surface`、`var(--font-display)`、`1.25rem`、`400`；Brutal：`on-surface`、`var(--font-display)`、`700`；Clay：`var(--font-display)`、`800`；Ledger 字級 `0.875rem` |
+| `--lib-upload-zone-active-bg` / `-active-fg` / `-active-icon-color` | 主色 8% 混進 `surface` / `--mat-sys-on-surface` / 同 icon-color | 檔案拖進來時的底色、文字與圖示（文字對底色 4.5:1、圖示 3:1） | Brutal：`primary-container`／`on-primary-container`／`on-primary-container`；Riso `var(--riso-overlay)`；Sketch 主色 10% 混進 `surface`；Soft UI 主色 6% 混進 `background`；Cockpit 主色 16% 混進 `surface-container-lowest`；Editorial `surface-container-low` |
+| `--lib-upload-zone-active-border-width` / `-style` / `-color` | `2px` / `dashed` / `--mat-sys-primary` | 拖進來時的框線 | Grid、Cockpit：`1px` `solid`；Brutal：`3px`、墨色；Riso：`var(--riso-line-w)` `solid` 主墨；Sketch：`var(--sketch-marker-w)`、`var(--sketch-ink)`；Editorial：`solid`、`on-surface` |
+| `--lib-upload-zone-active-shadow` | `none` | 拖進來時的陰影 | Grid、Frosted、Aero `var(--mat-sys-level1)`；Brutal `var(--brutal-shadow)`（5px 墨影）；Cockpit `var(--cockpit-glow-active)`；Sketch `var(--sketch-retrace)`；Soft UI `var(--soft-inset)`；Clay `var(--clay-shadow-small)` |
+| `--lib-upload-zone-backdrop` / `-backdrop-offset` | `none` / `0px` | 拖進來時區塊後面的裝飾（background 簡寫）與往右下錯開的距離 | Riso：`var(--riso-screen-dense)`、`var(--riso-offset)`（第二墨網點） |
+| `--lib-upload-font-size` | `0.875rem` | 清單文字字級 | Ledger `0.8125rem` |
+| `--lib-upload-row-padding-block` / `-padding-inline` | `0.625rem` / `0` | 清單每一列的內距 | Ledger 上下 `0.25rem`；Grid、Brutal 左右 `0.75rem` |
+| `--lib-upload-row-divider` / `-gap` | `1px solid --mat-sys-outline-variant` / `0` | 列與列之間的分隔線（border 簡寫）與間距 | Grid、Brutal：無分隔線、間距 `0.5rem`／`0.75rem`（每列自己有框）；Ledger `var(--ledger-rule)`；Cockpit `var(--cockpit-edge)`；Riso `var(--riso-rule)` |
+| `--lib-upload-row-frame` / `-bg` / `-radius` / `-shadow` | `0 solid transparent` / `transparent` / `--mat-sys-corner-small` / `none` | 每一列的框、底、圓角、陰影 | Grid：1px `outline`、`0px`；Brutal：`var(--brutal-line)`、`surface-container-lowest`、`0px`、`var(--brutal-shadow-sm)` |
+| `--lib-upload-thumb-size` / `-radius` / `-frame` / `-bg` | `2.5rem` / `--mat-sys-corner-small` / `1px solid --mat-sys-outline-variant` / `--mat-sys-surface-container-high` | 清單的縮圖與類型圖示格（縮圖方塊版面只用 radius 以外的設定） | Ledger `2rem`；Grid、Editorial、Brutal 圓角 `0px`；Clay `corner-medium`、無框；Grid 框 1px `outline`；Brutal `var(--brutal-line)`；Riso `var(--riso-line)`；Cockpit 1px `var(--cockpit-edge)`、底 `surface-container-lowest`；Linen 底 `surface-container`；Editorial 底 `surface-container-low` |
+| `--lib-upload-icon-color` | `--mat-sys-on-surface-variant` | 類型圖示（對格子底色 ≥ 3:1） | （無） |
+| `--lib-upload-tile-bg` / `-frame` / `-radius` / `-shadow` / `-padding` | `--mat-sys-surface` / `1px solid --mat-sys-outline-variant` / `--mat-sys-corner-medium` / `none` / `0.5rem` | `layout="grid"` 的縮圖方塊 | Grid：1px `outline`、`0px`；Brutal：`var(--brutal-line)`、`0px`、`var(--brutal-shadow-sm)`、`surface-container-lowest`；Editorial：無框、`0px`、`transparent`、內距 `0px`；Soft UI：`background`、無框、`var(--mat-sys-level1)`；Clay：無框、`corner-large`、`var(--clay-shadow-small)`；Frosted、Aero 陰影 `var(--mat-sys-level1)`；Linen `surface-container-low`、無框；Riso `var(--riso-line)`；Sketch 鋼筆框、`var(--sketch-wobble-md)`；Cockpit 1px `var(--cockpit-edge)`；Ledger 內距 `0.375rem`、`corner-small` |
+| `--lib-upload-tile-min` / `-gap` | `10rem` / `0.75rem` | 縮圖方塊的最小寬度與間距 | Ledger `8rem`／`0.5rem`；Soft UI、Clay、Brutal 間距 `1rem`（陰影要空間） |
+| `--lib-upload-progress-height` / `-radius` / `-frame` / `-track` / `-fill` / `-shadow` / `-glow` | `4px` / `--mat-sys-corner-full` / `0 solid transparent` / `--mat-sys-surface-container-highest` / `--mat-sys-primary` / `none` / `none` | 上傳進度條（`role="progressbar"`，填色對槽與底色 ≥ 3:1） | Grid：`8px`、`0px`、1px `outline`、`surface`；Editorial：`2px`、`0px`、`outline-variant` 槽、`on-surface`；Ledger：`3px`、`0px`；Cockpit：`6px`、corner-small、1px `var(--cockpit-edge-strong)`、`surface-container-lowest`、主色 50% 的 8px 光；Brutal：`12px`、`0px`、`var(--brutal-line)`、`surface-container-lowest`；Riso：`8px`、`var(--riso-line)`、主墨 12% 平網、主墨；Sketch：`8px`、`var(--sketch-wobble-xs)`、鋼筆框、`surface`；Linen 槽 `surface-container`；Soft UI：`8px`、`background` 槽＋`var(--soft-inset-small)`；Clay：`10px`、`var(--clay-shadow-pressed)` |
+
+Material 用預設值（淡底、1px 欄位色虛線、中圓角；拖進來時 2px 主色虛線＋主色淡底）。
+
 ### 字體（質地包提供，中英分軌）
 
 `--font-zh`（中文，裝置的系統字）、`--font-en`（英文依質地）、`--font-display`、`--font-body`、`--font-mono`

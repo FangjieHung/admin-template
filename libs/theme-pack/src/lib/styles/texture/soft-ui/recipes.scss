@@ -329,4 +329,21 @@
     --lib-step-progress-track: var(--mat-sys-background);
     --lib-step-progress-shadow: var(--soft-inset-small);
   }
+
+  // 附件上傳（libs/ui file-upload）：只設元件暴露的 --lib-upload-* 變數。拖放區壓進卡片（小內凹＋1px 欄位虛線框，
+  // 單靠浮雕對底色不到 3:1），拖進來時壓得更深；縮圖方塊凸起（level1、不畫框）；進度條是一道內凹的槽。
+  .lib-file-upload {
+    --lib-upload-zone-bg: var(--mat-sys-background);
+    --lib-upload-zone-hover-bg: var(--mat-sys-background);
+    --lib-upload-zone-shadow: var(--soft-inset-small);
+    --lib-upload-zone-active-bg: color-mix(in srgb, var(--mat-sys-primary) 6%, var(--mat-sys-background));
+    --lib-upload-zone-active-shadow: var(--soft-inset);
+    --lib-upload-tile-bg: var(--mat-sys-background);
+    --lib-upload-tile-frame: 0 solid transparent;
+    --lib-upload-tile-shadow: var(--mat-sys-level1);
+    --lib-upload-tile-gap: 1rem;
+    --lib-upload-progress-height: 8px;
+    --lib-upload-progress-track: var(--mat-sys-background);
+    --lib-upload-progress-shadow: var(--soft-inset-small);
+  }
 }

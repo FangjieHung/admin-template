@@ -440,4 +440,25 @@
     --lib-step-progress-frame: 1px solid var(--cockpit-edge-strong);
     --lib-step-progress-track: var(--mat-sys-surface-container-lowest);
   }
+
+  // 附件上傳（libs/ui file-upload）：只設元件暴露的 --lib-upload-* 變數。拖放區是凹進去的讀數窗（最暗的底），
+  // 檔案拖進來時亮起來：主色實線框＋glow-active、底色疊 --cockpit-lit。縮圖與方塊用暗的亮邊；進度條是強亮邊的讀數槽，
+  // 填滿的那段帶一點主色的光。
+  .lib-file-upload {
+    --lib-upload-zone-bg: var(--mat-sys-surface-container-lowest);
+    --lib-upload-zone-hover-bg: var(--mat-sys-surface-container-low);
+    --lib-upload-zone-active-bg: color-mix(in srgb, var(--mat-sys-primary) 16%, var(--mat-sys-surface-container-lowest));
+    --lib-upload-zone-active-border-width: 1px;
+    --lib-upload-zone-active-border-style: solid;
+    --lib-upload-zone-active-shadow: var(--cockpit-glow-active);
+    --lib-upload-row-divider: 1px solid var(--cockpit-edge);
+    --lib-upload-thumb-frame: 1px solid var(--cockpit-edge);
+    --lib-upload-thumb-bg: var(--mat-sys-surface-container-lowest);
+    --lib-upload-tile-frame: 1px solid var(--cockpit-edge);
+    --lib-upload-progress-height: 6px;
+    --lib-upload-progress-radius: var(--mat-sys-corner-small);
+    --lib-upload-progress-frame: 1px solid var(--cockpit-edge-strong);
+    --lib-upload-progress-track: var(--mat-sys-surface-container-lowest);
+    --lib-upload-progress-glow: 0 0 8px color-mix(in srgb, var(--mat-sys-primary) 50%, transparent);
+  }
 }
