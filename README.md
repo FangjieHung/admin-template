@@ -18,7 +18,7 @@
 2. **改名**：
    - 根目錄 `package.json` 的 `name`（以及 `package-lock.json` 開頭的兩處）。
    - `tsconfig.base.json` 的路徑別名 `@admin-template/*`（全域取代 import）；`libs/*/package.json` 的 `name`。
-   - `apps/admin/project.json` 的 `outputPath`（`dist/admin-template`）與 `package.json` 的 `deploy` 指令（目前 base href 仍是 `/bbd-car-rental/`）。
+   - `apps/admin/project.json` 的 `outputPath`（`dist/admin-template`）與 `package.json` 的 `deploy` 指令（base href `/admin-template/`，要跟 GitHub repo 名稱一致）。
    - 側欄與頁尾的品牌文字：`apps/admin/src/app/core/i18n/zh-tw-shell.ts`；`apps/admin/src/index.html` 的 `<title>`。
 3. **刪減**：照 [`docs/guides/theme-pruning.md`](./docs/guides/theme-pruning.md) 刪掉用不到的質地、配色、外觀面板與元件（含展示頁）。
 4. **開始做**：新頁面直接用 `libs/ui` 的元件、`theme-pack` 的 `ui-*` class 與語意 token；展示頁就是用法範例。
