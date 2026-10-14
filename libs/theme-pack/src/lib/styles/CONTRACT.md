@@ -320,6 +320,18 @@ Material 用預設值（surface-container 面板、大圓角、level3 陰影；�
 
 Material 用預設值（surface-container-high 面板、extra-large 圓角、level4 陰影；secondary-container 的目前那一列、加粗的比對字、1px `--app-field-border` 鍵帽）。
 
+#### 匯入精靈（`libs/ui` import-wizard）
+
+- 外框全部是現有元件：步驟是 lib-step-wizard（吃上面的 `--lib-step-*`）、選檔是 lib-file-upload（`--lib-upload-*`）、預覽是 lib-data-table（`--dt-*`）、狀態是 `.ui-chip`、停止前確認是確認對話框、匯入進度是 Material 的 `mat-progress-bar`（吃配色）。按鈕、下拉（`mat-form-field` 裡的原生 `select`）、勾選框與單選鈕（`_choice-controls.scss`）也都吃各質地既有的 recipe，所以沒有質地需要另寫規則。
+- 文字：欄位名稱、計數、儲存格 `--mat-sys-on-surface`；說明、範例值、表頭、空白格的「（空白）」`--mat-sys-on-surface-variant`；必填的 * 與「有問題」計數的圖示 `--mat-sys-error`；「可匯入」圖示 `--app-positive-fg`；比對失敗的提示圖示 `--app-warning-fg`。分隔線與重複處理的外框是 `--mat-sys-outline-variant`（裝飾，旁邊有文字）。
+- 每一格是一顆按鈕：滑過 `--app-state-hover`、焦點 `--app-focus-ring`（`-width`），圓角 `--mat-sys-corner-small`；修改中的輸入框框線 `--app-field-border`、底 `--mat-sys-surface`。有錯的格子一律寫出錯誤圖示與訊息（不只靠顏色），預設是錯誤容器色；質地要換時在 `.lib-import-wizard` 上設下列變數（元件裡是 `var()` 的第二個值）。文字對錯誤底色 ≥ 4.5:1、框線對格子外的底色 ≥ 3:1。
+- 匯入中的轉圈（比對現有資料）同指令面板：`--mat-sys-primary` 疊在 `--mat-sys-outline-variant` 上，時長 `--app-motion-loop` / 8，減少動態時停住。
+
+| 變數 | 預設 | 用途 | 目前設定的質地 |
+| --- | --- | --- | --- |
+| `--lib-import-cell-error-bg` / `-fg` | `--mat-sys-error-container` / `--mat-sys-on-error-container` | 有錯的格子的底色與文字（值、圖示、訊息） | （無） |
+| `--lib-import-cell-error-border` / `-border-width` | `--mat-sys-error` / `1px` | 有錯的格子的內框（`box-shadow: inset`） | （無） |
+
 ### 字體（質地包提供，中英分軌）
 
 `--font-zh`（中文，裝置的系統字）、`--font-en`（英文依質地）、`--font-display`、`--font-body`、`--font-mono`
