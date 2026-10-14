@@ -255,4 +255,17 @@
     --lib-notif-panel-shadow: none;
     --lib-notif-unread-bg: var(--mat-sys-surface-container-low);
   }
+
+  // 指令面板（libs/ui command-palette＋頁首 ⌘K）：只設元件暴露的 --lib-cmdk-* 變數。沒有陰影：對話框是一張最亮的紙＋淡框、
+  // 大圓角（遮罩隔開背景）；目前那一列換成「選取中、強調區」那一階的紙＋淡框。
+  .lib-command-palette {
+    --lib-cmdk-bg: var(--mat-sys-surface);
+    --lib-cmdk-frame: 1px solid var(--mat-sys-outline-variant);
+    --lib-cmdk-radius: var(--mat-sys-corner-extra-large);
+    --lib-cmdk-shadow: none;
+    --lib-cmdk-inline-shadow: none;
+    --lib-cmdk-active-bg: var(--mat-sys-surface-container-highest);
+    --lib-cmdk-active-fg: var(--mat-sys-on-surface);
+    --lib-cmdk-active-shadow: inset 0 0 0 1px var(--mat-sys-outline-variant);
+  }
 }

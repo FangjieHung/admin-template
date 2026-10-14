@@ -587,4 +587,26 @@
     --lib-notif-badge-fg: var(--mat-sys-on-primary);
     --lib-notif-badge-shadow: var(--riso-misreg);
   }
+
+  // 指令面板（libs/ui command-palette＋頁首 ⌘K）：只設元件暴露的 --lib-cmdk-* 變數。對話框是紙底＋主墨線框、平網影（level4）；
+  // 搜尋框下一條主墨細線；目前那一列疊主墨 16% 平網、左側一條主墨線；比對到的字是主墨的螢光筆平網（字仍是文字墨）；
+  // 鍵帽是主墨線框＋第二墨錯位。
+  .lib-command-palette {
+    --lib-cmdk-bg: var(--mat-sys-surface);
+    --lib-cmdk-frame: var(--riso-line);
+    --lib-cmdk-radius: var(--mat-sys-corner-large);
+    --lib-cmdk-shadow: var(--mat-sys-level4);
+    --lib-cmdk-inline-shadow: var(--riso-misreg);
+    --lib-cmdk-input-divider: var(--riso-rule);
+    --lib-cmdk-active-bg: var(--app-state-selected);
+    --lib-cmdk-active-fg: var(--mat-sys-on-surface);
+    --lib-cmdk-active-shadow: inset 3px 0 0 var(--riso-ink-a);
+    --lib-cmdk-mark-bg: color-mix(in srgb, var(--riso-ink-a) 20%, transparent);
+    --lib-cmdk-mark-radius: 2px;
+    --lib-cmdk-kbd-frame: 1px solid var(--riso-ink-a);
+    --lib-cmdk-kbd-shadow: var(--riso-misreg);
+    --lib-cmdk-crumb-bg: var(--riso-overlay);
+    --lib-cmdk-crumb-fg: var(--mat-sys-on-surface);
+    --lib-cmdk-crumb-frame: var(--riso-line);
+  }
 }

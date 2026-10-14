@@ -355,4 +355,17 @@
     --lib-notif-item-divider: 1px solid var(--mat-sys-outline-variant);
     --lib-notif-badge-shadow: 0 0 0 1px var(--mat-sys-surface), 2px 2px 0 1px var(--mat-sys-outline);
   }
+
+  // 指令面板（libs/ui command-palette＋頁首 ⌘K）：只設元件暴露的 --lib-cmdk-* 變數。跟對話框一樣是直角的 1px outline 實框＋
+  // 硬影；搜尋框下一條實線，結果是一列一列的表格列（內格線、不內縮、直角），目前那一列多一圈 1px 實框。
+  .lib-command-palette {
+    --lib-cmdk-bg: var(--mat-sys-surface);
+    --lib-cmdk-frame: 1px solid var(--mat-sys-outline);
+    --lib-cmdk-input-divider: 1px solid var(--mat-sys-outline);
+    --lib-cmdk-list-inset: 0px;
+    --lib-cmdk-group-gap: 0px;
+    --lib-cmdk-row-divider: 1px solid var(--mat-sys-outline-variant);
+    --lib-cmdk-row-radius: 0px;
+    --lib-cmdk-active-shadow: inset 0 0 0 1px var(--mat-sys-outline);
+  }
 }

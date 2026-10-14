@@ -254,4 +254,19 @@
     --lib-notif-panel-shadow: var(--mat-sys-level4);
     --lib-notif-panel-backdrop: blur(26px) saturate(1.12);
   }
+
+  // 指令面板（libs/ui command-palette＋頁首 ⌘K）：只設元件暴露的 --lib-cmdk-* 變數。對話框是一塊亮邊的玻璃（level4、霧化）；
+  // 背後有遮罩，所以玻璃比選單的 aero-panel 不透明一些（文字仍要對混色後的底 ≥ 4.5:1）。
+  .lib-command-palette {
+    --lib-cmdk-bg: color-mix(in srgb, var(--mat-sys-surface) 86%, transparent);
+    --lib-cmdk-frame: 1px solid var(--aero-edge);
+    --lib-cmdk-radius: var(--mat-sys-corner-extra-large);
+    --lib-cmdk-shadow: var(--mat-sys-level4);
+    --lib-cmdk-inline-shadow: var(--mat-sys-level2);
+    --lib-cmdk-backdrop: blur(26px) saturate(1.12);
+    // 目前那一列：主色 14% 的亮玻璃＋一圈主色亮邊（淡的 secondary-container 在玻璃上分不出來）。
+    --lib-cmdk-active-bg: color-mix(in srgb, var(--mat-sys-primary) 14%, var(--mat-sys-surface));
+    --lib-cmdk-active-fg: var(--mat-sys-on-surface);
+    --lib-cmdk-active-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mat-sys-primary) 40%, transparent);
+  }
 }

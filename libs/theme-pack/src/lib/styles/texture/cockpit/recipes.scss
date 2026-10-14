@@ -475,4 +475,24 @@
     --lib-notif-lead-frame: 1px solid var(--cockpit-edge);
     --lib-notif-badge-shadow: 0 0 0 2px var(--mat-sys-surface), 0 0 10px color-mix(in srgb, var(--mat-sys-error) 60%, transparent);
   }
+
+  // 指令面板（libs/ui command-palette＋頁首 ⌘K）：只設元件暴露的 --lib-cmdk-* 變數。對話框是最亮的儀表面板（highest）＋強亮邊、
+  // 外面一圈最大的光（level4）；目前那一列亮起來（cockpit-lit）、內側一圈亮邊與光；比對到的字是發光的主色。
+  .lib-command-palette {
+    --lib-cmdk-bg: var(--mat-sys-surface-container-highest);
+    --lib-cmdk-frame: 1px solid var(--cockpit-edge-strong);
+    --lib-cmdk-shadow: var(--mat-sys-level4);
+    --lib-cmdk-inline-shadow: var(--mat-sys-level2);
+    --lib-cmdk-input-divider: 1px solid var(--cockpit-edge);
+    --lib-cmdk-active-bg: var(--cockpit-lit);
+    --lib-cmdk-active-fg: var(--mat-sys-on-surface);
+    --lib-cmdk-active-shadow: inset 0 0 0 1px var(--cockpit-edge-strong), inset 0 0 12px color-mix(in srgb, var(--mat-sys-primary) 22%, transparent);
+    --lib-cmdk-mark-fg: var(--mat-sys-primary);
+    --lib-cmdk-mark-glow: 0 0 8px color-mix(in srgb, var(--mat-sys-primary) 55%, transparent);
+    // 目前那一列底色已經是主色光，比對字換回文字色（只留光），對比才夠。
+    --lib-cmdk-active-mark-fg: var(--mat-sys-on-surface);
+    --lib-cmdk-crumb-bg: var(--cockpit-lit);
+    --lib-cmdk-crumb-fg: var(--mat-sys-on-surface);
+    --lib-cmdk-crumb-frame: 1px solid var(--cockpit-edge-strong);
+  }
 }

@@ -626,4 +626,23 @@
     --lib-notif-badge-radius: var(--sketch-wobble-round);
     --lib-notif-badge-shadow: 0 0 0 var(--sketch-pen-w) var(--sketch-ink);
   }
+
+  // 指令面板（libs/ui command-palette＋頁首 ⌘K）：只設元件暴露的 --lib-cmdk-* 變數。對話框是最粗的麥克筆框＋再描一次、
+  // 手繪圓角（框不套抖動：面板裡全是字）；搜尋框下與列之間是 --sketch-rule 直線；目前那一列是手繪的鋼筆圈；
+  // 比對到的字畫一條手寫的波浪底線；鍵帽是手繪的小圓角。
+  .lib-command-palette {
+    --lib-cmdk-bg: var(--sketch-card);
+    --lib-cmdk-frame: var(--sketch-marker-heavy-w) solid var(--sketch-ink);
+    --lib-cmdk-radius: var(--sketch-wobble-md);
+    --lib-cmdk-shadow: var(--sketch-retrace);
+    --lib-cmdk-inline-shadow: none;
+    --lib-cmdk-input-divider: var(--sketch-rule);
+    --lib-cmdk-active-radius: var(--sketch-wobble-sm);
+    --lib-cmdk-active-shadow: inset 0 0 0 var(--sketch-pen-w) var(--sketch-pen);
+    --lib-cmdk-mark-decoration: underline wavy 1px;
+    --lib-cmdk-mark-offset: 0.15em;
+    --lib-cmdk-kbd-frame: var(--sketch-pen-w) solid var(--sketch-pen);
+    --lib-cmdk-kbd-radius: var(--sketch-wobble-xs);
+    --lib-cmdk-crumb-radius: var(--sketch-wobble-sm);
+  }
 }

@@ -276,4 +276,15 @@
     --lib-notif-panel-shadow: var(--mat-sys-level4);
     --lib-notif-panel-backdrop: blur(20px);
   }
+
+  // 指令面板（libs/ui command-palette＋頁首 ⌘K）：只設元件暴露的 --lib-cmdk-* 變數。對話框跟選單一樣是霧面玻璃
+  // （frost-panel＋淡框、level4、背景霧化 20px），減少透明度時 frost-panel 變回實色。
+  .lib-command-palette {
+    --lib-cmdk-bg: var(--frost-panel);
+    --lib-cmdk-frame: 1px solid var(--frost-border);
+    --lib-cmdk-radius: var(--mat-sys-corner-extra-large);
+    --lib-cmdk-shadow: var(--mat-sys-level4);
+    --lib-cmdk-inline-shadow: var(--mat-sys-level2);
+    --lib-cmdk-backdrop: blur(20px);
+  }
 }

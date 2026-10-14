@@ -353,4 +353,14 @@
     --lib-notif-panel-bg: var(--mat-sys-background);
     --lib-notif-badge-shadow: 0 0 0 2px var(--mat-sys-background);
   }
+
+  // 指令面板（libs/ui command-palette＋頁首 ⌘K）：只設元件暴露的 --lib-cmdk-* 變數。對話框是同色的浮雕（background 底）；
+  // 目前那一列壓進去（小內凹），不換顏色；鍵帽也是小內凹。
+  .lib-command-palette {
+    --lib-cmdk-bg: var(--mat-sys-background);
+    --lib-cmdk-active-bg: var(--mat-sys-background);
+    --lib-cmdk-active-fg: var(--mat-sys-on-surface);
+    --lib-cmdk-active-shadow: var(--soft-inset-small);
+    --lib-cmdk-kbd-shadow: var(--soft-inset-small);
+  }
 }

@@ -458,4 +458,31 @@
     --lib-notif-body-size: 0.75rem;
     --lib-notif-group-size: 0.6875rem;
   }
+
+  // 指令面板（libs/ui command-palette＋頁首 ⌘K）：只設元件暴露的 --lib-cmdk-* 變數。高密度：搜尋框矮一號（字仍是 16px，
+  // iOS 聚焦不放大）、每一列 32px、字小一號，列與列之間是帳冊的細分隔線；對話框是白紙＋1px 較深的帳冊框。
+  // 目前那一列底色淡淡加深（同滑過的表格列）、左側一條主色細線。
+  .lib-command-palette {
+    --lib-cmdk-bg: var(--mat-sys-surface);
+    --lib-cmdk-frame: 1px solid var(--ledger-rule-strong);
+    --lib-cmdk-shadow: none;
+    --lib-cmdk-inline-shadow: none;
+    --lib-cmdk-input-height: 2.75rem;
+    --lib-cmdk-input-size: 1rem;
+    --lib-cmdk-input-divider: 1px solid var(--ledger-rule-strong);
+    --lib-cmdk-list-inset: 0px;
+    --lib-cmdk-group-gap: 0px;
+    --lib-cmdk-row-height: 2rem;
+    --lib-cmdk-row-padding-block: 0.25rem;
+    --lib-cmdk-row-padding-inline: 0.625rem;
+    --lib-cmdk-row-size: 0.8125rem;
+    --lib-cmdk-row-divider: 1px solid var(--ledger-rule);
+    --lib-cmdk-row-radius: 0px;
+    --lib-cmdk-active-bg: var(--app-state-selected);
+    --lib-cmdk-active-fg: var(--mat-sys-on-surface);
+    --lib-cmdk-active-shadow: inset 2px 0 0 var(--mat-sys-primary);
+    --lib-cmdk-subtitle-size: 0.75rem;
+    --lib-cmdk-group-size: 0.6875rem;
+    --lib-cmdk-list-max-height: min(30rem, 64vh);
+  }
 }

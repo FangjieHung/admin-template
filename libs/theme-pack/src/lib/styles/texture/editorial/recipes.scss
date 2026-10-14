@@ -350,4 +350,33 @@
     --lib-notif-badge-bg: var(--mat-sys-on-surface);
     --lib-notif-badge-fg: var(--mat-sys-surface);
   }
+
+  // 指令面板（libs/ui command-palette＋頁首 ⌘K）：只設元件暴露的 --lib-cmdk-* 變數。排版式：方正的白紙＋髮絲框、沒有陰影；
+  // 搜尋框用襯線大字，下方一條墨色強調線；結果之間是髮絲線，目前那一列不鋪色塊、左側一條墨線；分組標題是加字距的
+  // 小型大寫（只影響英文小寫）；比對到的字加粗並畫一條墨色細底線。
+  .lib-command-palette {
+    --lib-cmdk-bg: var(--mat-sys-surface);
+    --lib-cmdk-frame: 1px solid var(--mat-sys-outline-variant);
+    --lib-cmdk-shadow: none;
+    --lib-cmdk-inline-shadow: none;
+    --lib-cmdk-input-font: var(--font-display);
+    --lib-cmdk-input-size: 1.5rem;
+    --lib-cmdk-input-height: 4.25rem;
+    --lib-cmdk-input-divider: 1px solid var(--mat-sys-on-surface);
+    --lib-cmdk-list-inset: 0px;
+    --lib-cmdk-group-gap: 0.75rem;
+    --lib-cmdk-row-divider: 1px solid var(--mat-sys-outline-variant);
+    --lib-cmdk-row-radius: 0px;
+    --lib-cmdk-active-bg: var(--mat-sys-surface-container-low);
+    --lib-cmdk-active-fg: var(--mat-sys-on-surface);
+    --lib-cmdk-active-shadow: inset 3px 0 0 var(--mat-sys-on-surface);
+    --lib-cmdk-group-font: var(--font-display);
+    --lib-cmdk-group-size: 0.8125rem;
+    --lib-cmdk-group-caps: small-caps;
+    --lib-cmdk-group-spacing: 0.08em;
+    --lib-cmdk-mark-decoration: underline 1px;
+    --lib-cmdk-crumb-bg: transparent;
+    --lib-cmdk-crumb-fg: var(--mat-sys-on-surface);
+    --lib-cmdk-crumb-frame: 1px solid var(--mat-sys-on-surface);
+  }
 }

@@ -638,4 +638,33 @@
     --lib-notif-badge-radius: 0px;
     --lib-notif-badge-shadow: 0 0 0 2px var(--brutal-ink), 2px 2px 0 2px var(--brutal-ink);
   }
+
+  // 指令面板（libs/ui command-palette＋頁首 ⌘K）：只設元件暴露的 --lib-cmdk-* 變數。對話框是一張 3px 墨框的白紙＋最長的墨影
+  // （level4）；搜尋框粗體、下方 3px 墨線；目前那一列是 primary-container 色塊＋2px 墨框；比對到的字（選項本來就粗）
+  // 畫 2px 墨色底線；鍵帽是方形貼紙（2px 墨框＋2px 墨影），頁首按鈕的快捷鍵框也是。
+  .lib-command-palette {
+    --lib-cmdk-bg: var(--brutal-card);
+    --lib-cmdk-frame: var(--brutal-line-thick);
+    --lib-cmdk-radius: 0px;
+    --lib-cmdk-shadow: var(--mat-sys-level4);
+    --lib-cmdk-inline-shadow: var(--brutal-shadow);
+    --lib-cmdk-input-weight: 700;
+    --lib-cmdk-input-divider: var(--brutal-line-thick);
+    --lib-cmdk-row-radius: 0px;
+    --lib-cmdk-title-weight: 700;
+    --lib-cmdk-active-bg: var(--mat-sys-primary-container);
+    --lib-cmdk-active-fg: var(--mat-sys-on-primary-container);
+    --lib-cmdk-active-shadow: inset 0 0 0 2px var(--brutal-ink);
+    --lib-cmdk-group-font: var(--font-display);
+    --lib-cmdk-group-weight: 700;
+    --lib-cmdk-mark-weight: 800;
+    --lib-cmdk-mark-decoration: underline 2px;
+    --lib-cmdk-kbd-frame: var(--brutal-line);
+    --lib-cmdk-kbd-radius: 0px;
+    --lib-cmdk-kbd-shadow: 2px 2px 0 0 var(--brutal-ink);
+    --lib-cmdk-crumb-bg: var(--brutal-raised);
+    --lib-cmdk-crumb-fg: var(--mat-sys-on-secondary-container);
+    --lib-cmdk-crumb-frame: var(--brutal-line);
+    --lib-cmdk-crumb-radius: 0px;
+  }
 }
