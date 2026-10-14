@@ -1,0 +1,324 @@
+// 富文字編輯器。不封裝（ProseMirror 動態建立的節點拿不到 _ngcontent），選擇器都從 .lib-rich-text-editor／
+// .lib-rte-mention／.lib-rte-link（浮層）開始。只用語意 token；質地只在 .lib-rich-text 上設 --lib-rt-* 變數
+// （CONTRACT.md「富文字、留言與 @提及」），這裡是 var() 的預設值。
+
+.lib-rich-text-editor {
+  display: block;
+  min-width: 0;
+
+  .lib-rte__frame {
+    overflow: clip;
+    border: var(--lib-rt-frame, 1px solid var(--app-field-border));
+    border-radius: var(--lib-rt-radius, var(--mat-sys-corner-medium));
+    background: var(--lib-rt-bg, var(--mat-sys-surface));
+    box-shadow: var(--lib-rt-shadow, none);
+    transition: border-color var(--app-motion-fast) var(--app-ease-standard);
+  }
+
+  &:not(.is-disabled, .is-readonly) .lib-rte__frame:hover {
+    border-color: var(--mat-sys-on-surface);
+  }
+
+  // 聚焦：2px 焦點框蓋在外框上（不改外框寬度，內容不會跳動）；沒有外框的質地一樣看得到。
+  &.is-focused .lib-rte__frame {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: -1px;
+  }
+
+  &.is-invalid .lib-rte__frame {
+    border-color: var(--mat-sys-error);
+  }
+
+  &.is-invalid.is-focused .lib-rte__frame {
+    outline-color: var(--mat-sys-error);
+  }
+
+  &.is-disabled .lib-rte__frame {
+    border-color: var(--app-disabled-bg);
+    background: transparent;
+    box-shadow: none;
+  }
+
+  &.is-disabled .lib-rich-text-content {
+    color: var(--app-disabled-fg);
+  }
+
+  &.is-readonly .lib-rte__frame {
+    background: var(--lib-rt-readonly-bg, transparent);
+    border-style: var(--lib-rt-readonly-border-style, dashed);
+  }
+
+  // ---- 工具列 ----
+  .lib-rte__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.125rem;
+    padding: 0.25rem;
+    border-bottom: var(--lib-rt-toolbar-divider, 1px solid var(--mat-sys-outline-variant));
+    background: var(--lib-rt-toolbar-bg, transparent);
+  }
+
+  .lib-rte__sep {
+    align-self: stretch;
+    width: 1px;
+    margin: 0.375rem 0.125rem;
+    background: var(--mat-sys-outline-variant);
+  }
+
+  .lib-rte__tool {
+    display: inline-grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 0;
+    border-radius: var(--lib-rt-tool-radius, var(--mat-sys-corner-small));
+    background: transparent;
+    color: var(--mat-sys-on-surface-variant);
+    cursor: pointer;
+    transition:
+      background-color var(--app-motion-fast) var(--app-ease-standard),
+      color var(--app-motion-fast) var(--app-ease-standard);
+
+    .material-symbols-rounded {
+      font-size: 1.25rem;
+    }
+
+    &:hover:not(:disabled) {
+      background: var(--app-state-hover);
+      color: var(--mat-sys-on-surface);
+    }
+
+    // 按下（目前套用中）：不只換色——實心底＋反白圖示，對工具列底色 ≥ 3:1。
+    &[aria-pressed='true'] {
+      background: var(--lib-rt-tool-on-bg, var(--mat-sys-primary));
+      box-shadow: var(--lib-rt-tool-on-shadow, none);
+      color: var(--lib-rt-tool-on-fg, var(--mat-sys-on-primary));
+    }
+
+    &:focus-visible {
+      outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+      outline-offset: 1px;
+    }
+
+    &:disabled {
+      color: var(--app-disabled-fg);
+      cursor: default;
+    }
+
+    &[aria-pressed='true']:disabled {
+      background: var(--app-disabled-bg);
+      box-shadow: none;
+    }
+  }
+
+  // ---- 編輯區 ----
+  .lib-rte__scroll {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    padding: var(--lib-rt-padding, 0.625rem 0.875rem);
+    cursor: text;
+    overscroll-behavior: contain;
+  }
+
+  .lib-rte__mount {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+  }
+
+  .ProseMirror {
+    flex: 1 0 auto;
+    outline: none;
+    white-space: pre-wrap;
+    white-space: break-spaces;
+    word-wrap: break-word;
+    font-variant-ligatures: none;
+
+    [contenteditable='false'] {
+      white-space: normal;
+    }
+
+    // 空白時的提示（引擎的 placeholder 外掛加上 data-placeholder）；報讀器念 aria-placeholder。
+    p.is-editor-empty:first-child::before {
+      content: attr(data-placeholder);
+      float: inline-start;
+      height: 0;
+      color: var(--mat-sys-on-surface-variant);
+      pointer-events: none;
+    }
+
+    img.ProseMirror-separator {
+      display: inline !important;
+      margin: 0 !important;
+      border: none !important;
+    }
+  }
+
+  .ProseMirror-hideselection *::selection {
+    background: transparent;
+  }
+
+  &.is-disabled .lib-rte__scroll,
+  &.is-readonly .lib-rte__scroll {
+    cursor: default;
+  }
+
+  .lib-rte__anchor {
+    position: absolute;
+    width: 1px;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .lib-rte__loading {
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 0.875rem;
+  }
+
+  // ---- 字數（mat-form-field 的 subscript 位置與字級） ----
+  .lib-rte__subscript {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.25rem 1rem 0;
+  }
+
+  .lib-rte__counter {
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 0.75rem;
+    line-height: 1.25rem;
+
+    &.is-error {
+      color: var(--mat-sys-error);
+    }
+  }
+}
+
+// ---- 提及清單與連結小視窗（CDK overlay，掛在 body 底下；同一組 --lib-rt-* 由 .lib-rich-text 繼承） ----
+.lib-rte-mention,
+.lib-rte-link {
+  border: var(--lib-rt-menu-frame, 0 solid transparent);
+  border-radius: var(--lib-rt-menu-radius, var(--mat-sys-corner-medium));
+  background: var(--lib-rt-menu-bg, var(--mat-sys-surface-container-high));
+  box-shadow: var(--lib-rt-menu-shadow, var(--mat-sys-level3));
+  color: var(--mat-sys-on-surface);
+  font-family: var(--font-body);
+}
+
+.lib-rte-mention {
+  width: max-content;
+  min-width: 14rem;
+  max-width: min(22rem, calc(100vw - 16px));
+  max-height: 16rem;
+  overflow: auto;
+  padding: 0.25rem 0;
+  overscroll-behavior: contain;
+
+  .lib-rte-mention__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .lib-rte-mention__option {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 2.75rem;
+    padding: 0.375rem 0.75rem;
+    cursor: pointer;
+
+    &.is-active {
+      background: var(--lib-rt-option-active-bg, var(--mat-sys-secondary-container));
+      box-shadow: var(--lib-rt-option-active-shadow, none);
+      color: var(--lib-rt-option-active-fg, var(--mat-sys-on-secondary-container));
+
+      .lib-rte-mention__desc {
+        color: inherit;
+      }
+    }
+  }
+
+  .lib-rte-mention__avatar {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    overflow: hidden;
+    border-radius: var(--lib-rt-avatar-radius, var(--mat-sys-corner-full));
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .lib-rte-mention__text {
+    display: grid;
+    min-width: 0;
+  }
+
+  .lib-rte-mention__name {
+    overflow: hidden;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lib-rte-mention__desc {
+    overflow: hidden;
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 0.75rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lib-rte-mention__status {
+    margin: 0;
+    padding: 0.625rem 0.875rem;
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 0.875rem;
+
+    &.is-error {
+      color: var(--mat-sys-error);
+    }
+  }
+}
+
+.lib-rte-link {
+  display: grid;
+  gap: 0.5rem;
+  width: min(22rem, calc(100vw - 16px));
+  padding: 1rem;
+
+  .lib-rte-link__title {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .lib-rte-link__field {
+    width: 100%;
+  }
+
+  .lib-rte-link__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .lib-rte-link__remove {
+    margin-inline-end: auto;
+  }
+}

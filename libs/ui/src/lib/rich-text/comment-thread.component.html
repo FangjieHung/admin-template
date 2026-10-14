@@ -1,0 +1,125 @@
+@if (views().length === 0) {
+  <lib-empty-state class="lc-empty" icon="forum" [compact]="true" [message]="labels.empty" [detail]="labels.emptyDetail" />
+} @else {
+  @if (hiddenCount() > 0) {
+    <button type="button" matButton class="lc-earlier" data-comments-earlier (click)="showEarlier()">
+      <span class="material-symbols-rounded" aria-hidden="true">expand_less</span>{{ showEarlierLabel() }}
+    </button>
+  }
+  <ol class="lc-list" [attr.aria-label]="labels.thread">
+    @for (view of visible(); track view.item.id) {
+      <li class="lc-item" [class.is-own]="view.own" [id]="itemDomId(view.item.id)" tabindex="-1" [attr.data-comment-id]="view.item.id">
+        <span class="lc-avatar" aria-hidden="true">
+          @if (view.item.author.avatar) {
+            <img [src]="view.item.author.avatar" alt="" />
+          } @else {
+            {{ view.initial }}
+          }
+        </span>
+        <div class="lc-main">
+          <div class="lc-meta">
+            <span class="lc-name">{{ view.item.author.name }}</span>
+            @if (view.own) {
+              <span class="lc-you">{{ labels.you }}</span>
+            }
+            <time class="lc-time ui-text-numeric" [attr.datetime]="view.iso" [title]="view.full">{{ view.ago }}</time>
+            @if (view.editedTitle) {
+              <span class="lc-edited" [title]="view.editedTitle" data-comment-edited>· {{ labels.edited }}</span>
+            }
+            @if (view.own && editingId() !== view.item.id) {
+              <span class="lc-actions" role="group" [attr.aria-label]="actionsLabel(view)">
+                <button
+                  type="button"
+                  matIconButton
+                  class="lc-action"
+                  data-comment-action="edit"
+                  [attr.aria-label]="labels.edit"
+                  [matTooltip]="labels.edit"
+                  [disabled]="deletingId() === view.item.id"
+                  (click)="startEdit(view)"
+                >
+                  <span class="material-symbols-rounded" aria-hidden="true">edit</span>
+                </button>
+                <button
+                  type="button"
+                  matIconButton
+                  class="lc-action"
+                  data-comment-action="delete"
+                  [attr.aria-label]="labels.delete"
+                  [matTooltip]="labels.delete"
+                  [disabled]="deletingId() === view.item.id"
+                  (click)="remove(view)"
+                >
+                  <span class="material-symbols-rounded" aria-hidden="true">delete</span>
+                </button>
+              </span>
+            }
+          </div>
+          @if (editingId() === view.item.id) {
+            <div class="lc-edit" (keydown)="onEditKeydown($event)">
+              <lib-rich-text-editor
+                #editor
+                [formControl]="editControl"
+                [ariaLabel]="labels.edit"
+                [mentionSource]="mentionSource()"
+                [maxLength]="maxLength()"
+                minHeight="4.5rem"
+                maxHeight="16rem"
+                (contentChange)="onEditChange($event)"
+                (submitShortcut)="saveEdit()"
+              />
+              <div class="lc-bar">
+                <span class="lc-hint">{{ sendHint }}</span>
+                @if (editFailed()) {
+                  <span class="lc-error" role="alert">{{ labels.editFailed }}</span>
+                }
+                <span class="lc-buttons">
+                  <button type="button" matButton [disabled]="saving()" data-edit-cancel (click)="cancelEdit()">{{ labels.cancel }}</button>
+                  <button type="button" matButton="filled" [disabled]="!canSave()" data-edit-save (click)="saveEdit()">
+                    {{ saving() ? labels.sending : labels.save }}
+                  </button>
+                </span>
+              </div>
+            </div>
+          } @else {
+            <lib-rich-text-view class="lc-bubble" [html]="view.item.html" />
+          }
+          @if (deleteFailedId() === view.item.id) {
+            <p class="lc-error" role="alert">{{ labels.deleteFailed }}</p>
+          }
+        </div>
+      </li>
+    }
+  </ol>
+}
+
+@if (canComment()) {
+  <div class="lc-composer" [attr.aria-busy]="sending() ? 'true' : null">
+    <lib-rich-text-editor
+      #composer
+      [formControl]="composerControl"
+      [ariaLabel]="labels.composer"
+      [placeholder]="placeholder() ?? labels.composerPlaceholder"
+      [mentionSource]="mentionSource()"
+      [maxLength]="maxLength()"
+      minHeight="4.5rem"
+      maxHeight="16rem"
+      (contentChange)="onComposerChange($event)"
+      (submitShortcut)="submit()"
+    />
+    <div class="lc-bar">
+      <span class="lc-hint">{{ sendHint }}</span>
+      @if (sendFailed()) {
+        <span class="lc-error" role="alert" data-send-error>{{ labels.sendFailed }}</span>
+      }
+      <span class="lc-buttons">
+        @if (sendFailed()) {
+          <button type="button" matButton="outlined" data-comment-retry [disabled]="!canSend()" (click)="submit()">{{ labels.retry }}</button>
+        }
+        <button type="button" matButton="filled" data-comment-send [disabled]="!canSend()" (click)="submit()">
+          {{ sending() ? labels.sending : labels.send }}
+        </button>
+      </span>
+    </div>
+  </div>
+}

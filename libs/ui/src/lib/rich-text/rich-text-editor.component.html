@@ -1,0 +1,120 @@
+<lib-rich-text-content-styles />
+<div class="lib-rte__frame">
+  @if (showToolbar()) {
+    <div class="lib-rte__toolbar" role="toolbar" [attr.aria-label]="labels.toolbar" [attr.aria-controls]="editorId" (keydown)="onToolbarKey($event)">
+      @for (tool of tools; track tool.id; let i = $index) {
+        @if (tool.group) {
+          <span class="lib-rte__sep" aria-hidden="true"></span>
+        }
+        <button
+          #toolButton
+          type="button"
+          class="lib-rte__tool"
+          [attr.data-tool]="tool.id"
+          [attr.aria-label]="toolName(tool)"
+          [attr.aria-pressed]="isPressed(tool)"
+          [attr.aria-keyshortcuts]="ariaShortcut(tool)"
+          [attr.aria-haspopup]="tool.id === 'link' ? 'dialog' : null"
+          [attr.aria-expanded]="tool.id === 'link' ? linkOpen() : null"
+          [tabIndex]="i === focusIndex() ? 0 : -1"
+          [disabled]="isDisabled() || !ready()"
+          [matTooltip]="tooltip(tool)"
+          (mousedown)="$event.preventDefault()"
+          (click)="activate(tool, i)"
+        >
+          <span class="material-symbols-rounded" aria-hidden="true">{{ tool.icon }}</span>
+        </button>
+      }
+    </div>
+  }
+  <div #scroll class="lib-rte__scroll" [style.min-height]="minHeight()" [style.max-height]="maxHeight()">
+    <div #mount class="lib-rte__mount lib-rich-text-content"></div>
+    <span #anchor class="lib-rte__anchor" aria-hidden="true"></span>
+    @if (!ready()) {
+      <span class="lib-rte__loading">{{ labels.loading }}</span>
+    }
+  </div>
+</div>
+@if (counterText()) {
+  <div class="lib-rte__subscript">
+    <span [id]="counterId" class="lib-rte__counter ui-text-numeric" [class.is-error]="overLimit()" aria-live="polite">{{ counterText() }}</span>
+  </div>
+}
+
+<ng-template #mentionPanel>
+  <div class="lib-rich-text lib-rte-mention">
+    <ul
+      class="lib-rte-mention__list"
+      role="listbox"
+      [id]="listboxId"
+      [attr.aria-label]="labels.mentionList"
+      [attr.aria-busy]="mentionStatus() === 'loading' ? 'true' : null"
+      [attr.data-query]="mentionResultQuery()"
+    >
+      @for (item of mentionItems(); track item.id; let i = $index) {
+        <li
+          role="option"
+          class="lib-rte-mention__option"
+          [id]="listboxId + '-' + i"
+          [attr.aria-selected]="i === activeIndex()"
+          [class.is-active]="i === activeIndex()"
+          [attr.data-mention-id]="item.id"
+          (mousedown)="$event.preventDefault()"
+          (mouseenter)="activeIndex.set(i)"
+          (click)="selectMention(item)"
+        >
+          <span class="lib-rte-mention__avatar" aria-hidden="true">
+            @if (item.avatar) {
+              <img [src]="item.avatar" alt="" />
+            } @else {
+              {{ initial(item) }}
+            }
+          </span>
+          <span class="lib-rte-mention__text">
+            <span class="lib-rte-mention__name">{{ item.name }}</span>
+            @if (item.description) {
+              <span class="lib-rte-mention__desc">{{ item.description }}</span>
+            }
+          </span>
+        </li>
+      }
+    </ul>
+    @if (mentionItems().length === 0) {
+      <p class="lib-rte-mention__status" [class.is-error]="mentionStatus() === 'error'" role="status">
+        @switch (mentionStatus()) {
+          @case ('loading') {
+            {{ labels.mentionLoading }}
+          }
+          @case ('error') {
+            {{ labels.mentionError }}
+          }
+          @default {
+            {{ emptyText() }}
+          }
+        }
+      </p>
+    }
+  </div>
+</ng-template>
+
+<ng-template #linkPanel>
+  <form class="lib-rich-text lib-rte-link" role="dialog" [attr.aria-labelledby]="linkTitleId" (submit)="applyLink($event)">
+    <p class="lib-rte-link__title" [id]="linkTitleId">{{ linkEditing() ? labels.linkEditTitle : labels.linkInsertTitle }}</p>
+    <mat-form-field class="lib-rte-link__field" subscriptSizing="dynamic">
+      <mat-label>{{ labels.linkUrl }}</mat-label>
+      <input matInput type="text" inputmode="url" autocomplete="off" spellcheck="false" [formControl]="linkControl" data-link-input />
+      @if (linkControl.invalid) {
+        <mat-error>{{ labels.linkInvalid }}</mat-error>
+      } @else {
+        <mat-hint>{{ labels.linkHint }}</mat-hint>
+      }
+    </mat-form-field>
+    <div class="lib-rte-link__actions">
+      @if (linkEditing()) {
+        <button type="button" matButton class="lib-rte-link__remove" data-link-remove (click)="removeLink()">{{ labels.linkRemove }}</button>
+      }
+      <button type="button" matButton (click)="closeLink(true)">{{ labels.cancel }}</button>
+      <button type="submit" matButton="filled" data-link-apply>{{ labels.linkApply }}</button>
+    </div>
+  </form>
+</ng-template>

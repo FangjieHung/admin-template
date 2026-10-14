@@ -1,0 +1,89 @@
+// 富文字內容（編輯器與顯示元件共用）。不封裝：選擇器一律從 .lib-rich-text-content 開始。
+// 只用語意 token；質地要換造型時只在 .lib-rich-text 上設 --lib-rt-* 變數（CONTRACT.md「富文字、留言與 @提及」），
+// 這裡是 var() 的預設值。
+
+lib-rich-text-content-styles {
+  display: none;
+}
+
+.lib-rich-text-content {
+  color: var(--mat-sys-on-surface);
+  font-family: var(--font-body);
+  font-size: var(--lib-rt-font-size, 0.875rem);
+  line-height: var(--lib-rt-line-height, 1.6);
+  overflow-wrap: anywhere;
+
+  > * + *,
+  li > * + * {
+    margin-block-start: var(--lib-rt-block-gap, 0.5em);
+  }
+
+  p,
+  ul,
+  ol,
+  blockquote {
+    margin: 0;
+  }
+
+  // 全域 reset（Tailwind preflight）把清單符號拿掉了，這裡補回來。
+  ul,
+  ol {
+    padding-inline-start: 1.5em;
+  }
+
+  ul {
+    list-style: disc;
+  }
+
+  ol {
+    list-style: decimal;
+  }
+
+  ul ul {
+    list-style: circle;
+  }
+
+  li + li {
+    margin-block-start: 0.125em;
+  }
+
+  strong {
+    font-weight: 700;
+  }
+
+  blockquote {
+    padding-block: 0.125em;
+    padding-inline: 0.75em 0;
+    border-inline-start: var(--lib-rt-quote-line, 3px solid var(--mat-sys-outline-variant));
+    border-radius: var(--lib-rt-quote-radius, 0px);
+    background: var(--lib-rt-quote-bg, transparent);
+    color: var(--lib-rt-quote-fg, var(--mat-sys-on-surface-variant));
+    font-style: var(--lib-rt-quote-style, normal);
+  }
+
+  a {
+    color: var(--lib-rt-link-fg, var(--mat-sys-primary));
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+
+    &:focus-visible {
+      border-radius: var(--mat-sys-corner-small);
+      outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+      outline-offset: 1px;
+    }
+  }
+
+  // 提及標記：不可分割的小標籤（編輯器裡是 contenteditable=false 的 atom 節點）。
+  .lib-rich-text-mention {
+    padding: 0 0.3em;
+    border: var(--lib-rt-mention-frame, 0 solid transparent);
+    border-radius: var(--lib-rt-mention-radius, var(--mat-sys-corner-small));
+    background: var(--lib-rt-mention-bg, var(--mat-sys-primary-container));
+    box-shadow: var(--lib-rt-mention-shadow, none);
+    color: var(--lib-rt-mention-fg, var(--mat-sys-on-primary-container));
+    font-weight: var(--lib-rt-mention-weight, 500);
+    white-space: nowrap;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+}
