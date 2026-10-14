@@ -1,0 +1,124 @@
+// 指令面板的一列。只用語意 token；造型讀 --lib-cmdk-* 變數（var() 的第二個值就是預設），質地要特調時在
+// `.lib-command-palette` 上設這些變數（各質地 recipes.scss，CONTRACT.md「指令面板」）。
+
+:host {
+  // 只給報讀器的字是 absolute：host 當定位基準。
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: var(--lib-cmdk-row-height, 2.75rem);
+  box-sizing: border-box;
+  padding: var(--lib-cmdk-row-padding-block, 0.5rem) var(--lib-cmdk-row-padding-inline, 0.75rem);
+  border-bottom: var(--lib-cmdk-row-divider, 0 solid transparent);
+  border-radius: var(--lib-cmdk-row-radius, var(--mat-sys-corner-medium));
+  color: var(--mat-sys-on-surface);
+  font-size: var(--lib-cmdk-row-size, 0.875rem);
+  line-height: 1.35;
+  cursor: pointer;
+  scroll-margin-block: 0.25rem;
+  -webkit-tap-highlight-color: transparent;
+}
+
+// 目前那一列（鍵盤上下或滑鼠移過）：不只靠底色，質地可以再加內框、左側粗線或光暈（--lib-cmdk-active-shadow）。
+:host(.is-active) {
+  border-radius: var(--lib-cmdk-active-radius, var(--lib-cmdk-row-radius, var(--mat-sys-corner-medium)));
+  background: var(--lib-cmdk-active-bg, var(--mat-sys-secondary-container));
+  box-shadow: var(--lib-cmdk-active-shadow, none);
+  color: var(--lib-cmdk-active-fg, var(--mat-sys-on-secondary-container));
+}
+
+.co-icon,
+.co-trail {
+  flex: 0 0 auto;
+  width: 1.25rem;
+  height: 1.25rem;
+  overflow: hidden;
+  color: var(--lib-cmdk-icon-color, var(--mat-sys-on-surface-variant));
+  font-size: 1.25rem;
+}
+
+.co-trail {
+  margin-inline-start: auto;
+}
+
+:host(.is-active) :is(.co-icon, .co-trail, .co-subtitle, .co-kbd) {
+  color: inherit;
+}
+
+.co-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.co-title,
+.co-subtitle {
+  overflow: hidden;
+  // 裁切範圍往下多留一點，比對字的底線（Sketch 的波浪線）才不會被切掉；負的 margin 讓版面不變。
+  padding-block-end: 0.2em;
+  margin-block-end: -0.2em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.co-title {
+  font-family: var(--lib-cmdk-title-font, var(--font-body));
+  font-weight: var(--lib-cmdk-title-weight, 500);
+}
+
+.co-subtitle {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: var(--lib-cmdk-subtitle-size, 0.75rem);
+}
+
+// 比對到的字：預設加粗，質地可以加底線（Brutal、Editorial、Sketch）、墨色平網（Riso）或光（Cockpit）。
+// 不只靠顏色：預設不換字色，換字色的質地另外有粗細或底線。
+.co-mark {
+  border-radius: var(--lib-cmdk-mark-radius, 0px);
+  background: var(--lib-cmdk-mark-bg, transparent);
+  color: var(--lib-cmdk-mark-fg, inherit);
+  font-weight: var(--lib-cmdk-mark-weight, 700);
+  text-decoration: var(--lib-cmdk-mark-decoration, none);
+  text-underline-offset: var(--lib-cmdk-mark-offset, 0.2em);
+  text-shadow: var(--lib-cmdk-mark-glow, none);
+}
+
+// 目前那一列的底色可能跟比對字的顏色太近（Cockpit：主色光上的主色字），質地可以換一個顏色。
+:host(.is-active) .co-mark {
+  color: var(--lib-cmdk-active-mark-fg, var(--lib-cmdk-mark-fg, inherit));
+}
+
+.co-kbd {
+  flex: 0 0 auto;
+  min-width: 1.25rem;
+  padding: 0 0.375rem;
+  border: var(--lib-cmdk-kbd-frame, 1px solid var(--app-field-border));
+  border-radius: var(--lib-cmdk-kbd-radius, var(--mat-sys-corner-small));
+  background: var(--lib-cmdk-kbd-bg, transparent);
+  box-shadow: var(--lib-cmdk-kbd-shadow, none);
+  color: var(--mat-sys-on-surface-variant);
+  font: 500 0.75rem / 1.25rem var(--font-body);
+  text-align: center;
+}
+
+.co-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  :host(.is-active) {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .co-mark {
+    text-decoration: underline;
+  }
+}

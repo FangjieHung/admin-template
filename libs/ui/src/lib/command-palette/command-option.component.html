@@ -1,0 +1,22 @@
+<span class="material-symbols-rounded co-icon" aria-hidden="true">{{ icon() }}</span>
+<span class="co-text">
+  <span class="co-title"
+    >@for (seg of entry().titleSegments; track $index) {@if (seg.match) {<mark class="co-mark">{{ seg.text }}</mark>} @else {<span>{{ seg.text }}</span>}}</span
+  >
+  @if (entry().subtitleSegments.length) {
+    <span class="co-subtitle"
+      >@for (seg of entry().subtitleSegments; track $index) {@if (seg.match) {<mark class="co-mark">{{ seg.text }}</mark>} @else {<span>{{ seg.text }}</span>}}</span
+    >
+  }
+</span>
+@if (entry().item.shortcut; as shortcut) {
+  <kbd class="co-kbd">{{ shortcut }}</kbd>
+}
+@if (entry().item.current) {
+  <span class="material-symbols-rounded co-trail" aria-hidden="true">check</span>
+  <span class="co-sr">{{ labels().current }}</span>
+}
+@if (entry().item.children) {
+  <span class="material-symbols-rounded co-trail" aria-hidden="true">chevron_right</span>
+  <span class="co-sr">{{ labels().hasChildren }}</span>
+}

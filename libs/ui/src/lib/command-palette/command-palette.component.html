@@ -1,0 +1,89 @@
+<div class="cmdk-field">
+  @if (level(); as lvl) {
+    <!-- 子清單的麵包屑：點一下回上一層（鍵盤用空白時的 Backspace 或 Esc），不在 Tab 順序裡。 -->
+    <button
+      type="button"
+      class="cmdk-crumb"
+      tabindex="-1"
+      [attr.aria-label]="backLabel()"
+      (click)="back()"
+    >
+      <span class="material-symbols-rounded" aria-hidden="true">chevron_left</span>
+      <span class="cmdk-crumb__text">{{ lvl.parent.title }}</span>
+    </button>
+  } @else {
+    <span class="material-symbols-rounded cmdk-field__icon" aria-hidden="true">search</span>
+  }
+  <input
+    #input
+    class="cmdk-input"
+    type="text"
+    role="combobox"
+    autocomplete="off"
+    autocapitalize="off"
+    spellcheck="false"
+    enterkeyhint="go"
+    aria-autocomplete="list"
+    [attr.aria-label]="labels.input"
+    [attr.aria-expanded]="entries().length > 0"
+    [attr.aria-controls]="listId"
+    [attr.aria-activedescendant]="activeEntry()?.optionId ?? null"
+    [placeholder]="placeholder()"
+    [value]="query()"
+    (input)="onInput($event)"
+    (keydown)="onKeydown($event)"
+  />
+  @if (mode() === 'dialog') {
+    <!-- 觸控裝置與窄螢幕（滿版、沒有 Esc 可按）才顯示的關閉鈕；鍵盤用 Esc，所以不在 Tab 順序裡。 -->
+    <button type="button" class="cmdk-close" tabindex="-1" (click)="closed.emit()">{{ labels.close }}</button>
+  }
+</div>
+
+<div class="cmdk-list" role="listbox" [id]="listId" [attr.aria-label]="labels.results">
+  @for (group of groups(); track group.id) {
+    <div class="cmdk-group" role="group" [attr.aria-labelledby]="group.headingId" [attr.data-group]="group.id">
+      <div class="cmdk-group__heading" [id]="group.headingId">{{ group.label }}</div>
+      @for (entry of group.entries; track entry.key) {
+        <div
+          lib-command-option
+          [entry]="entry"
+          [active]="entry.key === activeEntry()?.key"
+          [labels]="labels"
+          (mousemove)="hover(entry)"
+          (click)="execute(entry)"
+        ></div>
+      }
+      @if (group.status === 'loading') {
+        <div class="cmdk-status" role="option" aria-disabled="true" aria-selected="false" [id]="group.headingId + '-status'">
+          <span class="cmdk-status__spinner" aria-hidden="true"></span>{{ labels.loading }}
+        </div>
+      } @else if (group.status === 'error') {
+        <div
+          class="cmdk-status cmdk-status--error"
+          role="option"
+          aria-disabled="true"
+          aria-selected="false"
+          [id]="group.headingId + '-status'"
+        >
+          <span class="material-symbols-rounded" aria-hidden="true">error</span>{{ groupError(group.label) }}
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showEmpty()) {
+  <lib-empty-state class="cmdk-empty" kind="no-results" [compact]="true" [message]="noResultsText()" [detail]="labels.noResultsHint" />
+}
+
+<!-- 底部提示只是視覺上的說明（報讀器從 combobox 的角色就知道怎麼操作）；觸控與窄螢幕不顯示。 -->
+<div class="cmdk-footer" aria-hidden="true">
+  <span><kbd class="cmdk-kbd">↑</kbd><kbd class="cmdk-kbd">↓</kbd>{{ labels.hintNavigate }}</span>
+  <span><kbd class="cmdk-kbd">Enter</kbd>{{ labels.hintRun }}</span>
+  @if (level()) {
+    <span><kbd class="cmdk-kbd">⌫</kbd>{{ labels.hintBack }}</span>
+  }
+  <span><kbd class="cmdk-kbd">Esc</kbd>{{ labels.hintClose }}</span>
+</div>
+
+<div class="cmdk-sr" aria-live="polite" aria-atomic="true">{{ announcement() }}</div>

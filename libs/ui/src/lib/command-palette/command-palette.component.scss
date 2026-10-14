@@ -1,0 +1,247 @@
+// 指令面板。只用語意 token；造型讀 --lib-cmdk-* 變數（var() 的第二個值就是預設），質地要特調時在
+// `.lib-command-palette` 上設這些變數（各質地 recipes.scss，CONTRACT.md「指令面板」）。每一列在 command-option。
+
+:host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border: var(--lib-cmdk-frame, 0 solid transparent);
+  border-radius: var(--lib-cmdk-radius, var(--mat-sys-corner-extra-large));
+  background: var(--lib-cmdk-bg, var(--mat-sys-surface-container-high));
+  box-shadow: var(--lib-cmdk-shadow, var(--mat-sys-level4));
+  backdrop-filter: var(--lib-cmdk-backdrop, none);
+  color: var(--mat-sys-on-surface);
+}
+
+// 嵌在頁面裡：不是浮層，陰影降到一階（質地另外設 --lib-cmdk-inline-shadow）。
+:host([data-mode='inline']) {
+  box-shadow: var(--lib-cmdk-inline-shadow, var(--mat-sys-level1));
+}
+
+.cmdk-field {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--lib-cmdk-input-height, 3.5rem);
+  padding: 0 1rem;
+  border-bottom: var(--lib-cmdk-input-divider, 1px solid var(--mat-sys-outline-variant));
+}
+
+// 嵌在頁面裡時搜尋框不是唯一的焦點，分隔線換成焦點色標示它（對話框裡焦點一直在這裡，不必標）。
+:host([data-mode='inline']) .cmdk-field:focus-within {
+  box-shadow: inset 0 calc(var(--app-focus-ring-width) * -1) 0 var(--app-focus-ring);
+}
+
+.cmdk-field__icon {
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  overflow: hidden;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 1.5rem;
+}
+
+.cmdk-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  min-height: 2.5rem;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--mat-sys-on-surface);
+  // iOS Safari：小於 16px 會在聚焦時放大整頁。
+  font-family: var(--lib-cmdk-input-font, var(--font-body));
+  font-size: max(1rem, var(--lib-cmdk-input-size, 1.125rem));
+  font-weight: var(--lib-cmdk-input-weight, 400);
+  letter-spacing: var(--lib-cmdk-input-spacing, normal);
+
+  &::placeholder {
+    color: var(--mat-sys-on-surface-variant);
+    opacity: 1;
+  }
+}
+
+// 對話框的「取消」：只在觸控裝置與窄螢幕顯示（桌機按 Esc）。
+.cmdk-close {
+  display: none;
+  flex: 0 0 auto;
+  min-height: 2.5rem;
+  padding: 0 0.5rem;
+  border: 0;
+  border-radius: var(--mat-sys-corner-small);
+  background: transparent;
+  color: var(--mat-sys-primary);
+  font: 600 0.9375rem / 1 var(--font-body);
+  cursor: pointer;
+}
+
+@media (hover: none), (max-width: 600px) {
+  .cmdk-close {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+.cmdk-crumb {
+  display: inline-flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 0.125rem;
+  max-width: 45%;
+  height: 1.75rem;
+  padding: 0 0.5rem 0 0.25rem;
+  border: var(--lib-cmdk-crumb-frame, 0 solid transparent);
+  border-radius: var(--lib-cmdk-crumb-radius, var(--mat-sys-corner-small));
+  background: var(--lib-cmdk-crumb-bg, var(--mat-sys-secondary-container));
+  color: var(--lib-cmdk-crumb-fg, var(--mat-sys-on-secondary-container));
+  font: 600 0.8125rem / 1 var(--font-body);
+  cursor: pointer;
+
+  .material-symbols-rounded {
+    width: 1.125rem;
+    height: 1.125rem;
+    overflow: hidden;
+    font-size: 1.125rem;
+  }
+}
+
+.cmdk-crumb__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cmdk-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: var(--lib-cmdk-list-max-height, min(26rem, 60vh));
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: var(--lib-cmdk-list-inset, 0.5rem);
+
+  // @for 只留下註解節點時 :empty 成立：沒有任何分組就不佔高度。
+  &:empty {
+    display: none;
+  }
+}
+
+.cmdk-group + .cmdk-group {
+  margin-top: var(--lib-cmdk-group-gap, 0.375rem);
+}
+
+.cmdk-group__heading {
+  padding: 0.5rem var(--lib-cmdk-row-padding-inline, 0.75rem) 0.25rem;
+  color: var(--mat-sys-on-surface-variant);
+  font-family: var(--lib-cmdk-group-font, var(--font-body));
+  font-size: var(--lib-cmdk-group-size, 0.75rem);
+  font-weight: var(--lib-cmdk-group-weight, 600);
+  font-variant-caps: var(--lib-cmdk-group-caps, normal);
+  letter-spacing: var(--lib-cmdk-group-spacing, 0.02em);
+}
+
+.cmdk-status {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: var(--lib-cmdk-row-height, 2.75rem);
+  box-sizing: border-box;
+  padding: var(--lib-cmdk-row-padding-block, 0.5rem) var(--lib-cmdk-row-padding-inline, 0.75rem);
+  color: var(--mat-sys-on-surface-variant);
+  font-size: var(--lib-cmdk-row-size, 0.875rem);
+
+  .material-symbols-rounded {
+    width: 1.25rem;
+    height: 1.25rem;
+    overflow: hidden;
+    font-size: 1.25rem;
+  }
+}
+
+.cmdk-status--error {
+  color: var(--mat-sys-error);
+}
+
+.cmdk-status__spinner {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  margin: 0.125rem;
+  border: 2px solid var(--mat-sys-outline-variant);
+  border-top-color: var(--mat-sys-primary);
+  border-radius: 50%;
+  animation: cmdk-spin calc(var(--app-motion-loop) / 8) linear infinite;
+}
+
+@keyframes cmdk-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cmdk-status__spinner {
+    animation: none;
+  }
+}
+
+.cmdk-empty {
+  margin: 0.5rem;
+}
+
+.cmdk-footer {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  padding: 0.5rem 1rem;
+  border-top: var(--lib-cmdk-input-divider, 1px solid var(--mat-sys-outline-variant));
+  background: var(--lib-cmdk-footer-bg, transparent);
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.75rem;
+
+  > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+}
+
+// 觸控裝置與窄螢幕沒有實體鍵盤可按，提示不顯示。
+@media (hover: none), (max-width: 600px) {
+  .cmdk-footer {
+    display: none;
+  }
+}
+
+.cmdk-kbd {
+  min-width: 1.25rem;
+  padding: 0 0.3125rem;
+  box-sizing: border-box;
+  border: var(--lib-cmdk-kbd-frame, 1px solid var(--app-field-border));
+  border-radius: var(--lib-cmdk-kbd-radius, var(--mat-sys-corner-small));
+  background: var(--lib-cmdk-kbd-bg, transparent);
+  box-shadow: var(--lib-cmdk-kbd-shadow, none);
+  color: var(--mat-sys-on-surface-variant);
+  font: 500 0.6875rem / 1.125rem var(--font-body);
+  text-align: center;
+
+  + .cmdk-kbd {
+    margin-inline-start: 0.125rem;
+  }
+}
+
+.cmdk-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

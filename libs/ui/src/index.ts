@@ -67,3 +67,7 @@ export * from './lib/file-upload/file-upload.component';
 export * from './lib/notification-center/notification-center-labels';
 export * from './lib/notification-center/notification-source';
 export * from './lib/notification-center/notification-list.component';
+export * from './lib/command-palette/command-palette-labels';
+export * from './lib/command-palette/command-match';
+export * from './lib/command-palette/command-palette.types';
+export * from './lib/command-palette/command-palette.component';
