@@ -1,0 +1,126 @@
+<lib-step-wizard
+  [submitAction]="startImport"
+  [finishLabel]="finishLabel()"
+  [showCancel]="showCancel() && phase() !== 'done'"
+  [hideActions]="phase() === 'done'"
+  [headingLevel]="headingLevel()"
+  (selectionChange)="onStep($event)"
+  (cancel)="cancel.emit()"
+>
+  <lib-wizard-step
+    [label]="labels.stepUpload"
+    [description]="labels.uploadDescription"
+    [stepControl]="uploadForm"
+    [fieldLabels]="{ file: labels.fileLabel }"
+    [errorMessage]="sourceError()"
+    [editable]="phase() !== 'done'"
+  >
+    <div class="iw-upload" [formGroup]="uploadForm">
+      <lib-file-upload
+        formControlName="file"
+        data-field="file"
+        [label]="labels.fileLabel"
+        [hint]="labels.fileHint"
+        [errorMessage]="labels.fileRequired"
+        [accept]="accept"
+        [multiple]="false"
+        [maxSize]="maxFileSize()"
+        [adapter]="reader"
+      />
+
+      @if (workbook(); as book) {
+        <div class="iw-upload__options">
+          @if (book.sheets.length > 1) {
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iw-upload__sheet">
+              <mat-label>{{ labels.sheet }}</mat-label>
+              <select matNativeControl formControlName="sheet">
+                @for (sheet of book.sheets; track $index) {
+                  <option [ngValue]="$index">{{ sheet.name }}</option>
+                }
+              </select>
+            </mat-form-field>
+          }
+          <label class="iw-check">
+            <input type="checkbox" formControlName="hasHeader" />
+            <span>{{ labels.hasHeader }}</span>
+          </label>
+        </div>
+        <p class="iw-upload__summary" aria-live="polite">
+          <span>{{ sourceSummary() }}</span>
+          @if (book.encoding === 'big5') {
+            <span class="iw-upload__note">{{ labels.encodingBig5 }}</span>
+          }
+        </p>
+        @if (sourceError(); as message) {
+          <p class="iw-upload__error" role="alert">
+            <span class="material-symbols-rounded" aria-hidden="true">error</span>{{ message }}
+          </p>
+        }
+      }
+
+      <div class="iw-upload__template">
+        <button type="button" matButton="outlined" (click)="downloadTemplate()" data-action="template">
+          <span class="material-symbols-rounded" aria-hidden="true">download</span>{{ labels.downloadTemplate }}
+        </button>
+        <span class="iw-upload__note">{{ labels.templateHint }}</span>
+      </div>
+    </div>
+  </lib-wizard-step>
+
+  <lib-wizard-step
+    [label]="labels.stepMapping"
+    [description]="labels.mappingDescription"
+    [stepControl]="mappingForm()"
+    [fieldLabels]="mappingLabels()"
+    [editable]="phase() !== 'done'"
+  >
+    @if (source(); as src) {
+      <p class="iw-upload__note iw-mapping-note" aria-live="polite">{{ autoMappedText() }}</p>
+      <lib-import-mapping [schema]="schema()" [headers]="src.headers" [rows]="src.data" [form]="mappingForm()" [labels]="labels" />
+      @if (mappingStore()) {
+        <label class="iw-check iw-remember">
+          <input type="checkbox" [formControl]="remember" />
+          <span>{{ labels.rememberMapping }}</span>
+        </label>
+      }
+    }
+  </lib-wizard-step>
+
+  <lib-wizard-step
+    [label]="labels.stepPreview"
+    [description]="labels.previewDescription"
+    [stepControl]="previewForm"
+    [errorMessage]="blockedText()"
+    [editable]="phase() !== 'done'"
+  >
+    <lib-import-preview
+      [schema]="schema()"
+      [rows]="rows()"
+      [form]="previewForm"
+      [labels]="labels"
+      [checking]="checking()"
+      [existingFailed]="existingFailed()"
+      (edit)="onEdit($event)"
+    />
+  </lib-wizard-step>
+
+  <lib-wizard-step
+    [label]="labels.stepImport"
+    [description]="labels.importDescription"
+    [stepControl]="importForm"
+    [errorMessage]="labels.nothingToImport"
+  >
+    <lib-import-run
+      [labels]="labels"
+      [phase]="phase()"
+      [plan]="plan()"
+      [progress]="progress()"
+      [result]="result()"
+      [reportCount]="reportCount()"
+      (stop)="stop()"
+      (downloadReport)="downloadReport()"
+      (done)="finish()"
+      (again)="restart()"
+    />
+  </lib-wizard-step>
+</lib-step-wizard>

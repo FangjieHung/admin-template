@@ -1,0 +1,72 @@
+<p class="iwr-sr" aria-live="polite">{{ announcement() }}</p>
+
+@switch (phase()) {
+  @case ('idle') {
+    <p class="iwr-summary" data-run="summary">{{ summary() }}</p>
+  }
+  @case ('running') {
+    <div class="iwr-progress" data-run="progress">
+      <mat-progress-bar
+        mode="determinate"
+        [value]="percent()"
+        [attr.aria-label]="labels().progressLabel"
+        [attr.aria-valuetext]="progressText()"
+      />
+      <div class="iwr-progress__row">
+        <span>{{ progressText() }}</span>
+        <button type="button" matButton="outlined" data-action="stop" (click)="stop.emit()">
+          <span class="material-symbols-rounded" aria-hidden="true">stop_circle</span>{{ labels().stop }}
+        </button>
+      </div>
+    </div>
+  }
+  @case ('done') {
+    @if (result(); as r) {
+      <div class="iwr-result" data-run="result">
+        <p class="iwr-result__title ui-text-subtitle" tabindex="-1" data-result-title>
+          <span class="material-symbols-rounded" aria-hidden="true">{{ r.canceled ? 'stop_circle' : 'task_alt' }}</span>
+          {{ r.canceled ? labels().resultCanceledTitle : labels().resultTitle }}
+        </p>
+        @if (r.canceled) {
+          <p class="iwr-note">{{ canceledText(r) }}</p>
+        }
+        <dl class="iwr-stats">
+          @for (stat of stats(); track stat.key) {
+            <div class="iwr-stat" [attr.data-stat]="stat.key" [class.is-failed]="stat.key === 'failed' && stat.value > 0">
+              <dt>{{ stat.label }}</dt>
+              <dd class="ui-text-numeric">{{ stat.value }}</dd>
+            </div>
+          }
+        </dl>
+
+        @if (r.failed.length) {
+          <div class="iwr-failed">
+            <p class="iwr-failed__title">{{ labels().failedRows }}</p>
+            <ul class="iwr-failed__list" tabindex="0" [attr.aria-label]="labels().failedRows">
+              @for (item of r.failed.slice(0, 50); track item.row) {
+                <li>
+                  <span class="material-symbols-rounded" aria-hidden="true">error</span>
+                  <span>{{ failedText(item.row, item.message) }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        @if (reportCount() > 0) {
+          <div class="iwr-report">
+            <button type="button" matButton="outlined" data-action="report" (click)="downloadReport.emit()">
+              <span class="material-symbols-rounded" aria-hidden="true">download</span>{{ labels().downloadReport }}
+            </button>
+            <span class="iwr-note">{{ labels().reportHint }}</span>
+          </div>
+        }
+
+        <div class="iwr-actions">
+          <button type="button" matButton="outlined" data-action="again" (click)="again.emit()">{{ labels().importAnother }}</button>
+          <button type="button" matButton="filled" data-action="done" (click)="done.emit()">{{ labels().done }}</button>
+        </div>
+      </div>
+    }
+  }
+}

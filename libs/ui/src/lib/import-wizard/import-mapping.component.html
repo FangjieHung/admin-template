@@ -1,0 +1,57 @@
+<div class="iwm" [formGroup]="form()">
+  <div class="iwm-head" aria-hidden="true">
+    <span>{{ labels().mappingField }}</span>
+    <span>{{ labels().mappingSource }}</span>
+    <span>{{ labels().mappingSamples }}</span>
+  </div>
+  <ul class="iwm-list">
+    @for (field of schema().fields; track field.key) {
+      <li class="iwm-row" [attr.data-mapping]="field.key">
+        <label class="iwm-field" [for]="uid + '-' + field.key">
+          {{ field.label }}
+          @if (field.required) {
+            <span class="iwm-required" aria-hidden="true">*</span>
+            <span class="iwm-sr">{{ labels().requiredMark }}</span>
+          }
+        </label>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iwm-select">
+          <select
+            matNativeControl
+            [id]="uid + '-' + field.key"
+            [formControlName]="field.key"
+            [attr.aria-describedby]="uid + '-' + field.key + '-samples'"
+          >
+            <option [ngValue]="null">{{ labels().notImported }}</option>
+            @for (header of headers(); track $index) {
+              <option [ngValue]="$index">{{ header }}</option>
+            }
+          </select>
+          @if (invalid(field.key)) {
+            <mat-error>{{ labels().mappingRequired }}</mat-error>
+          }
+        </mat-form-field>
+        <p class="iwm-samples" [id]="uid + '-' + field.key + '-samples'">
+          <span class="iwm-samples__label">{{ labels().mappingSamples }}</span>
+          {{ samplesText(selected(field.key)) }}
+        </p>
+      </li>
+    }
+  </ul>
+
+  <section class="iwm-unused" [attr.aria-labelledby]="uid + '-unused'">
+    <p class="iwm-unused__title ui-text-caption" [id]="uid + '-unused'">{{ labels().unusedColumns }}</p>
+    @if (unused().length) {
+      <ul class="iwm-unused__list">
+        @for (column of unused(); track column.index) {
+          <li class="iwm-unused__item">
+            <span class="iwm-unused__name">{{ column.header }}</span>
+            <span class="iwm-unused__samples">{{ samplesText(column.index) }}</span>
+            <span class="ui-chip ui-chip--neutral">{{ labels().notImported }}</span>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="iwm-unused__none">{{ labels().unusedNone }}</p>
+    }
+  </section>
+</div>

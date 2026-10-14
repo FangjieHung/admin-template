@@ -1,0 +1,79 @@
+// 匯入精靈的外框：步驟、上傳、按鈕的外觀交給 lib-step-wizard、lib-file-upload 與質地 recipe。只用語意 token。
+
+:host {
+  display: block;
+}
+
+.iw-upload {
+  display: grid;
+  gap: 1rem;
+}
+
+.iw-upload__options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+}
+
+.iw-upload__sheet {
+  min-width: 12rem;
+}
+
+.iw-upload__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface);
+}
+
+.iw-upload__note {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.iw-upload__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.375rem;
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--mat-sys-error);
+
+  .material-symbols-rounded {
+    font-size: 1.25rem;
+  }
+}
+
+.iw-upload__template {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+
+  .material-symbols-rounded {
+    margin-inline-end: 0.375rem;
+    font-size: 1.25rem;
+  }
+}
+
+.iw-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface);
+  cursor: pointer;
+}
+
+.iw-mapping-note {
+  margin-bottom: 1rem;
+}
+
+.iw-remember {
+  margin-top: 0.75rem;
+}

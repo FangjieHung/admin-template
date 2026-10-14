@@ -124,6 +124,8 @@ export class StepWizardComponent extends CdkStepper implements AfterContentInit 
   readonly compactBelow = input(STEP_WIZARD_COMPACT_BELOW, { transform: numberAttribute });
   /** 步驟標題的層級（`aria-level`），配合頁面的標題結構。 */
   readonly headingLevel = input(2, { transform: numberAttribute });
+  /** 隱藏底部的「上一步／下一步／完成」（例如匯入結束後，內容自己提供「完成」與「再來一次」）。 */
+  readonly hideActions = input(false);
 
   /** 全部驗證通過、按下「完成」。 */
   readonly finish = output<void>();

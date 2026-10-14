@@ -78,39 +78,41 @@
     </section>
   }
 
-  <div class="sw-actions">
-    @if (showCancel()) {
-      <button type="button" matButton class="sw-actions__cancel" [disabled]="busy()" (click)="cancel.emit()">
-        {{ labels.cancel }}
-      </button>
-    }
-    <div class="sw-actions__nav">
-      @if (selectedIndex > 0) {
-        <button type="button" matButton="outlined" class="sw-actions__previous" [disabled]="busy()" (click)="goPrevious()">
-          {{ labels.previous }}
+  @if (!hideActions()) {
+    <div class="sw-actions">
+      @if (showCancel()) {
+        <button type="button" matButton class="sw-actions__cancel" [disabled]="busy()" (click)="cancel.emit()">
+          {{ labels.cancel }}
         </button>
       }
-      @if (isLast()) {
-        <button
-          type="button"
-          matButton="filled"
-          class="sw-actions__finish"
-          [class.is-loading]="busy()"
-          [attr.aria-disabled]="busy() ? 'true' : null"
-          (click)="submit()"
-        >
-          @if (busy()) {
-            <span class="sw-spinner" aria-hidden="true"></span>
-            {{ labels.submitting }}
-          } @else {
-            {{ finishLabel() || labels.finish }}
-          }
-        </button>
-      } @else {
-        <button type="button" matButton="filled" class="sw-actions__next" [disabled]="busy()" (click)="goNext()">
-          {{ labels.next }}
-        </button>
-      }
+      <div class="sw-actions__nav">
+        @if (selectedIndex > 0) {
+          <button type="button" matButton="outlined" class="sw-actions__previous" [disabled]="busy()" (click)="goPrevious()">
+            {{ labels.previous }}
+          </button>
+        }
+        @if (isLast()) {
+          <button
+            type="button"
+            matButton="filled"
+            class="sw-actions__finish"
+            [class.is-loading]="busy()"
+            [attr.aria-disabled]="busy() ? 'true' : null"
+            (click)="submit()"
+          >
+            @if (busy()) {
+              <span class="sw-spinner" aria-hidden="true"></span>
+              {{ labels.submitting }}
+            } @else {
+              {{ finishLabel() || labels.finish }}
+            }
+          </button>
+        } @else {
+          <button type="button" matButton="filled" class="sw-actions__next" [disabled]="busy()" (click)="goNext()">
+            {{ labels.next }}
+          </button>
+        }
+      </div>
     </div>
-  </div>
+  }
 </div>

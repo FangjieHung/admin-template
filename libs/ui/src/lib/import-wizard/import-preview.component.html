@@ -1,0 +1,126 @@
+<p class="iwp-sr" aria-live="polite">{{ announcement() }}</p>
+
+<div class="iwp" [formGroup]="form()">
+  <div class="iwp-bar">
+    <p class="iwp-counts" aria-live="polite">
+      <span class="iwp-count">
+        <span class="material-symbols-rounded iwp-count__icon iwp-count__icon--ok" aria-hidden="true">check_circle</span>
+        <span>{{ count(labels().countReady, readyCount()) }}</span>
+      </span>
+      <span class="iwp-count" [class.is-problem]="problemCount() > 0">
+        <span class="material-symbols-rounded iwp-count__icon" aria-hidden="true">error</span>
+        <span>{{ count(labels().countProblem, problemCount()) }}</span>
+      </span>
+      @if (duplicateCount() > 0) {
+        <span class="iwp-count">
+          <span class="material-symbols-rounded iwp-count__icon" aria-hidden="true">content_copy</span>
+          <span>{{ count(labels().countDuplicate, duplicateCount()) }}</span>
+        </span>
+      }
+    </p>
+    <div class="iwp-tools">
+      <label class="iwp-check">
+        <input type="checkbox" [checked]="onlyProblems()" (change)="toggleProblems($event)" data-action="only-problems" />
+        <span>{{ labels().onlyProblems }}</span>
+      </label>
+      <button
+        type="button"
+        matButton="outlined"
+        data-action="next-problem"
+        [disabled]="problemCount() === 0"
+        (click)="nextProblem()"
+      >
+        <span class="material-symbols-rounded" aria-hidden="true">arrow_downward</span>{{ labels().nextProblem }}
+      </button>
+    </div>
+  </div>
+
+  @if (checking()) {
+    <p class="iwp-note" role="status">
+      <span class="iwp-spinner" aria-hidden="true"></span>{{ labels().checkingExisting }}
+    </p>
+  } @else if (existingFailed()) {
+    <p class="iwp-note" role="status">
+      <span class="material-symbols-rounded iwp-note__icon" aria-hidden="true">warning</span>{{ labels().existingFailed }}
+    </p>
+  }
+
+  <div class="iwp-table">
+    <lib-data-table
+      [columns]="columns()"
+      [rows]="displayRows()"
+      [rowId]="rowId"
+      [labels]="labels().table"
+      [showExport]="false"
+      [pageable]="true"
+      [(page)]="page"
+      [(pageSize)]="pageSize"
+      [emptyText]="labels().noProblems"
+      emptyKind="no-results"
+    >
+      @for (field of schema().fields; track field.key) {
+        <ng-template [dtCell]="colOf(field.key)" let-row>
+          @let r = asRow(row);
+          @if (isEditing(r, field.key)) {
+            <input
+              class="iwp-input"
+              data-editor
+              [value]="r.raw[field.key] ?? ''"
+              [attr.aria-label]="editLabel(r, field)"
+              [attr.aria-invalid]="r.errors[field.key] ? 'true' : null"
+              (keydown)="onEditorKeydown($event, r, field.key)"
+              (blur)="onEditorBlur($event, r, field.key)"
+            />
+          } @else {
+            <button
+              type="button"
+              class="iwp-cell"
+              [class.is-invalid]="!!r.errors[field.key]"
+              [attr.data-cell]="cellId(r, field.key)"
+              [attr.aria-label]="cellLabel(r, field)"
+              (click)="startEdit(r, field.key)"
+            >
+              <span class="iwp-cell__value" [class.is-empty]="!r.raw[field.key]">{{ r.raw[field.key] || labels().emptyCell }}</span>
+              @if (r.errors[field.key]; as message) {
+                <span class="iwp-cell__error">
+                  <span class="material-symbols-rounded" aria-hidden="true">error</span>{{ message }}
+                </span>
+              }
+            </button>
+          }
+        </ng-template>
+      }
+      <ng-template dtCell="status" let-row>
+        @let r = asRow(row);
+        <lib-status-chip [status]="statusKey(r)" [label]="statusText(r)" />
+      </ng-template>
+    </lib-data-table>
+  </div>
+
+  @if (duplicateCount() > 0) {
+    <div class="iwp-choice" role="radiogroup" [attr.aria-labelledby]="uid + '-duplicates'" data-section="duplicates">
+      <p class="iwp-choice__title" [id]="uid + '-duplicates'">{{ duplicatesTitle() }}</p>
+      <div class="iwp-choice__options">
+        @for (option of modes(); track option.value) {
+          <label class="iwp-check">
+            <input
+              type="radio"
+              [name]="uid + '-mode'"
+              [value]="option.value"
+              [checked]="mode() === option.value"
+              (change)="setMode(option.value)"
+            />
+            <span>{{ option.label }}</span>
+          </label>
+        }
+      </div>
+    </div>
+  }
+
+  @if (problemCount() > 0) {
+    <label class="iwp-check iwp-skip" data-field="skipInvalid">
+      <input type="checkbox" formControlName="skipInvalid" />
+      <span>{{ count(labels().skipInvalid, problemCount()) }}</span>
+    </label>
+  }
+</div>

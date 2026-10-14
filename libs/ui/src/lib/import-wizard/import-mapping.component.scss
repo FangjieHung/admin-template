@@ -1,0 +1,126 @@
+// 欄位對應：寬時三欄（欄位、下拉、範例），窄時疊成一欄。只用語意 token；下拉的外框交給質地的欄位 recipe。
+
+:host {
+  display: block;
+}
+
+.iwm-head,
+.iwm-row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) minmax(12rem, 18rem) minmax(0, 1fr);
+  gap: 0.5rem 1rem;
+  align-items: center;
+}
+
+.iwm-head {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.iwm-list,
+.iwm-unused__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.iwm-row {
+  padding-block: 0.5rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.iwm-field {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--mat-sys-on-surface);
+}
+
+.iwm-required {
+  margin-inline-start: 0.125rem;
+  color: var(--mat-sys-error);
+}
+
+.iwm-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.iwm-row,
+.iwm-field {
+  position: relative;
+}
+
+.iwm-select {
+  width: 100%;
+}
+
+.iwm-samples {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 寬版有表頭，範例前面的小標只給窄版。
+.iwm-samples__label {
+  display: none;
+}
+
+.iwm-unused {
+  margin-top: 1.5rem;
+}
+
+.iwm-unused__title {
+  margin: 0 0 0.5rem;
+}
+
+.iwm-unused__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+  padding-block: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.iwm-unused__name {
+  font-weight: 600;
+  color: var(--mat-sys-on-surface);
+}
+
+.iwm-unused__samples,
+.iwm-unused__none {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+@media (max-width: 640px) {
+  .iwm-head {
+    display: none;
+  }
+
+  .iwm-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+  }
+
+  .iwm-samples {
+    white-space: normal;
+  }
+
+  .iwm-samples__label {
+    display: inline;
+    margin-inline-end: 0.375rem;
+    font-weight: 600;
+  }
+}
