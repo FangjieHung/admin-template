@@ -1,0 +1,64 @@
+// 表格內直接編輯展示頁。只用語意 token；表格與編輯中格子的外觀交給 libs/ui 與質地 recipe（--dt-*）。
+
+.inline-state {
+  margin-top: 1rem;
+}
+
+.paste-sample {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px dashed var(--mat-sys-outline);
+  border-radius: var(--mat-sys-corner-medium);
+}
+
+.paste-sample__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+
+  .material-symbols-rounded {
+    margin-inline-end: 0.25rem;
+    font-size: 1.125rem;
+  }
+}
+
+.paste-sample__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--mat-sys-on-surface);
+}
+
+.paste-sample__block {
+  margin: 0;
+  overflow-x: auto;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--mat-sys-on-surface);
+  tab-size: 4;
+  user-select: all;
+
+  &:focus-visible {
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: var(--app-focus-ring-offset);
+  }
+}
+
+.lock-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+  color: var(--mat-sys-on-surface-variant);
+
+  .material-symbols-rounded {
+    font-size: 1rem;
+  }
+}
+
+.lock-note--open {
+  color: var(--mat-sys-on-surface);
+}

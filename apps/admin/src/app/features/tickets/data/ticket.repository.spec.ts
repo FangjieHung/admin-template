@@ -51,6 +51,28 @@ describe('TicketRepository（工單樣板的示範資料層）', () => {
     expect(again).toEqual(list);
   });
 
+  it('patchMany：一次改多張工單的快速編輯欄位，記活動紀錄，快照可以復原', async () => {
+    const [a, b] = await repo.list();
+    const snapshot = await repo.patchMany(
+      [
+        { id: a.id, patch: { priority: 'urgent', status: 'in-progress' } },
+        { id: b.id, patch: { assigneeId: null, dueDate: '2026-12-31' } },
+      ],
+      ME,
+    );
+    const a2 = (await repo.get(a.id))!;
+    const b2 = (await repo.get(b.id))!;
+    expect([a2.priority, a2.status]).toEqual(['urgent', 'in-progress']);
+    expect([b2.assigneeId, b2.dueDate]).toEqual([null, '2026-12-31']);
+    const log = await repo.activity(a.id);
+    expect(log[0].summary).toContain('在列表快速修改了');
+    expect(log[0].changes?.map((c) => c.field)).toEqual(expect.arrayContaining(['優先順序', '狀態']));
+    await repo.restore(snapshot);
+    expect((await repo.get(a.id))?.priority).toBe(a.priority);
+    expect((await repo.get(b.id))?.dueDate).toBe(b.dueDate);
+    await expect(repo.patchMany([{ id: 'TK-0000', patch: { priority: 'low' } }], ME)).rejects.toBeInstanceOf(TicketNotFoundError);
+  });
+
   it('list() 回傳複本：改回傳的物件不會改到資料層', async () => {
     const [first] = await repo.list();
     first.title = '被改掉';

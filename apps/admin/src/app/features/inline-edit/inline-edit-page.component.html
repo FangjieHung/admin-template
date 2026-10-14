@@ -1,0 +1,112 @@
+<app-showcase-page
+  [summary]="entry.summary"
+  [whenToUse]="whenToUse"
+  [avoid]="avoid"
+  [source]="entry.source"
+  [usage]="usage"
+  [api]="api"
+>
+  <app-demo-block
+    heading="即時儲存：改一格存一格"
+    description="點一下格子再按 Enter（或直接打字、雙擊）開始編輯；Enter 存檔往下、Tab 往右、Esc 取消。儲存中格子右側轉圈，存好後提示可以「復原」。把工時改成 13 會儲存失敗（示範）：格子還原、寫出原因，提示可以重試。"
+  >
+    <div data-demo="instant">
+      <lib-data-table
+        [columns]="taskColumns"
+        [rows]="tasks()"
+        [labels]="labels"
+        [showExport]="false"
+        editMode="instant"
+        [onCellSave]="saveTask"
+      />
+      <dl class="demo-state inline-state">
+        <div>
+          <dt>最後一次儲存</dt>
+          <dd data-last-save>{{ lastSave() }}</dd>
+        </div>
+      </dl>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="批次修改與從 Excel 貼上"
+    description="改過的格子右上角有標記，有錯的格子標出原因；下方的列顯示改了幾格、有幾個錯誤，有錯時「儲存全部」會帶你跳到錯誤。可以把下面這一塊（或 Excel、Google 試算表裡選取的一塊）複製起來，點第一列的 Email 格再貼上：會往右、往下填，每格都檢查。有未儲存的修改時離開這一頁會先問。"
+    [stickyContent]="true"
+  >
+    <div data-demo="batch">
+      <div class="paste-sample">
+        <div class="paste-sample__head">
+          <span class="paste-sample__title">複製這一塊（Email、電話、部門）</span>
+          <button type="button" matButton="outlined" data-action="copy-block" (click)="copyBlock()">
+            <span class="material-symbols-rounded" aria-hidden="true">content_copy</span>{{ copied() ? '已複製' : '複製' }}
+          </button>
+        </div>
+        <pre class="paste-sample__block ui-text-numeric" data-paste-block tabindex="0">{{ pasteBlock }}</pre>
+      </div>
+
+      <lib-data-table
+        #peopleTable
+        [columns]="peopleColumns"
+        [rows]="people()"
+        [labels]="labels"
+        [showExport]="false"
+        editMode="batch"
+        [onBatchSave]="savePeople"
+        (dirtyChange)="peopleDirty.set($event)"
+      />
+      <dl class="demo-state inline-state">
+        <div>
+          <dt>(dirtyChange)</dt>
+          <dd data-people-dirty>{{ peopleDirty() ? '有未儲存的修改' : '沒有' }}</dd>
+        </div>
+        <div>
+          <dt>最後一次「儲存全部」</dt>
+          <dd data-last-batch>{{ lastBatch() }}</dd>
+        </div>
+      </dl>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="每一列的權限"
+    description="進度 100% 的專案已結案：canEdit 回傳 false，那一列沒有鉛筆提示、報讀器念「唯讀」，按 Enter 會說明這一格不能修改。專案名稱沒有 editor，整欄都不能改。"
+  >
+    <div data-demo="locked">
+      <lib-data-table
+        [columns]="projectColumns"
+        [rows]="projects()"
+        [labels]="labels"
+        [showExport]="false"
+        editMode="instant"
+        [onCellSave]="saveProject"
+      >
+        <ng-template dtCell="budget" let-row>{{ budgetText(asProject(row).budget) }}</ng-template>
+        <ng-template dtCell="lock" let-row>
+          @if (asProject(row).progress >= 100) {
+            <span class="lock-note">
+              <span class="material-symbols-rounded" aria-hidden="true">lock</span>已結案，鎖定
+            </span>
+          } @else {
+            <span class="lock-note lock-note--open">進行中</span>
+          }
+        </ng-template>
+      </lib-data-table>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
+    heading="手機卡片版"
+    description="視窗窄於 640px 時資料表變成卡片，不做儲存格層級的編輯：每張卡片一顆「編輯」，按下在卡片裡展開這一列可以改的欄位，按「儲存」一次送出（即時儲存逐欄呼叫 onCellSave；批次修改記成草稿）。桌機上看起來就是一般的可編輯表格。"
+  >
+    <div data-demo="mobile">
+      <lib-data-table
+        [columns]="mobileColumns()"
+        [rows]="mobilePeople()"
+        [labels]="labels"
+        [showExport]="false"
+        editMode="instant"
+        [onCellSave]="saveMobile"
+      />
+    </div>
+  </app-demo-block>
+</app-showcase-page>

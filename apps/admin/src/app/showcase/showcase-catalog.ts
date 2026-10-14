@@ -19,6 +19,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '清單頁的主體：分頁、排序、欄位選擇與拖曳排序、凍結識別欄、多選、匯出 Excel、手機卡片模式。',
     source: 'libs/ui/src/lib/data-table',
   },
+  'inline-edit': {
+    summary: '在資料表的格子裡直接改：方向鍵移動、Enter 或打字開始編輯；改一格存一格（失敗還原、可以復原），或先標成已修改再一次儲存、從 Excel 貼上一整塊；每一列可以鎖定，手機改用整列表單。',
+    source: 'libs/ui/src/lib/data-table（columns 的 editor）',
+  },
   'page-toolbar': {
     summary: '放在頁首的搜尋框（可收合）與單選下拉篩選，顯示已套用的篩選數並可一鍵清除。',
     source: 'libs/ui/src/lib/page-toolbar、libs/ui/src/lib/filter/filter-select.component.ts',
@@ -174,7 +178,6 @@ export interface PlannedItem {
 }
 
 export const PLANNED_ITEMS: readonly PlannedItem[] = [
-  { title: '表格內直接編輯', kind: '元件', priority: 'P1', summary: '行內編輯與批次修改。' },
   { title: '共用日曆與排程', kind: '元件', priority: 'P1', summary: '月／週檢視與資源時間軸，含拖曳。' },
   { title: '看板', kind: '元件', priority: 'P1', summary: '卡片拖曳換欄。' },
   { title: '樹狀選單與樹狀表', kind: '元件', priority: 'P2', summary: '組織架構、分類。' },

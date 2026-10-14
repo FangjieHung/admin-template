@@ -22,6 +22,25 @@
   padding: 0;
 }
 
+// 快速編輯：批次列要 sticky 貼在捲動容器底部，有些質地的 .ui-card 是 overflow: hidden（卡片變成捲動容器）——這時改成不裁切。
+:host .ui-card.ticket-table--editing {
+  overflow: visible;
+}
+
+.ticket-quick-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+
+  .material-symbols-rounded {
+    font-size: 1.25rem;
+    color: var(--mat-sys-primary);
+  }
+}
+
 .ticket-count {
   margin: 0 0 0 auto;
   white-space: nowrap;

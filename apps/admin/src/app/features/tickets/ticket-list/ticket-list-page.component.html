@@ -43,7 +43,24 @@
       (conditionsChange)="setFilters($event)"
     />
     <p class="ui-text-caption ticket-count" aria-live="polite" data-ticket-count>{{ countText() }}</p>
+    @if (canEdit() && loadState() === 'ready') {
+      <button
+        type="button"
+        [matButton]="quickEdit() ? 'filled' : 'outlined'"
+        [attr.aria-pressed]="quickEdit()"
+        data-action="quick-edit"
+        (click)="toggleQuickEdit()"
+      >
+        <span class="material-symbols-rounded" aria-hidden="true">edit_square</span>快速編輯
+      </button>
+    }
   </div>
+  @if (quickEdit()) {
+    <p class="ticket-quick-hint" data-quick-hint>
+      <span class="material-symbols-rounded" aria-hidden="true">info</span>
+      直接在表格裡改優先順序、負責人、期限與狀態：方向鍵移動、Enter 或直接打字開始編輯，也可以從 Excel 貼上一整塊。改完按下方的「儲存全部」。
+    </p>
+  }
 
   @if (loadState() === 'error') {
     <section class="ui-card p-4 sm:p-6" data-state="error">
@@ -55,11 +72,13 @@
       />
     </section>
   } @else {
-    <div class="ui-card ticket-table">
+    <div class="ui-card ticket-table" [class.ticket-table--editing]="quickEdit()">
       <lib-data-table
-        [columns]="columns"
+        [columns]="tableColumns()"
         [rows]="rows()"
-        [labels]="tableLabels"
+        [labels]="quickEdit() ? editLabels : tableLabels"
+        editMode="batch"
+        [onBatchSave]="saveQuickEdit"
         [loading]="loadState() === 'loading'"
         [loadingRows]="8"
         [selectable]="true"
@@ -67,7 +86,7 @@
         [selection]="selection()"
         (selectionChange)="selection.set($event)"
         (batchDelete)="removeSelected($event)"
-        [rowClickable]="true"
+        [rowClickable]="!quickEdit()"
         (rowClick)="open($event)"
         [pageable]="true"
         [pageSizeOptions]="pageSizes"

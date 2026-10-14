@@ -135,4 +135,57 @@ describe('TicketListPageComponent（列表頁樣板）', () => {
     expect(await h.repo.list()).toHaveLength(TICKET_COUNT);
     expect(rowIds(h.el).slice(0, 2)).toEqual(['TK-2120', 'TK-2119']);
   });
+
+  it('快速編輯（有編輯權限）：四欄改成批次修改，儲存全部寫回資料、有未儲存時離開先問；檢視者看不到開關', async () => {
+    const h = await setupTicketPage();
+    await h.navigate('/templates/tickets');
+    const toggle = () => h.el.querySelector<HTMLButtonElement>('[data-action="quick-edit"]')!;
+    expect(toggle().getAttribute('aria-pressed')).toBe('false');
+    expect(h.el.querySelector('.dt-table')!.hasAttribute('role')).toBe(false);
+
+    toggle().click();
+    await h.settle();
+    for (let i = 0; i < 20 && h.el.querySelector('.dt-table')!.getAttribute('role') !== 'grid'; i++) {
+      await new Promise((r) => setTimeout(r, 10));
+      await h.settle();
+    }
+    expect(toggle().getAttribute('aria-pressed')).toBe('true');
+    expect(h.el.querySelector('.dt-table')!.getAttribute('role')).toBe('grid');
+    expect(h.el.querySelector('[data-quick-hint]')).not.toBeNull();
+    const editable = [...h.el.querySelectorAll('thead th.dt-col--editable')].map((th) => th.textContent?.trim());
+    expect(editable).toEqual(['狀態', '優先順序', '負責人', '期限']);
+
+    // 第一列的優先順序：Enter 打開下拉，選「緊急」，Enter 確定（還沒存）
+    const first = (await h.repo.list())[0];
+    const cell = h.el.querySelector<HTMLElement>('td[data-dt-row="0"][data-dt-col="priority"]')!;
+    cell.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    await h.settle();
+    const select = h.el.querySelector<HTMLSelectElement>('[data-dt-editor]')!;
+    const urgent = [...select.options].find((o) => o.textContent?.trim() === '緊急')!;
+    select.value = urgent.value;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    select.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    await h.settle();
+    expect(h.el.querySelector('[data-dt-dirty-count]')?.textContent).toBe('已修改 1 格');
+    expect((await h.repo.get(first.id))?.priority).toBe(first.priority);
+
+    // 有未儲存的修改：離開頁面先問（這次選「繼續編輯」）
+    h.dialog.next = false;
+    await h.router.navigateByUrl('/templates/tickets/new');
+    await h.settle();
+    expect(h.router.url).toBe('/templates/tickets');
+    expect(h.dialog.opened).toHaveLength(1);
+
+    (h.el.querySelector('[data-action="save-all"]') as HTMLButtonElement).click();
+    await h.settle();
+    expect((await h.repo.get(first.id))?.priority).toBe('urgent');
+    expect(h.el.querySelector('[data-dt-batch-bar]')).toBeNull();
+    expect((await h.repo.activity(first.id))[0].summary).toContain('在列表快速修改了優先順序');
+
+    TestBed.resetTestingModule();
+    const viewer = await setupTicketPage();
+    viewer.access.signIn('u-viewer');
+    await viewer.navigate('/templates/tickets');
+    expect(viewer.el.querySelector('[data-action="quick-edit"]')).toBeNull();
+  });
 });

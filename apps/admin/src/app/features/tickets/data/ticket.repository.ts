@@ -50,6 +50,9 @@ export interface TicketSnapshot {
   readonly entries: readonly { index: number; ticket: Ticket; activity: readonly ActivityEntry[] }[];
 }
 
+/** 列表「快速編輯」能改的欄位。 */
+export type TicketQuickPatch = Partial<Pick<Ticket, 'priority' | 'assigneeId' | 'dueDate' | 'status'>>;
+
 /** 匯入的一列：標題必填，其他欄位沒給就用預設值（新增）或保留原值（更新）。 */
 export interface TicketImportRow {
   /** 檔案裡的列號（失敗時回報用）。 */
@@ -220,6 +223,29 @@ export class TicketRepository {
       this.log(id, this.entry(id, actor, 'assign', summary, [{ field: '負責人', from, to }]));
     }
     return { ...ticket };
+  }
+
+  /**
+   * 列表的快速編輯：一次改多張工單的優先順序、負責人、期限、狀態（資料表批次修改的「儲存全部」）。
+   * 每張工單記一筆活動紀錄；回傳改之前的快照（復原用）。任何一張不存在時丟 TicketNotFoundError、全部不改。
+   */
+  async patchMany(patches: readonly { id: string; patch: TicketQuickPatch }[], actor: TicketActor): Promise<TicketSnapshot> {
+    await this.delay();
+    const snapshot = this.snapshot(patches.map((p) => p.id));
+    for (const { id, patch } of patches) {
+      const current = this.require(id);
+      const next: Ticket = { ...current, ...patch };
+      const changes = this.diff(current, next);
+      if (current.status !== next.status) {
+        changes.push({ field: '狀態', from: TICKET_STATUS_LABELS[current.status], to: TICKET_STATUS_LABELS[next.status] });
+      }
+      Object.assign(current, next);
+      if (changes.length) {
+        const fields = changes.map((c) => c.field).join('、');
+        this.log(id, this.entry(id, actor, 'edit', `${actor.name} 在列表快速修改了${fields}`, changes));
+      }
+    }
+    return snapshot;
   }
 
   /** 刪除（單筆或批次）。回傳刪除前的快照，交給 restore() 就能復原。 */

@@ -1,12 +1,13 @@
-import { Component, Injector, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, Injector, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { AccessService, CanDirective } from '@admin-template/access';
+import { AccessService, CanDirective, HasUnsavedChanges } from '@admin-template/access';
 import type { StatusKey } from '@admin-template/theme-pack';
 import {
   AdvancedFilterComponent,
   DataTableBatchActionsDirective,
+  DataTableBatchSaveFn,
   DataTableCellDirective,
   DataTableColumn,
   DataTableComponent,
@@ -37,6 +38,8 @@ import {
   rangePickerLabelProviders,
 } from '../../../shared/ui/component-label-providers';
 import { ADMIN_DATA_TABLE_LABELS } from '../../../shared/ui/data-table-labels';
+import { ADMIN_EDITABLE_TABLE_LABELS } from '../../../shared/ui/data-table-editing-labels';
+import { RELATION_SELECT_LABEL_PROVIDERS } from '../../../shared/ui/relation-select-labels';
 import { LIST_TOOLBAR_LABEL_PROVIDERS } from '../../../shared/ui/list-toolbar-labels';
 import { ADMIN_FILTER_LABELS, ADMIN_SAVED_VIEWS_LABELS } from '../../../shared/ui/list-view-labels';
 import { TemplateInfo, TemplateInfoComponent } from '../../../shared/ui/template-info.component';
@@ -50,9 +53,10 @@ import {
   TICKET_STATUS_LABELS,
   TICKET_STATUS_TONES,
   Ticket,
+  TicketPerson,
   TicketStatus,
 } from '../data/ticket.model';
-import { TicketRepository, TicketSnapshot } from '../data/ticket.repository';
+import { TicketQuickPatch, TicketRepository, TicketSnapshot } from '../data/ticket.repository';
 import { TicketListMemory, readListUrl, sameListParams, toListQueryParams } from './ticket-list-url';
 
 type LoadState = 'loading' | 'ready' | 'error';
@@ -67,18 +71,20 @@ function options<T extends string>(labels: Readonly<Record<T, string>>): FilterO
 }
 
 const INFO: TemplateInfo = {
-  summary: '列表頁樣板：搜尋、篩選、排序、分頁都寫在網址上，重新整理或從詳情頁返回時還原；多選後可批次改狀態或刪除（可復原）。',
+  summary:
+    '列表頁樣板：搜尋、篩選、排序、分頁都寫在網址上，重新整理或從詳情頁返回時還原；多選後可批次改狀態或刪除（可復原）；有編輯權限時可以切到「快速編輯」，直接在表格裡改優先順序、負責人、期限與狀態，一次儲存。',
   components: [
     'lib-page-toolbar、lib-filter-select（頁首的搜尋與狀態）',
     'lib-advanced-filter、lib-filter-chips、lib-saved-views（ListViewController）',
-    'lib-data-table（分頁、排序、欄位選擇、凍結編號欄、多選、批次操作、骨架、空狀態）',
+    'lib-data-table（分頁、排序、欄位選擇、凍結編號欄、多選、批次操作、骨架、空狀態；快速編輯是 editor 欄位＋批次修改）',
     'lib-error-state、lib-empty-state、lib-status-chip、lib-toast、確認對話框',
     'libs/access 的 *libCan（檢視者看不到匯入、新增、批次改狀態、刪除）',
   ],
   replace: [
     'ticket.repository.ts：list() 換成呼叫後端（資料量大時改成伺服器分頁）',
     'ticket.model.ts：工單的欄位、狀態與標籤',
-    '本頁的 columns、fields（欄位與篩選條件）',
+    '本頁的 columns、fields（欄位與篩選條件）；quickColumns 決定快速編輯能改哪些欄位',
+    'ticket.repository.ts：patchMany() 換成呼叫後端的批次更新',
     '網址的 ?demo=error、?demo=empty（示範載入失敗與沒有資料）',
   ],
   files: [
@@ -122,6 +128,7 @@ const INFO: TemplateInfo = {
     ...FEEDBACK_STATE_LABEL_PROVIDERS,
     ...CONFIRM_DIALOG_LABEL_PROVIDERS,
     ...TOAST_PROVIDERS,
+    ...RELATION_SELECT_LABEL_PROVIDERS,
     // 已儲存檢視存在瀏覽器、每個示範身分分開；接後端時換成 API 版本的 SavedViewRepository。
     {
       provide: SAVED_VIEW_REPOSITORY,
@@ -134,7 +141,7 @@ const INFO: TemplateInfo = {
   templateUrl: './ticket-list-page.component.html',
   styleUrl: './ticket-list-page.component.scss',
 })
-export class TicketListPageComponent {
+export class TicketListPageComponent implements HasUnsavedChanges {
   private readonly repo = inject(TicketRepository);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -228,6 +235,79 @@ export class TicketListPageComponent {
   ];
 
   protected readonly statusOptions = options(TICKET_STATUS_LABELS);
+
+  // ---- 快速編輯（有 ticket:edit 時）：優先順序、負責人、期限、狀態改成批次修改 ----
+
+  private readonly table = viewChild(DataTableComponent<Ticket>);
+  protected readonly quickEdit = signal(false);
+  protected readonly editLabels = ADMIN_EDITABLE_TABLE_LABELS;
+
+  /** 快速編輯時的欄位：同一份 columns，只是這四欄多了 editor。 */
+  private readonly quickColumns: DataTableColumn<Ticket>[] = this.columns.map((col): DataTableColumn<Ticket> => {
+    switch (col.key) {
+      case 'priority':
+        return { ...col, editor: { type: 'select', required: true, options: options(TICKET_PRIORITY_LABELS) } } as DataTableColumn<Ticket>;
+      case 'status':
+        return { ...col, editor: { type: 'select', required: true, options: options(TICKET_STATUS_LABELS) } } as DataTableColumn<Ticket>;
+      case 'dueDate':
+        return {
+          ...col,
+          editor: {
+            type: 'date',
+            validate: (v, row) =>
+              typeof v === 'string' && v < row.createdAt.slice(0, 10) ? '期限不能早於建立日期' : null,
+          },
+        } as DataTableColumn<Ticket>;
+      case 'assignee':
+        return {
+          ...col,
+          editor: {
+            type: 'relation',
+            field: 'assigneeId',
+            source: this.repo.assigneeSource as never,
+            displayWith: (p) => (p as TicketPerson).name,
+            secondaryWith: (p) => (p as TicketPerson).team,
+          },
+        } as DataTableColumn<Ticket>;
+      default:
+        return col;
+    }
+  });
+
+  protected readonly tableColumns = computed(() => (this.quickEdit() ? this.quickColumns : this.columns));
+
+  /** 快速編輯的「儲存全部」：一次送出所有改過的格子，重新讀取清單。 */
+  protected readonly saveQuickEdit: DataTableBatchSaveFn<Ticket> = async (changes) => {
+    const byId = new Map<string, TicketQuickPatch>();
+    for (const { row, key, value } of changes) byId.set(row.id, { ...byId.get(row.id), [key]: value });
+    await this.repo.patchMany([...byId].map(([id, patch]) => ({ id, patch })), ACTOR);
+    await this.load(true);
+  };
+
+  /** 切換快速編輯；關掉時有未儲存的修改先問。 */
+  protected async toggleQuickEdit(): Promise<void> {
+    if (this.quickEdit() && !(await this.confirmDiscard())) return;
+    this.selection.set([]);
+    this.quickEdit.update((on) => !on);
+  }
+
+  /** 路由離開前（unsavedChangesGuard）：快速編輯有未儲存的修改時先問。 */
+  canLeave(): Promise<boolean> {
+    return this.confirmDiscard();
+  }
+
+  private async confirmDiscard(): Promise<boolean> {
+    const table = this.table();
+    if (!table?.dirty()) return true;
+    const discard = await openConfirmDialog(this.injector, {
+      title: '有尚未儲存的修改',
+      message: '快速編輯裡改過的格子還沒儲存，要捨棄嗎？',
+      confirmLabel: '捨棄修改',
+      cancelLabel: '繼續編輯',
+    });
+    if (discard) table.discardChanges();
+    return discard;
+  }
 
   /** 頁首的「狀態」快速篩選＝進階篩選裡只選一個狀態的那個條件。 */
   protected readonly quickStatus = computed<TicketStatus | null>(() => {

@@ -17,6 +17,8 @@ export const TICKET_ROUTES: Routes = [
     path: '',
     loadComponent: () => import('./ticket-list/ticket-list-page.component').then((m) => m.TicketListPageComponent),
     ...guarded('ticket:view'),
+    // 快速編輯有未儲存的修改時，離開前先確認。
+    canDeactivate: [unsavedChangesGuard],
   },
   { path: 'new', loadComponent: loadForm, ...guarded('ticket:create'), canDeactivate: [unsavedChangesGuard] },
   // 匯入：跟「新增」同一個權限；要放在 :id 前面，否則 import 會被當成工單編號。

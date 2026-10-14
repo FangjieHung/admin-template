@@ -57,6 +57,14 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     load: () => import('../features/data-table/data-table-page.component').then((m) => m.DataTablePageComponent),
   },
   {
+    id: 'inline-edit',
+    title: '表格內直接編輯',
+    group: 'data',
+    icon: 'edit_square',
+    load: () => import('../features/inline-edit/inline-edit-page.component').then((m) => m.InlineEditPageComponent),
+    guardUnsaved: true,
+  },
+  {
     id: 'page-toolbar',
     title: '頁首工具列',
     group: 'data',
