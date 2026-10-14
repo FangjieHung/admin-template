@@ -97,3 +97,8 @@ export * from './lib/tree/tree-node.directive';
 export * from './lib/tree/tree-highlight.component';
 export * from './lib/tree/tree.component';
 export * from './lib/tree/tree-table.component';
+export * from './lib/print-document/print-document.types';
+export * from './lib/print-document/print-document-labels';
+export * from './lib/print-document/print-page-css';
+export * from './lib/print-document/print-table.component';
+export * from './lib/print-document/print-document.component';

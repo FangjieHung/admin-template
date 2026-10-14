@@ -1,0 +1,94 @@
+@if (toolbar()) {
+  <div class="lib-print-document__toolbar" role="toolbar" [attr.aria-label]="labels.toolbar">
+    <button matButton="filled" type="button" data-print-action="print" (click)="print()">
+      <span class="material-symbols-rounded" aria-hidden="true">print</span>{{ labels.print }}
+    </button>
+    <button
+      matButton="outlined"
+      type="button"
+      data-print-action="pdf"
+      [attr.aria-describedby]="hintId"
+      (click)="downloadPdf()"
+    >
+      <span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span>{{ labels.downloadPdf }}
+    </button>
+    <span class="lib-print-document__estimate" data-print-estimate>{{ estimateText() }}</span>
+    <p class="lib-print-document__hint" [id]="hintId">{{ labels.pdfHint }}</p>
+  </div>
+}
+
+<div class="lib-print-document__desk">
+  <div class="lib-print-document__stage" #stage>
+    <div class="lib-print-document__fit" [style.width.px]="fitWidth()" [style.height.px]="fitHeight()">
+      <article
+        #sheet
+        class="lib-print-sheet"
+        role="region"
+        [attr.aria-label]="previewLabel()"
+        [attr.data-print-page]="pageName"
+        [style.width.mm]="size().width"
+        [style.min-height.mm]="sheetHeight()"
+        [style.padding]="margins().top + 'mm ' + margins().right + 'mm ' + margins().bottom + 'mm ' + margins().left + 'mm'"
+        [style.transform]="scale() < 1 ? 'scale(' + scale() + ')' : null"
+      >
+        @for (guide of guides(); track guide.page) {
+          <div class="lib-print-sheet__guide" aria-hidden="true" [style.top.mm]="guide.top">
+            <span>{{ guideText(guide.page) }}</span>
+          </div>
+        }
+        <div class="lib-print-sheet__body" #body>
+          <header class="lib-print-sheet__head">
+            <div class="lib-print-sheet__brand">
+              <ng-content select="[libPrintBrand]" />
+            </div>
+            <div class="lib-print-sheet__heading">
+              <p class="lib-print-sheet__title" role="heading" [attr.aria-level]="headingLevel()">{{ title() }}</p>
+              @if (number() || date()) {
+                <dl class="lib-print-sheet__meta">
+                  @if (number()) {
+                    <div>
+                      <dt>{{ labels.numberLabel }}</dt>
+                      <dd class="lib-print-num" data-print-number>{{ number() }}</dd>
+                    </div>
+                  }
+                  @if (date()) {
+                    <div>
+                      <dt>{{ labels.dateLabel }}</dt>
+                      <dd class="lib-print-num">{{ date() }}</dd>
+                    </div>
+                  }
+                </dl>
+              }
+            </div>
+          </header>
+
+          <ng-content select="[libPrintInfo]" />
+          <ng-content />
+
+          <!-- 結尾：有明細表時由最後一張明細表畫在合計列後面（同一個不切開的區段），沒有時畫在這裡。 -->
+          @if (!closingTable()) {
+            <div class="lib-print-sheet__closing">
+              <ng-container *ngTemplateOutlet="closing" />
+            </div>
+          }
+        </div>
+      </article>
+    </div>
+  </div>
+</div>
+
+<ng-template #closing>
+  <ng-content select="[libPrintNotes]" />
+  @if (signatures().length) {
+    <section class="lib-print-sheet__signatures" data-print-signatures>
+      @for (name of signatures(); track $index) {
+        <div class="lib-print-sign">
+          <span class="lib-print-sign__title">{{ name }}</span>
+          <span class="lib-print-sign__line" aria-hidden="true"></span>
+          <span class="lib-print-sign__date">{{ labels.signatureDate }}</span>
+        </div>
+      }
+    </section>
+  }
+  <ng-content select="[libPrintFooter]" />
+</ng-template>

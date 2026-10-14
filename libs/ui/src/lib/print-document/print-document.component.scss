@@ -1,0 +1,461 @@
+// 列印版面（lib-print-document、lib-print-table）。不封裝（ViewEncapsulation.None）：
+// 列印時隱藏殼層的規則要作用在整份文件，`.lib-print-table` 也要套到使用端自己寫的表格；所有選擇器都以 lib-print 開頭。
+// 這份樣式跟著元件的 lazy chunk 載入（頁面上有單據時才在 <head>），不在主樣式裡。見 CONTRACT.md「列印版面」。
+
+// ---- 紙張：不分質地、不分配色（螢幕預覽與列印都是白紙黑字） ----
+// 這幾個是元件自己的中性 token，不讀 --mat-sys-*；質地不要設，使用端真的需要（例如公司色的抬頭）才在自己的頁面覆寫。
+.lib-print-document {
+  --lib-print-paper: white;
+  --lib-print-ink: black; // 對白紙 21:1
+  --lib-print-ink-muted: color-mix(in srgb, black 72%, white); // 標籤、說明、頁碼：對白紙約 9.4:1
+  --lib-print-rule: color-mix(in srgb, black 35%, white); // 明細列之間的細線（非文字）
+  --lib-print-rule-strong: black; // 表頭、頁首下緣、總計上方的線
+  --lib-print-font: var(--font-zh, system-ui, sans-serif); // 裝置的中文字（中英數都用它），不跟質地換字
+  --lib-print-font-size: 10pt;
+
+  display: block;
+  container-type: inline-size;
+  color: var(--mat-sys-on-surface);
+}
+
+// ---- 螢幕：工具列（跟著質地：按鈕吃各質地的 Material 按鈕 recipe） ----
+.lib-print-document__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-block-end: 0.75rem;
+
+  .material-symbols-rounded {
+    font-size: 1.125rem;
+    margin-inline-end: 0.375rem;
+  }
+}
+
+.lib-print-document__estimate {
+  margin-inline-start: auto;
+  font-size: 0.8125rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.lib-print-document__hint {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// ---- 螢幕：紙張外面的桌面（跟著質地：--lib-print-desk-*，見 CONTRACT.md） ----
+.lib-print-document__desk {
+  padding: var(--lib-print-desk-padding, 1.5rem);
+  background: var(--lib-print-desk-bg, var(--mat-sys-surface-container));
+  border: var(--lib-print-desk-frame, 0 solid transparent);
+  border-radius: var(--lib-print-desk-radius, var(--mat-sys-corner-large));
+  box-shadow: var(--lib-print-desk-shadow, none);
+}
+
+@container (max-width: 40rem) {
+  .lib-print-document__desk {
+    padding: var(--lib-print-desk-padding-narrow, 0.75rem);
+  }
+}
+
+.lib-print-document__stage {
+  min-width: 0;
+}
+
+// 紙張依實際尺寸（mm）排版；窄螢幕用 transform 等比縮小，這一層的寬高設成縮小後的大小（元件用 ResizeObserver 算）。
+.lib-print-document__fit {
+  position: relative;
+  margin-inline: auto;
+}
+
+// ---- 紙張本身（螢幕與列印共用） ----
+.lib-print-sheet {
+  // 投影進來的內容若用了系統 token（狀態標籤、ui-text-*），在紙上也一律換成中性墨色。
+  --mat-sys-on-surface: var(--lib-print-ink);
+  --mat-sys-on-surface-variant: var(--lib-print-ink-muted);
+  --mat-sys-surface: var(--lib-print-paper);
+  --mat-sys-outline: var(--lib-print-rule-strong);
+  --mat-sys-outline-variant: var(--lib-print-rule);
+  --mat-sys-primary: var(--lib-print-ink);
+  --font-body: var(--lib-print-font);
+  --font-display: var(--lib-print-font);
+
+  position: relative;
+  box-sizing: border-box;
+  transform-origin: 0 0;
+  color-scheme: light;
+  background: var(--lib-print-paper);
+  color: var(--lib-print-ink);
+  box-shadow: var(--lib-print-sheet-shadow, var(--mat-sys-level2));
+  font-family: var(--lib-print-font);
+  font-size: var(--lib-print-font-size);
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: normal;
+  text-align: start;
+  overflow-wrap: break-word;
+}
+
+// 分頁參考線（只在螢幕）：第 N 頁內容開始的位置；實際分頁會因「列不切開」、表頭重印略往前移。
+.lib-print-sheet__guide {
+  position: absolute;
+  inset-inline: 0;
+  height: 0;
+  border-block-start: 1px dashed var(--lib-print-rule);
+  pointer-events: none;
+
+  span {
+    position: absolute;
+    inset-block-start: 0.75mm;
+    inset-inline-end: 1.5mm;
+    padding-inline: 1mm;
+    background: var(--lib-print-paper);
+    font-size: 7pt;
+    line-height: 1.4;
+    color: var(--lib-print-ink-muted);
+  }
+}
+
+.lib-print-sheet__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8mm;
+  padding-block-end: 4mm;
+  margin-block-end: 5mm;
+  border-block-end: 1.5pt solid var(--lib-print-rule-strong);
+}
+
+.lib-print-sheet__brand {
+  min-width: 0;
+  font-size: 8.5pt;
+  line-height: 1.5;
+  color: var(--lib-print-ink-muted);
+
+  img,
+  svg {
+    display: block;
+    max-height: 14mm;
+    width: auto;
+    margin-block-end: 1.5mm;
+  }
+}
+
+// 公司名稱（放在 [libPrintBrand] 裡）。
+.lib-print-brand-name {
+  display: block;
+  font-size: 13pt;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--lib-print-ink);
+}
+
+.lib-print-sheet__heading {
+  flex-shrink: 0;
+  text-align: end;
+}
+
+.lib-print-sheet__title {
+  margin: 0;
+  font-size: 18pt;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.08em;
+}
+
+.lib-print-sheet__meta {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: end;
+  gap: 0.5mm 3mm;
+  margin: 2mm 0 0;
+  font-size: 9pt;
+
+  > div {
+    display: contents;
+  }
+
+  dt {
+    color: var(--lib-print-ink-muted);
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+// 資訊區：<dl class="lib-print-fields"><div><dt>客戶</dt><dd>…</dd></div>…</dl>，兩欄；整列的加 .is-wide。
+.lib-print-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 8mm;
+  margin: 0 0 5mm;
+  font-size: 9.5pt;
+
+  > div {
+    display: flex;
+    gap: 3mm;
+    min-width: 0;
+    padding-block: 1.2mm;
+    border-block-end: 0.5pt solid var(--lib-print-rule);
+  }
+
+  > .is-wide {
+    grid-column: 1 / -1;
+  }
+
+  dt {
+    flex: 0 0 18mm;
+    color: var(--lib-print-ink-muted);
+  }
+
+  dd {
+    min-width: 0;
+    margin: 0;
+  }
+}
+
+.lib-print-section-title {
+  margin: 5mm 0 2mm;
+  font-size: 10.5pt;
+  font-weight: 700;
+  line-height: 1.4;
+  break-after: avoid;
+}
+
+.lib-print-note {
+  margin: 0 0 2mm;
+  font-size: 9.5pt;
+  white-space: pre-line;
+}
+
+.lib-print-num {
+  font-variant-numeric: tabular-nums;
+}
+
+// 單據的結尾：備註、簽名欄、頁尾。有明細表時畫在最後一張明細表的最後一個區段裡（.lib-print-table__closing），
+// 跟最後幾列與合計列一起不切開；沒有明細表時畫在 .lib-print-sheet__closing，盡量跟前面的內容黏在一起。
+.lib-print-sheet__closing {
+  break-before: avoid;
+  break-inside: avoid;
+}
+
+.lib-print-sheet [libPrintNotes] {
+  margin-block-start: 5mm;
+  font-size: 9pt;
+  break-inside: avoid;
+}
+
+.lib-print-sheet__signatures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(40mm, 1fr));
+  gap: 6mm 8mm;
+  margin-block-start: 8mm;
+  break-inside: avoid;
+}
+
+.lib-print-sign {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5mm;
+  font-size: 9pt;
+}
+
+.lib-print-sign__title {
+  font-weight: 700;
+}
+
+.lib-print-sign__line {
+  display: block;
+  height: 13mm;
+  border-block-end: 0.75pt solid var(--lib-print-ink);
+}
+
+.lib-print-sign__date {
+  color: var(--lib-print-ink-muted);
+
+  &::after {
+    content: '';
+    display: inline-block;
+    width: 26mm;
+    margin-inline-start: 2mm;
+    border-block-end: 0.5pt solid var(--lib-print-rule);
+  }
+}
+
+.lib-print-sheet [libPrintFooter] {
+  margin-block-start: 6mm;
+  padding-block-start: 2mm;
+  border-block-start: 0.5pt solid var(--lib-print-rule);
+  font-size: 8pt;
+  color: var(--lib-print-ink-muted);
+  break-inside: avoid;
+}
+
+// ---- 明細表（lib-print-table 元件，也可以把 class 掛在自己的 <table> 上） ----
+.lib-print-table-host {
+  display: block;
+}
+
+.lib-print-table {
+  width: 100%;
+  margin: 0 0 4mm;
+  border-collapse: collapse;
+  font-size: 9.5pt;
+  line-height: 1.45;
+
+  th,
+  td {
+    padding: 1.4mm 2mm;
+    text-align: start;
+    vertical-align: top;
+  }
+
+  // 表頭：每一頁重印（table-header-group），上下各一條墨線。
+  thead {
+    display: table-header-group;
+  }
+
+  thead th {
+    font-size: 9pt;
+    font-weight: 700;
+    white-space: nowrap;
+    border-block: 1pt solid var(--lib-print-rule-strong);
+  }
+
+  .lib-print-table__row > td {
+    border-block-end: 0.5pt solid var(--lib-print-rule);
+  }
+
+  // 每一列不切在兩頁。
+  tr {
+    break-inside: avoid;
+  }
+
+  [data-align='center'] {
+    text-align: center;
+  }
+
+  // 數字欄：靠右、等寬數字（不跟質地換等寬字型，列印不分質地）。
+  [data-align='end'] {
+    text-align: end;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// 最後幾列明細、合計列與單據的結尾放在同一個區段，整組不切開（放不下就一起換到下一頁，表頭照樣重印）。
+// 不用逐列的 break-before: avoid：Chrome 149 在表格裡不一定守得住，合計會被拆開（見 print-closing.ts）。
+.lib-print-table__tail {
+  break-inside: avoid;
+}
+
+.lib-print-table__total {
+  th {
+    font-weight: 400;
+    text-align: end;
+    color: var(--lib-print-ink-muted);
+  }
+
+  td {
+    font-variant-numeric: tabular-nums;
+  }
+
+  &:not(.lib-print-table__total + .lib-print-table__total) > * {
+    padding-block-start: 2.5mm;
+  }
+
+  &.is-emphasis > * {
+    padding-block: 2mm;
+    border-block-start: 1pt solid var(--lib-print-rule-strong);
+    font-size: 11pt;
+    font-weight: 700;
+    color: var(--lib-print-ink);
+  }
+}
+
+.lib-print-table__closing > td {
+  padding: 0;
+  border: 0;
+  font-size: var(--lib-print-font-size);
+  line-height: 1.55;
+}
+
+.lib-print-table__empty {
+  padding-block: 6mm;
+  text-align: center;
+  color: var(--lib-print-ink-muted);
+}
+
+// ---- 列印 ----
+@media print {
+  // 1. 不在「通往紙張的路徑」上、也不在紙張裡的元素一律不印：側欄、頁首、頁尾、外觀面板、提示訊息、通知、
+  //    展示頁的說明與程式碼、單據的工具列與桌面。只看 DOM 結構，不認得任何殼層的 class，所以換殼層也適用；
+  //    使用者直接按 Ctrl＋P 也一樣（不需要先按列印按鈕）。
+  :root:has(.lib-print-sheet) body *:not(:has(.lib-print-sheet), .lib-print-sheet, .lib-print-sheet *) {
+    display: none !important;
+  }
+
+  // 2. 路徑上的祖先（html、body、殼層的捲動容器、卡片…）：攤平成普通區塊，不捲動、不留白、沒有框與底色，
+  //    捲動容器的固定高度拿掉，內容才會一路印到最後一頁。
+  :has(.lib-print-sheet) {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    float: none !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    background: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    contain: none !important;
+    container-type: normal !important;
+    opacity: 1 !important;
+  }
+
+  // 質地畫在祖先偽元素上的紋理、光暈、紙張顆粒（body::before 等）也不印。
+  :has(.lib-print-sheet)::before,
+  :has(.lib-print-sheet)::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  // 深色配色時頁面本身也印成白底（不管列印對話框有沒有勾「背景圖形」）。
+  :root:has(.lib-print-sheet),
+  :root:has(.lib-print-sheet) body {
+    color-scheme: light !important;
+    background: white !important;
+  }
+
+  // 3. 按了某一份單據的「列印」：同一頁的其他單據不印。
+  :root:has(.lib-print-sheet--target) .lib-print-sheet:not(.lib-print-sheet--target) {
+    display: none !important;
+  }
+
+  // 4. 紙張：頁邊交給 @page margin（元件產生的規則），這裡不留內距、不縮放、沒有陰影。
+  .lib-print-sheet {
+    width: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .lib-print-sheet__guide {
+    display: none !important;
+  }
+}
