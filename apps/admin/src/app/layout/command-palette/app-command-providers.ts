@@ -40,7 +40,8 @@ function pagesProvider(injector: Injector): CommandProvider {
         subtitle: groupLabel.get(entry.group),
         icon: entry.icon,
         kind: 'page' as const,
-        keywords: [route, entry.id],
+        // 網址裡的示範紀錄編號（templates/tickets/TK-2048）不當關鍵字，否則搜工單編號會先跳出樣板頁
+        keywords: [route.replace(/\/[A-Z]+-\d+/g, ''), entry.id],
         ...(entry.access ? { access: entry.access } : {}),
         run: go(route),
       };

@@ -119,21 +119,19 @@ describe('全域指令面板（頁首 ⌘K 打開的 overlay）', () => {
     expect(document.activeElement).toBe(trigger);
   });
 
-  it('輸入 TK-20：頁面與工單兩組（工單非同步）；Enter 打開那張工單並關閉面板，記進最近使用', async () => {
+  it('輸入 TK-20：只有工單一組（樣板頁網址裡的示範編號不算關鍵字）；Enter 打開那張工單並關閉面板，記進最近使用', async () => {
     const router = TestBed.inject(Router);
     const navigate = vi.spyOn(router, 'navigateByUrl');
     trigger.click();
     await settle(50);
     type('TK-20');
     await settle(250);
-    expect(groups()).toEqual(['頁面', '工單']);
-    expect(titles().slice(0, 2)).toEqual(['詳情頁', '表單頁']);
+    expect(groups()).toEqual(['工單']);
     const ticketRows = overlay.querySelectorAll('[data-group="tickets"] [lib-command-option]');
     expect(ticketRows.length).toBe(5);
     expect(ticketRows[0].querySelector('.co-subtitle mark')?.textContent).toBe('TK-20');
     press('ArrowDown');
-    press('ArrowDown');
-    const id = (ticketRows[0] as HTMLElement).dataset['commandId'];
+    const id = (ticketRows[1] as HTMLElement).dataset['commandId'];
     press('Enter');
     await settle();
     expect(navigate).toHaveBeenCalledWith(`/templates/tickets/${id}`);
