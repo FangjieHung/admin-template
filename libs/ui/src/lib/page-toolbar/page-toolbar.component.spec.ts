@@ -230,3 +230,23 @@ describe('PageToolbarComponent 失焦收合', () => {
     expect(component.expanded()).toBe(false);
   });
 });
+
+describe('PageToolbarComponent 搜尋框樣式', () => {
+  it('輸入框左側有留白，字不會貼著膠囊的圓弧', () => {
+    const { input } = setup();
+    const style = getComputedStyle(input());
+    expect(style.paddingLeft).toBe('1rem');
+    expect(style.paddingRight).toBe('0.5rem');
+  });
+
+  it('展開後，裁切用的外層往四周多留焦點框的空間、再用負 margin 抵掉（焦點框不被 overflow: hidden 裁掉）', () => {
+    const { fixture, toggleBtn } = setup();
+    const inner = () => (fixture.nativeElement as HTMLElement).querySelector('.search-row__inner') as HTMLElement;
+    expect(getComputedStyle(inner()).getPropertyValue('--_ring-room')).toBe('');
+    toggleBtn().click();
+    fixture.detectChanges();
+    const style = getComputedStyle(inner());
+    expect(style.getPropertyValue('--_ring-room').trim()).toBe('calc(var(--app-focus-ring-width) + 1px)');
+    expect(style.overflow).toBe('hidden');
+  });
+});

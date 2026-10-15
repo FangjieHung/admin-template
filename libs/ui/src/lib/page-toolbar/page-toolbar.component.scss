@@ -84,6 +84,19 @@
   }
 }
 
+/* 展開時往四周多留焦點框的空間（框線寬＋1px 的 offset），再用等量的負 margin 抵掉：版面位置不變，
+   .search:focus-within 往外畫的焦點框才不會被上面的 overflow: hidden 裁掉。收合時拿掉，高度照樣收到 0。 */
+.search-row--expanded .search-row__inner {
+  --_ring-room: calc(var(--app-focus-ring-width) + 1px);
+  padding: var(--_ring-room);
+  margin: calc(-1 * var(--_ring-room));
+
+  @variant md {
+    padding: 0;
+    margin: 0;
+  }
+}
+
 /* 收合態寬度為 0（完全不佔版面）；展開態拉長為膠囊。
    手機版：margin-left: auto 讓它永遠貼齊 row 右緣，寬度從 0 長到 100% 時
    左緣往左推、右緣不動——即「由右展開到左」；width transition 刻意晚於
@@ -166,7 +179,8 @@
   flex: 1 1 200px;
   min-width: 5rem;
   height: 100%;
-  padding: 0;
+  // 左側留白：膠囊兩端是半圓，字從最左邊開始會貼著圓弧（placeholder 看起來被切到）。
+  padding: 0 0.5rem 0 1rem;
   border: 0;
   background: transparent;
   color: var(--mat-sys-on-surface);
