@@ -177,6 +177,14 @@
   .mat-mdc-dialog-actions {
     border-top: 1px solid var(--mat-sys-outline-variant);
   }
+  // 內容跟兩條內格線之間留白：Material 有標題時內容上緣 0、有動作列時下緣 0（沒畫線，靠標題與動作列自己的留白），
+  // Grid 畫了線，內容就貼在線上。補成 16px，跟動作列在線下、按鈕下方的留白一樣，線的上下等距。
+  .mat-mdc-dialog-container {
+    --mat-dialog-with-actions-content-padding: 20px 24px 16px;
+  }
+  .mat-mdc-dialog-container .mat-mdc-dialog-title + .mat-mdc-dialog-content {
+    padding-top: 16px;
+  }
   .mat-mdc-menu-panel {
     border: 1px solid var(--mat-sys-outline);
     border-radius: var(--mat-sys-corner-large) !important;
