@@ -1,7 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
+  afterNextRender,
   afterRenderEffect,
   computed,
   contentChild,
@@ -11,6 +13,7 @@ import {
   output,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import {
@@ -39,6 +42,7 @@ import { KanbanCardContext, KanbanCardDirective } from './kanban-card.directive'
 import { KanbanAddCardComponent } from './kanban-add-card.component';
 import { KanbanColumnHeadComponent } from './kanban-column-head.component';
 import { KanbanLaneHeadComponent } from './kanban-lane-head.component';
+import { KanbanSwitcherComponent, KanbanSwitcherItem } from './kanban-switcher.component';
 
 interface CardView<T> {
   item: T;
@@ -121,6 +125,9 @@ let nextId = 0;
  * Alt＋←／→ 換欄（保持同一列，目標欄沒那麼多張就放最後）、Alt＋↑／↓ 在格內移動（分組模式到頭尾時換到上一道的最後或下一道的最前）。
  * 移動後用 polite 的 live region 念出結果，焦點留在被移動的卡片上（拖曳放下也一樣；被 canMove 拒絕或放回原位時，焦點回到原來那張卡片）。
  *
+ * 窄版（看板本身寬度小於 600px，用 container query 判斷，不看視窗）：一次顯示一欄，左右滑動吸附到欄（scroll-snap），
+ * 上方出現欄位切換（欄名＋張數）；按切換捲到那一欄，手指滑動時切換跟著亮起目前那一欄。換欄以「移動」選單為主，長按拖曳照常可用。
+ *
  * 卡片內容由使用端的 `<ng-template libKanbanCard let-item>` 提供。畫面文字全部來自 `KANBAN_LABELS`。
  */
 @Component({
@@ -138,6 +145,7 @@ let nextId = 0;
     KanbanAddCardComponent,
     KanbanColumnHeadComponent,
     KanbanLaneHeadComponent,
+    KanbanSwitcherComponent,
   ],
   templateUrl: './kanban-board.component.html',
   styleUrls: ['./kanban-board.component.scss', './kanban-board-lanes.scss'],
@@ -200,6 +208,11 @@ export class KanbanBoardComponent<T> {
   protected readonly dropTarget = signal<{ listId: string; columnId: string; blocked: boolean } | null>(null);
   /** 「移動」選單目前開著的卡片（分組清單是整個看板共用一份，靠它知道要移哪一張）。 */
   protected readonly menuTarget = signal<{ cell: CellView<T>; card: CardView<T> } | null>(null);
+  /** 窄版：目前顯示的是第幾欄（欄位切換亮哪一顆）；寬版時也照捲動位置更新，只是切換藏起來。 */
+  protected readonly activeColumn = signal(0);
+  private readonly board = viewChild.required<ElementRef<HTMLElement>>('board');
+  /** 按切換後捲動中的目標欄：捲到之前不讓捲動事件把切換改成途經的欄。 */
+  private scrollTarget: { index: number; until: number } | null = null;
   private draggedFrom: CellView<T> | null = null;
   private pendingFocus: string | null = null;
   private announceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -320,12 +333,77 @@ export class KanbanBoardComponent<T> {
     return { columns: columnViews, lanes, rows: row - 1, cells };
   });
 
+  protected readonly switcherItems = computed<KanbanSwitcherItem[]>(() =>
+    this.model().columns.map((view) => ({
+      id: view.column.id,
+      title: view.column.title,
+      countText: view.countText,
+      countLabel: view.countLabel,
+    })),
+  );
+
   constructor() {
     // 鍵盤／選單／拖曳移動之後，等使用端更新資料、畫面重畫完，把焦點放回被移動的卡片（換欄時卡片是新建的元素）。
     afterRenderEffect(() => {
       this.model();
       untracked(() => this.flushFocus());
     });
+    // 捲動同步欄位切換：自己掛 listener（不經過範本），捲動時不會每一格都跑一次變更偵測，只有目前那一欄換了才更新。
+    const destroyRef = inject(DestroyRef);
+    afterNextRender(() => {
+      const board = this.board().nativeElement;
+      const onScroll = () => this.syncActiveColumn();
+      board.addEventListener('scroll', onScroll, { passive: true });
+      destroyRef.onDestroy(() => board.removeEventListener('scroll', onScroll));
+    });
+  }
+
+  /** 欄位切換：把看板捲到第 `index` 欄（減少動態時不平滑捲動）。 */
+  protected showColumn(index: number): void {
+    const board = this.board().nativeElement;
+    const column = this.columnElements()[index];
+    if (!column) return;
+    this.activeColumn.set(index);
+    const delta = column.getBoundingClientRect().left - this.contentLeft(board);
+    if (Math.abs(delta) < 1) return;
+    this.scrollTarget = { index, until: Date.now() + 1000 };
+    const reduce = board.ownerDocument.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    board.scrollBy({ left: delta, behavior: reduce ? 'auto' : 'smooth' });
+  }
+
+  /** 目前最靠近看板內框左緣的那一欄＝目前顯示的欄。 */
+  private syncActiveColumn(): void {
+    // 拖曳中（CDK 自動捲動）不換：窄版分組模式只畫目前那一欄的格子，拖曳途中換欄會把來源格藏起來。
+    if (this.dragging()) return;
+    const board = this.board().nativeElement;
+    const left = this.contentLeft(board);
+    const columns = this.columnElements();
+    let best = 0;
+    let bestDistance = Infinity;
+    columns.forEach((column, index) => {
+      const distance = Math.abs(column.getBoundingClientRect().left - left);
+      if (distance < bestDistance) {
+        best = index;
+        bestDistance = distance;
+      }
+    });
+    const target = this.scrollTarget;
+    if (target) {
+      // 按切換後的平滑捲動途中：到達目標（或逾時）之前不更新，切換才不會在途經的欄之間閃。
+      if (best !== target.index && Date.now() < target.until) return;
+      this.scrollTarget = null;
+    }
+    if (best !== this.activeColumn()) this.activeColumn.set(best);
+  }
+
+  /** 每一欄的元素：沒有分組時是欄（section），分組模式是欄底的 track。 */
+  private columnElements(): HTMLElement[] {
+    return Array.from(this.board().nativeElement.querySelectorAll<HTMLElement>(':scope > [data-kanban-column]'));
+  }
+
+  private contentLeft(board: HTMLElement): number {
+    const padding = parseFloat(board.ownerDocument.defaultView?.getComputedStyle(board).paddingLeft ?? '0') || 0;
+    return board.getBoundingClientRect().left + padding;
   }
 
   protected moveToLabel(column: KanbanColumn): string {
@@ -357,6 +435,7 @@ export class KanbanBoardComponent<T> {
     this.dragging.set(false);
     this.dropTarget.set(null);
     this.draggedFrom = null;
+    this.syncActiveColumn();
   }
 
   protected onEntered(event: CdkDragEnter<CellView<T>, unknown>): void {
@@ -475,6 +554,8 @@ export class KanbanBoardComponent<T> {
     // 移到收合中的分組：先展開，卡片和焦點才看得到。
     if (to.groupId !== null && this.collapsedGroups().includes(to.groupId)) this.toggleGroup(to.groupId);
     this.moved.emit({ ...base, fromIndex, toIndex });
+    // 換到另一欄：目前的欄跟著換（窄版分組模式只畫目前那一欄的格子，卡片要先畫出來焦點才放得上去；焦點會把那一欄捲進畫面）。
+    if (to.columnIndex !== from.columnIndex) this.activeColumn.set(to.columnIndex);
     const title = this.cardTitle()(item);
     const lane = to.groupId !== null ? this.model().lanes?.[to.laneIndex] : undefined;
     this.announce(

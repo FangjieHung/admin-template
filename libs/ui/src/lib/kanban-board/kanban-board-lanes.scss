@@ -11,6 +11,21 @@
   grid-template-columns: repeat(var(--kb-cols), minmax(var(--lib-kanban-column-min, 15rem), 1fr));
 }
 
+// 窄版：一次一欄（分組標題的文字黏在左邊，換到哪一欄都看得到）。同一道的格子共用一列，列高是最高的那一格；
+// 只畫目前那一欄的格子，列高才跟著這一欄的卡片走，不會留下別欄撐出來的空白（換欄用欄位切換、滑動或「移動」選單）。
+@container (max-width: 599px) {
+  .kb-board.is-lanes {
+    grid-template-columns: repeat(var(--kb-cols), 100%);
+  }
+
+  .kb-cell:not(.is-current) {
+    visibility: hidden;
+    height: 0;
+    padding-block: 0;
+    overflow: hidden;
+  }
+}
+
 // 黏住的欄頭要不透明：底色是欄底疊在 --lib-kanban-surface（＝看板所在卡片的底色）上，框線照畫（下緣除外）。
 // 貼齊基準是看板扣掉內距的內框，往上多推一個內距，捲動時上面才不會露出一條縫。
 .is-lanes .kb-head {

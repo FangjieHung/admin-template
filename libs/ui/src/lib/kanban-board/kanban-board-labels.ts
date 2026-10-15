@@ -49,6 +49,8 @@ export interface KanbanLabels {
   moveToGroupMenu: string;
   /** 分組模式：分組清單的項目（放在該格最後），例：「換到「{group}」」。 */
   moveToGroup: string;
+  /** 窄版（看板寬度小於 600px，一次顯示一欄）上方欄位切換的無障礙名稱，例：「切換顯示的欄位」。 */
+  columnSwitcher: string;
 }
 
 export const KANBAN_LABELS = new InjectionToken<KanbanLabels>('KANBAN_LABELS');
@@ -75,6 +77,7 @@ const KEYS: readonly (keyof KanbanLabels)[] = [
   'announceMovedGroup',
   'moveToGroupMenu',
   'moveToGroup',
+  'columnSwitcher',
 ];
 
 /** 開發期設定錯誤（忘了提供文字或少了某一句）時直接丟出明確訊息，不靜默顯示空白。 */

@@ -16,7 +16,7 @@
   @include sk.sr-only;
 }
 
-// ---- 欄位並排：桌機等寬；窄容器（< 600px）改成橫向捲動＋scroll-snap，每欄約 85% 寬 ----
+// ---- 欄位並排：桌機等寬；窄容器（< 600px）一次一欄，橫向捲動＋scroll-snap，上方出現欄位切換 ----
 // 三列共用：欄頭／卡片清單／新增卡片。每一欄用 subgrid 接上這三列，所以同一排的欄頭一樣高
 //（有說明文字、WIP 警告或欄名換行的欄撐高時，其他欄一起對齊，欄頭下緣的分隔線在同一條線上）。
 // 欄的最大高度因此設在看板上：清單那一列 minmax(0, 1fr) 會縮，欄頭與新增列不縮。
@@ -35,14 +35,25 @@
   overscroll-behavior-x: contain;
 }
 
+// 欄位切換只在窄版出現（看板寬度，不看視窗）。
+.kb-switcher {
+  display: none;
+}
+
 @container (max-width: 599px) {
+  .kb-switcher {
+    display: block;
+    margin-block-end: 0.25rem;
+  }
+
   .kb-board {
-    grid-auto-columns: 85cqi;
+    grid-auto-columns: 100%;
     scroll-snap-type: x mandatory;
     scroll-padding-inline: var(--lib-kanban-board-padding, 0.25rem);
   }
 
-  .kb-column {
+  .kb-column,
+  .kb-track {
     scroll-snap-align: start;
   }
 }

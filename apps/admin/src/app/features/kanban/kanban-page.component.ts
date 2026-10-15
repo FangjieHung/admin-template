@@ -303,9 +303,9 @@ onMoved(event: KanbanMoveEvent<Ticket>) {
       rows: [
         { name: 'ng-template[libKanbanCard]', type: 'KanbanCardContext<T>', default: '必填', description: '卡片內容：let-item，另有 let-column、let-index。加 [libKanbanCardOf]="items" 讓 let-item 有型別。' },
         { name: 'moveKanbanItem(items, event, options)', type: 'T[]', description: '依 (moved) 事件產生新的清單：拿掉卡片、換欄（withColumn）、插在目標欄第 toIndex 張之前。分組模式再給 group、withGroup：位置在「欄 × 分組」那一格裡算，換道時用 withGroup 更新卡片。' },
-        { name: 'KANBAN_LABELS', type: 'KanbanLabels', default: '必填', description: '21 句畫面文字（卡片的位置與操作提示、選單、移動結果的宣告、WIP、空欄、新增卡片，以及分組模式的位置、提示、宣告與「換到其他分組」）；少一句會在建立元件時丟出錯誤。' },
+        { name: 'KANBAN_LABELS', type: 'KanbanLabels', default: '必填', description: '22 句畫面文字（卡片的位置與操作提示、選單、移動結果的宣告、WIP、空欄、新增卡片，分組模式的位置、提示、宣告與「換到其他分組」，以及窄版欄位切換的名稱）；少一句會在建立元件時丟出錯誤。' },
         { name: '鍵盤', type: '—', description: '卡片聚焦時 Alt＋←／→ 換欄（保持同一列，目標欄比較短就放最後）、Alt＋↑／↓ 欄內移動（分組模式到格子頭尾時換到上一道的最後或下一道的最前）；每張卡片的「移動」選單可以移到其他欄的最後、上移、下移，分組模式另有「換到其他分組」。移動後念出結果，焦點留在卡片上。' },
-        { name: '觸控', type: '—', description: '長按 250ms 才開始拖曳，手指先能捲動頁面；600px 以下的容器改成橫向捲動，每欄約 85% 寬。' },
+        { name: '窄版與觸控', type: '—', description: '看板本身寬度小於 600px（container query，不看視窗）時一次顯示一欄：左右滑動會吸附到欄，上方的欄位切換（欄名＋張數）跟著亮起目前那一欄，按切換就捲過去。換欄以每張卡片的「移動」選單為主；長按 250ms 也能拖曳（手指先能捲動頁面）。分組模式一樣適用，分組名稱黏在左邊。' },
       ],
     },
   ];

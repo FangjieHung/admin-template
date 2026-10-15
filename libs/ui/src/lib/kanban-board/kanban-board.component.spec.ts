@@ -38,6 +38,7 @@ const LABELS: KanbanLabels = {
   announceMovedGroup: '已將「{title}」移到「{group}」的「{column}」第 {position} 張',
   moveToGroupMenu: '換到其他分組',
   moveToGroup: '換到「{group}」',
+  columnSwitcher: '切換欄位',
 };
 
 interface Task {
@@ -627,6 +628,99 @@ describe('KanbanBoardComponent（看板）', () => {
     press(input, 'Enter', false);
     await settle();
     expect(host.added).toEqual([{ columnId: 'todo', title: '新的工單', groupId: '林' }]);
+  });
+  // ---- 窄版：一次一欄＋欄位切換 ----
+
+  /** jsdom 沒有版面：假裝每欄寬 300、欄距 16，看板內框左緣在 0，`scroll` 是目前的橫向捲動量。 */
+  function fakeLayout(): { calls: ScrollToOptions[]; scrollTo(left: number): void; board: HTMLElement } {
+    const board = el.querySelector<HTMLElement>('.kb-board')!;
+    let scroll = 0;
+    board.getBoundingClientRect = () => new DOMRect(0, 0, 300, 500);
+    el.querySelectorAll<HTMLElement>('.kb-board > [data-kanban-column]').forEach((col, i) => {
+      col.getBoundingClientRect = () => new DOMRect(i * 316 - scroll, 0, 300, 500);
+    });
+    const calls: ScrollToOptions[] = [];
+    board.scrollBy = ((options: ScrollToOptions) => calls.push(options)) as typeof board.scrollBy;
+    return {
+      calls,
+      board,
+      scrollTo: (left: number) => {
+        scroll = left;
+        board.dispatchEvent(new Event('scroll'));
+      },
+    };
+  }
+  const pills = () => Array.from(el.querySelectorAll<HTMLButtonElement>('[data-kanban-switch]'));
+  const current = () => pills().findIndex((p) => p.getAttribute('aria-current') === 'true');
+
+  it('窄版欄位切換：每欄一顆（欄名＋張數，報讀器念張數說明），目前那一欄 aria-current', async () => {
+    await setup();
+    const group = el.querySelector('lib-kanban-switcher [role="group"]')!;
+    expect(group.getAttribute('aria-label')).toBe('切換欄位');
+    expect(pills().map((p) => p.querySelector('span')?.textContent)).toEqual(['待處理', '進行中', '已完成']);
+    expect(pills().map((p) => p.querySelector('.ks-count')?.textContent)).toEqual(['2', '2 / 2', '0']);
+    expect(pills()[1].querySelector('.ks-sr')?.textContent).toBe('2 張卡片，上限 2 張');
+    expect(current()).toBe(0);
+    expect(pills()[1].getAttribute('aria-current')).toBeNull();
+    // 張數跟著資料變
+    host.items.update((items) => [...items, { id: 'e', title: '主機升級', status: 'done' }]);
+    await settle();
+    expect(pills()[2].querySelector('.ks-count')?.textContent).toBe('1');
+  });
+
+  it('窄版欄位切換與滑動同步：按切換捲到那一欄（平滑捲動途中不跟著途經的欄閃）；手指滑動時切換亮起目前那一欄', async () => {
+    await setup();
+    const layout = fakeLayout();
+    pills()[2].click();
+    await settle();
+    expect(layout.calls).toEqual([{ left: 632, behavior: 'smooth' }]);
+    expect(current()).toBe(2);
+    // 平滑捲動途中經過第二欄：切換維持在目標
+    layout.scrollTo(320);
+    await settle();
+    expect(current()).toBe(2);
+    layout.scrollTo(632);
+    await settle();
+    expect(current()).toBe(2);
+    // 手指往回滑到第二欄附近（scroll-snap 會吸附）：切換跟著換
+    layout.scrollTo(356);
+    await settle();
+    expect(current()).toBe(1);
+    layout.scrollTo(0);
+    await settle();
+    expect(current()).toBe(0);
+    // 已經對齊那一欄時按切換：不捲動
+    pills()[0].click();
+    await settle();
+    expect(layout.calls).toHaveLength(1);
+  });
+
+  it('窄版分組模式只畫目前那一欄的格子（is-current）；換欄移動卡片時目前的欄跟著換，焦點放得上去', async () => {
+    await setupGrouped();
+    const current = () =>
+      Array.from(new Set(Array.from(el.querySelectorAll<HTMLElement>('.kb-cell.is-current')).map((c) => c.dataset['kanbanCell'])));
+    expect(current()).toEqual(['todo']);
+    card('a').focus();
+    press(card('a'), 'ArrowRight');
+    await settle();
+    expect(current()).toEqual(['doing']);
+    expect(pills()[1].getAttribute('aria-current')).toBe('true');
+    expect(card('a').closest('.kb-cell')?.classList).toContain('is-current');
+    expect(document.activeElement).toBe(card('a'));
+  });
+
+  it('窄版欄位切換在分組模式也一樣（以欄底的 track 為準）', async () => {
+    await setupGrouped();
+    expect(el.querySelectorAll('.kb-board > [data-kanban-column]')).toHaveLength(3);
+    expect(el.querySelectorAll('.kb-board > .kb-track')).toHaveLength(3);
+    const layout = fakeLayout();
+    pills()[1].click();
+    await settle();
+    expect(layout.calls).toEqual([{ left: 316, behavior: 'smooth' }]);
+    layout.scrollTo(316);
+    layout.scrollTo(640);
+    await settle();
+    expect(current()).toBe(2);
   });
 });
 

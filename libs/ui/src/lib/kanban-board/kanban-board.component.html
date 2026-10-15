@@ -1,5 +1,14 @@
 @let m = model();
+<!-- 窄版（一次一欄）上方的欄位切換；寬版時由 container query 藏起來。 -->
+<lib-kanban-switcher
+  class="kb-switcher"
+  [items]="switcherItems()"
+  [active]="activeColumn()"
+  [label]="labels.columnSwitcher"
+  (select)="showColumn($event)"
+/>
 <div
+  #board
   class="kb-board"
   cdkDropListGroup
   cdkScrollable
@@ -51,6 +60,7 @@
               class="kb-cell"
               [style.grid-column]="cell.columnIndex + 1"
               [style.grid-row]="lane.row + 1"
+              [class.is-current]="cell.columnIndex === activeColumn()"
               [class.is-drop-target]="dropTarget()?.listId === cell.listId && !dropTarget()?.blocked"
               [class.is-drop-blocked]="dropTarget()?.listId === cell.listId && dropTarget()?.blocked"
               [attr.data-kanban-cell]="cell.column.id"

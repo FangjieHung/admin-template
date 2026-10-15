@@ -30,6 +30,7 @@ export const ZH_TW_KANBAN: KanbanLabels = {
   announceMovedGroup: '已將「{title}」移到「{group}」的「{column}」第 {position} 張',
   moveToGroupMenu: '換到其他分組',
   moveToGroup: '換到「{group}」',
+  columnSwitcher: '切換顯示的欄位',
 };
 
 export const KANBAN_LABEL_PROVIDERS: Provider[] = [{ provide: KANBAN_LABELS, useValue: ZH_TW_KANBAN }];
