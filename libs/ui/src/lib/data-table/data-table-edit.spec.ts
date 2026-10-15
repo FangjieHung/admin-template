@@ -656,9 +656,12 @@ describe('DataTable 表格內直接編輯', () => {
       expect(document.activeElement).toBe(input);
       const options = [...document.querySelectorAll('.lib-relation-select-panel mat-option')].map((o) => o.textContent?.trim());
       expect(options).toEqual(['林美惠']);
-      // 第一次 Esc 關清單、第二次取消：格子回到原值，沒有存檔
-      await key(input, 'Escape');
-      if (el.querySelector('lib-relation-select')) await key(input, 'Escape');
+      // 第一次 Esc 關清單、第二次取消：格子回到原值，沒有存檔。keyCode 27 跟真的瀏覽器一樣（mat-autocomplete 看 keyCode，
+      // 而且清單關著也會 preventDefault Esc）。
+      await key(input, 'Escape', { keyCode: 27 });
+      expect(document.querySelectorAll('.lib-relation-select-panel mat-option')).toHaveLength(0);
+      expect(el.querySelector('lib-relation-select')).not.toBeNull();
+      await key(input, 'Escape', { keyCode: 27 });
       expect(el.querySelector('lib-relation-select')).toBeNull();
       expect(cell(0, 'owner').textContent).toContain('王小明');
       expect(host.cellSave).not.toHaveBeenCalled();

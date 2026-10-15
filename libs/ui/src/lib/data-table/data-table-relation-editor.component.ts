@@ -88,16 +88,18 @@ export class DataTableRelationEditorComponent implements OnInit {
 
   protected onKeydown(event: KeyboardEvent): void {
     const ctx = this.context();
-    // 清單開著時，Enter（選這一筆）與 Esc（關清單）已經被 mat-autocomplete 處理掉。
-    if (event.defaultPrevented || event.isComposing) return;
+    if (event.isComposing) return;
+    // mat-autocomplete 不管清單開關都會 preventDefault Esc，所以 Esc 看清單本身：開著時這一下是關清單（交給它），關著才取消。
     if (event.key === 'Escape') {
+      if (this.select().panelOpen) return;
       event.preventDefault();
       event.stopPropagation();
       this.done = true;
       ctx.cancel();
       return;
     }
-    if (ctx.mode !== 'cell') return;
+    // 清單開著時，Enter（選這一筆）已經被 mat-autocomplete 處理掉。
+    if (event.defaultPrevented || ctx.mode !== 'cell') return;
     let intent: DataTableEditIntent | null = null;
     if (event.key === 'Enter') intent = event.shiftKey ? 'up' : 'down';
     else if (event.key === 'Tab') intent = event.shiftKey ? 'left' : 'right';

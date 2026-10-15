@@ -244,6 +244,11 @@ export class RelationSelectComponent<T> implements ControlValueAccessor, DoCheck
     this.formDisabled.set(disabled);
   }
 
+  /** 候選清單開著（有選項可看）。 */
+  get panelOpen(): boolean {
+    return this.trigger().panelOpen;
+  }
+
   /**
    * 用一段字開始搜尋：輸入框換成這段字、立刻以它搜尋並打開清單（例：資料表的關聯欄用打字開始編輯）。
    * 初始值還在查時，查完只記下已選項、不把輸入框改回它的文字；沒選就離開時照樣還原成已選項的文字。
