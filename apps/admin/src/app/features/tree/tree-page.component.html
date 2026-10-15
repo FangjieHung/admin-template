@@ -151,6 +151,81 @@
   </app-demo-block>
 
   <app-demo-block
+    heading="大量延遲載入：全部展開與伺服器端搜尋"
+    description="部門 → 年度 → 季 → 檔案，每個資料夾都要向「伺服器」拿內容（延遲 0.4 秒）。「全部展開」一層一層載入：同時最多 3 個請求，這個示範一次最多載入 20 個資料夾，到了就停並說明，其餘維持收合（再按一次會接著載入）；載入中可以按「停止」。搜尋交給伺服器：它回傳符合的檔案與所在的資料夾路徑，樹照路徑載入並展開，例如搜尋「報表」。關掉「伺服器端搜尋」時只比對已經載入的項目，結果下方會說明。"
+  >
+    <div class="tree-drive" data-demo="drive">
+      <div class="tree-drive__search">
+        <mat-form-field appearance="outline" class="tree-category__search" subscriptSizing="dynamic">
+          <mat-label>搜尋檔案</mat-label>
+          <input
+            matInput
+            type="search"
+            autocomplete="off"
+            data-demo-search
+            [value]="driveQuery()"
+            (input)="onDriveQuery($event)"
+            (keydown.arrowdown)="focusDriveTree($event)"
+          />
+          <mat-hint>例：報表、Q3、招募</mat-hint>
+        </mat-form-field>
+        <mat-checkbox data-demo-server [checked]="driveServer()" (change)="driveServer.set($event.checked)">伺服器端搜尋</mat-checkbox>
+      </div>
+      <div class="tree-demo-actions tree-demo-actions--top">
+        @if (driveProgress()) {
+          <button matButton="outlined" type="button" data-demo-action="stop-drive" (click)="stopDrive()">停止</button>
+        } @else {
+          <button matButton="outlined" type="button" data-demo-action="expand-drive" (click)="expandDrive()">全部展開</button>
+        }
+        <button matButton="outlined" type="button" data-demo-action="collapse-drive" (click)="collapseDrive()">全部收合</button>
+        <button matButton="outlined" type="button" data-demo-action="reset-drive" (click)="resetDrive()">重設示範</button>
+      </div>
+      <p class="demo-note tree-drive__status" role="status" data-demo-status>
+        @if (driveProgress(); as p) {
+          正在載入…已載入 <span class="ui-text-numeric">{{ p.loaded }}</span> 個資料夾（同時最多 3 個請求）
+        } @else if (driveResult(); as r) {
+          @if (r.cancelled) {
+            已停止：載入了 <span class="ui-text-numeric">{{ r.loaded }}</span> 個資料夾。
+          } @else if (r.limitReached) {
+            已載入 <span class="ui-text-numeric">{{ r.loaded }}</span> 個資料夾，達到這次的上限
+            <span class="ui-text-numeric">{{ driveMaxLoads }}</span> 個：其餘維持收合，再按一次「全部展開」會接著載入。
+          } @else {
+            全部展開完成：這次載入了 <span class="ui-text-numeric">{{ r.loaded }}</span> 個資料夾。
+          }
+          @if (r.failed) {
+            <span class="ui-text-numeric">{{ r.failed }}</span> 個載入失敗。
+          }
+        }
+      </p>
+      @for (round of [driveRound()]; track round) {
+        <lib-tree
+          #driveTree
+          label="共用雲端硬碟"
+          [nodes]="drive"
+          [nodeKey]="idOf"
+          [nodeLabel]="nameOf"
+          [hasChildren]="folderHasChildren"
+          [loadChildren]="loadDrive"
+          [filterText]="driveQuery()"
+          [serverSearch]="driveSearch()"
+        >
+          <ng-template libTreeNode [libTreeNodeOf]="drive" let-node let-expanded="expanded" let-query="query">
+            <span class="tree-node">
+              <span class="material-symbols-rounded tree-node__icon" aria-hidden="true">{{
+                node.kind === 'file' ? 'description' : expanded ? 'folder_open' : 'folder'
+              }}</span>
+              <lib-tree-highlight class="tree-node__name" [text]="node.name" [query]="query" />
+            </span>
+          </ng-template>
+        </lib-tree>
+      }
+      <p class="demo-note tree-drive__requests">
+        「伺服器」收到 <span class="ui-text-numeric" data-demo-requests>{{ driveRequests() }}</span> 個請求
+      </p>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
     heading="樹狀表：專案 → 階段 → 任務"
     description="每一層都有負責人、進度與期限，欄位對齊方便比較。外觀跟資料表一致（跟著質地換框線、列高、表頭）。整張表只有一個 tab stop：↑↓ 換列、→ 展開或到第一個子列、← 收合或回到上一層。窄螢幕可以橫向捲動，名稱欄固定在左側。"
   >

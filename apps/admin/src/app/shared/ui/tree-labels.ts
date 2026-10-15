@@ -15,6 +15,9 @@ export const ZH_TW_TREE: TreeLabels = {
   retryHint: '，按右方向鍵重試',
   noResults: '找不到符合「{query}」的項目',
   noRows: '沒有資料',
+  searchLoadedOnly: '只搜尋已載入的項目；還沒展開過的資料夾裡的檔案不會出現',
+  searching: '正在搜尋未載入的項目…',
+  searchFailed: '無法搜尋未載入的項目，只顯示已載入的結果',
 };
 
 export const TREE_LABEL_PROVIDERS: Provider[] = [{ provide: TREE_LABELS, useValue: ZH_TW_TREE }];

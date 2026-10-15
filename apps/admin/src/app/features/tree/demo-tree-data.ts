@@ -196,6 +196,65 @@ export const FOLDER_ROOTS: FolderNode[] = [
 /** 第一次展開「設計稿」時故意失敗，示範錯誤與重試。 */
 export const FOLDER_FAILS_ONCE = 'dir-design';
 
+// ---- (c2) 共用雲端硬碟：全部展開（逐層載入）與伺服器端搜尋 ----
+
+/** 部門 → 年度 → 季 → 檔案（每個資料夾都要向「伺服器」拿內容）。 */
+export const DRIVE_ROOTS: FolderNode[] = [
+  { id: 'drv-sales', name: '業務部', kind: 'folder' },
+  { id: 'drv-finance', name: '財務部', kind: 'folder' },
+  { id: 'drv-rd', name: '研發部', kind: 'folder' },
+  { id: 'drv-hr', name: '人資部', kind: 'folder' },
+];
+
+const DRIVE_FILES: Readonly<Record<string, readonly string[]>> = {
+  'drv-sales': ['業績報表', '客戶拜訪紀錄'],
+  'drv-finance': ['損益報表', '費用明細'],
+  'drv-rd': ['版本說明', '測試報告'],
+  'drv-hr': ['招募進度', '教育訓練名單'],
+};
+
+const YEARS = ['2024', '2025'];
+const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'];
+
+/** 「伺服器上」每個資料夾的內容（id → 子項目）。 */
+export const DRIVE_CONTENTS: Readonly<Record<string, FolderNode[]>> = (() => {
+  const map: Record<string, FolderNode[]> = {};
+  for (const dept of DRIVE_ROOTS) {
+    map[dept.id] = [
+      ...YEARS.map((y) => ({ id: `${dept.id}-${y}`, name: `${y} 年`, kind: 'folder' as const })),
+      { id: `${dept.id}-readme`, name: `${dept.name}說明.pdf`, kind: 'file' },
+    ];
+    for (const y of YEARS) {
+      map[`${dept.id}-${y}`] = QUARTERS.map((q) => ({ id: `${dept.id}-${y}-${q}`, name: `${y} ${q}`, kind: 'folder' as const }));
+      for (const q of QUARTERS) {
+        map[`${dept.id}-${y}-${q}`] = DRIVE_FILES[dept.id].map((file, i) => ({
+          id: `${dept.id}-${y}-${q}-f${i}`,
+          name: `${y}${q} ${file}.xlsx`,
+          kind: 'file' as const,
+        }));
+      }
+    }
+  }
+  return map;
+})();
+
+/** 伺服器端搜尋（示範）：在「伺服器上」所有項目的名稱裡找，回傳符合的鍵與祖先路徑，最多 limit 筆。 */
+export function searchDrive(query: string, limit = 12): { key: string; ancestors: string[] }[] {
+  const q = query.trim().toLocaleLowerCase();
+  const hits: { key: string; ancestors: string[] }[] = [];
+  if (!q) return hits;
+  const visit = (nodes: readonly FolderNode[], ancestors: string[]) => {
+    for (const node of nodes) {
+      if (hits.length >= limit) return;
+      if (node.name.toLocaleLowerCase().includes(q)) hits.push({ key: node.id, ancestors });
+      const kids = DRIVE_CONTENTS[node.id];
+      if (kids) visit(kids, [...ancestors, node.id]);
+    }
+  };
+  visit(DRIVE_ROOTS, []);
+  return hits;
+}
+
 // ---- (d) 樹狀表：專案 → 階段 → 任務 ----
 
 export interface PlanRow {

@@ -6,6 +6,7 @@ import {
   afterRenderEffect,
   computed,
   contentChild,
+  effect,
   inject,
   input,
   model,
@@ -15,14 +16,27 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { TREE_LABELS, assertTreeLabels, formatTreeLabel } from './tree-labels';
-import { TreeController, TreeViewNode, defaultTreeChildren, findTypeahead } from './tree-model';
+import { TreeController, TreeViewNode, defaultTreeChildren, findTypeahead, settleFirst } from './tree-model';
 import { TreeCheckAccess, checkedKeysInOrder, computeCheckStates, toggleCheckedKeys } from './tree-check';
 import { TreeNodeContext, TreeNodeDirective } from './tree-node.directive';
 import { TreeHighlightComponent } from './tree-highlight.component';
-import type { TreeCheckState, TreeFilter, TreeKey, TreeLoadChildren, TreeSelectionMode } from './tree.types';
+import type {
+  TreeCheckState,
+  TreeExpandAllOptions,
+  TreeExpandAllResult,
+  TreeFilter,
+  TreeKey,
+  TreeLoadChildren,
+  TreeSearchMatch,
+  TreeSelectionMode,
+  TreeServerSearch,
+} from './tree.types';
 
 /** 預輸入的字串在停手多久之後清空。 */
 const TYPEAHEAD_RESET_MS = 500;
+/** 搜尋字停手多久才呼叫伺服器端搜尋。 */
+const SERVER_SEARCH_DELAY_MS = 250;
+const NO_KEYS: ReadonlySet<TreeKey> = new Set();
 
 /**
  * 樹狀選單（WAI-ARIA Tree View）：分類、組織架構這類有上下層的清單。
@@ -30,6 +44,8 @@ const TYPEAHEAD_RESET_MS = 500;
  * - 資料：`[nodes]` 是第一層；子節點由 `[nodeChildren]` 取得（預設讀 `children` 屬性）。節點內容由
  *   `<ng-template libTreeNode let-node>` 提供，不給就顯示 `[nodeLabel]` 的文字。
  * - 展開：`[(expandedKeys)]` 雙向綁定（受控）；不綁定時元件自己記（非受控）。`expandAll()`／`collapseAll()` 一次展開或收合。
+ *   延遲載入的樹按 `expandAll()` 會一層一層載入還沒載入的節點：同時最多 3 個請求、總共最多載入 50 個（`expandAll({ maxLoads, concurrency })` 可改），
+ *   載入中的節點顯示轉圈，失敗的節點展開並顯示錯誤與重試；`expandAllProgress()` 是進度，`cancelExpandAll()` 停止。
  * - 延遲載入：`[loadChildren]` 回 Promise 或 Observable。第一次展開時載入、顯示轉圈；失敗時節點下方顯示錯誤與「重試」
  *  （也可以按 →）。收合再展開不會重新載入成功過的節點；失敗的節點收合後再展開會重新載入。
  *   沒有 `children` 的節點，`[hasChildren]` 可以先說「有沒有子節點」（不給就假設可能有）。
@@ -37,7 +53,9 @@ const TYPEAHEAD_RESET_MS = 500;
  *  （`[(checkedKeys)]`），規則見 `toggleCheckedKeys`：勾父節點連帶勾所有已知子孫；子孫全勾時父節點自動全勾；
  *   還沒載入的延遲節點算一個獨立的葉節點，勾了它，之後載入的子節點也全部算勾。`checkedKeys` 一律列出所有全勾的已知節點（含父節點）。
  * - 搜尋：`filterText`（比對 `nodeLabel`，不分大小寫）或 `[filter]` 謂詞。符合的節點與它們的祖先保留，祖先自動展開
- *  （搜尋中不能收合），比對到的字用 `<mark>` 標出；只搜尋已知的節點（還沒載入的延遲節點不會為了搜尋而載入）。沒有結果時顯示 `noResults`。
+ *  （搜尋中不能收合），比對到的字用 `<mark>` 標出。沒有結果時顯示 `noResults`。
+ *   本機的比對只看得到已知的節點；延遲載入的樹可以給 `[serverSearch]`（使用端實作，回傳符合的鍵與祖先路徑），
+ *   元件照路徑一層一層載入，讓伺服器找到的節點也出現（並保留）。沒給時，搜尋結果下方顯示 `searchLoadedOnly`（有提供這句時）。
  * - 鍵盤：↑↓ 移動、→ 展開或進入第一個子節點、← 收合或回到父節點、Home／End、打字跳到開頭相符的節點（單一按鍵字元；
  *   輸入法組字時 keydown 是 `Process`，中文名稱沒辦法這樣跳）、
  *   Space 勾選（single 時選為目前項目）、Enter 送出 activate、`*` 展開同一層。整棵樹只有一個 tab stop（roving tabindex）。
@@ -70,6 +88,12 @@ export class TreeComponent<T> {
   readonly filter = input<TreeFilter<T> | null>(null);
   /** 整棵樹的無障礙名稱，例：「組織架構」。 */
   readonly label = input('');
+  /**
+   * 伺服器端搜尋（延遲載入的樹用）：filterText 有字時（停手 250ms 後）呼叫，回傳符合的節點鍵與祖先路徑；
+   * 元件照路徑載入祖先，找到的節點即使名稱不含搜尋字也保留。
+   */
+  readonly serverSearch = input<TreeServerSearch | null>(null);
+
 
   /** 展開中的節點鍵（雙向綁定＝受控；不綁定＝元件自己記）。 */
   readonly expandedKeys = model<readonly TreeKey[]>([]);
@@ -87,13 +111,24 @@ export class TreeComponent<T> {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   protected readonly query = computed(() => this.filterText().trim());
-  private readonly activeFilter = computed<TreeFilter<T> | null>(() => {
+  /** 伺服器端搜尋找到的節點鍵（它們不管名稱比不比對得到都保留）。 */
+  private readonly serverMatches = signal<ReadonlySet<TreeKey>>(NO_KEYS);
+  /** 伺服器端搜尋的狀態。 */
+  protected readonly serverState = signal<'idle' | 'searching' | 'failed'>('idle');
+  private readonly baseFilter = computed<TreeFilter<T> | null>(() => {
     const custom = this.filter();
     if (custom) return custom;
     const q = this.query().toLocaleLowerCase();
     if (!q) return null;
     const labelOf = this.nodeLabel();
     return (node) => labelOf(node).toLocaleLowerCase().includes(q);
+  });
+  private readonly activeFilter = computed<TreeFilter<T> | null>(() => {
+    const base = this.baseFilter();
+    const found = this.serverMatches();
+    if (!base || found.size === 0) return base;
+    const keyOf = this.nodeKey();
+    return (node) => base(node) || found.has(keyOf(node));
   });
   protected readonly filtering = computed(() => this.activeFilter() !== null);
 
@@ -134,6 +169,21 @@ export class TreeComponent<T> {
     return view.flat[0]?.key ?? null;
   });
   protected readonly noResultsText = computed(() => formatTreeLabel(this.labels.noResults, { query: this.query() }));
+  /** 搜尋結果下方的說明：伺服器端搜尋中／失敗，或「只搜尋已載入的項目」。 */
+  protected readonly searchNote = computed<{ text: string; busy: boolean } | null>(() => {
+    if (!this.filtering() || !this.query()) return null;
+    const state = this.serverState();
+    if (state === 'searching') return { text: this.labels.searching ?? '', busy: true };
+    if (state === 'failed') return this.labels.searchFailed ? { text: this.labels.searchFailed, busy: false } : null;
+    if (!this.serverSearch() && this.loadChildren() && this.labels.searchLoadedOnly) {
+      return { text: this.labels.searchLoadedOnly, busy: false };
+    }
+    return null;
+  });
+
+  /** 全部展開進行中的進度（延遲載入的樹；沒在跑時是 null）。 */
+  readonly expandAllProgress = this.ctrl.expandAllProgress;
+
 
   private pendingFocus: TreeKey | null = null;
   private typeahead = '';
@@ -148,14 +198,54 @@ export class TreeComponent<T> {
     inject(DestroyRef).onDestroy(() => {
       if (this.typeaheadTimer) clearTimeout(this.typeaheadTimer);
     });
+    // 伺服器端搜尋：搜尋字停手後呼叫，照回傳的路徑載入祖先。搜尋字換了就丟掉上一次的結果。
+    effect((onCleanup) => {
+      const query = this.query();
+      const search = this.serverSearch();
+      untracked(() => {
+        this.serverMatches.set(NO_KEYS);
+        this.serverState.set(query && search ? 'searching' : 'idle');
+      });
+      if (!query || !search) return;
+      let live = true;
+      let cancel: (() => void) | null = null;
+      const timer = setTimeout(() => {
+        let result: ReturnType<TreeServerSearch>;
+        try {
+          result = search(query);
+        } catch {
+          this.serverState.set('failed');
+          return;
+        }
+        cancel = settleFirst(
+          result,
+          (matches) => void this.applyServerMatches(matches ?? [], () => live),
+          () => live && this.serverState.set('failed'),
+        );
+      }, SERVER_SEARCH_DELAY_MS);
+      onCleanup(() => {
+        live = false;
+        clearTimeout(timer);
+        cancel?.();
+      });
+    });
   }
 
-  /** 展開所有子節點已知的節點（還沒載入的延遲節點不會因此去載入）。 */
-  expandAll(): void {
-    this.ctrl.expandAll();
+  /**
+   * 全部展開。靜態的與已經載入過的節點立刻展開；延遲載入的樹另外一層一層載入還沒載入的節點
+   * （預設同時 3 個請求、最多 50 個，見 `TreeExpandAllOptions`），完成時回傳載入了幾個、是否到了上限。
+   */
+  expandAll(options?: TreeExpandAllOptions): Promise<TreeExpandAllResult> {
+    return this.ctrl.expandAll(options);
+  }
+
+  /** 停止進行中的全部展開（已送出的請求照樣完成並留著，但不再展開、不再送新的）。 */
+  cancelExpandAll(): void {
+    this.ctrl.cancelExpandAll();
   }
 
   collapseAll(): void {
+    this.ctrl.cancelExpandAll();
     this.ctrl.collapseAll();
   }
 
@@ -163,6 +253,16 @@ export class TreeComponent<T> {
   focus(key: TreeKey | null = null): void {
     const target = key !== null && this.view().byKey.has(key) ? key : this.tabKey();
     if (target !== null) this.focusNode(target);
+  }
+
+  private async applyServerMatches(matches: readonly TreeSearchMatch[], live: () => boolean): Promise<void> {
+    if (!live()) return;
+    this.serverMatches.set(new Set(matches.map((m) => m.key)));
+    await this.ctrl.revealPaths(
+      matches.map((m) => [...m.ancestors, m.key]),
+      live,
+    );
+    if (live()) this.serverState.set('idle');
   }
 
   protected context(vn: TreeViewNode<T>): TreeNodeContext<T> {

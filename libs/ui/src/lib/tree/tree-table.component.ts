@@ -19,13 +19,15 @@ import { DataTableCellContext, DataTableCellDirective } from '../data-table/data
 import type { DataTableCellValue } from '../data-table/data-table.types';
 import { TREE_LABELS, assertTreeLabels, formatTreeLabel } from './tree-labels';
 import { TreeController, TreeViewNode, defaultTreeChildren } from './tree-model';
-import type { TreeKey, TreeLoadChildren, TreeTableColumn } from './tree.types';
+import type { TreeExpandAllOptions, TreeExpandAllResult, TreeKey, TreeLoadChildren, TreeTableColumn } from './tree.types';
 
 /**
  * 樹狀表（WAI-ARIA Treegrid，列模式）：每一列是一個節點，第一欄帶縮排與展開鈕，其餘欄位像資料表一樣對齊。
  *
  * - 欄位：`[columns]` 寫法沿用 data-table（key 綁資料列的屬性；`<ng-template dtCell="key" let-row>` 自訂儲存格）。
  * - 展開、延遲載入、`[(expandedKeys)]`、`expandAll()`／`collapseAll()` 的規則與 lib-tree 相同；載入失敗時在那一列下面多一列錯誤與「重試」。
+ * - 全部展開：延遲載入的列一層一層載入（同時最多 3 個請求、總共最多 50 個，`expandAll({ maxLoads, concurrency })` 可改），
+ *   規則同 lib-tree 的 `expandAll()`；`expandAllProgress()` 是進度，`cancelExpandAll()` 停止。
  * - 鍵盤（列模式）：↑↓ 換列、→ 展開或到第一個子列、← 收合或回到父列、Home／End、Enter 送出 `(activate)`、`*` 展開同一層。
  *   整張表只有一個 tab stop（roving tabindex）；儲存格範本裡不要放按鈕等互動元件（它們會多出 tab stop）。
  * - 外觀：表格本身掛 data-table 的 `.dt-table`，各質地設的 `--dt-*` 變數（外框、列線、表頭底色、字級、列高）直接適用。
@@ -93,6 +95,8 @@ export class TreeTableComponent<T> {
   });
   /** 橫向捲過：固定的第一欄才畫底色與右緣分界（同 data-table）。 */
   protected readonly scrolledX = signal(false);
+  /** 全部展開進行中的進度（延遲載入的列；沒在跑時是 null）。 */
+  readonly expandAllProgress = this.ctrl.expandAllProgress;
   private pendingFocus: TreeKey | null = null;
 
   constructor() {
@@ -102,11 +106,17 @@ export class TreeTableComponent<T> {
     });
   }
 
-  expandAll(): void {
-    this.ctrl.expandAll();
+  /** 全部展開；延遲載入的列一層一層載入（見 `TreeExpandAllOptions`）。 */
+  expandAll(options?: TreeExpandAllOptions): Promise<TreeExpandAllResult> {
+    return this.ctrl.expandAll(options);
+  }
+
+  cancelExpandAll(): void {
+    this.ctrl.cancelExpandAll();
   }
 
   collapseAll(): void {
+    this.ctrl.cancelExpandAll();
     this.ctrl.collapseAll();
   }
 

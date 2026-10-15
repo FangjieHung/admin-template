@@ -90,6 +90,28 @@
   list-style: none;
 }
 
+// (c2) 共用雲端硬碟
+.tree-drive {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 36rem;
+}
+
+.tree-drive__search {
+  display: grid;
+  gap: 0.25rem;
+  justify-items: start;
+}
+
+.tree-drive__status:empty {
+  display: none;
+}
+
+.tree-drive__status,
+.tree-drive__requests {
+  margin: 0;
+}
+
 // (c)、(d) 共用
 .tree-demo-actions {
   display: flex;

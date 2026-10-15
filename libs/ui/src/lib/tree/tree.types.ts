@@ -21,6 +21,50 @@ export type TreeLoadChildren<T> = (node: T) => Promise<readonly T[]> | Observabl
 /** 搜尋用的謂詞：回 true 的節點保留（它的祖先也保留並自動展開）。 */
 export type TreeFilter<T> = (node: T) => boolean;
 
+/**
+ * 伺服器端搜尋的一筆結果：符合的節點，加上從第一層到它的父節點的鍵（不含它自己；第一層的節點給空陣列）。
+ * 元件照這條路徑一層一層呼叫 loadChildren，讓還沒載入的結果也出現在樹裡。
+ */
+export interface TreeSearchMatch {
+  key: TreeKey;
+  ancestors: readonly TreeKey[];
+}
+
+/**
+ * 伺服器端搜尋（使用端實作）：回傳符合 query 的節點與它們的祖先路徑。Promise 或 Observable（取第一個值）。
+ * 搜尋字換了，上一次還沒回來的結果會被丟掉；Observable 會被取消訂閱。
+ */
+export type TreeServerSearch = (query: string) => Promise<readonly TreeSearchMatch[]> | Observable<readonly TreeSearchMatch[]>;
+
+/** `expandAll()` 的選項（延遲載入的樹才用得到）。 */
+export interface TreeExpandAllOptions {
+  /** 這一次最多載入幾個延遲節點（成功＋失敗），預設 50；到了就停，其餘維持收合。 */
+  maxLoads?: number;
+  /** 同時最多幾個載入請求，預設 3。 */
+  concurrency?: number;
+}
+
+/** `expandAll()` 進行中的進度（`expandAllProgress()`）。 */
+export interface TreeExpandAllProgress {
+  /** 載入成功的節點數。 */
+  loaded: number;
+  /** 載入失敗的節點數（它們展開並顯示錯誤與重試）。 */
+  failed: number;
+  /** 正在等回應的請求數。 */
+  pending: number;
+  /** 已經到了 maxLoads，還有沒載入的節點。 */
+  limitReached: boolean;
+}
+
+/** `expandAll()` 完成（或停止）時的結果。 */
+export interface TreeExpandAllResult {
+  loaded: number;
+  failed: number;
+  limitReached: boolean;
+  /** 被 `cancelExpandAll()`（或再呼叫一次 expandAll、元件銷毀）停掉。 */
+  cancelled: boolean;
+}
+
 interface TreeTableColumnBase {
   /** 欄位標題。 */
   label: string;

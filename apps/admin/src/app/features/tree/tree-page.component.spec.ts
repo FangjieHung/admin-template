@@ -105,6 +105,43 @@ describe('TreePageComponent（樹狀選單與樹狀表展示頁）', () => {
     expect(item(lazy, '設計稿').querySelector('.tr-error')).not.toBeNull();
   });
 
+  it('大量延遲載入：全部展開顯示進度並可停止；伺服器端搜尋照路徑載入並展開；關掉時說明只搜尋已載入的項目', async () => {
+    const drive = demo('drive');
+    const status = () => drive.querySelector('[data-demo-status]')!.textContent!.replace(/\s+/g, ' ').trim();
+    drive.querySelector<HTMLButtonElement>('[data-demo-action="expand-drive"]')!.click();
+    await settle();
+    expect(status()).toContain('正在載入');
+    expect(drive.querySelector('[data-demo-action="stop-drive"]')).not.toBeNull();
+    expect(item(drive, '業務部').getAttribute('aria-busy')).toBe('true');
+    await sleep(450);
+    await settle();
+    drive.querySelector<HTMLButtonElement>('[data-demo-action="stop-drive"]')!.click();
+    await settle();
+    await sleep(450);
+    await settle();
+    expect(status()).toMatch(/已停止：載入了 \d+ 個資料夾/);
+    expect(names(drive)).toContain('2025 年');
+    drive.querySelector<HTMLButtonElement>('[data-demo-action="reset-drive"]')!.click();
+    await settle();
+    expect(names(drive)).toEqual(['業務部', '財務部', '研發部', '人資部']);
+    // 伺服器端搜尋：「Q3 損益」在 財務部 / 2025 年 / 2025 Q3 底下，還沒載入
+    const search = drive.querySelector<HTMLInputElement>('[data-demo-search]')!;
+    search.value = '2025Q3 損益';
+    search.dispatchEvent(new Event('input'));
+    await settle();
+    await sleep(250 + 450 + 3 * 450);
+    await settle();
+    expect(names(drive)).toEqual(['財務部', '2025 年', '2025 Q3', '2025Q3 損益報表.xlsx']);
+    expect(item(drive, '2025 Q3').getAttribute('aria-expanded')).toBe('true');
+    // 關掉伺服器端搜尋：只比對已載入的項目，結果下方說明
+    drive.querySelector<HTMLInputElement>('[data-demo-server] input')!.click();
+    search.value = '招募';
+    search.dispatchEvent(new Event('input'));
+    await settle();
+    expect(drive.querySelector('.tr-empty')?.textContent).toContain('找不到符合「招募」的項目');
+    expect(drive.querySelector('.tr-search-note')?.textContent).toContain('只搜尋已載入的項目');
+  });
+
   it('樹狀表：預設展開第一個專案；全部展開／全部收合；進度欄用狀態標籤＋百分比', async () => {
     const plan = demo('plan');
     const rowNames = () => Array.from(plan.querySelectorAll('tr[data-tree-row] .tt-name')).map((n) => n.textContent?.trim());

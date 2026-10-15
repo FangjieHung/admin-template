@@ -8,6 +8,7 @@
       class="dt-table tt-table"
       role="treegrid"
       [attr.aria-label]="label() || null"
+      [attr.aria-busy]="expandAllProgress() ? 'true' : null"
       [style.--tt-first-min]="firstColumnMinWidth()"
       (keydown)="onKeydown($event)"
       (focusin)="onFocusIn($event)"

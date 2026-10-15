@@ -17,6 +17,15 @@ export interface TreeLabels {
   noResults: string;
   /** 只用在樹狀表：沒有任何資料列，例：「沒有資料」。 */
   noRows: string;
+  /**
+   * 選填。延遲載入的樹在搜尋、但沒有提供伺服器端搜尋（`[serverSearch]`）時，結果下方的說明，例：「只搜尋已載入的項目」。
+   * 不給就不顯示。
+   */
+  searchLoadedOnly?: string;
+  /** 選填。伺服器端搜尋還沒回來時給報讀器念、畫面上在結果下方顯示的字，例：「搜尋中」。不給就只顯示轉圈。 */
+  searching?: string;
+  /** 選填。伺服器端搜尋失敗時的說明（仍顯示已載入項目的結果），例：「無法搜尋未載入的項目，只顯示已載入的結果」。 */
+  searchFailed?: string;
 }
 
 export const TREE_LABELS = new InjectionToken<TreeLabels>('TREE_LABELS');

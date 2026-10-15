@@ -1,17 +1,30 @@
 @let v = view();
+@let note = searchNote();
 @if (filtering() && v.roots.length === 0) {
-  <p class="tr-empty" role="status">{{ noResultsText() }}</p>
+  @if (!note?.busy) {
+    <p class="tr-empty" role="status">{{ noResultsText() }}</p>
+  }
 } @else {
   <ul
     class="tr-tree"
     role="tree"
     [attr.aria-label]="label() || null"
+    [attr.aria-busy]="expandAllProgress() ? 'true' : null"
     (keydown)="onKeydown($event)"
     (focusin)="onFocusIn($event)"
   >
     <ng-container [ngTemplateOutlet]="branch" [ngTemplateOutletContext]="{ $implicit: v.roots }" />
   </ul>
 }
+@if (note) {
+  <p class="tr-search-note" [attr.role]="note.busy ? 'status' : null">
+    @if (note.busy) {
+      <span class="tr-spinner" aria-hidden="true"></span>
+    }
+    {{ note.text }}
+  </p>
+}
+
 
 <ng-template #branch let-nodes>
   @for (vn of nodes; track vn.key) {

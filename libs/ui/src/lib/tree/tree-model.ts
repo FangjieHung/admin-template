@@ -1,5 +1,16 @@
 import { DestroyRef, Signal, computed, effect, signal, untracked } from '@angular/core';
-import type { TreeFilter, TreeKey, TreeLoadChildren } from './tree.types';
+import type {
+  TreeExpandAllOptions,
+  TreeExpandAllProgress,
+  TreeExpandAllResult,
+  TreeFilter,
+  TreeKey,
+  TreeLoadChildren,
+} from './tree.types';
+
+/** expandAll() 的預設上限：最多載入幾個延遲節點、同時幾個請求。 */
+export const TREE_EXPAND_ALL_MAX_LOADS = 50;
+export const TREE_EXPAND_ALL_CONCURRENCY = 3;
 
 /** 畫面上的一個節點（lib-tree 與 lib-tree-table 共用）。只包含目前看得到的節點；收合的子孫不在裡面。 */
 export interface TreeViewNode<T> {
@@ -65,11 +76,16 @@ export class TreeController<T> {
   private readonly loadingKeys = signal<ReadonlySet<TreeKey>>(new Set());
   private readonly failedKeys = signal<ReadonlySet<TreeKey>>(new Set());
   private readonly pending = new Map<TreeKey, () => void>();
+  /** 載入中的節點：完成時 resolve（true＝成功）。expandAll 與搜尋路徑共用，同一個節點不會重複請求。 */
+  private readonly settles = new Map<TreeKey, Promise<boolean>>();
+  private expandRun: { cancelled: boolean } | null = null;
   private readonly domIds = new Map<TreeKey, string>();
   private readonly idPrefix = `lib-tree-n${nextControllerId++}`;
   private destroyed = false;
 
   readonly view: Signal<TreeView<T>>;
+  /** expandAll() 進行中的進度（沒在跑時是 null）。 */
+  readonly expandAllProgress = signal<TreeExpandAllProgress | null>(null);
 
   constructor(
     private readonly src: TreeSource<T>,
@@ -88,6 +104,7 @@ export class TreeController<T> {
     });
     destroyRef.onDestroy(() => {
       this.destroyed = true;
+      if (this.expandRun) this.expandRun.cancelled = true;
       this.pending.forEach((cancel) => cancel());
       this.pending.clear();
     });
@@ -117,23 +134,163 @@ export class TreeController<T> {
     this.src.setExpandedKeys(open ? [...current, key] : current.filter((k) => k !== key));
   }
 
-  /** 展開所有「子節點已知」的節點（靜態或已經載入過的）；還沒載入的延遲節點不會因此去載入。 */
-  expandAll(): void {
+  /**
+   * 全部展開。靜態的與已經載入過的節點立刻展開；還沒載入的延遲節點「一層一層」載入（同時最多 `concurrency` 個請求），
+   * 載入成功才展開、再往下一層，總共最多載入 `maxLoads` 個（超過就停，結果的 `limitReached` 是 true）。
+   * 載入失敗的節點展開並顯示錯誤與「重試」，不中斷其他節點。`cancelExpandAll()` 停止排新的請求（已送出的照樣完成、留著，但不再展開）。
+   * 沒有 loadChildren 時跟以前一樣，同步展開所有已知的節點。
+   */
+  expandAll(options: TreeExpandAllOptions = {}): Promise<TreeExpandAllResult> {
+    this.cancelExpandAll();
+    const known = this.expandKnown();
+    if (this.src.loadChildren() === null) {
+      return Promise.resolve({ loaded: 0, failed: 0, limitReached: false, cancelled: false });
+    }
+    const maxLoads = Math.max(0, Math.floor(options.maxLoads ?? TREE_EXPAND_ALL_MAX_LOADS));
+    const concurrency = Math.max(1, Math.floor(options.concurrency ?? TREE_EXPAND_ALL_CONCURRENCY));
+    const run = { cancelled: false };
+    this.expandRun = run;
+    const progress: TreeExpandAllProgress = { loaded: 0, failed: 0, pending: 0, limitReached: false };
+    const publish = () => run === this.expandRun && this.expandAllProgress.set({ ...progress });
+    publish();
+    return (async () => {
+      // 一層一層：先找出這一層「展開了但子節點未知」的節點，載完再看下一層。
+      let frontier = known;
+      while (frontier.length > 0 && !run.cancelled && !this.destroyed) {
+        const next: T[] = [];
+        for (let i = 0; i < frontier.length && !run.cancelled; i += concurrency) {
+          const room = maxLoads - progress.loaded - progress.failed;
+          if (room <= 0) {
+            progress.limitReached = true;
+            break;
+          }
+          const batch = frontier.slice(i, i + Math.min(concurrency, room));
+          progress.pending = batch.length;
+          publish();
+          const results = await Promise.all(batch.map((node) => this.loadAsync(node)));
+          progress.pending = 0;
+          if (run.cancelled || this.destroyed) break;
+          const keyOf = this.src.key();
+          const open: TreeKey[] = [];
+          batch.forEach((node, j) => {
+            open.push(keyOf(node));
+            if (results[j]) {
+              progress.loaded++;
+              next.push(...this.expandKnown(this.childrenOf(node) ?? [], false));
+            } else {
+              progress.failed++;
+            }
+          });
+          // 成功的展開（失敗的也展開：節點下方顯示錯誤與重試）。
+          this.addExpanded(open);
+          publish();
+        }
+        if (progress.limitReached) break;
+        frontier = next;
+      }
+      const result: TreeExpandAllResult = {
+        loaded: progress.loaded,
+        failed: progress.failed,
+        limitReached: progress.limitReached,
+        cancelled: run.cancelled,
+      };
+      if (run === this.expandRun) {
+        this.expandRun = null;
+        this.expandAllProgress.set(null);
+      }
+      return result;
+    })();
+  }
+
+  /** 停止 expandAll()：不再送出新的載入請求。 */
+  cancelExpandAll(): void {
+    if (!this.expandRun) return;
+    this.expandRun.cancelled = true;
+    this.expandRun = null;
+    this.expandAllProgress.set(null);
+  }
+
+  /**
+   * 展開 nodes（預設是第一層）底下所有子節點已知的節點，回傳「可以展開、但子節點還沒載入」的延遲節點（依畫面順序）。
+   * write＝false 時只收集鍵、不寫回（呼叫端一起寫）。
+   */
+  private expandKnown(nodes: readonly T[] = this.src.roots(), write = true): T[] {
     const keyOf = this.src.key();
     const keys: TreeKey[] = [];
+    const unknown: T[] = [];
     const visit = (node: T) => {
       const key = keyOf(node);
       const kids = this.childrenOf(node, key);
-      if (kids && kids.length > 0) {
-        keys.push(key);
-        kids.forEach(visit);
+      if (kids) {
+        if (kids.length > 0) {
+          keys.push(key);
+          kids.forEach(visit);
+        }
+      } else if (this.isExpandable(node, key) && !this.failedKeys().has(key)) {
+        unknown.push(node);
       }
     };
-    this.src.roots().forEach(visit);
+    nodes.forEach(visit);
+    if (write) this.addExpanded(keys);
+    else this.deferredKeys.push(...keys);
+    return unknown;
+  }
+
+  /** expandKnown(write＝false) 收集的鍵：下一次 addExpanded 一起寫回。 */
+  private deferredKeys: TreeKey[] = [];
+
+  private addExpanded(keys: readonly TreeKey[]): void {
+    const all = [...this.deferredKeys, ...keys];
+    this.deferredKeys = [];
     const current = this.src.expandedKeys();
-    // 保留原本已展開、但這次走不到的鍵（例如還沒載入的延遲節點），只補上新的。
-    const merged = [...current, ...keys.filter((k) => !current.includes(k))];
-    if (merged.length !== current.length) this.src.setExpandedKeys(merged);
+    const have = new Set(current);
+    // 保留原本已展開的鍵，只補上新的。
+    const add = all.filter((k) => !have.has(k) && have.add(k));
+    if (add.length > 0) this.src.setExpandedKeys([...current, ...add]);
+  }
+
+  /**
+   * 載入一串路徑（每條是從第一層到某個節點的鍵）上的延遲節點，讓路徑末端的節點出現在已知的樹裡。
+   * 伺服器端搜尋用：一層一層載入，同一層共用的祖先只載一次，同時最多 `concurrency` 個請求、總共最多 `maxLoads` 個。
+   * isCurrent 回 false（例如搜尋字已經換了）時中途停止。回傳成功走完的路徑數。
+   */
+  async revealPaths(
+    paths: readonly (readonly TreeKey[])[],
+    isCurrent: () => boolean = () => true,
+    { maxLoads = TREE_EXPAND_ALL_MAX_LOADS, concurrency = TREE_EXPAND_ALL_CONCURRENCY }: TreeExpandAllOptions = {},
+  ): Promise<number> {
+    const keyOf = this.src.key();
+    let loads = 0;
+    // 每條路徑目前走到哪一層的節點清單。
+    let walkers = paths.filter((p) => p.length > 0).map((path) => ({ path, depth: 0, level: this.src.roots() as readonly T[] }));
+    let reached = 0;
+    while (walkers.length > 0 && isCurrent() && !this.destroyed) {
+      const need = new Map<TreeKey, T>();
+      const alive: typeof walkers = [];
+      for (const w of walkers) {
+        const node = w.level.find((n) => keyOf(n) === w.path[w.depth]);
+        if (!node) continue;
+        if (w.depth === w.path.length - 1) {
+          reached++;
+          continue;
+        }
+        alive.push(w);
+        const key = keyOf(node);
+        if (!this.childrenOf(node, key)) need.set(key, node);
+      }
+      const queue = [...need.values()];
+      for (let i = 0; i < queue.length && isCurrent(); i += concurrency) {
+        const batch = queue.slice(i, i + Math.min(concurrency, Math.max(0, maxLoads - loads)));
+        if (batch.length === 0) break;
+        loads += batch.length;
+        await Promise.all(batch.map((node) => this.loadAsync(node)));
+      }
+      walkers = alive.map((w) => {
+        const node = w.level.find((n) => keyOf(n) === w.path[w.depth])!;
+        return { path: w.path, depth: w.depth + 1, level: this.childrenOf(node) ?? [] };
+      });
+    }
+    return reached;
   }
 
   collapseAll(): void {
@@ -197,6 +354,14 @@ export class TreeController<T> {
 
   // ---- 延遲載入 ----
 
+  /** 載入一個節點的子節點（已經載入過就直接回 true；正在載入就等那一次）。 */
+  loadAsync(node: T): Promise<boolean> {
+    const key = this.src.key()(node);
+    if (this.childrenOf(node, key)) return Promise.resolve(true);
+    this.load(node);
+    return this.settles.get(key) ?? Promise.resolve(!!this.childrenOf(node, key));
+  }
+
   private load(node: T): void {
     const fn = this.src.loadChildren();
     const key = this.src.key()(node);
@@ -204,9 +369,16 @@ export class TreeController<T> {
     this.loadingKeys.update((set) => with_(set, key));
     this.failedKeys.update((set) => without(set, key));
     let settled = false;
+    let done!: (ok: boolean) => void;
+    this.settles.set(key, new Promise<boolean>((resolve) => (done = resolve)));
     const finish = (children: readonly T[] | null) => {
-      if (settled || this.destroyed) return;
+      if (settled) return;
       settled = true;
+      this.settles.delete(key);
+      if (this.destroyed) {
+        done(false);
+        return;
+      }
       this.pending.get(key)?.();
       this.pending.delete(key);
       this.loadingKeys.update((set) => without(set, key));
@@ -216,6 +388,7 @@ export class TreeController<T> {
       } else {
         this.failedKeys.update((set) => with_(set, key));
       }
+      done(!!children);
     };
     let result: ReturnType<TreeLoadChildren<T>>;
     try {
@@ -326,6 +499,36 @@ export class TreeController<T> {
     const roots = branch(this.src.roots(), 1, null);
     return { roots, flat, byKey, needsLoad };
   }
+}
+
+/**
+ * 等 Promise 或 Observable 的第一個值（Observable 拿到第一個值就取消訂閱；complete 而沒有值時當成 undefined）。
+ * 回傳取消函式：之後不會再呼叫 next／error。lib-tree 的伺服器端搜尋用。
+ */
+export function settleFirst<V>(
+  result: PromiseLike<V> | { subscribe(observer: { next: (v: V) => void; error: (e: unknown) => void; complete: () => void }): { unsubscribe(): void } },
+  next: (value: V | undefined) => void,
+  error: (reason: unknown) => void,
+): () => void {
+  let live = true;
+  const once = <A>(fn: (a: A) => void) => (a: A) => {
+    if (!live) return;
+    live = false;
+    fn(a);
+  };
+  const onNext = once(next);
+  const onError = once(error);
+  if (isSubscribable<V>(result)) {
+    let sub: { unsubscribe(): void } | null = null;
+    sub = result.subscribe({ next: (v) => (onNext(v), sub?.unsubscribe()), error: onError, complete: () => onNext(undefined) });
+    if (!live) sub.unsubscribe();
+    return () => {
+      live = false;
+      sub?.unsubscribe();
+    };
+  }
+  Promise.resolve(result).then(onNext, onError);
+  return () => (live = false);
 }
 
 /** 型別上的鴨子判斷：有 subscribe 就當 Observable（不必為了 isObservable 引入 rxjs）。 */

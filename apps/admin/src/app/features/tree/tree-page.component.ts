@@ -2,13 +2,16 @@ import { Component, computed, signal, viewChild } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
+import { MatCheckbox } from '@angular/material/checkbox';
 import {
   DataTableCellDirective,
   StatusChipComponent,
   TreeComponent,
+  TreeExpandAllResult,
   TreeHighlightComponent,
   TreeKey,
   TreeLoadChildren,
+  TreeServerSearch,
   TreeNodeDirective,
   TreeTableColumn,
   TreeTableComponent,
@@ -20,6 +23,9 @@ import { detailOf } from '../../showcase/showcase-catalog';
 import {
   CATEGORY_TREE,
   CategoryNode,
+  DRIVE_CONTENTS,
+  DRIVE_ROOTS,
+  searchDrive,
   FOLDER_CONTENTS,
   FOLDER_FAILS_ONCE,
   FOLDER_ROOTS,
@@ -37,6 +43,9 @@ const ENTRY = detailOf('tree');
 
 /** 延遲載入示範的「網路」延遲。 */
 const LOAD_DELAY_MS = 700;
+/** 共用雲端硬碟示範：每個請求的延遲，與「全部展開」這一次最多載入幾個資料夾。 */
+const DRIVE_DELAY_MS = 400;
+const DRIVE_MAX_LOADS = 20;
 
 /** 依鍵建出 鍵 → 節點、鍵 → 父節點 的對照（詳情的路徑、勾選清單的名稱用）。 */
 function indexTree<T extends { id: string; children?: T[] }>(roots: readonly T[]) {
@@ -63,6 +72,7 @@ const CATEGORY_INDEX = indexTree(CATEGORY_TREE);
     MatLabel,
     MatHint,
     MatInput,
+    MatCheckbox,
     TreeComponent,
     TreeNodeDirective,
     TreeHighlightComponent,
@@ -161,6 +171,61 @@ export class TreePageComponent {
     this.lazyLog.update((log) => [line, ...log].slice(0, 5));
   }
 
+  // ---- (c2) 共用雲端硬碟：全部展開（逐層載入）＋伺服器端搜尋 ----
+  private readonly driveTree = viewChild<TreeComponent<FolderNode>>('driveTree');
+  protected readonly drive = DRIVE_ROOTS;
+  protected readonly driveMaxLoads = DRIVE_MAX_LOADS;
+  protected readonly driveRound = signal(0);
+  protected readonly driveQuery = signal('');
+  protected readonly driveServer = signal(true);
+  /** 「伺服器」收到幾個請求（載入資料夾＋搜尋）。 */
+  protected readonly driveRequests = signal(0);
+  protected readonly driveResult = signal<TreeExpandAllResult | null>(null);
+  protected readonly driveProgress = computed(() => this.driveTree()?.expandAllProgress() ?? null);
+  protected readonly loadDrive: TreeLoadChildren<FolderNode> = (node) =>
+    new Promise<FolderNode[]>((resolve) => {
+      this.driveRequests.update((n) => n + 1);
+      setTimeout(() => resolve(DRIVE_CONTENTS[node.id] ?? []), DRIVE_DELAY_MS);
+    });
+  private readonly searchDriveServer: TreeServerSearch = (query) =>
+    new Promise((resolve) => {
+      this.driveRequests.update((n) => n + 1);
+      setTimeout(() => resolve(searchDrive(query)), DRIVE_DELAY_MS);
+    });
+  protected readonly driveSearch = computed(() => (this.driveServer() ? this.searchDriveServer : null));
+
+  protected async expandDrive(): Promise<void> {
+    this.driveResult.set(null);
+    const result = await this.driveTree()?.expandAll({ maxLoads: DRIVE_MAX_LOADS });
+    if (result) this.driveResult.set(result);
+  }
+
+  protected stopDrive(): void {
+    this.driveTree()?.cancelExpandAll();
+  }
+
+  protected collapseDrive(): void {
+    this.driveTree()?.collapseAll();
+    this.driveResult.set(null);
+  }
+
+  protected resetDrive(): void {
+    this.driveTree()?.cancelExpandAll();
+    this.driveResult.set(null);
+    this.driveQuery.set('');
+    this.driveRequests.set(0);
+    this.driveRound.update((n) => n + 1);
+  }
+
+  protected onDriveQuery(event: Event): void {
+    this.driveQuery.set((event.target as HTMLInputElement).value);
+  }
+
+  protected focusDriveTree(event: Event): void {
+    event.preventDefault();
+    this.driveTree()?.focus();
+  }
+
   // ---- (d) 樹狀表 ----
   private readonly planTable = viewChild<TreeTableComponent<PlanRow>>('planTable');
   protected readonly plans = PLAN_ROWS;
@@ -187,7 +252,7 @@ export class TreePageComponent {
   protected readonly whenToUse = [
     '有上下層、而且層數不固定的資料：組織架構、商品或文件分類、資料夾。',
     '要在階層裡挑一個（目前項目）或勾一批（含「整個分類」）的情境；搜尋時保留祖先，看得出結果在哪一層。',
-    '子節點很多、要用到才向伺服器拿：延遲載入，失敗時就地重試。',
+    '子節點很多、要用到才向伺服器拿：延遲載入，失敗時就地重試；全部展開時一層一層載入（有上限），搜尋交給伺服器找、樹照路徑展開。',
     '樹狀表：每一層都有同樣幾個欄位要對齊比較，例如專案 → 階段 → 任務的負責人、進度與期限。',
   ];
   protected readonly avoid = [
@@ -222,6 +287,15 @@ readonly current = signal<TreeKey | null>(null);
 <lib-tree selection="multiple" [filterText]="query()" [(checkedKeys)]="checked" … />
 <lib-tree [loadChildren]="loadFolder" [hasChildren]="isFolder" … />
 
+// 延遲載入的樹：全部展開逐層載入（有上限、可停止），搜尋交給伺服器
+readonly search: TreeServerSearch = (query) =>
+  api.searchFolders(query);   // 回傳 [{ key: 'doc-42', ancestors: ['dir-a', 'dir-b'] }, …]
+<lib-tree #tree [loadChildren]="loadFolder" [filterText]="query()" [serverSearch]="search" … />
+const result = await tree.expandAll({ maxLoads: 20 });   // { loaded, failed, limitReached, cancelled }
+tree.expandAllProgress();   // 進行中：{ loaded, failed, pending, limitReached }
+tree.cancelExpandAll();
+
+
 // 樹狀表：欄位寫法同 data-table，第一欄自動縮排與展開鈕
 readonly columns: TreeTableColumn<PlanRow>[] = [
   { key: 'name', label: '名稱' },
@@ -247,7 +321,8 @@ readonly columns: TreeTableColumn<PlanRow>[] = [
         { name: '[(currentKey)]', type: 'TreeKey | null', default: 'null', description: 'single 的目前項目：點擊、Enter、Space 改變它。' },
         { name: '[(checkedKeys)]', type: 'TreeKey[]', default: '[]', description: 'multiple 的勾選結果：所有全勾的已知節點（含父節點，依樹的順序）。只給父節點時子孫一起算勾。' },
         { name: 'filterText', type: 'string', default: "''", description: '搜尋文字：比對 nodeLabel（不分大小寫），符合的節點與祖先保留、祖先自動展開（搜尋中不能收合），比對到的字標成 <mark>。' },
-        { name: '[filter]', type: '(node: T) => boolean', default: 'null', description: '自訂搜尋條件，取代文字比對（filterText 仍用來標字）。只搜尋已知的節點，還沒載入的延遲節點不會為了搜尋而載入。' },
+        { name: '[filter]', type: '(node: T) => boolean', default: 'null', description: '自訂搜尋條件，取代文字比對（filterText 仍用來標字）。本機比對只看得到已知的節點。' },
+        { name: '[serverSearch]', type: '(query) => Promise<TreeSearchMatch[]> | Observable<…>', default: 'null', description: '伺服器端搜尋（延遲載入的樹用）：filterText 停手 250ms 後呼叫，回傳符合的 { key, ancestors }（ancestors 是從第一層到父節點的鍵）。元件照路徑一層一層載入（同時最多 3 個請求、最多 50 個），找到的節點即使名稱不含搜尋字也保留；搜尋字換了就丟掉晚到的結果。沒給時，延遲載入的樹在結果下方顯示 searchLoadedOnly。' },
         { name: 'label', type: 'string', default: "''", description: '整棵樹的無障礙名稱。' },
       ],
     },
@@ -255,7 +330,9 @@ readonly columns: TreeTableColumn<PlanRow>[] = [
       title: 'lib-tree 輸出、方法與範本',
       rows: [
         { name: '(activate)', type: 'T', description: '點擊或 Enter（single 時 Space 也算）。multiple 時點擊是勾選，Enter 仍送出 activate。' },
-        { name: 'expandAll()／collapseAll()', type: 'void', description: '展開所有子節點已知的節點（還沒載入的延遲節點不會因此去載入）／全部收合。' },
+        { name: 'expandAll(options?)', type: 'Promise<TreeExpandAllResult>', description: '全部展開。延遲載入的樹一層一層載入還沒載入的節點：同時最多 concurrency 個請求（預設 3）、這一次最多 maxLoads 個（預設 50），到了就停（結果的 limitReached 是 true，其餘維持收合；再呼叫一次會接著載入）。載入中的節點轉圈，失敗的節點展開並顯示錯誤與重試，不中斷其他節點。' },
+        { name: 'expandAllProgress()／cancelExpandAll()', type: 'signal／void', description: '全部展開進行中的進度 { loaded, failed, pending, limitReached }（沒在跑時是 null）；停止：不再送新的請求，已送出的回來後留著但不展開。' },
+        { name: 'collapseAll()', type: 'void', description: '全部收合（也會停止進行中的全部展開）。' },
         { name: 'focus(key?)', type: 'void', description: '把鍵盤焦點放進樹（例：搜尋框按 ↓）。' },
         { name: 'ng-template[libTreeNode]', type: 'TreeNodeContext<T>', description: '節點內容：let-node，另有 let-level、let-expanded、let-query。加 [libTreeNodeOf]="nodes" 讓 let-node 有型別。' },
         { name: 'lib-tree-highlight', type: '[text]、[query]', description: '把比對到的字包成 <mark>；自訂範本時用它標字。' },
@@ -268,12 +345,12 @@ readonly columns: TreeTableColumn<PlanRow>[] = [
       rows: [
         { name: '[rows]／[columns]／[rowKey]', type: 'T[]／TreeTableColumn<T>[]／(row) => TreeKey', default: '必填', description: '欄位寫法同 data-table：key 綁資料列的屬性（虛擬欄寫 virtual: true），value 改寫顯示文字，align: \'end\' 靠右並用等寬數字；<ng-template dtCell="key" let-row> 自訂儲存格。第一欄自動縮排與展開鈕。' },
         { name: '[rowChildren]／[hasChildren]／[loadChildren]／[(expandedKeys)]', type: '同 lib-tree', description: '展開、延遲載入、受控與非受控的規則和 lib-tree 一樣；載入失敗時那一列下面多一列錯誤與「重試」。' },
-        { name: 'expandAll()／collapseAll()', type: 'void', description: '全部展開／收合。' },
+        { name: 'expandAll(options?)／cancelExpandAll()／expandAllProgress()／collapseAll()', type: '同 lib-tree', description: '全部展開（延遲載入的列逐層載入，有上限、可停止）／收合。' },
         { name: '(activate)', type: 'T', description: '點擊一列或按 Enter。' },
         { name: '鍵盤（列模式）', type: '—', description: '↑↓ 換列、→ 展開或到第一個子列、← 收合或回到父列、Home／End、Enter、*。只有一個 tab stop；儲存格範本裡不要放按鈕。' },
         { name: '外觀', type: '—', description: '表格掛 .dt-table，跟資料表吃同一組 --dt-* 變數；窄螢幕橫向捲動、第一欄固定在左側。' },
         { name: '不支援', type: '—', description: '排序、分頁、凍結欄設定、欄位選擇、勾選、表格內編輯、手機卡片版——要這些請用 lib-data-table。' },
-        { name: 'TREE_LABELS', type: 'TreeLabels', default: '必填', description: '6 句畫面文字（載入中、載入失敗、重試、重試提示、搜尋沒有結果、沒有資料），兩個元件共用；少一句會在建立元件時丟出錯誤。' },
+        { name: 'TREE_LABELS', type: 'TreeLabels', default: '必填', description: '6 句必填的畫面文字（載入中、載入失敗、重試、重試提示、搜尋沒有結果、沒有資料），兩個元件共用；少一句會在建立元件時丟出錯誤。另有 3 句選填：searchLoadedOnly（延遲載入的樹沒有伺服器端搜尋時，結果下方的說明）、searching（伺服器端搜尋中）、searchFailed（伺服器端搜尋失敗）。' },
       ],
     },
   ];

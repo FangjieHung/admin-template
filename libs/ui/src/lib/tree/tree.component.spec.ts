@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach } from 'vitest';
 import { Component, signal, viewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
@@ -7,7 +7,7 @@ import { TreeNodeDirective } from './tree-node.directive';
 import { TreeHighlightComponent, splitTreeHighlight } from './tree-highlight.component';
 import { TREE_LABELS, TreeLabels } from './tree-labels';
 import { toggleCheckedKeys, computeCheckStates } from './tree-check';
-import type { TreeFilter, TreeKey, TreeLoadChildren, TreeSelectionMode } from './tree.types';
+import type { TreeFilter, TreeKey, TreeLoadChildren, TreeSearchMatch, TreeSelectionMode, TreeServerSearch } from './tree.types';
 
 const TREE_TEST_LABELS: TreeLabels = {
   loading: '載入中',
@@ -16,6 +16,9 @@ const TREE_TEST_LABELS: TreeLabels = {
   retryHint: '按右方向鍵重試',
   noResults: '找不到符合「{query}」的項目',
   noRows: '沒有資料',
+  searchLoadedOnly: '只搜尋已載入的項目',
+  searching: '搜尋中',
+  searchFailed: '無法搜尋未載入的項目',
 };
 
 interface Unit {
@@ -57,6 +60,7 @@ const FRUIT: Unit[] = [
         [loadChildren]="load()"
         [filterText]="query()"
         [filter]="predicate()"
+        [serverSearch]="search()"
         [(expandedKeys)]="expanded"
         [(currentKey)]="current"
         [(checkedKeys)]="checked"
@@ -87,6 +91,7 @@ class HostComponent {
   readonly load = signal<TreeLoadChildren<Unit> | null>(null);
   readonly query = signal('');
   readonly predicate = signal<TreeFilter<Unit> | null>(null);
+  readonly search = signal<TreeServerSearch | null>(null);
   readonly expanded = signal<readonly TreeKey[]>([]);
   readonly current = signal<TreeKey | null>(null);
   readonly checked = signal<readonly TreeKey[]>([]);
@@ -302,6 +307,170 @@ describe('TreeComponent（樹狀選單）', () => {
     expect(focusedName()).toBe('Apple');
     await press('z'); // 「az」沒有符合：不動
     expect(focusedName()).toBe('Apple');
+  });
+
+  describe('延遲載入的全部展開與伺服器端搜尋', () => {
+    const LAZY: Record<string, Unit[]> = {
+      a: [{ id: 'a1', name: '甲一' }, { id: 'a2', name: '甲二' }],
+      b: [{ id: 'b1', name: '乙一' }],
+      a1: [{ id: 'a1x', name: '甲一之一' }],
+      a2: [{ id: 'a2x', name: '甲二之一' }],
+      b1: [{ id: 'b1x', name: '深處的報表' }],
+      a1x: [],
+      a2x: [],
+      b1x: [],
+    };
+    const ROOTS: Unit[] = [{ id: 'a', name: '甲' }, { id: 'b', name: '乙' }];
+    let calls: string[];
+    let inFlight: number;
+    let maxInFlight: number;
+    let gates: Map<string, { resolve: () => void; reject: () => void }>;
+    const manual: TreeLoadChildren<Unit> = (node) => {
+      calls.push(node.id);
+      inFlight++;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      return new Promise<Unit[]>((resolve, reject) =>
+        gates.set(node.id, {
+          resolve: () => (inFlight--, resolve(LAZY[node.id] ?? [])),
+          reject: () => (inFlight--, reject(new Error('boom'))),
+        }),
+      );
+    };
+    const release = async (...ids: string[]) => {
+      ids.forEach((id) => gates.get(id)!.resolve());
+      await settle();
+    };
+
+    beforeEach(() => {
+      calls = [];
+      inFlight = 0;
+      maxInFlight = 0;
+      gates = new Map();
+    });
+
+    it('expandAll()：一層一層載入，同時最多 concurrency 個請求，載入中轉圈；到 maxLoads 就停並回報', async () => {
+      await setup((h) => {
+        h.nodes.set(ROOTS);
+        h.load.set(manual);
+      });
+      const done = host.tree()!.expandAll({ maxLoads: 4, concurrency: 2 });
+      await settle();
+      expect(calls).toEqual(['a', 'b']);
+      expect(item('甲').getAttribute('aria-busy')).toBe('true');
+      expect(item('甲').querySelector('.tr-spinner')).not.toBeNull();
+      expect(el.querySelector('[role="tree"]')!.getAttribute('aria-busy')).toBe('true');
+      expect(host.tree()!.expandAllProgress()).toEqual({ loaded: 0, failed: 0, pending: 2, limitReached: false });
+      await release('a', 'b');
+      // 第二層：a1、a2（b1 排在後面，但上限只剩 2 個）
+      expect(calls).toEqual(['a', 'b', 'a1', 'a2']);
+      expect(names()).toEqual(['甲', '甲一', '甲二', '乙', '乙一']);
+      await release('a1', 'a2');
+      const result = await done;
+      await settle();
+      expect(result).toEqual({ loaded: 4, failed: 0, limitReached: true, cancelled: false });
+      expect(maxInFlight).toBe(2);
+      expect(calls).not.toContain('b1');
+      expect(host.expanded()).toEqual(['a', 'b', 'a1', 'a2']);
+      expect(names()).toEqual(['甲', '甲一', '甲一之一', '甲二', '甲二之一', '乙', '乙一']);
+      expect(item('乙一').getAttribute('aria-expanded')).toBe('false'); // 沒載入的維持收合
+      expect(host.tree()!.expandAllProgress()).toBeNull();
+      expect(el.querySelector('[role="tree"]')!.hasAttribute('aria-busy')).toBe(false);
+    });
+
+    it('expandAll()：失敗的節點展開顯示錯誤、不中斷其他節點；cancelExpandAll() 之後不再送新的請求', async () => {
+      await setup((h) => {
+        h.nodes.set(ROOTS);
+        h.load.set(manual);
+      });
+      const done = host.tree()!.expandAll({ concurrency: 2 });
+      await settle();
+      gates.get('a')!.reject();
+      await release('b');
+      expect(item('甲').querySelector('.tr-error')).not.toBeNull();
+      expect(item('甲').getAttribute('aria-expanded')).toBe('true');
+      expect(calls).toEqual(['a', 'b', 'b1']);
+      host.tree()!.cancelExpandAll();
+      await release('b1');
+      const result = await done;
+      expect(result).toEqual({ loaded: 1, failed: 1, limitReached: false, cancelled: true });
+      expect(calls).toEqual(['a', 'b', 'b1']); // 沒有再載入 b1x
+      expect(item('乙一').getAttribute('aria-expanded')).toBe('false'); // 停止後回來的結果不展開
+    });
+
+    it('伺服器端搜尋：照回傳的祖先路徑一層一層載入，找到的節點出現且祖先自動展開；搜尋中顯示「搜尋中」', async () => {
+      let answer!: (m: TreeSearchMatch[]) => void;
+      const queries: string[] = [];
+      await setup((h) => {
+        h.nodes.set(ROOTS);
+        h.load.set((node) => (calls.push(node.id), Promise.resolve(LAZY[node.id] ?? [])));
+        h.search.set((q) => (queries.push(q), new Promise<TreeSearchMatch[]>((r) => (answer = r))));
+      });
+      host.query.set('報');
+      await settle();
+      host.query.set('報表');
+      await settle();
+      // 搜尋中：本機沒有結果時不顯示「找不到」，改顯示搜尋中
+      expect(el.querySelector('.tr-empty')).toBeNull();
+      const note = () => el.querySelector('.tr-search-note');
+      expect(note()?.getAttribute('role')).toBe('status');
+      expect(note()?.textContent?.trim()).toBe('搜尋中');
+      await sleep(300);
+      expect(queries).toEqual(['報表']); // 停手 250ms 才送，前一個字不送
+      answer([{ key: 'b1x', ancestors: ['b', 'b1'] }]);
+      await sleep(0);
+      await settle(6);
+      expect(calls).toEqual(['b', 'b1']);
+      expect(names()).toEqual(['乙', '乙一', '深處的報表']);
+      expect(item('乙一').getAttribute('aria-expanded')).toBe('true');
+      expect(item('深處的報表').querySelector('mark')?.textContent).toBe('報表');
+      expect(note()).toBeNull();
+      expect(host.expanded()).toEqual([]); // 跟本機搜尋一樣，不寫回 expandedKeys
+    });
+
+    it('伺服器端搜尋：名稱不含搜尋字的結果也保留；搜尋字換掉後晚到的結果丟掉；失敗時說明', async () => {
+      const answers = new Map<string, (m: TreeSearchMatch[]) => void>();
+      let fail = false;
+      await setup((h) => {
+        h.nodes.set(ROOTS);
+        h.load.set((node) => Promise.resolve(LAZY[node.id] ?? []));
+        h.search.set((q) => (fail ? Promise.reject(new Error('down')) : new Promise<TreeSearchMatch[]>((r) => answers.set(q, r))));
+      });
+      host.query.set('report');
+      await settle();
+      await sleep(300);
+      host.query.set('a2x');
+      await settle();
+      answers.get('report')!([{ key: 'b1x', ancestors: ['b', 'b1'] }]); // 晚到：丟掉
+      await sleep(300);
+      answers.get('a2x')!([{ key: 'a2x', ancestors: ['a', 'a2'] }]); // 例：伺服器用編號比對，名稱不含搜尋字
+      await sleep(0);
+      await settle(6);
+      expect(names()).toEqual(['甲', '甲二', '甲二之一']);
+      host.query.set('');
+      await settle();
+      fail = true;
+      host.query.set('乙');
+      await settle();
+      await sleep(300);
+      await settle();
+      expect(names()).toEqual(['乙']); // 已載入的結果照樣顯示
+      expect(el.querySelector('.tr-search-note')?.textContent?.trim()).toBe('無法搜尋未載入的項目');
+    });
+
+    it('沒有伺服器端搜尋的延遲載入樹：搜尋結果下方說明「只搜尋已載入的項目」；靜態的樹不顯示', async () => {
+      await setup((h) => {
+        h.nodes.set(ROOTS);
+        h.load.set((node) => Promise.resolve(LAZY[node.id] ?? []));
+      });
+      host.query.set('甲');
+      await settle();
+      expect(names()).toEqual(['甲']);
+      expect(el.querySelector('.tr-search-note')?.textContent?.trim()).toBe('只搜尋已載入的項目');
+      expect(el.querySelector('.tr-search-note')?.hasAttribute('role')).toBe(false);
+      host.load.set(null);
+      await settle();
+      expect(el.querySelector('.tr-search-note')).toBeNull();
+    });
   });
 
   it('single：點擊或 Enter／Space 讓節點成為目前項目（aria-selected）並送出 activate；[(currentKey)] 雙向', async () => {
