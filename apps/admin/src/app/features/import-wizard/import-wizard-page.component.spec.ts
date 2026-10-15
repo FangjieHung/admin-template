@@ -70,6 +70,32 @@ describe('ImportWizardPageComponent（匯入精靈展示頁）', () => {
     expect(el.textContent).toContain('已按「完成」');
   });
 
+  it('canLeave：選了示範檔還沒匯入時先確認；匯入完成按「完成」回到第一步後不再問', async () => {
+    const { fixture, el, click } = await setup();
+    const page = fixture.componentInstance;
+    expect(page.canLeave()).toBe(true);
+
+    await click('[data-sample="clean"]');
+    const leave = page.canLeave();
+    expect(leave).toBeInstanceOf(Promise);
+    await fixture.whenStable();
+    const dialog = document.querySelector('.cdk-overlay-container mat-dialog-container');
+    expect(dialog?.textContent).toContain('還沒完成匯入');
+    // 選「留在這一頁」
+    const stay = Array.from(document.querySelectorAll<HTMLButtonElement>('.cdk-overlay-container button')).find((b) =>
+      b.textContent?.includes('留在這一頁'),
+    );
+    stay!.click();
+    expect(await leave).toBe(false);
+
+    await click('.sw-actions__next');
+    await click('.sw-actions__next');
+    await click('.sw-actions__next');
+    await click('.sw-actions__finish');
+    expect(el.querySelector('[data-stat="created"]')).not.toBeNull();
+    expect(page.canLeave()).toBe(true);
+  });
+
   it('Big5 的示範檔用 Big5 讀出中文', async () => {
     const { el, click } = await setup();
     await click('[data-sample="big5"]');

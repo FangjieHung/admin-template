@@ -44,6 +44,7 @@ const LABELS: StepWizardLabels = {
         description="專案的名稱與代碼"
         [stepControl]="basics"
         [fieldLabels]="{ name: '專案名稱', code: '專案代碼' }"
+        [editable]="basicsEditable()"
       >
         <div [formGroup]="basics">
           <label>專案名稱 <input class="f-name" formControlName="name" /></label>
@@ -61,6 +62,7 @@ const LABELS: StepWizardLabels = {
 })
 class HostComponent {
   readonly linear = signal(true);
+  readonly basicsEditable = signal(true);
   readonly index = signal(0);
   readonly submitting = signal(false);
   readonly action = signal<(() => unknown) | null>(null);
@@ -123,6 +125,22 @@ describe('StepWizardComponent', () => {
 
   afterEach(() => {
     (globalThis as { ResizeObserver?: unknown }).ResizeObserver = original;
+  });
+
+  it('editable=false 的步驟走過之後：按鈕停用、維持「完成」外觀，點了也不會回去', async () => {
+    fillBasics();
+    await click(button('next'));
+    expect(headerButton(0).disabled).toBe(false);
+    host.basicsEditable.set(false);
+    fixture.detectChanges();
+    expect(stateOf(0)).toBe('done');
+    expect(steps()[0].classList.contains('is-frozen')).toBe(true);
+    expect(headerButton(0).disabled).toBe(true);
+    await click(headerButton(0));
+    expect(heading().textContent?.trim()).toBe('成員');
+    // 還沒走到的步驟、目前這一步不受影響
+    expect(headerButton(1).disabled).toBe(false);
+    expect(steps()[1].classList.contains('is-frozen')).toBe(false);
   });
 
   it('列出每一步：第一步是目前步驟（aria-current），選填步驟有「選填」，後面的步驟鎖住', () => {

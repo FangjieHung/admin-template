@@ -26,6 +26,8 @@ export const TICKET_ROUTES: Routes = [
     path: 'import',
     loadComponent: () => import('./ticket-import/ticket-import-page.component').then((m) => m.TicketImportPageComponent),
     ...guarded('ticket:create'),
+    // 選了檔案但還沒匯入完成時，離開前先確認。
+    canDeactivate: [unsavedChangesGuard],
   },
   {
     path: ':id',

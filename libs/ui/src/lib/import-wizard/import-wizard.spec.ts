@@ -387,6 +387,7 @@ function makeLabels(): ImportWizardLabels {
     reasonDuplicateExisting: '已有相同的{field}',
     announceResult: '新增 {created}、更新 {updated}、略過 {skipped}、失敗 {failed}',
     errorOption: '請填 {options} 其中之一',
+    editsDiscarded: '對應已變更，{count} 筆修改不再適用',
     table: TABLE_LABELS,
   };
 }
@@ -408,8 +409,10 @@ describe('assertImportWizardLabels', () => {
     [schema]="schema"
     [target]="target"
     [batchSize]="2"
+    [showCancel]="true"
     (imported)="imported.set($event)"
     (finished)="finished.set($event)"
+    (cancel)="cancelled = cancelled + 1"
   />`,
 })
 class HostComponent {
@@ -431,6 +434,7 @@ class HostComponent {
   };
   readonly imported = signal<ImportResult | null>(null);
   readonly finished = signal<ImportResult | null>(null);
+  cancelled = 0;
 }
 
 describe('ImportWizardComponent（匯入精靈）', () => {
@@ -589,5 +593,137 @@ describe('ImportWizardComponent（匯入精靈）', () => {
     await settle();
     expect(fixture.componentInstance.imported()).toMatchObject({ created: 1, skipped: 2 });
     expect(el.querySelector('[data-action="report"]')).not.toBeNull();
+  });
+  /** 在預覽裡改一格：點格子、輸入、Enter。 */
+  async function editCellText(t: Awaited<ReturnType<typeof setup>>, cell: string, text: string) {
+    await t.click(`[data-cell="${cell}"]`);
+    const input = t.el.querySelector<HTMLInputElement>('[data-editor]')!;
+    input.value = text;
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    await t.settle();
+  }
+
+  async function mapTo(t: Awaited<ReturnType<typeof setup>>, field: string, option: number) {
+    const select = t.el.querySelector<HTMLSelectElement>(`[data-mapping="${field}"] select`)!;
+    select.selectedIndex = option;
+    select.dispatchEvent(new Event('change'));
+    await t.settle();
+  }
+
+  it('換欄位對應後回到預覽：仍對應同一欄的修改保留，對應換掉的欄位上的修改不再適用，上方說明筆數', async () => {
+    const t = await setup();
+    const { el, load, heading, click } = t;
+    await load('姓名,Email,電話,備註\n王小明,ming@x.com,0912-345-678,老客戶\n陳大同,datong@,0922-000-111,新客戶\n');
+    await click('.sw-actions__next');
+    await click('.sw-actions__next');
+    expect(heading()).toBe('stepPreview');
+    expect(el.querySelector('[data-note="edits-discarded"]')).toBeNull();
+
+    await editCellText(t, '1:email', 'datong@x.com');
+    await editCellText(t, '0:phone', '0933-111-222');
+    await editCellText(t, '1:phone', '0944-222-333');
+    expect(el.querySelectorAll('.iwp-cell.is-invalid')).toHaveLength(0);
+
+    // 回到欄位對應，把「電話」換成「備註」那一欄
+    await click('.sw-actions__previous');
+    expect(heading()).toBe('stepMapping');
+    await mapTo(t, 'phone', 4);
+    await click('.sw-actions__next');
+    expect(heading()).toBe('stepPreview');
+    // Email 的對應沒變：修改留著；電話的兩筆修改不再適用，顯示檔案「備註」欄的原值
+    expect(el.querySelector('[data-cell="1:email"]')?.textContent).toContain('datong@x.com');
+    expect(el.querySelector('[data-cell="1:email"]')?.classList.contains('is-invalid')).toBe(false);
+    expect(el.querySelector('[data-cell="0:phone"]')?.textContent).toContain('老客戶');
+    expect(el.querySelector('[data-cell="1:phone"]')?.textContent).toContain('新客戶');
+    expect(el.querySelector('[data-note="edits-discarded"]')?.textContent).toContain('對應已變更，2 筆修改不再適用');
+
+    // 再回去只多對應一個沒改過的欄位（公司 → 電話欄）：沒有修改失效，說明消失，Email 的修改仍在
+    await click('.sw-actions__previous');
+    await mapTo(t, 'company', 3);
+    await click('.sw-actions__next');
+    expect(el.querySelector('[data-note="edits-discarded"]')).toBeNull();
+    expect(el.querySelector('[data-cell="1:email"]')?.textContent).toContain('datong@x.com');
+    expect(el.querySelector('[data-cell="0:company"]')?.textContent).toContain('0912-345-678');
+
+    // 換檔案：修改全部清掉，不顯示說明（是另一份資料）
+    await load('姓名,Email\n王小明,ming@x.com\n陳大同,datong@\n');
+    await click('.sw-actions__next');
+    await click('.sw-actions__next');
+    expect(el.querySelector('[data-cell="1:email"]')?.classList.contains('is-invalid')).toBe(true);
+    expect(el.querySelector('[data-note="edits-discarded"]')).toBeNull();
+  });
+
+  it('hasUnsavedWork()：選了檔案到匯入完成前是 true（重新整理時請瀏覽器確認）；完成、取消、重來之後是 false', async () => {
+    const t = await setup();
+    const { fixture, load, click } = t;
+    const wizard = fixture.componentInstance.wizard();
+    const unload = () => {
+      const event = new Event('beforeunload', { cancelable: true });
+      window.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    expect(wizard.hasUnsavedWork()).toBe(false);
+    expect(unload()).toBe(false);
+
+    await load('姓名,Email\n王小明,ming@x.com\n陳大同,datong@\n');
+    expect(wizard.hasUnsavedWork()).toBe(true);
+    expect(unload()).toBe(true);
+
+    // 按「取消」：使用者已經決定放棄
+    await click('.sw-actions__cancel');
+    expect(fixture.componentInstance.cancelled).toBe(1);
+    expect(wizard.hasUnsavedWork()).toBe(false);
+    expect(unload()).toBe(false);
+
+    // 之後再改資料又會提醒
+    await click('.sw-actions__next');
+    await click('.sw-actions__next');
+    await editCellText(t, '1:email', 'datong@x.com');
+    expect(wizard.hasUnsavedWork()).toBe(true);
+
+    await click('.sw-actions__next');
+    await click('.sw-actions__finish');
+    await t.settle();
+    expect(fixture.componentInstance.imported()?.created).toBe(2);
+    expect(wizard.hasUnsavedWork()).toBe(false);
+    expect(unload()).toBe(false);
+
+    // 再匯入一個檔案：回到第一步，還沒選檔
+    await click('[data-action="again"]');
+    expect(wizard.hasUnsavedWork()).toBe(false);
+    await load('姓名,Email\n王小明,ming@x.com\n');
+    expect(wizard.hasUnsavedWork()).toBe(true);
+    wizard.restart();
+    await t.settle();
+    expect(wizard.hasUnsavedWork()).toBe(false);
+  });
+
+  it('匯入完成後，前面的步驟鎖住：按鈕停用、維持「完成」外觀，點了不會回去', async () => {
+    const { el, load, heading, click, settle } = await setup();
+    await load('姓名,Email\n王小明,ming@x.com\n');
+    await click('.sw-actions__next');
+    await click('.sw-actions__next');
+    await click('.sw-actions__next');
+    const buttons = () => Array.from(el.querySelectorAll<HTMLButtonElement>('.sw-step__button'));
+    // 匯入前：走過的步驟可以點回去
+    expect(buttons().slice(0, 3).map((b) => b.disabled)).toEqual([false, false, false]);
+
+    await click('.sw-actions__finish');
+    await settle();
+    expect(el.querySelector('[data-stat="created"]')).not.toBeNull();
+    const steps = Array.from(el.querySelectorAll<HTMLElement>('.sw-step'));
+    expect(steps.map((s) => s.dataset['state'])).toEqual(['done', 'done', 'done', 'current']);
+    expect(steps.map((s) => s.classList.contains('is-frozen'))).toEqual([true, true, true, false]);
+    expect(buttons().map((b) => b.disabled)).toEqual([true, true, true, false]);
+
+    buttons()[1].click();
+    await settle();
+    expect(heading()).toBe('stepImport');
+    expect(el.querySelector('[data-action="again"]')).not.toBeNull();
+
+    // 「再匯入一個檔案」之後回到第一步，鎖住解除
+    await click('[data-action="again"]');
+    expect(heading()).toBe('stepUpload');
+    expect(el.querySelectorAll('.sw-step.is-frozen')).toHaveLength(0);
   });
 });

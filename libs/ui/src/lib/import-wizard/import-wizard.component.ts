@@ -63,6 +63,12 @@ interface UploadValue {
   hasHeader: boolean;
 }
 
+/** 預覽裡改過的一格：改成的文字，以及改的時候這個欄位對應到檔案的哪一欄。 */
+interface CellEdit {
+  text: string;
+  column: number | null;
+}
+
 interface ImportSource {
   key: string;
   headers: string[];
@@ -100,7 +106,10 @@ let nextId = 0;
   templateUrl: './import-wizard.component.html',
   styleUrl: './import-wizard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'lib-import-wizard' },
+  host: {
+    class: 'lib-import-wizard',
+    '(window:beforeunload)': 'onBeforeUnload($event)',
+  },
 })
 export class ImportWizardComponent<T = Record<string, unknown>> {
   /** 要匯入的欄位與判斷重複的 key。 */
@@ -185,6 +194,7 @@ export class ImportWizardComponent<T = Record<string, unknown>> {
       const id = `${this.uid}-file-${++this.fileSeq}`;
       this.workbooks.clear();
       this.workbooks.set(id, { ...workbook, sheets });
+      this.released.set(false);
       return { id, name: file.name, size: file.size, type: file.type };
     },
   };
@@ -221,6 +231,15 @@ export class ImportWizardComponent<T = Record<string, unknown>> {
   // ---- 3. 預覽 ----
   protected readonly rows = signal<readonly ImportRow[]>([]);
   private builtKey: string | null = null;
+  private builtSourceKey: string | null = null;
+  private builtMapping: Readonly<Record<string, number | null>> = {};
+  /**
+   * 預覽裡改過的格子，key 是「資料列索引:欄位 key」（原始列＋目標欄位）。換欄位對應後重建預覽時，
+   * 欄位仍對應到同一個檔案欄的修改套回去；對應換掉的欄位上的修改丟掉，數量記在 discardedEdits。
+   */
+  private readonly edits = new Map<string, CellEdit>();
+  /** 上一次重建預覽時，因為欄位對應改變而不再適用的修改數（預覽上方說明）。 */
+  protected readonly discardedEdits = signal(0);
   private readonly existing = signal<ReadonlySet<string>>(new Set());
   protected readonly checking = signal(false);
   protected readonly existingFailed = signal(false);
@@ -248,6 +267,17 @@ export class ImportWizardComponent<T = Record<string, unknown>> {
   protected readonly result = signal<ImportResult | null>(null);
   private report: ImportReportEntry[] = [];
   private runAbort: AbortController | null = null;
+  /** 按了「取消」：使用者已經決定放棄，離開頁面時不再提醒（之後再選檔或修改又會提醒）。 */
+  private readonly released = signal(false);
+
+  /**
+   * 有還沒匯入的工作：已經選了檔案（或在預覽改過資料），但還沒匯入完成。匯入中也算。
+   * 匯入完成、按「取消」或「再匯入一個檔案」（restart）之後是 false。
+   * 頁面的路由守門（canDeactivate）讀它決定要不要先確認；重新整理或關閉分頁時精靈自己請瀏覽器確認（beforeunload）。
+   */
+  readonly hasUnsavedWork = computed(
+    () => !this.released() && this.phase() !== 'done' && (this.uploadValue().file?.length ?? 0) > 0,
+  );
 
   constructor() {
     // 換檔案、工作表或標題列設定時，重新自動對應。
@@ -294,6 +324,11 @@ export class ImportWizardComponent<T = Record<string, unknown>> {
     this.result.set(null);
     this.rows.set([]);
     this.builtKey = null;
+    this.builtSourceKey = null;
+    this.builtMapping = {};
+    this.edits.clear();
+    this.discardedEdits.set(0);
+    this.released.set(false);
     this.mappedSourceKey = null;
     this.existing.set(new Set());
     this.workbooks.clear();
@@ -315,6 +350,8 @@ export class ImportWizardComponent<T = Record<string, unknown>> {
 
   protected onEdit(edit: ImportCellEdit): void {
     const schema = this.schema();
+    this.edits.set(editKey(edit.index, edit.key), { text: edit.text, column: this.builtMapping[edit.key] ?? null });
+    this.released.set(false);
     this.rows.update((rows) => {
       const next = rows.slice();
       next[edit.index] = editCell(schema, rows[edit.index], edit.key, edit.text, this.messages);
@@ -376,6 +413,17 @@ export class ImportWizardComponent<T = Record<string, unknown>> {
     downloadText(csv, this.reportFileName() || this.labels.reportFileName);
   }
 
+  /** 按「取消」：放棄這次匯入，之後離開頁面不再提醒。 */
+  protected onCancel(): void {
+    this.released.set(true);
+    this.cancel.emit();
+  }
+
+  /** 重新整理或關閉分頁：有還沒匯入的工作時請瀏覽器確認（瀏覽器只允許顯示它自己的提示）。 */
+  protected onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.hasUnsavedWork()) event.preventDefault();
+  }
+
   protected finish(): void {
     const result = this.result();
     if (result) this.finished.emit(result);
@@ -406,7 +454,10 @@ export class ImportWizardComponent<T = Record<string, unknown>> {
     );
   }
 
-  /** 進入預覽：對應或來源變了才重建（回到預覽時保留已修改的內容）。 */
+  /**
+   * 進入預覽：對應或來源變了才重建。重建時把預覽裡改過的格子套回去：換了檔案、工作表或標題列設定就全部清掉；
+   * 只換欄位對應時，欄位仍對應到同一個檔案欄的修改留著，對應換掉的欄位上的修改不再適用（數量顯示在預覽上方）。
+   */
   private buildPreview(): void {
     const source = this.source();
     if (!source) return;
@@ -414,12 +465,31 @@ export class ImportWizardComponent<T = Record<string, unknown>> {
     const key = `${source.key}|${JSON.stringify(mapping)}`;
     if (key === this.builtKey) return;
     this.builtKey = key;
+    this.discardedEdits.set(source.key === this.builtSourceKey ? this.dropStaleEdits(mapping) : 0);
+    if (source.key !== this.builtSourceKey) this.edits.clear();
+    this.builtSourceKey = source.key;
+    this.builtMapping = mapping;
     const schema = this.schema();
     const rows = buildRows(schema, mapping, source.data, source.firstRow, this.messages);
+    for (const [cell, edit] of this.edits) {
+      const [index, field] = splitEditKey(cell);
+      if (rows[index]) rows[index] = editCell(schema, rows[index], field, edit.text, this.messages);
+    }
     this.existing.set(new Set());
     this.existingFailed.set(false);
     this.rows.set(markDuplicates(schema, rows, new Set()));
     void this.checkExisting(rows);
+  }
+
+  /** 丟掉欄位對應已經換掉（或不再匯入）的修改，回傳丟掉幾筆。 */
+  private dropStaleEdits(mapping: Readonly<Record<string, number | null>>): number {
+    let dropped = 0;
+    for (const [cell, edit] of this.edits) {
+      if ((mapping[splitEditKey(cell)[1]] ?? null) === edit.column) continue;
+      this.edits.delete(cell);
+      dropped++;
+    }
+    return dropped;
   }
 
   private async checkExisting(rows: readonly ImportRow[]): Promise<void> {
@@ -502,6 +572,15 @@ export class ImportWizardComponent<T = Record<string, unknown>> {
     const skip = (group as FormGroup).controls['skipInvalid']?.value;
     return this.problemCount?.() && !skip ? { problems: true } : null;
   }
+}
+
+function editKey(index: number, field: string): string {
+  return `${index}:${field}`;
+}
+
+function splitEditKey(key: string): [number, string] {
+  const at = key.indexOf(':');
+  return [Number(key.slice(0, at)), key.slice(at + 1)];
 }
 
 function isKey(value: unknown): value is string {

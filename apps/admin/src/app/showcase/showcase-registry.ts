@@ -163,6 +163,7 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     group: 'input',
     icon: 'drive_folder_upload',
     load: () => import('../features/import-wizard/import-wizard-page.component').then((m) => m.ImportWizardPageComponent),
+    guardUnsaved: true,
   },
   {
     id: 'signature-pad',

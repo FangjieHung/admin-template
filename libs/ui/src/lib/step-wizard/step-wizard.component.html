@@ -17,12 +17,12 @@
     <nav class="sw-nav" [attr.aria-label]="labels.stepList" [id]="uid + '-list'">
       <ol class="sw-steps">
         @for (view of views(); track view.step) {
-          <li class="sw-step" [attr.data-state]="view.state" [class.is-current]="view.current">
+          <li class="sw-step" [attr.data-state]="view.state" [class.is-current]="view.current" [class.is-frozen]="view.frozen">
             <button
               type="button"
               libStepWizardHeader
               class="sw-step__button"
-              [disabled]="view.state === 'locked' || (busy() && !view.current)"
+              [disabled]="view.state === 'locked' || view.frozen || (busy() && !view.current)"
               [attr.aria-current]="view.current ? 'step' : null"
               [attr.tabindex]="tabIndexOf(view.index)"
               (click)="selectStep(view.index)"

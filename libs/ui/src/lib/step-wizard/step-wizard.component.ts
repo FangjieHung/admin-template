@@ -59,6 +59,8 @@ interface StepView {
   index: number;
   state: WizardStepState;
   current: boolean;
+  /** 已經走過、而且不能再回去改（`editable` 是 false）：按鈕停用，外觀仍是「完成」。 */
+  frozen: boolean;
 }
 
 interface ErrorSummary {
@@ -72,7 +74,8 @@ interface ErrorSummary {
  * 外觀全部用語意 token 與質地 recipe，不依賴 Material Icons 字型。
  *
  * - 預設線性：「下一步」先驗證目前這一步的 `stepControl`（全部標記為碰過）；無效就留在原地、這一步標成錯誤、
- *   上方出現錯誤摘要、焦點移到第一個無效欄位。已完成的步驟隨時可以點回去；後面還沒開放的步驟鎖住。
+ *   上方出現錯誤摘要、焦點移到第一個無效欄位。已完成的步驟隨時可以點回去（`editable` 是 false 的步驟走過之後就不能回去：按鈕停用、外觀維持完成）；
+ *   後面還沒開放的步驟鎖住。
  *   `[linear]="false"`：每一步都能直接點，帶著錯誤離開時那一步標成錯誤，按「完成」時才一次檢查全部。
  * - 步驟狀態：未開始、目前、完成、錯誤、鎖住；選填步驟名稱下方多一行「選填」。狀態另有只給報讀器的文字，不只靠顏色。
  * - 寬度小於 `compactBelow`（看元件自己的寬度，不是視窗）時，步驟清單收成一列精簡列＋細進度條，
@@ -163,6 +166,7 @@ export class StepWizardComponent extends CdkStepper implements AfterContentInit 
       index,
       current: index === selected,
       state: this.stateOf(step, index, selected, linear, steps),
+      frozen: index < selected && !step.editable,
     }));
   });
 
@@ -254,7 +258,7 @@ export class StepWizardComponent extends CdkStepper implements AfterContentInit 
 
   /** 點步驟清單上的某一步。 */
   protected selectStep(index: number): void {
-    if (this.busy()) return;
+    if (this.busy() || this.views()[index]?.frozen) return;
     if (index === this.selectedIndex) {
       this.listOpen.set(false);
       return;

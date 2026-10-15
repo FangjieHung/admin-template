@@ -126,6 +126,8 @@ export interface ImportWizardLabels {
   existingFailed: string;
   /** 只看有問題、但已經沒有問題時，例：「沒有需要修正的列」。 */
   noProblems: string;
+  /** 換了欄位對應、回到預覽時，先前的修改有幾筆不再適用，`{count}`，例：「欄位對應已變更，{count} 筆修改不再適用」。 */
+  editsDiscarded: string;
 
   // ---- 4. 匯入 ----
   /** `{create}`、`{update}`、`{skip}`，例：「將新增 {create} 筆、更新 {update} 筆，略過 {skip} 筆」。 */
@@ -211,6 +213,7 @@ const KEYS: readonly (keyof ImportWizardLabels)[] = [
   'rowNumber', 'rowStatus', 'statusReady', 'statusProblem', 'statusDuplicateFile', 'statusDuplicateExisting',
   'editCell', 'editInput', 'emptyCell', 'cellFixed', 'cellStillInvalid',
   'duplicatesTitle', 'duplicateSkip', 'duplicateUpdate', 'duplicateCreate', 'checkingExisting', 'existingFailed', 'noProblems',
+  'editsDiscarded',
   'importSummary', 'start', 'nothingToImport', 'progressLabel', 'progressText', 'stop', 'stopTitle', 'stopMessage',
   'stopConfirm', 'canceledNote', 'resultTitle', 'resultCanceledTitle', 'resultCreated', 'resultUpdated', 'resultSkipped',
   'resultFailed', 'failedRows', 'failedRow', 'downloadReport', 'reportHint', 'reportFileName', 'reportRow', 'reportReason',

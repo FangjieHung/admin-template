@@ -5,7 +5,7 @@
   [hideActions]="phase() === 'done'"
   [headingLevel]="headingLevel()"
   (selectionChange)="onStep($event)"
-  (cancel)="cancel.emit()"
+  (cancel)="onCancel()"
 >
   <lib-wizard-step
     [label]="labels.stepUpload"
@@ -100,6 +100,7 @@
       [labels]="labels"
       [checking]="checking()"
       [existingFailed]="existingFailed()"
+      [discardedEdits]="discardedEdits()"
       (edit)="onEdit($event)"
     />
   </lib-wizard-step>

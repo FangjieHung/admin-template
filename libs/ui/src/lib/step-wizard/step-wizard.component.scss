@@ -111,7 +111,9 @@
   }
 }
 
-.is-current .sw-step__button {
+// 目前這一步，以及走過之後不能再回去的步驟（editable=false，例如匯入完成後）：不是「被擋住」，游標維持一般箭頭。
+.is-current .sw-step__button,
+.is-frozen .sw-step__button {
   cursor: default;
 }
 

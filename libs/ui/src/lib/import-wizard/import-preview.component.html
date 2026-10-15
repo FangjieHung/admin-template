@@ -1,6 +1,13 @@
 <p class="iwp-sr" aria-live="polite">{{ announcement() }}</p>
 
 <div class="iwp" [formGroup]="form()">
+  @if (discardedEdits() > 0) {
+    <p class="iwp-note" role="status" data-note="edits-discarded">
+      <span class="material-symbols-rounded iwp-note__icon" aria-hidden="true">info</span>
+      {{ count(labels().editsDiscarded, discardedEdits()) }}
+    </p>
+  }
+
   <div class="iwp-bar">
     <p class="iwp-counts" aria-live="polite">
       <span class="iwp-count">

@@ -1,10 +1,18 @@
-import { Component, inject } from '@angular/core';
+import { Component, Injector, inject, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { ImportResult, ImportSchema, ImportTarget, ImportWizardComponent, ToastService, createLocalStorageMappingStore } from '@admin-template/ui';
+import {
+  ImportResult,
+  ImportSchema,
+  ImportTarget,
+  ImportWizardComponent,
+  ToastService,
+  createLocalStorageMappingStore,
+  openConfirmDialog,
+} from '@admin-template/ui';
 import { provideHeaderTitle } from '../../../layout/header/header-title';
 import { HeaderToolbarDirective } from '../../../layout/header/header-toolbar-slot';
 import { TOAST_PROVIDERS } from '../../../shared/ui/component-label-providers';
-import { IMPORT_WIZARD_LABEL_PROVIDERS } from '../../../shared/ui/import-wizard-labels';
+import { IMPORT_LEAVE_CONFIRM, IMPORT_WIZARD_LABEL_PROVIDERS } from '../../../shared/ui/import-wizard-labels';
 import { TemplateInfo, TemplateInfoComponent } from '../../../shared/ui/template-info.component';
 import { TICKET_ASSIGNEES } from '../data/ticket-demo-data';
 import { TicketRepository } from '../data/ticket.repository';
@@ -51,6 +59,7 @@ const INFO: TemplateInfo = {
     'lib-import-wizard（裡面是 lib-step-wizard、lib-file-upload、lib-data-table、lib-status-chip、確認對話框）',
     'lib-toast（回到列表後的提示）',
     'libs/access：只有能新增工單的角色看得到「匯入」，直接開網址也會檢查',
+    'libs/access 的 unsavedChangesGuard：選了檔案還沒匯入完成就離開時先確認（讀精靈的 hasUnsavedWork()）',
   ],
   replace: [
     '本頁的 schema（要匯入的欄位、選項的其他寫法、負責人的比對方式）',
@@ -59,7 +68,7 @@ const INFO: TemplateInfo = {
   files: [
     'apps/admin/src/app/features/tickets/ticket-import/',
     'apps/admin/src/app/features/tickets/data/ticket.repository.ts',
-    'apps/admin/src/app/features/tickets/tickets.routes.ts（import 路由與權限）',
+    'apps/admin/src/app/features/tickets/tickets.routes.ts（import 路由、權限與離開前確認）',
   ],
 };
 
@@ -109,6 +118,8 @@ export class TicketImportPageComponent {
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
   private readonly listParams = inject(TicketListMemory).queryParams;
+  private readonly injector = inject(Injector);
+  private readonly wizard = viewChild(ImportWizardComponent);
 
   protected readonly info = INFO;
   protected readonly mappingStore = createLocalStorageMappingStore('admin-template.ticket-import');
@@ -181,6 +192,12 @@ export class TicketImportPageComponent {
       title: '匯入工單',
       breadcrumbs: [{ label: '頁面樣板' }, { label: '工單', route: '/templates/tickets' }],
     }));
+  }
+
+  /** 路由離開前（tickets.routes.ts 的 canDeactivate）：選了檔案但還沒匯入完成就先問；按「取消」或匯入完成後不問。 */
+  canLeave(): boolean | Promise<boolean> {
+    if (!this.wizard()?.hasUnsavedWork()) return true;
+    return openConfirmDialog(this.injector, IMPORT_LEAVE_CONFIRM);
   }
 
   protected backToList(): void {

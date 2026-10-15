@@ -1,5 +1,11 @@
 import { Provider } from '@angular/core';
-import { FILE_UPLOAD_LABELS, IMPORT_WIZARD_LABELS, ImportWizardLabels, STEP_WIZARD_LABELS } from '@admin-template/ui';
+import {
+  ConfirmDialogData,
+  FILE_UPLOAD_LABELS,
+  IMPORT_WIZARD_LABELS,
+  ImportWizardLabels,
+  STEP_WIZARD_LABELS,
+} from '@admin-template/ui';
 import { ADMIN_DATA_TABLE_LABELS } from './data-table-labels';
 import { CONFIRM_DIALOG_LABEL_PROVIDERS } from './component-label-providers';
 import { ZH_TW_STEP_WIZARD } from './step-wizard-labels';
@@ -73,6 +79,7 @@ export const ZH_TW_IMPORT_WIZARD: ImportWizardLabels = {
   checkingExisting: '正在比對現有資料…',
   existingFailed: '無法比對現有資料，只檢查檔案內的重複',
   noProblems: '沒有需要修正的列',
+  editsDiscarded: '欄位對應已變更，{count} 筆修改不再適用',
 
   importSummary: '將新增 {create} 筆、更新 {update} 筆，略過 {skip} 筆',
   start: '開始匯入 {count} 筆',
@@ -137,3 +144,14 @@ export const IMPORT_WIZARD_LABEL_PROVIDERS: Provider[] = [
   { provide: FILE_UPLOAD_LABELS, useValue: IMPORT_FILE_UPLOAD },
   { provide: IMPORT_WIZARD_LABELS, useValue: ZH_TW_IMPORT_WIZARD },
 ];
+
+/**
+ * 匯入精靈有還沒匯入的檔案（`hasUnsavedWork()`）時，在 app 內換頁前的確認（頁面的 `canLeave()`，路由掛 unsavedChangesGuard）。
+ * 重新整理或關閉分頁由精靈自己請瀏覽器確認，瀏覽器只顯示它自己的提示。
+ */
+export const IMPORT_LEAVE_CONFIRM: ConfirmDialogData = {
+  title: '還沒完成匯入',
+  message: '離開這一頁的話，已選的檔案和預覽裡的修改都不會保留。',
+  confirmLabel: '放棄匯入',
+  cancelLabel: '留在這一頁',
+};

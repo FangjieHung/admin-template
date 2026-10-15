@@ -1,4 +1,4 @@
-import { Component, signal, viewChild } from '@angular/core';
+import { Component, Injector, inject, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {
   ImportResult,
@@ -6,8 +6,9 @@ import {
   ImportTarget,
   ImportWizardComponent,
   createLocalStorageMappingStore,
+  openConfirmDialog,
 } from '@admin-template/ui';
-import { IMPORT_WIZARD_LABEL_PROVIDERS } from '../../shared/ui/import-wizard-labels';
+import { IMPORT_LEAVE_CONFIRM, IMPORT_WIZARD_LABEL_PROVIDERS } from '../../shared/ui/import-wizard-labels';
 import { DEMO_CONTACTS } from '../../showcase/demo-data';
 import { DemoBlockComponent } from '../../showcase/demo-block.component';
 import { ApiSection, ShowcasePageComponent } from '../../showcase/showcase-page.component';
@@ -48,6 +49,7 @@ export class ImportWizardPageComponent {
   protected readonly entry = ENTRY;
   protected readonly samples = DEMO_SAMPLES;
   private readonly wizard = viewChild(ImportWizardComponent);
+  private readonly injector = inject(Injector);
 
   /** 匯入示範的延遲（測試改成 0）。 */
   delayMs = 350;
@@ -140,6 +142,12 @@ export class ImportWizardPageComponent {
     this.wizard()?.restart();
   }
 
+  /** 路由離開前（showcase-registry 的 guardUnsaved → unsavedChangesGuard）：選了檔案但還沒匯入完成就先問。 */
+  canLeave(): boolean | Promise<boolean> {
+    if (!this.wizard()?.hasUnsavedWork()) return true;
+    return openConfirmDialog(this.injector, IMPORT_LEAVE_CONFIRM);
+  }
+
   protected resultText(result: ImportResult | null): string {
     if (!result) return '（尚未匯入）';
     const head = result.canceled ? '已停止' : '完成';
@@ -189,7 +197,13 @@ readonly target: ImportTarget<Contact> = {
   mappingId="contacts"
   templateFileName="聯絡人匯入範本.csv"
   (finished)="backToList($event)"
-/>`;
+/>
+
+// 離開前確認：路由加 canDeactivate: [unsavedChangesGuard]，頁面用 viewChild 取得精靈
+canLeave() {
+  if (!this.wizard()?.hasUnsavedWork()) return true;
+  return openConfirmDialog(this.injector, { title: '還沒完成匯入', message: '…', confirmLabel: '放棄匯入' });
+}`;
 
   protected readonly api: ApiSection[] = [
     {
@@ -215,6 +229,7 @@ readonly target: ImportTarget<Contact> = {
         { name: '(cancel)', type: 'void', description: '按「取消」（showCancel）。' },
         { name: 'loadFile(file)', type: 'method', description: '用程式選一個檔案（例如載入示範檔案），回到第一步。' },
         { name: 'restart()', type: 'method', description: '清空檔案與結果，回到第一步。' },
+        { name: 'hasUnsavedWork()', type: 'signal<boolean>', description: '選了檔案（或在預覽改過資料）但還沒匯入完成時是 true；匯入完成、按「取消」或 restart() 之後是 false。頁面的 canDeactivate 讀它決定要不要先確認；重新整理或關閉分頁時精靈自己請瀏覽器確認。' },
       ],
     },
     {

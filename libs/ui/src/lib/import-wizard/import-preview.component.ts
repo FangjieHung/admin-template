@@ -52,6 +52,8 @@ export class ImportPreviewComponent {
   readonly checking = input(false);
   /** `findExisting` 失敗。 */
   readonly existingFailed = input(false);
+  /** 換了欄位對應後不再適用、已經丟掉的修改數（大於 0 時在上方說明）。 */
+  readonly discardedEdits = input(0);
 
   readonly edit = output<ImportCellEdit>();
 
