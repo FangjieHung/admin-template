@@ -199,6 +199,8 @@ export class DataTableEditController<T> {
   /** 焦點在表格裡（資料列重排、換頁後要把焦點放回目前的格子）。 */
   private hasFocus = false;
   private announceFlip = false;
+  /** 編輯中的格子（開始編輯前量好寬高、寫在格子上；關閉編輯器時拿掉）。 */
+  private lockedCell: HTMLElement | null = null;
 
   readonly active = signal<ActiveCell | null>(null);
   readonly editing = signal<Editing<T> | null>(null);
@@ -343,6 +345,15 @@ export class DataTableEditController<T> {
       ),
     );
     this.effects.push(effect(() => host.dirtyChange(this.dirty()), { injector }));
+    // 編輯器關掉（確定、取消、換頁、列不見了…）時放開格子的寬高。根 effect 在畫面更新之前跑，同一輪拿掉編輯器，不會閃。
+    this.effects.push(
+      effect(
+        () => {
+          if (!this.editing()) untracked(() => this.unlockCell());
+        },
+        { injector },
+      ),
+    );
     // 欄位換成有關聯欄時先把 relation-select 的編輯器載好（資料表載入控制器時已經先載過一次）。
     this.effects.push(
       effect(
@@ -383,6 +394,7 @@ export class DataTableEditController<T> {
 
   destroy(): void {
     this.destroyed = true;
+    this.unlockCell();
     for (const ref of this.effects) ref.destroy();
     for (const fn of this.cleanups) fn();
     for (const ac of this.aborts.values()) ac.abort();
@@ -701,6 +713,7 @@ export class DataTableEditController<T> {
         if (error()) error.set(this.check(editor, raw, row).error);
       },
     };
+    this.lockCell(this.cellElement(id, col.key));
     this.active.set({ id, key: col.key });
     this.editing.set({
       id,
@@ -1111,12 +1124,39 @@ export class DataTableEditController<T> {
 
   private currentElement(): HTMLElement | null {
     const current = this.current();
-    if (!current) return null;
+    return current ? this.cellElement(current.id, current.key) : null;
+  }
+
+  private cellElement(id: unknown, key: string): HTMLElement | null {
     const rowId = this.host.rowId();
-    const index = this.host.displayRows().findIndex((r) => rowId(r) === current.id);
+    const index = this.host.displayRows().findIndex((r) => rowId(r) === id);
     if (index < 0) return null;
     const candidates = this.host.element.querySelectorAll<HTMLElement>(`[data-dt-row="${index}"]`);
-    return [...candidates].find((el) => el.getAttribute('data-dt-col') === current.key) ?? null;
+    return [...candidates].find((el) => el.getAttribute('data-dt-col') === key) ?? null;
+  }
+
+  /**
+   * 開始編輯前把格子目前的寬高寫在格子上：內容換成輸入框後，auto layout 會用「這一欄剩下最寬的內容」重算欄寬，
+   * 在最寬那一格開始編輯時整欄會變窄、別欄跟著動。格子的 width 在 auto layout 裡是這一欄的寬度（多出來的空間
+   * 分給其他欄），height 是這一列的最小高度。
+   */
+  private lockCell(el: HTMLElement | null): void {
+    this.unlockCell();
+    if (!el) return;
+    const { width, height } = el.getBoundingClientRect();
+    if (!width) return;
+    el.style.width = el.style.minWidth = `${width}px`;
+    el.style.height = `${height}px`;
+    this.lockedCell = el;
+  }
+
+  private unlockCell(): void {
+    const el = this.lockedCell;
+    if (!el) return;
+    this.lockedCell = null;
+    el.style.removeProperty('width');
+    el.style.removeProperty('min-width');
+    el.style.removeProperty('height');
   }
 
   private positionOf(el: HTMLElement): { row: T; rowIndex: number; key: string } | null {

@@ -616,6 +616,25 @@ describe('DataTable 表格內直接編輯', () => {
       expect(el.querySelector('lib-relation-select')).toBeNull();
     });
 
+    it('開始編輯時格子鎖住打開前的寬高（欄寬、列高不跳），換格時換鎖、關閉編輯器時放開', async () => {
+      const box = (width: number, height: number) => ({ width, height, top: 0, left: 0, right: width, bottom: height, x: 0, y: 0, toJSON: () => ({}) }) as DOMRect;
+      vi.spyOn(cell(0, 'title'), 'getBoundingClientRect').mockReturnValue(box(190.5, 44.25));
+      vi.spyOn(cell(0, 'hours'), 'getBoundingClientRect').mockReturnValue(box(96, 44.25));
+      await key(cell(0, 'title'), 'Enter');
+      expect(editor()).not.toBeNull();
+      const title = cell(0, 'title');
+      expect([title.style.width, title.style.minWidth, title.style.height]).toEqual(['190.5px', '190.5px', '44.25px']);
+      // Tab：確定往右，下一格（數字）開始編輯時鎖住它、放開上一格
+      await key(editor()!, 'Tab');
+      await key(cell(0, 'hours'), 'Enter');
+      expect(editor()).not.toBeNull();
+      expect(title.getAttribute('style') ?? '').toBe('');
+      expect([cell(0, 'hours').style.width, cell(0, 'hours').style.height]).toEqual(['96px', '44.25px']);
+      await key(editor()!, 'Escape');
+      expect(editor()).toBeNull();
+      expect(cell(0, 'hours').getAttribute('style') ?? '').toBe('');
+    });
+
     it('關聯欄：打字開始編輯，搜尋框是打的字（原本的值查完也不蓋回去），以它搜尋並列出候選；Esc 取消回到原值', async () => {
       cell(0, 'owner').focus();
       await settle();
