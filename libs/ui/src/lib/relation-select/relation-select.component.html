@@ -3,7 +3,7 @@
   [class.rs-field--invalid]="invalidShown()"
   [appearance]="appearance()"
   [subscriptSizing]="subscriptSizing()"
-  [floatLabel]="resolving() ? 'always' : 'auto'"
+  [floatLabel]="busy() ? 'always' : 'auto'"
 >
   @if (label()) {
     <mat-label>{{ label() }}</mat-label>
@@ -15,20 +15,20 @@
     type="text"
     autocomplete="off"
     [value]="text()"
-    [placeholder]="resolving() ? '' : placeholder()"
+    [placeholder]="busy() ? '' : placeholder()"
     [required]="isRequired()"
     [disabled]="isDisabled()"
-    [readonly]="readonly() || resolving()"
+    [readonly]="readonly() || busy()"
     [errorStateMatcher]="errorMatcher"
     [matAutocomplete]="auto"
     [matAutocompleteDisabled]="readonly() || isDisabled()"
-    [attr.aria-busy]="resolving() ? 'true' : null"
+    [attr.aria-busy]="busy() ? 'true' : null"
     [attr.aria-label]="ariaLabel()"
     (input)="onInput($event)"
     (focus)="onFocus()"
     (blur)="onBlur()"
   />
-  @if (resolving()) {
+  @if (busy()) {
     <span class="rs-resolving" aria-hidden="true"></span>
   }
   @if (showClear()) {

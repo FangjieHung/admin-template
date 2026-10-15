@@ -330,6 +330,27 @@ describe('RelationSelectComponent', () => {
     expect(input.value).toBe('u500');
   });
 
+  it('startSearch：輸入框換成那段字並立刻搜尋；初始值查完不蓋回去，沒選就離開時還原成已選項', async () => {
+    const { fixture, source, input } = setup((h) => h.value.set('u1'));
+    await settle(fixture);
+    input.focus();
+    const select = fixture.debugElement.children[0].componentInstance as RelationSelectComponent<Person>;
+    select.startSearch('林');
+    await settle(fixture);
+    expect(input.value).toBe('林');
+    expect(input.readOnly).toBe(false); // 打進來的字可以接著改
+    expect(fixture.nativeElement.querySelector('.rs-resolving')).toBeNull();
+    expect(source.calls.map((c) => c.query)).toEqual(['林']);
+    source.byId[0].resolve(PEOPLE[0]);
+    source.last().resolve({ items: [PEOPLE[3]], hasMore: false });
+    await settle(fixture);
+    expect(input.value).toBe('林');
+    expect(optionTexts()).toEqual(['美惠林美惠meihui@example.com']);
+    input.blur();
+    await settle(fixture);
+    expect(input.value).toBe('王小明');
+  });
+
   it('外部改 value：先前的解析作廢，新的 id 重新查', async () => {
     const { fixture, host, source, input } = setup((h) => h.value.set('u1'));
     await settle(fixture);

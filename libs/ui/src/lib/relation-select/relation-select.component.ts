@@ -138,6 +138,10 @@ export class RelationSelectComponent<T> implements ControlValueAccessor, DoCheck
   // ---- 初始值解析 ----
   protected readonly resolving = signal(false);
   protected readonly resolveFailedId = signal<string | null>(null);
+  /** 輸入框是 startSearch 帶進來的字：初始值查完只記下已選項，不把輸入框改回它的文字。 */
+  private readonly typedOver = signal(false);
+  /** 解析初始值中、而且輸入框還沒有打進來的字：顯示骨架、唯讀。 */
+  protected readonly busy = computed(() => this.resolving() && !this.typedOver());
 
   private searchSeq = 0;
   private searchAbort: AbortController | null = null;
@@ -156,7 +160,7 @@ export class RelationSelectComponent<T> implements ControlValueAccessor, DoCheck
     () => this.required() || !!this.ngControl?.control?.hasValidator(Validators.required),
   );
   protected readonly showClear = computed(
-    () => this.value() !== null && !this.isDisabled() && !this.readonly() && !this.resolving(),
+    () => this.value() !== null && !this.isDisabled() && !this.readonly() && !this.busy(),
   );
   protected readonly canCreate = computed(
     () => this.allowCreate() && this.phase() === 'results' && this.resultQuery().length > 0 && !this.exactMatch(),
@@ -167,7 +171,7 @@ export class RelationSelectComponent<T> implements ControlValueAccessor, DoCheck
   });
   /** 給報讀器的狀態（aria-live）：載入中、找不到、搜尋失敗、初始值查不到。 */
   protected readonly liveMessage = computed(() => {
-    if (this.resolving() || this.loadingVisible()) return this.labels.loading;
+    if (this.busy() || this.loadingVisible()) return this.labels.loading;
     if (this.resolveFailedId() !== null) return this.resolveFailedText();
     if (this.phase() === 'error') return this.labels.searchFailed;
     if (this.phase() === 'results' && this.items().length === 0) return this.noResultsText();
@@ -240,9 +244,21 @@ export class RelationSelectComponent<T> implements ControlValueAccessor, DoCheck
     this.formDisabled.set(disabled);
   }
 
+  /**
+   * 用一段字開始搜尋：輸入框換成這段字、立刻以它搜尋並打開清單（例：資料表的關聯欄用打字開始編輯）。
+   * 初始值還在查時，查完只記下已選項、不把輸入框改回它的文字；沒選就離開時照樣還原成已選項的文字。
+   */
+  startSearch(text: string): void {
+    if (this.isDisabled() || this.readonly()) return;
+    this.typedOver.set(true);
+    this.setText(text);
+    this.search(text.trim());
+    this.trigger().openPanel();
+  }
+
   // ---- 範本事件 ----
   protected onFocus(): void {
-    if (this.isDisabled() || this.readonly() || this.resolving()) return;
+    if (this.isDisabled() || this.readonly() || this.busy()) return;
     const query = this.queryFromText();
     // 同一個字已經有結果就不重搜（例如選完之後焦點回到輸入框）。
     if (!this.pending() && this.phase() === 'results' && this.resultQuery() === query) return;
@@ -287,6 +303,7 @@ export class RelationSelectComponent<T> implements ControlValueAccessor, DoCheck
 
   protected clear(): void {
     this.cancelSearch();
+    this.typedOver.set(false);
     this.selected.set(null);
     this.resolveFailedId.set(null);
     this.setText('');
@@ -317,6 +334,7 @@ export class RelationSelectComponent<T> implements ControlValueAccessor, DoCheck
   // ---- 內部 ----
   private select(item: T): void {
     this.cancelSearch();
+    this.typedOver.set(false);
     this.selected.set(item);
     this.resolveFailedId.set(null);
     this.setText(this.displayWith()(item));
@@ -416,7 +434,7 @@ export class RelationSelectComponent<T> implements ControlValueAccessor, DoCheck
     const abort = new AbortController();
     this.resolveAbort = abort;
     this.resolving.set(true);
-    this.setText('');
+    if (!this.typedOver()) this.setText('');
     let request: Promise<T | null>;
     try {
       request = this.source().getById(id, abort.signal);
@@ -429,7 +447,7 @@ export class RelationSelectComponent<T> implements ControlValueAccessor, DoCheck
         this.resolving.set(false);
         if (item) {
           this.selected.set(item);
-          this.setText(this.displayWith()(item));
+          if (!this.typedOver()) this.setText(this.displayWith()(item));
         } else {
           this.failResolve(id);
         }
@@ -445,12 +463,13 @@ export class RelationSelectComponent<T> implements ControlValueAccessor, DoCheck
   /** 查不到：輸入框顯示 id 本身（不讓欄位空白），下方提示。 */
   private failResolve(id: string): void {
     this.resolveFailedId.set(id);
-    this.setText(id);
+    if (!this.typedOver()) this.setText(id);
   }
 
   /** 還原成目前已選項的文字（沒選＝空白；初始值查不到＝id）。 */
   private restoreText(): void {
     this.clearDebounce();
+    this.typedOver.set(false);
     const item = this.selected();
     const failed = this.resolveFailedId();
     const restored = item ? this.displayWith()(item) : (failed ?? '');

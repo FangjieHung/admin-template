@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, OnInit, afterNextRender, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnInit, afterNextRender, computed, inject, input, signal, viewChild } from '@angular/core';
 import { RelationSelectComponent } from '../relation-select/relation-select.component';
 import type { DataTableEditIntent, DataTableEditorContext } from './data-table-edit.controller';
 
@@ -41,6 +41,7 @@ export class DataTableRelationEditorComponent implements OnInit {
   readonly context = input.required<DataTableEditorContext>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly select = viewChild.required(RelationSelectComponent);
   protected readonly value = signal<string | null>(null);
   private done = false;
 
@@ -65,9 +66,8 @@ export class DataTableRelationEditorComponent implements OnInit {
         if (!input) return;
         input.focus({ preventScroll: true });
         if (ctx.seeded) {
-          // 打字開始編輯：那個字就是搜尋字。
-          input.value = ctx.text;
-          input.dispatchEvent(new Event('input', { bubbles: true }));
+          // 打字開始編輯：那個字就是搜尋字（原本的值查完也不蓋回去；Esc 取消時回到原本的值）。
+          this.select().startSearch(ctx.text);
         } else {
           input.select();
         }

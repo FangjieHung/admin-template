@@ -615,6 +615,35 @@ describe('DataTable 表格內直接編輯', () => {
       await settle();
       expect(el.querySelector('lib-relation-select')).toBeNull();
     });
+
+    it('關聯欄：打字開始編輯，搜尋框是打的字（原本的值查完也不蓋回去），以它搜尋並列出候選；Esc 取消回到原值', async () => {
+      cell(0, 'owner').focus();
+      await settle();
+      const s = sink()!;
+      s.value = '林';
+      s.dispatchEvent(new InputEvent('input', { data: '林', inputType: 'insertText', bubbles: true }));
+      await settle();
+      for (let i = 0; !el.querySelector('lib-relation-select') && i < 30; i++) {
+        await new Promise((r) => setTimeout(r, 10));
+        await settle();
+      }
+      const input = el.querySelector<HTMLInputElement>('lib-relation-select input')!;
+      // 原本的值（王小明）查詢完成、搜尋回來之後
+      for (let i = 0; i < 5; i++) {
+        await new Promise((r) => setTimeout(r, 100));
+        await settle();
+      }
+      expect(input.value).toBe('林');
+      expect(document.activeElement).toBe(input);
+      const options = [...document.querySelectorAll('.lib-relation-select-panel mat-option')].map((o) => o.textContent?.trim());
+      expect(options).toEqual(['林美惠']);
+      // 第一次 Esc 關清單、第二次取消：格子回到原值，沒有存檔
+      await key(input, 'Escape');
+      if (el.querySelector('lib-relation-select')) await key(input, 'Escape');
+      expect(el.querySelector('lib-relation-select')).toBeNull();
+      expect(cell(0, 'owner').textContent).toContain('王小明');
+      expect(host.cellSave).not.toHaveBeenCalled();
+    });
   });
 
   describe('批次修改', () => {
