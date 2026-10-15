@@ -20,6 +20,19 @@
   gap: 0.5rem;
 }
 
+// 手機（768px 以下）：跟其他樣板頁一致——「樣板說明」圖示留在頁首第一列（全站搜尋左邊），
+// 期間切換像篩選列一樣獨佔第二列、齊左（order 2 同 lib-page-toolbar 的篩選列）。
+@media (max-width: 767.98px) {
+  .db-toolbar {
+    display: contents;
+  }
+
+  .db-period {
+    order: 2;
+    flex-basis: 100%;
+  }
+}
+
 .db {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

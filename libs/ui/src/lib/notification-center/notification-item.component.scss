@@ -5,7 +5,9 @@
 :host {
   // sr-only 是 absolute：host 當定位基準。
   position: relative;
-  display: block;
+  // 一欄的 grid：主按鈕、動作列各一列；「標為已讀」「移除」疊在主按鈕那一格的右下角（跟時間・類別同一行）。
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   border-bottom: var(--lib-notif-item-divider, 0 solid transparent);
   border-radius: var(--lib-notif-item-radius, 0px);
   background-color: var(--_surface, transparent);
@@ -35,6 +37,7 @@
 }
 
 .ni-main {
+  grid-area: 1 / 1;
   display: grid;
   grid-template-columns: var(--_dot) var(--_lead) minmax(0, 1fr);
   column-gap: 0.625rem;
@@ -129,8 +132,6 @@
 }
 
 .ni-title {
-  // 右上角留給「標為已讀」「移除」兩顆按鈕。
-  padding-inline-end: var(--_tools);
   font-family: var(--lib-notif-title-font, var(--font-body));
   line-height: 1.4;
   overflow-wrap: anywhere;
@@ -155,6 +156,8 @@
   flex-wrap: wrap;
   gap: 0 0.375rem;
   margin-top: 0.125rem;
+  // 右側留給「標為已讀」「移除」兩顆按鈕（.ni-tools 疊在這一行的右邊）。
+  padding-inline-end: var(--_tools);
   color: var(--mat-sys-on-surface-variant);
   font-size: var(--lib-notif-meta-size, 0.75rem);
   font-variant-caps: var(--lib-notif-meta-caps, normal);
@@ -162,16 +165,20 @@
 }
 
 .ni-extra {
+  grid-row: 2;
   padding: 0 var(--_pad-inline) var(--_pad-block)
     calc(var(--_pad-inline) - 0.375rem + var(--_dot) + var(--_lead) + 1.25rem);
   margin-top: calc(var(--_pad-block) * -0.5);
 }
 
+// 「標為已讀」「移除」：疊在主按鈕那一格的右下角，跟時間・類別同一行（行高約 1.0625rem，按鈕 2rem，往下多出的一半落在下內距裡）。
+// 以前放在右上角、標題右側整欄都讓出 4.25rem，手機上一行還有很多空間就換行；放在時間這一行，標題與說明都用滿整欄寬。
 .ni-tools {
-  position: absolute;
-  top: calc(var(--_pad-block) - 0.375rem);
-  right: calc(var(--_pad-inline) - 0.5rem);
+  grid-area: 1 / 1;
+  align-self: end;
+  justify-self: end;
   display: flex;
+  margin: 0 calc(var(--_pad-inline) - 0.5rem) calc(var(--_pad-block) - 0.46875rem) 0;
 
   --mat-icon-button-state-layer-size: 2rem;
   --mat-icon-button-icon-size: 1.125rem;

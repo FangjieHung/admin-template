@@ -12,6 +12,16 @@
   display: contents;
 }
 
+/* 手機版（768px 以下）：這一塊退出版面（display: contents），搜尋鈕與搜尋列直接成為 topbar 的 flex item——
+   搜尋鈕留在第一列、緊貼頁首的全站搜尋＋鈴鐺左邊（標題用剩下的寬度，太長就省略）；
+   搜尋列排在第二列（order 2，在篩選列前面），展開時獨佔整列。收合時它寬 0、排在第一列最後，
+   用負的左邊距抵掉 topbar 的欄間距（≤ 900px 是 12px），右側按鈕才會貼齊頁首右緣。 */
+.toolbar-main {
+  @media (max-width: 767.98px) {
+    display: contents;
+  }
+}
+
 /* 收合態下 toggle 按鈕永遠留在第一列（title 同列）的右側，不參與展開動畫，
    避免「展開時的寬度變化」與「觸發換行」耦合在同一個元素上——那正是舊版
    會閃跳的原因：input 寬度一變寬就立刻跨過換行門檻，換行與變寬同一幀發生，
@@ -32,15 +42,18 @@
    退出版面計算，讓 .search 變回 row1（toggle 所在的 flex 容器）的
    直接 flex item，在原地用 width 從 0 長到 12rem 上限，不換行。 */
 .search-row {
+  order: 2;
   flex-grow: 0;
   flex-shrink: 0;
   flex-basis: 0;
   min-width: 0;
+  margin-inline-start: -0.75rem;
   display: grid;
   grid-template-rows: 0fr;
   transition:
     grid-template-rows var(--app-motion-base) var(--app-ease-standard),
-    flex-basis 0s linear var(--app-motion-base);
+    flex-basis 0s linear var(--app-motion-base),
+    margin 0s linear var(--app-motion-base);
 
   @variant md {
     display: contents;
@@ -49,10 +62,12 @@
 
 .search-row--expanded {
   flex-basis: 100%;
+  margin-inline-start: 0;
   grid-template-rows: 1fr;
   transition:
     grid-template-rows var(--app-motion-base) var(--app-ease-standard),
-    flex-basis 0s linear 0s;
+    flex-basis 0s linear 0s,
+    margin 0s linear 0s;
 
   @variant md {
     display: contents;

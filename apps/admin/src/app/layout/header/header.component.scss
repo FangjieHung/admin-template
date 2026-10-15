@@ -9,6 +9,8 @@
   align-items: flex-start;
   gap: 1.5rem .75rem;
   padding: 1rem 1.75rem;
+  // 查詢容器：全站搜尋要不要長成搜尋框，看頁首實際的寬度（側欄展開／收合都算進去），不是視窗寬度。
+  container-type: inline-size;
 }
 
 .topbar-lead {
@@ -38,14 +40,15 @@
   }
 }
 
-// 全站搜尋（⌘K）：寬螢幕（≥ 1280px：工單頁的頁面工具列＋這個 15rem 的框，在側欄展開時也放得下）長得像搜尋框——
+// 全站搜尋（⌘K）：頁首內容寬（.topbar 是查詢容器）≥ 880px 時長得像搜尋框——工單頁的頁面工具列＋這個 15rem 的框
+// 實測 788px 就排得進同一列；視窗 1024px 側欄收合（884px）、1216px 以上側欄展開都在這個寬度以上。
 // 放大鏡、「搜尋全站…」（::after，內容是 aria-label，看得到的字與念出來的名稱一致）、靠右的快捷鍵框（::before 用 order
 // 排到最後，內容是 data-kbd）。外框讀 --lib-cmdk-kbd-frame（質地在 .lib-command-palette 上設，CONTRACT.md「指令面板」），
 // 快捷鍵框沿用同一條框與按鈕的圓角（inherit）；內距沿用圖示按鈕的（四邊 8px）、底色維持質地給圖示按鈕的樣子。
 // 權重：[data-kbd] 讓這條是 0-3-0，跟質地在圖示按鈕上設 border 的規則（:root[data-paradigm] .mat-mdc-icon-button）同權重，
 // 元件樣式（<style>）永遠排在質地的 <link> 之後，所以這裡贏。窄螢幕只有圖示。
 // 這裡在 Initial bundle，寫法盡量省（px、inherit、order 只寫一次）。
-@media (min-width: 1280px) {
+@container (min-width: 880px) {
   .topbar-search[data-kbd] {
     display: flex;
     align-items: center;
@@ -95,13 +98,20 @@
   display: contents;
 }
 
-// 麵包屑＋大標題：語意上是同一個 nav（可點的上層路徑 + 不可點的目前頁 h1）。
+// 麵包屑＋大標題：語意上是同一個 nav（可點的上層路徑 + 不可點的目前頁 h1）。直排兩列：nav 的寬度是較寬那一列
+// （以前是一個會換行的 flex，排版時把麵包屑與大標的寬度加在一起算，短標題也會把右側按鈕擠到下一列）。
 .topbar-title {
+  display: grid;
+  grid-template-columns: minmax(0, auto);
+  gap: 2px;
+  min-width: 0;
+}
+
+.topbar-crumbs {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 2px 4px;
-  min-width: 0;
 }
 
 .topbar-back {
@@ -145,10 +155,8 @@
   color: var(--mat-sys-on-surface-variant);
 }
 
-// flex-basis: 100% 讓大標題換到麵包屑下一行（沒有麵包屑時就直接是唯一一行）。
 .topbar-heading {
   display: flex;
-  flex-basis: 100%;
   align-items: center;
   gap: 0.625rem;
 }
@@ -166,6 +174,26 @@
 
 .menu-toggle {
   display: none;
+}
+
+// 手機（768px 以下，頁面動作已移到底部固定列）：第一列固定是「選單｜標題…｜頁面的圖示按鈕｜全站搜尋＋鈴鐺」。
+// 標題區的基準寬是 0、吃掉剩下的空間，標題太長就省略（…），右側的圖示按鈕永遠留在第一列；
+// 篩選、期間切換這類整列的控制項（order: 2）排在第二列。
+@media (max-width: 767.98px) {
+  .topbar-lead {
+    flex: 1 1 0;
+  }
+
+  .topbar-heading h1 {
+    min-width: 0;
+  }
+
+  .topbar-heading h1 span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 @media (max-width: 900px) {

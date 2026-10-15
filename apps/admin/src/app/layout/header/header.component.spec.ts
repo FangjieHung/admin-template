@@ -47,6 +47,21 @@ describe('HeaderComponent 由選單推得的標題（defaultTitle，沒有頁面
     expect(el.querySelector('h1')?.textContent).toBe('首頁');
   });
 
+  it('麵包屑自成一列（.topbar-crumbs），大標在下一列；沒有麵包屑時不留空的那一列', () => {
+    // nav 是直排：寬度取較寬的那一列，不是麵包屑＋大標相加（手機上短標題不會把右側按鈕擠到下一列）。
+    const withCrumbs = setup({ title: '工單 TK-2048', breadcrumbs: [{ label: '頁面樣板' }, { label: '工單' }] });
+    const nav = (withCrumbs.nativeElement as HTMLElement).querySelector('.topbar-title') as HTMLElement;
+    const rows = Array.from(nav.children).map((c) => c.className);
+    expect(rows).toEqual(['topbar-crumbs', 'topbar-heading']);
+    expect(nav.querySelectorAll('.topbar-crumbs .breadcrumb-text')).toHaveLength(2);
+    // 標題字包在 span 裡：省略號裁的是 span，質地畫在 h1 上的裝飾（偽元素）不受影響。
+    expect(nav.querySelector('h1 > span')?.textContent).toBe('工單 TK-2048');
+    TestBed.resetTestingModule();
+
+    const noCrumbs = setup({ title: '首頁', breadcrumbs: [] });
+    expect((noCrumbs.nativeElement as HTMLElement).querySelector('.topbar-crumbs')).toBeNull();
+  });
+
   it('找不到選單對應時的退回行為：顯示 defaultTitle 給的內容（由 App 算出，不寫死「首頁」）', () => {
     // App 對找不到選單對應的路由算出空標題（不退回「首頁」）；header 單純忠實顯示 defaultTitle。
     const fixture = setup({ title: '', breadcrumbs: [] });
