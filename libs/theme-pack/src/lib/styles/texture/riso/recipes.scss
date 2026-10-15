@@ -657,6 +657,8 @@
 // （level1）；張數是主墨線框的膠囊；放置預覽是主墨虛線。表面上不做錯位、不壓網點（都有字）。
 :root[data-paradigm='riso'] {
   .lib-kanban-board {
+    // 黏住的欄頭（分組模式）底下墊的底色＝卡片底色（同 --lib-cal-surface）。
+    --lib-kanban-surface: var(--riso-card);
     --lib-kanban-column-bg: var(--riso-raised);
     --lib-kanban-head-divider: var(--riso-rule);
     --lib-kanban-title-font: var(--font-display);

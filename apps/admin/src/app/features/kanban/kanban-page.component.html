@@ -61,6 +61,59 @@
   </app-demo-block>
 
   <app-demo-block
+    heading="依負責人分組（泳道）"
+    description="給 [groupBy] 就把卡片依負責人分成橫向的道；每道有名稱與張數，按標題可以收合。欄頭只出現一次，往下捲時黏在看板頂端；「進行中」的 WIP 上限一樣照整欄計算。把卡片拖到另一道就是換負責人（同一欄或順便換欄都可以），也可以用 Alt＋↑／↓（到格子的頭尾時換到上一道或下一道），或「移動」選單的「換到其他分組」。示範規則：放進「已完成」的工單一定要有負責人，拖到「未指派」那一道的「已完成」會被擋下。"
+  >
+    <div data-demo="lanes">
+      <lib-kanban-board
+        label="依負責人分組的工單看板"
+        [columns]="columns"
+        [items]="laneTickets()"
+        [cardKey]="key"
+        [cardColumn]="column"
+        [cardTitle]="title"
+        [groupBy]="owner"
+        [groups]="groups"
+        [(collapsedGroups)]="collapsedLanes"
+        [canMove]="laneCanMove"
+        (moved)="onLaneMoved($event)"
+        (moveRejected)="onLaneRejected($event)"
+        (addCard)="onLaneAdd($event)"
+      >
+        <ng-template libKanbanCard [libKanbanCardOf]="laneTickets()" let-ticket>
+          <div class="kanban-ticket">
+            <div class="kanban-ticket__top">
+              <span class="kanban-ticket__id ui-text-numeric">{{ ticket.id }}</span>
+              <span class="ui-chip" [class]="'ui-chip--' + priorityTones[ticket.priority]">
+                <span class="ui-chip__dot"></span>{{ priorityLabels[ticket.priority] }}
+              </span>
+            </div>
+            <p class="kanban-ticket__title">{{ ticket.title }}</p>
+            <div class="kanban-ticket__meta">
+              <span class="kanban-ticket__due">
+                <span class="material-symbols-rounded" aria-hidden="true">event</span>
+                <span class="ui-text-numeric">期限 {{ formatDue(ticket.dueDate) }}</span>
+              </span>
+            </div>
+          </div>
+        </ng-template>
+      </lib-kanban-board>
+
+      <div class="kanban-demo-actions">
+        <button matButton="outlined" type="button" data-demo-action="reset-lanes" (click)="resetLanes()">重設示範資料</button>
+      </div>
+      <h3 class="ui-text-caption kanban-demo-log-title">最近的事件</h3>
+      <ul class="demo-list kanban-demo-log" aria-live="off" data-demo-log="lanes">
+        @for (line of laneLog(); track $index) {
+          <li>{{ line }}</li>
+        } @empty {
+          <li class="demo-list__empty">（還沒有移動或新增）</li>
+        }
+      </ul>
+    </div>
+  </app-demo-block>
+
+  <app-demo-block
     heading="載入中與空看板"
     description="看板本身不管載入：資料還在路上時，頁面用骨架（lib-skeleton）排出欄位的樣子；完全沒有資料時用空狀態（lib-empty-state）帶出第一個動作；有欄位但某一欄沒有卡片時，看板自己顯示「沒有卡片」。"
   >

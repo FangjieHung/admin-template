@@ -1,4 +1,4 @@
-import type { KanbanColumn } from '@admin-template/ui';
+import type { KanbanColumn, KanbanGroup } from '@admin-template/ui';
 
 /** 看板展示頁的示範工單（中性資料）。欄位 id 對到 `status`。 */
 export type KanbanTicketPriority = 'urgent' | 'high' | 'medium' | 'low';
@@ -35,6 +35,16 @@ export const KANBAN_DEMO_COLUMNS: readonly KanbanColumn[] = [
   { id: 'doing', title: '進行中', wipLimit: 3, hint: '同時最多 3 張，超過時欄位會提醒' },
   { id: 'review', title: '待確認', hint: '等申請人確認結果' },
   { id: 'done', title: '已完成' },
+];
+
+/** 「依負責人分組」示範的分組 id：負責人姓名；沒有負責人的放在「未指派」。 */
+export const KANBAN_UNASSIGNED = 'unassigned';
+
+export const KANBAN_DEMO_GROUPS: readonly KanbanGroup[] = [
+  { id: '王小明', title: '王小明' },
+  { id: '林雅婷', title: '林雅婷' },
+  { id: '陳志豪', title: '陳志豪' },
+  { id: KANBAN_UNASSIGNED, title: '未指派' },
 ];
 
 export function kanbanDemoTickets(): KanbanTicket[] {

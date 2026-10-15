@@ -435,6 +435,8 @@
 // 沒有陰影；張數是純文字。狀態外框都改成 1px（髮絲）。
 :root[data-paradigm='editorial'] {
   .lib-kanban-board {
+    // 黏住的欄頭（分組模式）底下墊的底色＝卡片底色（同 --lib-cal-surface）。
+    --lib-kanban-surface: var(--mat-sys-surface-container-low);
     --lib-kanban-gap: 1.5rem;
     --lib-kanban-column-bg: transparent;
     --lib-kanban-column-radius: 0px;

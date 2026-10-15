@@ -688,6 +688,8 @@
 // 滑過再描一次，拖曳中換成麥克筆＋再描一次；欄頭下一條直的細分隔；張數是手繪小圓框。高對比時抖動拉直。
 :root[data-paradigm='sketch'] {
   .lib-kanban-board {
+    // 黏住的欄頭（分組模式）底下墊的底色＝卡片底色（同 --lib-cal-surface）。
+    --lib-kanban-surface: var(--sketch-card);
     --lib-kanban-board-padding: 0.375rem;
     --lib-kanban-column-bg: var(--sketch-card);
     --lib-kanban-column-frame: var(--sketch-pen-w) solid var(--sketch-pen);

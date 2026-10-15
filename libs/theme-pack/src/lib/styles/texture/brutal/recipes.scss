@@ -732,6 +732,8 @@
 // primary-container 的方形貼紙。狀態外框 3px。
 :root[data-paradigm='brutal'] {
   .lib-kanban-board {
+    // 黏住的欄頭（分組模式）底下墊的底色＝卡片底色（同 --lib-cal-surface）。
+    --lib-kanban-surface: var(--brutal-card);
     --lib-kanban-board-padding: 0.5rem;
     --lib-kanban-column-bg: var(--mat-sys-surface-container-low);
     --lib-kanban-column-frame: var(--brutal-line);

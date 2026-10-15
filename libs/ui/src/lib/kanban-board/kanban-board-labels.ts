@@ -3,7 +3,8 @@ import { InjectionToken } from '@angular/core';
 /**
  * 看板（lib-kanban-board）的畫面文字。libs/ui 不內建使用者可見字串，由使用端在 `providers` 提供一次。
  * 帶參數的句子用 `{name}` 佔位（同其他 libs/ui 元件）：`{title}` 換成卡片標題、`{column}` 換成欄位名稱、
- * `{position}` 換成第幾張（從 1 起算）、`{total}`／`{count}` 換成張數、`{limit}` 換成 WIP 上限、`{over}` 換成超出幾張。
+ * `{position}` 換成第幾張（從 1 起算）、`{total}`／`{count}` 換成張數、`{limit}` 換成 WIP 上限、`{over}` 換成超出幾張、
+ * `{group}` 換成分組（泳道）名稱。
  */
 export interface KanbanLabels {
   /** 卡片的角色描述（`aria-roledescription`），例：「卡片」。 */
@@ -38,6 +39,16 @@ export interface KanbanLabels {
   addCardInput: string;
   /** 新增卡片輸入框下方的提示，例：「Enter 新增，Esc 取消」。 */
   addCardHint: string;
+  /** 分組模式：卡片聚焦時念的位置，例：「{group}，{column}，第 {position} 張，共 {total} 張」。 */
+  groupCardPosition: string;
+  /** 分組模式：卡片聚焦時念的操作提示，例：「…Alt 加上下方向鍵調整順序，到頭尾時換到上一組或下一組…」。 */
+  groupKeyboardHint: string;
+  /** 分組模式：移動完成後念的字，例：「已將「{title}」移到「{group}」的「{column}」第 {position} 張」。 */
+  announceMovedGroup: string;
+  /** 分組模式：「移動」選單裡開出分組清單的項目，例：「換到其他分組」。 */
+  moveToGroupMenu: string;
+  /** 分組模式：分組清單的項目（放在該格最後），例：「換到「{group}」」。 */
+  moveToGroup: string;
 }
 
 export const KANBAN_LABELS = new InjectionToken<KanbanLabels>('KANBAN_LABELS');
@@ -59,6 +70,11 @@ const KEYS: readonly (keyof KanbanLabels)[] = [
   'addCard',
   'addCardInput',
   'addCardHint',
+  'groupCardPosition',
+  'groupKeyboardHint',
+  'announceMovedGroup',
+  'moveToGroupMenu',
+  'moveToGroup',
 ];
 
 /** 開發期設定錯誤（忘了提供文字或少了某一句）時直接丟出明確訊息，不靜默顯示空白。 */

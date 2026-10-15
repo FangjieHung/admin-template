@@ -385,6 +385,8 @@
 // （同色、小內凹），卡片從凹槽裡凸起來（level1，滑過升到 level3）；張數是小內凹。浮雕陰影要空間，清單與看板四周多留白。
 :root[data-paradigm='soft-ui'] {
   .lib-kanban-board {
+    // 黏住的欄頭（分組模式）底下墊的底色＝卡片底色（同 --lib-cal-surface）。
+    --lib-kanban-surface: var(--mat-sys-background);
     --lib-kanban-board-padding: 0.5rem;
     --lib-kanban-column-bg: var(--mat-sys-background);
     --lib-kanban-column-shadow: var(--soft-inset-small);

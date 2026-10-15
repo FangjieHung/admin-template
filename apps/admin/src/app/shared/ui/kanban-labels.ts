@@ -25,6 +25,11 @@ export const ZH_TW_KANBAN: KanbanLabels = {
   addCard: '新增卡片',
   addCardInput: '新增到「{column}」的卡片標題',
   addCardHint: 'Enter 新增，Esc 取消',
+  groupCardPosition: '{group}，{column}，第 {position} 張，共 {total} 張',
+  groupKeyboardHint: '按 Alt 加左右方向鍵換欄、Alt 加上下方向鍵調整順序（到頭尾時換到上一組或下一組），或用「移動」選單',
+  announceMovedGroup: '已將「{title}」移到「{group}」的「{column}」第 {position} 張',
+  moveToGroupMenu: '換到其他分組',
+  moveToGroup: '換到「{group}」',
 };
 
 export const KANBAN_LABEL_PROVIDERS: Provider[] = [{ provide: KANBAN_LABELS, useValue: ZH_TW_KANBAN }];

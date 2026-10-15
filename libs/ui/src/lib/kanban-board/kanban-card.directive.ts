@@ -1,12 +1,14 @@
 import { Directive, TemplateRef, inject, input } from '@angular/core';
 
-/** `<ng-template libKanbanCard let-item>` 的內容：`item` 是卡片資料，另外可取 `let-column="column" let-index="index"`。 */
+/** `<ng-template libKanbanCard let-item>` 的內容：`item` 是卡片資料，另外可取 `let-column="column" let-index="index" let-group="group"`。 */
 export interface KanbanCardContext<T> {
   $implicit: T;
   /** 卡片所在欄的 id。 */
   column: string;
-  /** 在這一欄的第幾張（從 0 起算）。 */
+  /** 在這一格（沒有分組時就是這一欄）的第幾張（從 0 起算）。 */
   index: number;
+  /** 分組模式：卡片所在分組的 id（沒有分組時 undefined）。 */
+  group?: string;
 }
 
 /**

@@ -20,7 +20,9 @@ import { ApiSection, ShowcasePageComponent } from '../../showcase/showcase-page.
 import { detailOf } from '../../showcase/showcase-catalog';
 import {
   KANBAN_DEMO_COLUMNS,
+  KANBAN_DEMO_GROUPS,
   KANBAN_PRIORITY_LABELS,
+  KANBAN_UNASSIGNED,
   KANBAN_PRIORITY_TONES,
   KanbanTicket,
   kanbanDemoTickets,
@@ -34,6 +36,8 @@ const ticketKey = (t: KanbanTicket) => t.id;
 const ticketColumn = (t: KanbanTicket) => t.status;
 const ticketTitle = (t: KanbanTicket) => t.title;
 const withStatus = (t: KanbanTicket, status: string): KanbanTicket => ({ ...t, status });
+const ticketOwner = (t: KanbanTicket) => t.assignee ?? KANBAN_UNASSIGNED;
+const withOwner = (t: KanbanTicket, owner: string): KanbanTicket => ({ ...t, assignee: owner === KANBAN_UNASSIGNED ? null : owner });
 
 /** 看板展示頁（/components/kanban）。 */
 @Component({
@@ -114,7 +118,59 @@ export class KanbanPageComponent {
     this.log.update((log) => [line, ...log].slice(0, 5));
   }
 
-  // ---- 示範 2：載入中與空看板 ----
+  // ---- 示範 2：依負責人分組（泳道） ----
+  protected readonly owner = ticketOwner;
+  protected readonly groups = KANBAN_DEMO_GROUPS;
+  protected readonly laneTickets = signal<KanbanTicket[]>(kanbanDemoTickets());
+  protected readonly collapsedLanes = signal<readonly string[]>([]);
+  protected readonly laneLog = signal<readonly string[]>([]);
+
+  /** 示範規則：放進「已完成」的工單一定要有負責人（拖到「未指派」那一道的「已完成」會被擋下）。 */
+  protected readonly laneCanMove: KanbanCanMove<KanbanTicket> = (ticket, _from, to, groups) => {
+    const owner = groups ? groups.toGroupId : ticketOwner(ticket);
+    return to === 'done' && owner === KANBAN_UNASSIGNED ? `「${ticket.id}」要有負責人才能放進「已完成」` : true;
+  };
+
+  protected onLaneMoved(event: KanbanMoveEvent<KanbanTicket>): void {
+    this.laneTickets.update((list) =>
+      moveKanbanItem(list, event, { key: ticketKey, column: ticketColumn, withColumn: withStatus, group: ticketOwner, withGroup: withOwner }),
+    );
+    const parts: string[] = [];
+    if (event.fromGroupId !== event.toGroupId) parts.push(`負責人「${this.groupTitle(event.fromGroupId)}」→「${this.groupTitle(event.toGroupId)}」`);
+    if (event.fromColumnId !== event.toColumnId) parts.push(`「${this.columnTitle(event.fromColumnId)}」→「${this.columnTitle(event.toColumnId)}」`);
+    this.pushLaneLog(`${event.item.id}：${parts.join('，') || `同一格排到第 ${event.toIndex + 1} 張`}`);
+  }
+
+  protected onLaneRejected(event: KanbanMoveRejectedEvent<KanbanTicket>): void {
+    this.toast.warning(event.reason);
+    this.pushLaneLog(`${event.item.id} 被擋下：${event.reason}`);
+  }
+
+  protected onLaneAdd(event: KanbanAddCardEvent): void {
+    const id = `TK-${this.nextNumber++}`;
+    const owner = event.groupId ?? KANBAN_UNASSIGNED;
+    this.laneTickets.update((list) => [
+      ...list,
+      { id, title: event.title, status: event.columnId, priority: 'medium', assignee: owner === KANBAN_UNASSIGNED ? null : owner, dueDate: '2026-10-21' },
+    ]);
+    this.pushLaneLog(`新增 ${id}「${event.title}」到「${this.groupTitle(owner)}」的「${this.columnTitle(event.columnId)}」`);
+  }
+
+  protected resetLanes(): void {
+    this.laneTickets.set(kanbanDemoTickets());
+    this.collapsedLanes.set([]);
+    this.laneLog.set([]);
+  }
+
+  private groupTitle(id: string | undefined): string {
+    return this.groups.find((g) => g.id === id)?.title ?? id ?? '';
+  }
+
+  private pushLaneLog(line: string): void {
+    this.laneLog.update((log) => [line, ...log].slice(0, 5));
+  }
+
+  // ---- 示範 3：載入中與空看板 ----
   protected readonly statesDemo = signal<StatesDemo>('loading');
   protected readonly statesColumns: readonly KanbanColumn[] = KANBAN_DEMO_COLUMNS.map((c) => ({ ...c, allowAdd: true }));
   protected readonly statesTickets = signal<KanbanTicket[]>([]);
@@ -193,7 +249,29 @@ canMove: KanbanCanMove<Ticket> = (t, from, to) =>
     <span class="ui-text-numeric">{{ ticket.id }}</span>
     <p>{{ ticket.title }}</p>
   </ng-template>
-</lib-kanban-board>`;
+</lib-kanban-board>
+
+<!-- 依負責人分組（泳道）：groupBy 回傳分組 id，groups 給順序與名稱 -->
+<lib-kanban-board
+  …
+  [groupBy]="(t) => t.ownerId ?? 'none'"
+  [groups]="[{ id: 'u1', title: '王小明' }, { id: 'none', title: '未指派' }]"
+  [(collapsedGroups)]="collapsed"
+  (moved)="onMoved($event)"
+/>
+
+// 換道＝改負責人：moveKanbanItem 再給 group／withGroup；要擋就在 canMove 看第四個參數
+onMoved(event: KanbanMoveEvent<Ticket>) {
+  this.tickets.update((list) =>
+    moveKanbanItem(list, event, {
+      key: (t) => t.id,
+      column: (t) => t.status,
+      withColumn: (t, status) => ({ ...t, status }),
+      group: (t) => t.ownerId ?? 'none',
+      withGroup: (t, owner) => ({ ...t, ownerId: owner === 'none' ? null : owner }),
+    }),
+  );
+}`;
 
   protected readonly api: ApiSection[] = [
     {
@@ -202,27 +280,31 @@ canMove: KanbanCanMove<Ticket> = (t, from, to) =>
         { name: '[columns]', type: 'KanbanColumn[]', default: '必填', description: '欄位：id、title、wipLimit（超過時欄位進入警告狀態，不擋移動）、hint（欄名下的說明）、allowAdd（欄底出現「新增卡片」）。順序就是畫面順序。' },
         { name: '[items]', type: 'T[]', default: '必填', description: '全部卡片；各欄的順序就是它們在陣列裡的先後。對不到任何欄的卡片不顯示。' },
         { name: '[cardKey]／[cardColumn]／[cardTitle]', type: '(item: T) => …', default: '必填', description: '唯一鍵（track 與還焦點用）、所在欄位 id、標題（報讀器念的卡片名稱、選單與移動結果的宣告）。' },
-        { name: '[canMove]', type: '(item, from, to) => true | string', default: 'null（全部允許）', description: '換欄前的檢查；回字串就拒絕，卡片回到原位並送出 (moveRejected)。同欄排序不會問。拖曳到會被拒絕的欄時，欄框與放置預覽換成錯誤色並出現禁止圖示。' },
+        { name: '[canMove]', type: '(item, from, to, groups?) => true | string', default: 'null（全部允許）', description: '換欄前的檢查；回字串就拒絕，卡片回到原位並送出 (moveRejected)。同一格排序不會問。分組模式換道也會問，第四個參數是 { fromGroupId, toGroupId }。拖曳到會被拒絕的欄（或格）時，外框與放置預覽換成錯誤色並出現禁止圖示。' },
         { name: 'label', type: 'string', default: "''", description: '整個看板的無障礙名稱，例：「工單看板」。' },
         { name: '[headingLevel]', type: 'number', default: '3', description: '欄名的標題層級（aria-level）。' },
         { name: '[readonly]', type: 'boolean', default: 'false', description: '唯讀：不能拖曳，沒有「移動」選單與新增卡片。' },
+        { name: '[groupBy]', type: '(item: T) => string', default: 'null（不分組）', description: '分組（泳道）：回傳卡片所在分組的 id（例：負責人；沒有負責人時回傳自訂的「未指派」id）。分組後欄頭只出現一次、黏在看板頂端，WIP 上限照整欄（所有分組加總）計算。' },
+        { name: '[groups]', type: 'KanbanGroup[]', default: 'null', description: '分組的順序與名稱 { id, title }；清單裡的分組沒有卡片也會顯示（可以拖進去）。卡片上出現、清單裡沒有的值依出現順序接在最後。' },
+        { name: '[groupTitle]', type: '(groupId: string) => string', default: 'null（顯示 id）', description: '不在 [groups] 裡的分組名稱。' },
+        { name: '[(collapsedGroups)]', type: 'string[]', default: '[]', description: '收合中的分組 id（雙向綁定，可以存進使用者設定）；把卡片移到收合的分組時會自動展開那一組。' },
       ],
     },
     {
       title: 'lib-kanban-board 輸出',
       rows: [
-        { name: '(moved)', type: 'KanbanMoveEvent<T>', description: '{ item, fromColumnId, toColumnId, fromIndex, toIndex }；toIndex 是在目標欄的位置（同欄時是拿掉原卡片之後的位置）。不更新 [items] 卡片就留在原位。' },
-        { name: '(moveRejected)', type: 'KanbanMoveRejectedEvent<T>', description: '{ item, fromColumnId, toColumnId, reason }：canMove 拒絕的移動，由頁面提示原因（例如提示訊息）。' },
-        { name: '(addCard)', type: 'KanbanAddCardEvent', description: '{ columnId, title }：欄底輸入標題按 Enter（已去頭尾空白）。輸入框清空、保持展開，可以連續新增；Esc 取消。' },
+        { name: '(moved)', type: 'KanbanMoveEvent<T>', description: '{ item, fromColumnId, toColumnId, fromIndex, toIndex }；toIndex 是在目標欄的位置（同欄時是拿掉原卡片之後的位置）。分組模式另外帶 fromGroupId、toGroupId（兩者不同＝換道），索引改成在「欄 × 分組」那一格裡算。不更新 [items] 卡片就留在原位。' },
+        { name: '(moveRejected)', type: 'KanbanMoveRejectedEvent<T>', description: '{ item, fromColumnId, toColumnId, reason }（分組模式另帶 fromGroupId、toGroupId）：canMove 拒絕的移動，由頁面提示原因（例如提示訊息）。' },
+        { name: '(addCard)', type: 'KanbanAddCardEvent', description: '{ columnId, title }：欄底輸入標題按 Enter（已去頭尾空白）。分組模式的新增列在每一格底下，另外帶 groupId。輸入框清空、保持展開，可以連續新增；Esc 取消。' },
       ],
     },
     {
       title: '範本與其他匯出',
       rows: [
         { name: 'ng-template[libKanbanCard]', type: 'KanbanCardContext<T>', default: '必填', description: '卡片內容：let-item，另有 let-column、let-index。加 [libKanbanCardOf]="items" 讓 let-item 有型別。' },
-        { name: 'moveKanbanItem(items, event, options)', type: 'T[]', description: '依 (moved) 事件產生新的清單：拿掉卡片、換欄（withColumn）、插在目標欄第 toIndex 張之前。' },
-        { name: 'KANBAN_LABELS', type: 'KanbanLabels', default: '必填', description: '16 句畫面文字（卡片的位置與操作提示、選單、移動結果的宣告、WIP、空欄、新增卡片）；少一句會在建立元件時丟出錯誤。' },
-        { name: '鍵盤', type: '—', description: '卡片聚焦時 Alt＋←／→ 換欄（保持同一列，目標欄比較短就放最後）、Alt＋↑／↓ 欄內移動；每張卡片的「移動」選單可以移到其他欄的最後、上移、下移。移動後念出結果，焦點留在卡片上。' },
+        { name: 'moveKanbanItem(items, event, options)', type: 'T[]', description: '依 (moved) 事件產生新的清單：拿掉卡片、換欄（withColumn）、插在目標欄第 toIndex 張之前。分組模式再給 group、withGroup：位置在「欄 × 分組」那一格裡算，換道時用 withGroup 更新卡片。' },
+        { name: 'KANBAN_LABELS', type: 'KanbanLabels', default: '必填', description: '21 句畫面文字（卡片的位置與操作提示、選單、移動結果的宣告、WIP、空欄、新增卡片，以及分組模式的位置、提示、宣告與「換到其他分組」）；少一句會在建立元件時丟出錯誤。' },
+        { name: '鍵盤', type: '—', description: '卡片聚焦時 Alt＋←／→ 換欄（保持同一列，目標欄比較短就放最後）、Alt＋↑／↓ 欄內移動（分組模式到格子頭尾時換到上一道的最後或下一道的最前）；每張卡片的「移動」選單可以移到其他欄的最後、上移、下移，分組模式另有「換到其他分組」。移動後念出結果，焦點留在卡片上。' },
         { name: '觸控', type: '—', description: '長按 250ms 才開始拖曳，手指先能捲動頁面；600px 以下的容器改成橫向捲動，每欄約 85% 寬。' },
       ],
     },

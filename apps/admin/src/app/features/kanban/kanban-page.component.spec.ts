@@ -91,6 +91,36 @@ describe('KanbanPageComponent（看板展示頁）', () => {
     expect(log()).toEqual(['（還沒有移動或新增）']);
   });
 
+  it('依負責人分組：四道（最後是未指派）；Alt＋↓ 換到下一道＝換負責人；拖到「未指派」的「已完成」被擋下並提示', async () => {
+    const lanes = demo('lanes');
+    const laneIds = Array.from(lanes.querySelectorAll<HTMLElement>('[data-kanban-group]')).map((l) => l.dataset['kanbanGroup']);
+    expect(laneIds).toEqual(['王小明', '林雅婷', '陳志豪', 'unassigned']);
+    expect(Array.from(lanes.querySelectorAll('.kl-title')).map((n) => n.textContent?.trim())).toEqual(['王小明', '林雅婷', '陳志豪', '未指派']);
+    // 欄頭只有一排，WIP 照整欄算（王小明 2 張＋陳志豪 1 張＝3）
+    expect(lanes.querySelectorAll('lib-kanban-column-head')).toHaveLength(4);
+    expect(lanes.querySelectorAll('.kh-count')[1].textContent?.trim()).toBe('3 / 3');
+    const laneCard = (id: string) => lanes.querySelector<HTMLElement>(`[data-kanban-card="${id}"]`)!;
+    const laneOf = (id: string) => laneCard(id).closest<HTMLElement>('[data-kanban-group]')!.dataset['kanbanGroup'];
+    const laneLog = () => Array.from(lanes.querySelectorAll('[data-demo-log="lanes"] li')).map((li) => li.textContent?.trim());
+
+    altKey(laneCard('TK-2102'), 'ArrowDown');
+    await settle();
+    expect(laneOf('TK-2102')).toBe('陳志豪');
+    expect(laneLog()[0]).toBe('TK-2102：負責人「林雅婷」→「陳志豪」');
+
+    // TK-2081（王小明／已完成）一路往下：林雅婷、陳志豪都可以，到「未指派」被擋下
+    for (const expected of ['林雅婷', '陳志豪']) {
+      altKey(laneCard('TK-2081'), 'ArrowDown');
+      await settle();
+      expect(laneOf('TK-2081')).toBe(expected);
+    }
+    altKey(laneCard('TK-2081'), 'ArrowDown');
+    await settle(20);
+    expect(laneOf('TK-2081')).toBe('陳志豪');
+    expect(document.querySelector('.cdk-overlay-container')?.textContent ?? '').toContain('「TK-2081」要有負責人才能放進「已完成」');
+    expect(laneLog()[0]).toContain('TK-2081 被擋下');
+  });
+
   it('載入中與空看板：骨架 → 空狀態 → 有欄位但每欄都沒有卡片', async () => {
     const states = demo('states');
     expect(states.querySelectorAll('lib-skeleton').length).toBeGreaterThan(0);

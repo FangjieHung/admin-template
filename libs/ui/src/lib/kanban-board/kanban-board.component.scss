@@ -53,14 +53,19 @@
 }
 
 .kb-column {
-  position: relative;
-  isolation: isolate;
   display: grid;
   grid-row: 1 / -1;
   grid-template-rows: subgrid;
   grid-template-columns: minmax(0, 1fr);
   min-width: 0;
   padding: var(--lib-kanban-column-padding, 0.75rem);
+}
+
+// 欄的底：沒有分組時畫在欄（section）上；分組模式畫在從欄頭延伸到最後一道的 track 上。
+.kb-column,
+.kb-track {
+  position: relative;
+  isolation: isolate;
   border-radius: var(--lib-kanban-column-radius, var(--mat-sys-corner-large));
 
   &::before,
@@ -86,15 +91,18 @@
 }
 
 // 狀態外框（畫在 ::after，不影響欄底的框與陰影）：超過上限、拖曳中可放下、拖曳中會被拒絕。
-.kb-column.is-over-limit::after {
+.kb-column.is-over-limit::after,
+.kb-track.is-over-limit::after {
   box-shadow: var(--lib-kanban-wip-ring, inset 0 0 0 2px var(--mat-sys-error));
 }
 
-.kb-column.is-drop-target::after {
+.kb-column.is-drop-target::after,
+.kb-cell.is-drop-target::after {
   box-shadow: var(--lib-kanban-drop-ring, inset 0 0 0 2px var(--mat-sys-primary));
 }
 
-.kb-column.is-drop-blocked::after {
+.kb-column.is-drop-blocked::after,
+.kb-cell.is-drop-blocked::after {
   box-shadow: var(--lib-kanban-blocked-ring, inset 0 0 0 2px var(--mat-sys-error));
 }
 

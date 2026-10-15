@@ -10,6 +10,7 @@ import {
   KanbanAddCardEvent,
   KanbanCanMove,
   KanbanColumn,
+  KanbanGroup,
   KanbanMoveEvent,
   KanbanMoveRejectedEvent,
   moveKanbanItem,
@@ -32,6 +33,11 @@ const LABELS: KanbanLabels = {
   addCard: '新增卡片',
   addCardInput: '新增到「{column}」的卡片標題',
   addCardHint: 'Enter 新增，Esc 取消',
+  groupCardPosition: '{group}，{column}，第 {position} 張，共 {total} 張',
+  groupKeyboardHint: '分組模式：按 Alt 加方向鍵移動',
+  announceMovedGroup: '已將「{title}」移到「{group}」的「{column}」第 {position} 張',
+  moveToGroupMenu: '換到其他分組',
+  moveToGroup: '換到「{group}」',
 };
 
 interface Task {
@@ -40,6 +46,16 @@ interface Task {
   status: string;
   owner?: string;
 }
+
+const NONE = 'none';
+const ownerOf = (t: Task) => t.owner ?? NONE;
+/** 分組清單：陳 不在清單裡（依出現順序接在最後，名稱來自 groupTitle）；張 沒有卡片也要顯示。 */
+const GROUPS: KanbanGroup[] = [
+  { id: '王', title: '王' },
+  { id: '林', title: '林' },
+  { id: '張', title: '張' },
+  { id: NONE, title: '未指派' },
+];
 
 const COLUMNS: KanbanColumn[] = [
   { id: 'todo', title: '待處理', allowAdd: true },
@@ -67,6 +83,10 @@ function seed(): Task[] {
       [cardColumn]="column"
       [cardTitle]="title"
       [canMove]="canMove()"
+      [groupBy]="groupBy()"
+      [groups]="groups()"
+      [groupTitle]="groupTitle"
+      [(collapsedGroups)]="collapsed"
       (moved)="onMoved($event)"
       (moveRejected)="rejected.push($event)"
       (addCard)="added.push($event)"
@@ -81,6 +101,10 @@ class HostComponent {
   readonly columns = signal<KanbanColumn[]>(COLUMNS);
   readonly items = signal<Task[]>(seed());
   readonly canMove = signal<KanbanCanMove<Task> | null>(null);
+  readonly groupBy = signal<((t: Task) => string) | null>(null);
+  readonly groups = signal<KanbanGroup[] | null>(null);
+  readonly groupTitle = (id: string) => `${id}（外部）`;
+  collapsed: readonly string[] = [];
   /** false：模擬使用端不更新資料（只記錄事件）。 */
   apply = true;
   readonly key = (t: Task) => t.id;
@@ -94,7 +118,13 @@ class HostComponent {
     this.moves.push(event);
     if (!this.apply) return;
     this.items.update((items) =>
-      moveKanbanItem(items, event, { key: this.key, column: this.column, withColumn: (t, status) => ({ ...t, status }) }),
+      moveKanbanItem(items, event, {
+        key: this.key,
+        column: this.column,
+        withColumn: (t, status) => ({ ...t, status }),
+        group: ownerOf,
+        withGroup: (t, owner) => ({ ...t, owner: owner === NONE ? undefined : owner }),
+      }),
     );
   }
 }
@@ -132,6 +162,26 @@ describe('KanbanBoardComponent（看板）', () => {
   const live = () => el.querySelector('[aria-live="polite"]')!.textContent?.trim();
   const press = (target: HTMLElement, key: string, altKey = true) =>
     target.dispatchEvent(new KeyboardEvent('keydown', { key, altKey, bubbles: true, cancelable: true }));
+  /** 直接呼叫放下的處理函式（CDK 的 drop 事件）：放置清單的 data 是「格」，用欄（＋分組）找。 */
+  const dropper = () => {
+    const board = fixture.debugElement.children[0].componentInstance as KanbanBoardComponent<Task>;
+    const internals = board as unknown as {
+      onDropped(e: unknown): void;
+      model(): { cells: { column: { id: string }; groupId: string | null }[][] };
+    };
+    const cell = (spec: string) => {
+      const [columnId, groupId] = spec.split('@');
+      return internals.model().cells.flat().find((c) => c.column.id === columnId && (groupId === undefined || c.groupId === groupId));
+    };
+    return (from: string, to: string, previousIndex: number, currentIndex: number, id: string) =>
+      internals.onDropped({
+        previousContainer: { data: cell(from) },
+        container: { data: cell(to) },
+        previousIndex,
+        currentIndex,
+        item: { data: { item: host.items().find((t) => t.id === id) } },
+      });
+  };
 
   afterEach(() => {
     fixture?.destroy();
@@ -262,15 +312,7 @@ describe('KanbanBoardComponent（看板）', () => {
     await setup();
     host.canMove.set((task, _from, to) => (to === 'done' && !task.owner ? '需要負責人' : true));
     await settle();
-    const board = fixture.debugElement.children[0].componentInstance as KanbanBoardComponent<Task>;
-    const drop = (from: string, to: string, previousIndex: number, currentIndex: number, id: string) =>
-      (board as unknown as { onDropped(e: unknown): void }).onDropped({
-        previousContainer: { data: from },
-        container: { data: to },
-        previousIndex,
-        currentIndex,
-        item: { data: { item: host.items().find((t) => t.id === id) } },
-      });
+    const drop = dropper();
     drop('todo', 'done', 0, 0, 'a');
     drop('todo', 'done', 1, 0, 'b');
     drop('doing', 'doing', 0, 0, 'c');
@@ -287,15 +329,7 @@ describe('KanbanBoardComponent（看板）', () => {
     await setup();
     host.canMove.set((task, _from, to) => (to === 'done' && !task.owner ? '需要負責人' : true));
     await settle();
-    const board = fixture.debugElement.children[0].componentInstance as KanbanBoardComponent<Task>;
-    const drop = (from: string, to: string, previousIndex: number, currentIndex: number, id: string) =>
-      (board as unknown as { onDropped(e: unknown): void }).onDropped({
-        previousContainer: { data: from },
-        container: { data: to },
-        previousIndex,
-        currentIndex,
-        item: { data: { item: host.items().find((t) => t.id === id) } },
-      });
+    const drop = dropper();
     // 拖曳開始前焦點在看板外（滑鼠拖曳時卡片被藏起來，焦點會掉到 body）。
     const outside = document.createElement('button');
     document.body.append(outside);
@@ -398,6 +432,202 @@ describe('KanbanBoardComponent（看板）', () => {
     expect(host.moves).toHaveLength(1);
     expect(titlesIn('todo')).toEqual(['印表機卡紙', '更換網路線']);
   });
+  // ---- 分組（泳道） ----
+
+  async function setupGrouped(): Promise<void> {
+    await setup();
+    host.groupBy.set(ownerOf);
+    host.groups.set(GROUPS);
+    await settle();
+  }
+  const lane = (id: string) => el.querySelector<HTMLElement>(`[data-kanban-group="${id}"]`)!;
+  const cellTitles = (groupId: string, columnId: string) =>
+    Array.from(lane(groupId)?.querySelectorAll(`[data-kanban-cell="${columnId}"] .t-title`) ?? []).map((n) => n.textContent?.trim());
+  const laneHead = (id: string) => lane(id).querySelector<HTMLElement>('lib-kanban-lane-head')!;
+
+  it('分組：依 groupBy 分道，順序照 groups（沒有卡片的也顯示），清單外的值接在最後、名稱來自 groupTitle；欄頭只出現一次', async () => {
+    await setupGrouped();
+    const lanes = Array.from(el.querySelectorAll<HTMLElement>('[data-kanban-group]'));
+    expect(lanes.map((l) => l.dataset['kanbanGroup'])).toEqual(['王', '林', '張', NONE, '陳']);
+    expect(lanes.map((l) => l.querySelector('.kl-title')?.textContent?.trim())).toEqual(['王', '林', '張', '未指派', '陳（外部）']);
+    // 道標題：張數（報讀器念「N 張卡片」）、標題層級、收合按鈕
+    expect(laneHead(NONE).querySelector('.kl-count')?.textContent?.trim()).toBe('1');
+    expect(laneHead(NONE).querySelector('.kl-sr')?.textContent?.trim()).toBe('1 張卡片');
+    expect(laneHead('張').querySelector('.kl-count')?.textContent?.trim()).toBe('0');
+    expect(laneHead('王').querySelector('[role="heading"]')?.getAttribute('aria-level')).toBe('3');
+    expect(laneHead('王').querySelector('button')?.getAttribute('aria-expanded')).toBe('true');
+    // 欄頭只有一排（3 欄），卡片排在「欄 × 分組」的格子裡
+    expect(el.querySelectorAll('lib-kanban-column-head')).toHaveLength(3);
+    expect(el.querySelectorAll('.kb-column')).toHaveLength(0);
+    expect(cellTitles('林', 'todo')).toEqual(['印表機卡紙']);
+    expect(cellTitles(NONE, 'todo')).toEqual(['更換網路線']);
+    expect(cellTitles('王', 'doing')).toEqual(['帳號開通']);
+    expect(cellTitles('陳', 'doing')).toEqual(['報表匯出']);
+    // 格子的清單：名稱是欄名＋分組名；卡片念的位置帶分組
+    const list = lane(NONE).querySelector('[data-kanban-cell="todo"] .kb-list')!;
+    const names = list.getAttribute('aria-labelledby')!.split(' ').map((id) => el.querySelector(`#${id}`)?.textContent?.trim());
+    expect(names).toEqual(['待處理', '未指派']);
+    const posId = card('b').getAttribute('aria-describedby')!.split(' ')[0];
+    expect(el.querySelector(`#${posId}`)?.textContent).toBe('未指派，待處理，第 1 張，共 1 張');
+    expect(el.querySelector(`#${card('b').getAttribute('aria-describedby')!.split(' ')[1]}`)?.textContent).toBe('分組模式：按 Alt 加方向鍵移動');
+  });
+
+  it('分組：WIP 照欄計算（所有道加總），超過時欄頭警告只出現一次', async () => {
+    await setupGrouped();
+    const head = () => el.querySelectorAll<HTMLElement>('lib-kanban-column-head')[1];
+    expect(head().querySelector('.kh-count')?.textContent?.trim()).toBe('2 / 2');
+    host.items.update((items) => [...items, { id: 'e', title: '主機升級', status: 'doing', owner: '林' }]);
+    await settle();
+    expect(head().querySelector('.kh-count')?.textContent?.trim()).toBe('3 / 2');
+    expect(head().querySelector('.kh-wip')?.textContent).toContain('超過上限 1 張');
+    expect(el.querySelectorAll('.kh-wip')).toHaveLength(1);
+    expect(el.querySelector('[data-kanban-column="doing"]')?.classList).toContain('is-over-limit');
+  });
+
+  it('分組：收合一道（雙向綁定 collapsedGroups），格子收起來、張數還在；再按一次展開', async () => {
+    await setupGrouped();
+    laneHead('王').querySelector('button')!.click();
+    await settle();
+    expect(host.collapsed).toEqual(['王']);
+    expect(laneHead('王').querySelector('button')?.getAttribute('aria-expanded')).toBe('false');
+    expect(lane('王').querySelectorAll('.kb-cell')).toHaveLength(0);
+    expect(laneHead('王').querySelector('.kl-count')?.textContent?.trim()).toBe('1');
+    expect(card('c')).toBeNull();
+    laneHead('王').querySelector('button')!.click();
+    await settle();
+    expect(host.collapsed).toEqual([]);
+    expect(cellTitles('王', 'doing')).toEqual(['帳號開通']);
+  });
+
+  it('分組：跨道拖曳送出新的欄與分組（使用端改負責人）；canMove 收到前後分組，拒絕時送出 moveRejected、卡片留在原位', async () => {
+    await setupGrouped();
+    const checks: unknown[][] = [];
+    host.canMove.set((task, from, to, groups) => {
+      checks.push([task.id, from, to, groups]);
+      return to === 'done' && groups?.toGroupId === NONE ? '未指派的卡片不能移到已完成' : true;
+    });
+    await settle();
+    const drop = dropper();
+    // 同一欄換道：未指派 → 王（待處理）
+    drop(`todo@${NONE}`, 'todo@王', 0, 0, 'b');
+    await settle();
+    expect(host.moves[0]).toEqual({
+      item: expect.objectContaining({ id: 'b' }),
+      fromColumnId: 'todo',
+      toColumnId: 'todo',
+      fromGroupId: NONE,
+      toGroupId: '王',
+      fromIndex: 0,
+      toIndex: 0,
+    });
+    expect(checks[0]).toEqual(['b', 'todo', 'todo', { fromGroupId: NONE, toGroupId: '王' }]);
+    expect(host.items().find((t) => t.id === 'b')?.owner).toBe('王');
+    expect(cellTitles('王', 'todo')).toEqual(['更換網路線']);
+    expect(document.activeElement).toBe(card('b'));
+    // 換欄又換道：王／進行中 → 林／已完成
+    drop('doing@王', 'done@林', 0, 0, 'c');
+    await settle();
+    expect(host.moves[1]).toMatchObject({ fromColumnId: 'doing', toColumnId: 'done', fromGroupId: '王', toGroupId: '林' });
+    expect(cellTitles('林', 'done')).toEqual(['帳號開通']);
+    // 拒絕：移到未指派的已完成
+    drop('todo@林', `done@${NONE}`, 0, 0, 'a');
+    await settle();
+    expect(host.moves).toHaveLength(2);
+    expect(host.rejected).toEqual([
+      {
+        item: expect.objectContaining({ id: 'a' }),
+        fromColumnId: 'todo',
+        toColumnId: 'done',
+        fromGroupId: '林',
+        toGroupId: NONE,
+        reason: '未指派的卡片不能移到已完成',
+      },
+    ]);
+    expect(cellTitles('林', 'todo')).toEqual(['印表機卡紙']);
+    expect(cellTitles(NONE, 'done')).toEqual([]);
+    // 同一格排序不問 canMove
+    const before = checks.length;
+    host.items.update((items) => [...items, { id: 'e', title: '主機升級', status: 'todo', owner: '王' }]);
+    await settle();
+    dropper()('todo@王', 'todo@王', 0, 1, 'b');
+    await settle();
+    expect(checks.length).toBe(before);
+    expect(cellTitles('王', 'todo')).toEqual(['主機升級', '更換網路線']);
+  });
+
+  it('分組：鍵盤 Alt＋↓ 在格子最後一張時換到下一道最前、Alt＋↑ 在第一張時換到上一道最後；Alt＋←／→ 留在同一道；移到收合的道會自動展開', async () => {
+    await setupGrouped();
+    // b 在「未指派／待處理」唯一的一張：Alt＋↑ → 張（上一道）的最後（空格，第 1 張）
+    press(card('b'), 'ArrowUp');
+    await settle();
+    expect(host.moves[0]).toMatchObject({ fromGroupId: NONE, toGroupId: '張', fromColumnId: 'todo', toColumnId: 'todo', toIndex: 0 });
+    expect(cellTitles('張', 'todo')).toEqual(['更換網路線']);
+    expect(document.activeElement).toBe(card('b'));
+    await sleep(40);
+    fixture.detectChanges();
+    expect(live()).toBe('已將「更換網路線」移到「張」的「待處理」第 1 張');
+    // 再 Alt＋↑ → 林（上一道）的最後：林／待處理原本有 a，放在第 2 張
+    press(card('b'), 'ArrowUp');
+    await settle();
+    expect(cellTitles('林', 'todo')).toEqual(['印表機卡紙', '更換網路線']);
+    // Alt＋↓ 在最後一張：換到下一道（張）的最前
+    press(card('b'), 'ArrowDown');
+    await settle();
+    expect(cellTitles('張', 'todo')).toEqual(['更換網路線']);
+    // Alt＋→：同一道換欄
+    press(card('b'), 'ArrowRight');
+    await settle();
+    expect(host.moves.at(-1)).toMatchObject({ fromGroupId: '張', toGroupId: '張', fromColumnId: 'todo', toColumnId: 'doing' });
+    // 收合「未指派」，再 Alt＋↓ 換道過去：自動展開，焦點跟到卡片
+    laneHead(NONE).querySelector('button')!.click();
+    await settle();
+    card('b').focus();
+    press(card('b'), 'ArrowDown');
+    await settle();
+    expect(host.collapsed).toEqual([]);
+    expect(cellTitles(NONE, 'doing')).toEqual(['更換網路線']);
+    expect(document.activeElement).toBe(card('b'));
+    // 最後一道的最後一張再往下：沒有下一道，不送事件
+    const count = host.moves.length;
+    press(card('d'), 'ArrowDown');
+    await settle();
+    expect(host.moves).toHaveLength(count);
+  });
+
+  it('分組：「移動」選單有「換到其他分組」，列出其他道；選了之後移到該道同一欄的最後', async () => {
+    await setupGrouped();
+    (card('c').querySelector('.kb-move') as HTMLButtonElement).click();
+    await settle();
+    const groupItem = document.querySelector<HTMLButtonElement>('.lib-kanban-menu [data-kanban-group-menu]')!;
+    expect(groupItem.textContent).toContain('換到其他分組');
+    groupItem.click();
+    await settle();
+    await sleep(20);
+    await settle();
+    const options = () => Array.from(document.querySelectorAll<HTMLButtonElement>('[data-kanban-move-group]'));
+    expect(options().map((b) => b.textContent?.trim())).toEqual(['換到「林」', '換到「張」', '換到「未指派」', '換到「陳（外部）」']);
+    options().find((b) => b.dataset['kanbanMoveGroup'] === '陳')!.click();
+    await settle();
+    await sleep(20);
+    await settle();
+    expect(host.moves[0]).toMatchObject({ fromGroupId: '王', toGroupId: '陳', fromColumnId: 'doing', toColumnId: 'doing', toIndex: 1 });
+    expect(cellTitles('陳', 'doing')).toEqual(['報表匯出', '帳號開通']);
+    expect(document.activeElement).toBe(card('c'));
+  });
+
+  it('分組：新增卡片在每一格底下，事件帶 groupId', async () => {
+    await setupGrouped();
+    const cell = lane('林').querySelector<HTMLElement>('[data-kanban-cell="todo"]')!;
+    expect(lane('林').querySelector('[data-kanban-cell="doing"] lib-kanban-add-card')).toBeNull();
+    cell.querySelector<HTMLButtonElement>('.ka-button')!.click();
+    await settle();
+    const input = cell.querySelector<HTMLInputElement>('.ka-input')!;
+    input.value = '新的工單';
+    input.dispatchEvent(new Event('input'));
+    press(input, 'Enter', false);
+    await settle();
+    expect(host.added).toEqual([{ columnId: 'todo', title: '新的工單', groupId: '林' }]);
+  });
 });
 
 describe('moveKanbanItem', () => {
@@ -422,6 +652,21 @@ describe('moveKanbanItem', () => {
     );
     // 原陣列不變
     expect(ids(items)).toBe('a:todo b:todo c:doing d:doing');
+  });
+
+  it('分組：位置在「欄 × 分組」那一格裡算，換組時用 withGroup 更新卡片', () => {
+    const items = [...seed(), { id: 'e', title: '主機升級', status: 'doing', owner: '王' }];
+    const grouped = { ...opts, group: ownerOf, withGroup: (t: Task, owner: string) => ({ ...t, owner: owner === NONE ? undefined : owner }) };
+    const owners = (list: Task[]) => list.map((t) => `${t.id}:${t.status}:${ownerOf(t)}`).join(' ');
+    // b（未指派／待處理）→ 王／進行中的第 1 張之前：王的進行中是 c、e，插在 e 前面（不是整欄的第 1 張 d 前面）
+    const b = items[1];
+    expect(
+      owners(moveKanbanItem(items, { item: b, fromColumnId: 'todo', toColumnId: 'doing', fromGroupId: NONE, toGroupId: '王', fromIndex: 0, toIndex: 1 }, grouped)),
+    ).toBe('a:todo:林 c:doing:王 d:doing:陳 b:doing:王 e:doing:王');
+    // 只換組不換欄
+    expect(
+      owners(moveKanbanItem(items, { item: b, fromColumnId: 'todo', toColumnId: 'todo', fromGroupId: NONE, toGroupId: '林', fromIndex: 0, toIndex: 9 }, grouped)),
+    ).toBe('a:todo:林 b:todo:林 c:doing:王 d:doing:陳 e:doing:王');
   });
 
   it('同欄：toIndex 是拿掉原卡片之後的位置（同 moveItemInArray）', () => {

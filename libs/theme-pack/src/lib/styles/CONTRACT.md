@@ -401,7 +401,8 @@ Material 用預設值（surface-container-high 面板、extra-large 圓角、lev
 - 「移動」選單是 Material 的 `mat-menu`（另掛 `.lib-kanban-menu`，吃各質地的選單 recipe），選單按鈕是 `matIconButton`、「新增卡片」是 `matButton`，展開後的輸入框框線 `--app-field-border`、底 `--mat-sys-surface`、字級 16px；卡片與輸入框的焦點 `--app-focus-ring`（`-width`／`-offset`）。轉場 `--app-motion-fast`（卡片放下與讓位的動畫 `--app-motion-base`），減少動態時不動。
 - 欄與卡片的底、框、陰影畫在不含文字的 `::before` 上（可以加 filter 而字不變形）；欄的狀態外框（超過上限、拖曳中可放下、會被拒絕）畫在 `::after`，不影響欄的框與陰影。拖曳中的預覽掛在 `body` 底下，另外帶 `.lib-kanban-board` class，所以質地設的變數一樣吃得到。會被 `canMove` 拒絕的欄：外框與放置預覽換成 `--mat-sys-error`，放置預覽中間出現禁止圖示。
 - 清單是捲動容器，會裁掉卡片的陰影：卡片陰影或偏移較大的質地要一起加大 `--lib-kanban-list-padding`（欄的陰影則是 `--lib-kanban-board-padding`）。
-- 質地只在 `.lib-kanban-board` 上設下列變數，不覆寫屬性（欄頭、新增卡片是內部元件，變數會繼承下去）。
+- 分組（泳道，`[groupBy]`）：欄的底改畫在從欄頭延伸到最後一道的 track 上（同一組 `--lib-kanban-column-*` 變數），整個看板自己捲動（高度上限同欄高上限），欄頭黏在看板頂端——黏住的欄頭底色是欄底疊在 `--lib-kanban-surface` 上（要等於看板所在卡片的底色，同 `--dt-frozen-bg`／`--lib-cal-surface` 的作法），框線照畫、下緣換成 `--lib-kanban-head-divider`。每一道的標題列（收合按鈕＋名稱＋張數，張數吃 `--lib-kanban-count-*`）橫跨所有欄、文字黏在左邊，上緣是 `--lib-kanban-lane-divider`；拖曳中的可放下／會被拒絕外框畫在那一格上。
+- 質地只在 `.lib-kanban-board` 上設下列變數，不覆寫屬性（欄頭、分組標題、新增卡片是內部元件，變數會繼承下去）。
 
 | 變數 | 預設 | 用途 | 目前設定的質地 |
 | --- | --- | --- | --- |
@@ -417,6 +418,8 @@ Material 用預設值（surface-container-high 面板、extra-large 圓角、lev
 | `--lib-kanban-placeholder-frame` / `-placeholder-bg` | `2px dashed --mat-sys-primary` / 主色 8% | 放置預覽（卡片會落下的位置；會被拒絕時換錯誤色＋禁止圖示） | 框：Linen 1px `outline` 虛線；Grid、Ledger 1px 主色虛線；Editorial 1px `on-surface` 虛線；Cockpit 1px `var(--cockpit-edge-strong)` 虛線；Brutal 2px 墨色虛線；Riso 主墨虛線；Sketch 鋼筆虛線。底：Linen `surface-container`；Soft UI `background`；Editorial、Sketch `transparent`；Cockpit `var(--cockpit-lit)`；Brutal `var(--brutal-raised)`；Riso 主墨 8% |
 | `--lib-kanban-drop-ring` / `-blocked-ring` / `-wip-ring` | `inset 0 0 0 2px` `--mat-sys-primary` / `--mat-sys-error` / `--mat-sys-error` | 欄的狀態外框（box-shadow 值，不可為 `none`）：拖曳中可放下、會被拒絕、超過 WIP 上限 | Editorial 三者都 1px（`on-surface`／error／error）；Brutal 三者都 3px；Cockpit 可放下：1px 強亮邊＋主色 22% 內光，超過上限：1px 錯誤色框＋錯誤色 45% 的 14px 紅光 |
 | `--lib-kanban-wip-bg` / `-wip-fg` | `--mat-sys-error-container` / `--mat-sys-on-error-container` | 超過上限的警告列與張數 | （無） |
+| `--lib-kanban-surface` | `var(--mat-sys-surface)` | 分組模式黏住的欄頭底下墊的底色（＝看板所在卡片的底色） | Editorial：`surface-container-low`；Soft UI：`background`；Brutal：`var(--brutal-card)`；Riso：`var(--riso-card)`；Sketch：`var(--sketch-card)` |
+| `--lib-kanban-lane-divider` | `1px solid --mat-sys-outline-variant` | 分組標題列的上緣（border 簡寫） | （無） |
 
 Material 用預設值（container-low 的欄、白色卡片＋level1、滑過 level2、拖曳中 level3、主色虛線的放置預覽）。
 

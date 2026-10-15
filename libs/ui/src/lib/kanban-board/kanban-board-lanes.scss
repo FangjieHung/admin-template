@@ -1,0 +1,80 @@
+// 看板的分組（泳道）模式（lib-kanban-board 的第二份樣式表；拆開是為了讓每份樣式表都在 8 kB 預算內）。
+// 只用語意 token；造型一樣讀 `.lib-kanban-board` 上的 --lib-kanban-* 變數。共用的欄底（::before／::after）、
+// 清單、卡片、拖曳樣式在 kanban-board.component.scss。
+
+// 每個元素都明確放在 grid 的某一格（track 佔滿整欄所有列，其他元素要跟它重疊，不能自動排）；欄數由 --kb-cols 給。
+// 整個看板自己捲動（欄高上限同上），欄頭黏在頂端、分組標題的文字黏在左邊；格子不自己捲動。
+
+.kb-board.is-lanes {
+  grid-auto-flow: row;
+  grid-template-rows: none;
+  grid-template-columns: repeat(var(--kb-cols), minmax(var(--lib-kanban-column-min, 15rem), 1fr));
+}
+
+// 黏住的欄頭要不透明：底色是欄底疊在 --lib-kanban-surface（＝看板所在卡片的底色）上，框線照畫（下緣除外）。
+// 貼齊基準是看板扣掉內距的內框，往上多推一個內距，捲動時上面才不會露出一條縫。
+.is-lanes .kb-head {
+  position: sticky;
+  inset-block-start: calc(-1 * var(--lib-kanban-board-padding, 0.25rem));
+  z-index: 2;
+  isolation: isolate;
+  grid-row: 1;
+  margin: 0;
+  padding: var(--lib-kanban-column-padding, 0.75rem);
+  padding-block-end: 0.5rem;
+  border-radius: var(--lib-kanban-column-radius, var(--mat-sys-corner-large)) var(--lib-kanban-column-radius, var(--mat-sys-corner-large)) 0 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border: var(--lib-kanban-column-frame, 0 solid transparent);
+    border-block-end: var(--lib-kanban-head-divider, 0 solid transparent);
+    border-radius: inherit;
+    background:
+      linear-gradient(var(--lib-kanban-column-bg, var(--mat-sys-surface-container-low)) 0 0),
+      var(--lib-kanban-surface, var(--mat-sys-surface));
+    filter: var(--lib-kanban-column-filter, none);
+  }
+}
+
+.kb-lane {
+  display: contents;
+}
+
+.kb-lane-head {
+  position: relative;
+  z-index: 1;
+  grid-column: 1 / -1;
+  margin-block-start: 0.5rem;
+}
+
+.kb-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0 var(--lib-kanban-column-padding, 0.75rem) 0.5rem;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0 0.25rem 0.25rem;
+    border-radius: var(--lib-kanban-card-radius, var(--mat-sys-corner-medium));
+    pointer-events: none;
+  }
+
+  .kb-list {
+    min-height: 3rem;
+    overflow: visible;
+  }
+
+  .kb-add {
+    margin-block-start: 0.25rem;
+  }
+}
+
+.kb-lane:last-child .kb-cell {
+  padding-block-end: var(--lib-kanban-column-padding, 0.75rem);
+}
