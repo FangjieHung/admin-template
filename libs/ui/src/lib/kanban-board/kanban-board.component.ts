@@ -414,6 +414,15 @@ export class KanbanBoardComponent<T> {
     return formatKanbanLabel(this.labels.moveToGroup, { group: group.title });
   }
 
+  /** 窄版（一次一欄）道標題的張數：目前這一欄、這一道的卡片數（寬版顯示整道加總）。 */
+  protected laneCount(lane: LaneView<T>): string {
+    return String(lane.cells[this.activeColumn()]?.cards.length ?? 0);
+  }
+
+  protected laneCountLabel(lane: LaneView<T>): string {
+    return formatKanbanLabel(this.labels.count, { count: lane.cells[this.activeColumn()]?.cards.length ?? 0 });
+  }
+
   protected otherColumns(cell: CellView<T>): KanbanColumn[] {
     return this.columns().filter((c) => c.id !== cell.column.id);
   }

@@ -51,6 +51,8 @@
           [level]="headingLevel()"
           [countText]="lane.countText"
           [countLabel]="lane.countLabel"
+          [currentCountText]="laneCount(lane)"
+          [currentCountLabel]="laneCountLabel(lane)"
           [expanded]="!lane.collapsed"
           (toggle)="toggleGroup(lane.group.id)"
         />
@@ -65,32 +67,38 @@
               [class.is-drop-blocked]="dropTarget()?.listId === cell.listId && dropTarget()?.blocked"
               [attr.data-kanban-cell]="cell.column.id"
             >
-              <ul
-                class="kb-list"
-                cdkDropList
-                [id]="cell.listId"
-                [cdkDropListData]="cell"
-                [cdkDropListDisabled]="readonly()"
-                [attr.aria-labelledby]="cell.labelledBy"
-                (cdkDropListEntered)="onEntered($event)"
-                (cdkDropListDropped)="onDropped($event)"
-              >
-                @for (card of cell.cards; track card.key) {
-                  <li
-                    class="kb-item"
-                    cdkDrag
-                    [cdkDragData]="card"
-                    [cdkDragDisabled]="readonly()"
-                    [cdkDragStartDelay]="dragDelay"
-                    [cdkDragPreviewClass]="previewClasses"
-                    (cdkDragStarted)="onDragStarted($event)"
-                    (cdkDragEnded)="onDragEnded()"
-                  >
-                    <ng-container *ngTemplateOutlet="cardShell; context: { $implicit: card, cell: cell }" />
-                    <span class="material-symbols-rounded kb-blocked" aria-hidden="true">block</span>
-                  </li>
+              <div class="kb-cell-body">
+                <ul
+                  class="kb-list"
+                  cdkDropList
+                  [id]="cell.listId"
+                  [cdkDropListData]="cell"
+                  [cdkDropListDisabled]="readonly()"
+                  [attr.aria-labelledby]="cell.labelledBy"
+                  (cdkDropListEntered)="onEntered($event)"
+                  (cdkDropListDropped)="onDropped($event)"
+                >
+                  @for (card of cell.cards; track card.key) {
+                    <li
+                      class="kb-item"
+                      cdkDrag
+                      [cdkDragData]="card"
+                      [cdkDragDisabled]="readonly()"
+                      [cdkDragStartDelay]="dragDelay"
+                      [cdkDragPreviewClass]="previewClasses"
+                      (cdkDragStarted)="onDragStarted($event)"
+                      (cdkDragEnded)="onDragEnded()"
+                    >
+                      <ng-container *ngTemplateOutlet="cardShell; context: { $implicit: card, cell: cell }" />
+                      <span class="material-symbols-rounded kb-blocked" aria-hidden="true">block</span>
+                    </li>
+                  }
+                </ul>
+                @if (cell.cards.length === 0) {
+                  <!-- 窄版（一次一欄）才顯示：目前這一欄在這一道沒有卡片。寬版的空格維持空白（container query 藏起來）。 -->
+                  <p class="kb-empty">{{ labels.emptyColumn }}</p>
                 }
-              </ul>
+              </div>
               @if (cell.column.allowAdd && !readonly()) {
                 <lib-kanban-add-card
                   class="kb-add"

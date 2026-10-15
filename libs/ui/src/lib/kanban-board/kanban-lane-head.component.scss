@@ -78,3 +78,18 @@
 .kl-sr {
   @include sk.sr-only;
 }
+
+// 寬版顯示整道的張數；窄版（看板寬度 < 600px，一次一欄）換成目前這一欄在這一道的張數。
+.kl-narrow {
+  display: none;
+}
+
+@container (max-width: 599px) {
+  .kl-wide {
+    display: none;
+  }
+
+  .kl-narrow {
+    display: inline;
+  }
+}

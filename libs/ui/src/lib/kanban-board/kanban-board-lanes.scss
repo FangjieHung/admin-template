@@ -24,6 +24,12 @@
     padding-block: 0;
     overflow: hidden;
   }
+
+  // 目前這一欄在這一道沒有卡片：跟空欄一樣顯示「沒有卡片」（疊在清單的最小高度上，不另外撐高）。
+  // 寬版藏起來的規則寫在檔案後面，這裡多一層 .is-current 讓權重比它高。
+  .kb-cell.is-current .kb-cell-body > .kb-empty {
+    display: grid;
+  }
 }
 
 // 黏住的欄頭要不透明：底色是欄底疊在 --lib-kanban-surface（＝看板所在卡片的底色）上，框線照畫（下緣除外）。
@@ -83,6 +89,18 @@
   .kb-list {
     min-height: 3rem;
     overflow: visible;
+  }
+
+  // 清單＋空格提示（提示絕對定位疊在清單上，同欄模式的 .kb-body）。
+  .kb-cell-body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  // 寬版的空格維持空白（拖曳時整格就是放置區）；窄版才顯示「沒有卡片」。
+  .kb-cell-body > .kb-empty {
+    display: none;
   }
 
   .kb-add {

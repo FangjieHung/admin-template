@@ -402,7 +402,7 @@ Material 用預設值（surface-container-high 面板、extra-large 圓角、lev
 - 欄與卡片的底、框、陰影畫在不含文字的 `::before` 上（可以加 filter 而字不變形）；欄的狀態外框（超過上限、拖曳中可放下、會被拒絕）畫在 `::after`，不影響欄的框與陰影。拖曳中的預覽掛在 `body` 底下，另外帶 `.lib-kanban-board` class，所以質地設的變數一樣吃得到。會被 `canMove` 拒絕的欄：外框與放置預覽換成 `--mat-sys-error`，放置預覽中間出現禁止圖示。
 - 清單是捲動容器，會裁掉卡片的陰影：卡片陰影或偏移較大的質地要一起加大 `--lib-kanban-list-padding`（欄的陰影則是 `--lib-kanban-board-padding`）。
 - 分組（泳道，`[groupBy]`）：欄的底改畫在從欄頭延伸到最後一道的 track 上（同一組 `--lib-kanban-column-*` 變數），整個看板自己捲動（高度上限同欄高上限），欄頭黏在看板頂端——黏住的欄頭底色是欄底疊在 `--lib-kanban-surface` 上（要等於看板所在卡片的底色，同 `--dt-frozen-bg`／`--lib-cal-surface` 的作法），框線照畫、下緣換成 `--lib-kanban-head-divider`。每一道的標題列（收合按鈕＋名稱＋張數，張數吃 `--lib-kanban-count-*`）橫跨所有欄、文字黏在左邊，上緣是 `--lib-kanban-lane-divider`；拖曳中的可放下／會被拒絕外框畫在那一格上。
-- 窄版（看板寬度 < 600px，container query）：一次一欄，上方的欄位切換是一排 `.ui-nav-pill`（目前那一欄 `.is-active`＋`aria-current`，吃質地的導覽膠囊 recipe），排不下時這一排自己橫向捲動。分組模式只畫目前那一欄的格子（同一道的格子共用一列，否則列高會被別欄撐高）。
+- 窄版（看板寬度 < 600px，container query）：一次一欄，上方的欄位切換是一排 `.ui-nav-pill`（目前那一欄 `.is-active`＋`aria-current`，吃質地的導覽膠囊 recipe），排不下時這一排自己橫向捲動。分組模式只畫目前那一欄的格子（同一道的格子共用一列，否則列高會被別欄撐高），道標題的張數改成目前這一欄在這一道的張數，沒有卡片的格子顯示跟空欄一樣的「沒有卡片」（虛線框、`--mat-sys-on-surface-variant`）；寬版的空格維持空白。
 - 質地只在 `.lib-kanban-board` 上設下列變數，不覆寫屬性（欄頭、分組標題、欄位切換、新增卡片是內部元件，變數會繼承下去）。
 
 | 變數 | 預設 | 用途 | 目前設定的質地 |

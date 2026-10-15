@@ -709,6 +709,42 @@ describe('KanbanBoardComponent（看板）', () => {
     expect(document.activeElement).toBe(card('a'));
   });
 
+  it('窄版分組模式：道標題另有「目前這一欄、這一道」的張數（寬版是整道加總），跟著目前的欄更新，報讀器文字一起換', async () => {
+    await setupGrouped();
+    const counts = (id: string) => ({
+      wide: laneHead(id).querySelector('.kl-count.kl-wide')?.textContent?.trim(),
+      wideLabel: laneHead(id).querySelector('.kl-sr.kl-wide')?.textContent?.trim(),
+      narrow: laneHead(id).querySelector('.kl-count.kl-narrow')?.textContent?.trim(),
+      narrowLabel: laneHead(id).querySelector('.kl-sr.kl-narrow')?.textContent?.trim(),
+    });
+    // 目前是「待處理」：王 在待處理 0 張、整道 1 張（c 在進行中）
+    expect(counts('王')).toEqual({ wide: '1', wideLabel: '1 張卡片', narrow: '0', narrowLabel: '0 張卡片' });
+    expect(counts('林')).toEqual({ wide: '1', wideLabel: '1 張卡片', narrow: '1', narrowLabel: '1 張卡片' });
+    // 切到「進行中」
+    const layout = fakeLayout();
+    pills()[1].click();
+    await settle();
+    layout.scrollTo(316);
+    await settle();
+    expect(counts('王')).toMatchObject({ narrow: '1', narrowLabel: '1 張卡片' });
+    expect(counts('林')).toMatchObject({ narrow: '0', narrowLabel: '0 張卡片' });
+    expect(counts('林').wide).toBe('1');
+  });
+
+  it('分組模式：沒有卡片的格子有「沒有卡片」提示（窄版才顯示，寬版由樣式藏起來），有卡片的格子沒有', async () => {
+    await setupGrouped();
+    const empty = (groupId: string, columnId: string) =>
+      lane(groupId).querySelector(`[data-kanban-cell="${columnId}"] .kb-cell-body > .kb-empty`);
+    expect(empty('王', 'todo')?.textContent).toBe('沒有卡片');
+    expect(empty('王', 'doing')).toBeNull();
+    expect(empty('林', 'todo')).toBeNull();
+    // 卡片移走後出現提示、移進來後消失
+    press(card('a'), 'ArrowRight');
+    await settle();
+    expect(empty('林', 'todo')?.textContent).toBe('沒有卡片');
+    expect(empty('林', 'doing')).toBeNull();
+  });
+
   it('窄版欄位切換在分組模式也一樣（以欄底的 track 為準）', async () => {
     await setupGrouped();
     expect(el.querySelectorAll('.kb-board > [data-kanban-column]')).toHaveLength(3);
