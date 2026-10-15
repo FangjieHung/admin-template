@@ -3,7 +3,7 @@ import { ACCESS_DATA_KEY, AccessCheck, accessGuard, unsavedChangesGuard } from '
 
 /**
  * 工單樣板的路由（app.routes.ts 用 loadChildren 掛在 /templates/tickets，整份都是 lazy）：
- * 列表 → 詳情 → 編輯，列表的「新增」→ 空白表單、「匯入」→ 匯入精靈，詳情的「列印」→ 工單服務單。每一頁依 libs/access 的「工單」功能守門：
+ * 列表 → 詳情 → 編輯，列表的「新增」→ 空白表單、「匯入」→ 匯入精靈、「看板」→ 工單看板，詳情的「列印」→ 工單服務單。每一頁依 libs/access 的「工單」功能守門：
  * 沒有權限時顯示「沒有權限」頁（網址不變）；表單有未存的變更時離開前先確認（unsavedChangesGuard）。
  */
 function guarded(access: AccessCheck): Partial<Route> {
@@ -21,6 +21,12 @@ export const TICKET_ROUTES: Routes = [
     canDeactivate: [unsavedChangesGuard],
   },
   { path: 'new', loadComponent: loadForm, ...guarded('ticket:create'), canDeactivate: [unsavedChangesGuard] },
+  // 看板：同一份工單依狀態分欄（可依負責人分組）；沒有「工單・編輯」時唯讀。要放在 :id 前面，否則 board 會被當成工單編號。
+  {
+    path: 'board',
+    loadComponent: () => import('./ticket-board/ticket-board-page.component').then((m) => m.TicketBoardPageComponent),
+    ...guarded('ticket:view'),
+  },
   // 匯入：跟「新增」同一個權限；要放在 :id 前面，否則 import 會被當成工單編號。
   {
     path: 'import',

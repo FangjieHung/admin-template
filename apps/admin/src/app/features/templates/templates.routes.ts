@@ -3,7 +3,7 @@ import { ACCESS_DATA_KEY, AccessCheck, accessGuard } from '@admin-template/acces
 
 /**
  * 頁面樣板的路由（app.routes.ts 用 loadChildren 掛在 /templates，整份都是 lazy，不佔 Initial bundle）：
- * 規劃中清單、儀表板、排程、工單（列表、詳情、表單，路由在 tickets.routes.ts）、設定頁（分組子路由在 account-settings.routes.ts）、全部通知、空白頁。
+ * 規劃中清單、儀表板、排程、工單（列表、詳情、表單、匯入、看板，路由在 tickets.routes.ts）、設定頁（分組子路由在 account-settings.routes.ts）、全部通知、空白頁。
  */
 function guarded(access: AccessCheck): Partial<Route> {
   return { canActivate: [accessGuard], data: { [ACCESS_DATA_KEY]: access }, runGuardsAndResolvers: 'always' };

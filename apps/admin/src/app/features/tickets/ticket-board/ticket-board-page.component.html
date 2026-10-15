@@ -1,0 +1,126 @@
+<!-- 頁首：標題「工單看板」（provideHeaderTitle）；右邊是關鍵字、負責人、優先順序、切回列表與樣板說明。 -->
+<ng-template appHeaderToolbar>
+  <lib-page-toolbar
+    placeholder="搜尋編號或標題"
+    [query]="query()"
+    (queryChange)="setQuery($event)"
+    [activeFilterCount]="filterCount()"
+    (clearAll)="clearFilters()"
+  >
+    <lib-filter-select filters label="負責人" [options]="assigneeOptions" [value]="assignee()" (valueChange)="setAssignee($event)" />
+    <lib-filter-select filters label="優先順序" [options]="priorityOptions" [value]="priority()" (valueChange)="setPriority($event)" />
+    <div actions class="board-actions">
+      <a matButton="outlined" routerLink="/templates/tickets" data-action="list-view">
+        <span class="material-symbols-rounded" aria-hidden="true">view_list</span>列表
+      </a>
+      <app-template-info [info]="info" />
+    </div>
+  </lib-page-toolbar>
+</ng-template>
+
+<div class="board-page">
+  <div class="board-bar">
+    <div class="board-group" role="group" aria-labelledby="board-group-label">
+      <span id="board-group-label" class="ui-text-caption">分組</span>
+      @for (option of groupOptions; track option.id) {
+        <button
+          type="button"
+          class="ui-nav-pill"
+          [class.is-active]="groupMode() === option.id"
+          [attr.aria-pressed]="groupMode() === option.id"
+          [attr.data-group-mode]="option.id"
+          (click)="setGroupMode(option.id)"
+        >
+          {{ option.label }}
+        </button>
+      }
+    </div>
+    <p class="ui-text-caption board-count" aria-live="polite" data-ticket-count>{{ countText() }}</p>
+  </div>
+  @if (!canEdit() && loadState() === 'ready') {
+    <p class="board-note" data-readonly-note>
+      <span class="material-symbols-rounded" aria-hidden="true">visibility</span>你只有檢視權限：可以查看看板，不能拖曳或改狀態。
+    </p>
+  }
+
+  @switch (loadState()) {
+    @case ('loading') {
+      <section class="ui-card board-card board-skeleton" aria-busy="true" data-state="loading">
+        @for (col of columns(); track col.id) {
+          <div class="board-skeleton__column">
+            <lib-skeleton variant="text" [count]="1" [label]="'正在載入「' + col.title + '」'" />
+            <div class="board-skeleton__cards" aria-hidden="true">
+              @for (n of [0, 1]; track n) {
+                <div class="board-skeleton__card"><lib-skeleton variant="text" [count]="3" /></div>
+              }
+            </div>
+          </div>
+        }
+      </section>
+    }
+    @case ('error') {
+      <section class="ui-card board-card" data-state="error">
+        <lib-error-state message="工單載入失敗" hint="請確認網路連線後再試一次。" (retry)="load()" />
+      </section>
+    }
+    @default {
+      <section class="ui-card board-card">
+        @if (visible().length === 0) {
+          <p class="board-empty" data-state="no-results">
+            沒有符合條件的工單。
+            <button type="button" matButton data-action="clear-filters" (click)="clearFilters()">清除篩選</button>
+          </p>
+        }
+        <lib-kanban-board
+          class="board"
+          label="工單看板"
+          [columns]="columns()"
+          [items]="visible()"
+          [cardKey]="key"
+          [cardColumn]="column"
+          [cardTitle]="title"
+          [groupBy]="groupMode() === 'assignee' ? owner : null"
+          [groups]="groups()"
+          [(collapsedGroups)]="collapsed"
+          [canMove]="canMove"
+          [readonly]="!canEdit()"
+          (moved)="onMoved($event)"
+          (moveRejected)="onRejected($event)"
+          (addCard)="onAdd($event)"
+        >
+          <ng-template libKanbanCard [libKanbanCardOf]="visible()" let-ticket>
+            <div class="board-ticket">
+              <div class="board-ticket__top">
+                <span class="board-ticket__id ui-text-numeric">{{ ticket.id }}</span>
+                <span class="board-ticket__priority" [attr.data-priority]="ticket.priority">
+                  @if (ticket.priority === 'urgent' || ticket.priority === 'high') {
+                    <span class="material-symbols-rounded" aria-hidden="true">{{ ticket.priority === 'urgent' ? 'priority_high' : 'arrow_upward' }}</span>
+                  }
+                  {{ priorityLabels[ticket.priority] }}
+                </span>
+              </div>
+              <a class="board-ticket__title" [routerLink]="['/templates/tickets', ticket.id]" data-action="open-ticket">{{ ticket.title }}</a>
+              <div class="board-ticket__meta">
+                @if (groupMode() !== 'assignee') {
+                  <span [class.board-ticket__muted]="!ticket.assigneeId">
+                    <span class="material-symbols-rounded" aria-hidden="true">{{ ticket.assigneeId ? 'person' : 'person_off' }}</span>
+                    {{ ticket.assigneeId ? repoName(ticket.assigneeId) : '未指派' }}
+                  </span>
+                }
+                @if (ticket.dueDate) {
+                  <span [class.board-ticket__overdue]="isOverdue(ticket.dueDate, ticket.status)">
+                    <span class="material-symbols-rounded" aria-hidden="true">event</span>
+                    <span class="ui-text-numeric">{{ formatDueDate(ticket.dueDate) }}</span>
+                    @if (isOverdue(ticket.dueDate, ticket.status)) {
+                      已逾期
+                    }
+                  </span>
+                }
+              </div>
+            </div>
+          </ng-template>
+        </lib-kanban-board>
+      </section>
+    }
+  }
+</div>

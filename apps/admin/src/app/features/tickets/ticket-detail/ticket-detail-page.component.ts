@@ -91,7 +91,7 @@ const INFO: TemplateInfo = {
 };
 
 /**
- * 工單詳情（頁面樣板，/templates/tickets/:id）：返回列表會帶著列表的篩選與頁碼（TicketListMemory）。
+ * 工單詳情（頁面樣板，/templates/tickets/:id）：返回列表會帶著列表的篩選與頁碼（TicketListMemory）；從看板打開時改成返回看板。
  * 表單存檔後導回這一頁，提示由表單頁顯示。
  */
 @Component({
@@ -137,7 +137,12 @@ export class TicketDetailPageComponent {
   private readonly toast = inject(ToastService);
   private readonly access = inject(AccessService);
   private readonly notifications = inject(NotificationCenterService);
-  protected readonly listParams = inject(TicketListMemory).queryParams;
+  private readonly memory = inject(TicketListMemory);
+  /** 返回連結：從看板打開的回到看板（帶著看板的篩選與分組），其他回到列表（帶著列表的篩選與頁碼）。 */
+  protected readonly back =
+    this.memory.origin === 'board'
+      ? { path: '/templates/tickets/board', params: this.memory.boardParams, label: '返回工單看板', action: '回到工單看板' }
+      : { path: '/templates/tickets', params: this.memory.queryParams, label: '返回工單列表', action: '回到工單列表' };
 
   protected readonly info = INFO;
   protected readonly kinds = TICKET_ACTIVITY_KINDS;
@@ -239,7 +244,7 @@ export class TicketDetailPageComponent {
   }
 
   protected backToList(): void {
-    void this.router.navigate(['/templates/tickets'], { queryParams: this.listParams });
+    void this.router.navigate([this.back.path], { queryParams: this.back.params });
   }
 
   protected async assign(): Promise<void> {

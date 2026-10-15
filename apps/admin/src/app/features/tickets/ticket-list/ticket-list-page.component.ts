@@ -75,7 +75,7 @@ const INFO: TemplateInfo = {
   summary:
     '列表頁樣板：搜尋、篩選、排序、分頁都寫在網址上，重新整理或從詳情頁返回時還原；多選後可批次改狀態或刪除（可復原）；有編輯權限時可以切到「快速編輯」，直接在表格裡改優先順序、負責人、期限與狀態，一次儲存。',
   components: [
-    'lib-page-toolbar、lib-filter-select（頁首的搜尋與狀態）',
+    'lib-page-toolbar、lib-filter-select（頁首的搜尋與狀態；「看板」切到同一批工單的看板檢視）',
     'lib-advanced-filter、lib-filter-chips、lib-saved-views（ListViewController）',
     'lib-data-table（分頁、排序、欄位選擇、凍結編號欄、多選、批次操作、骨架、空狀態；快速編輯是 editor 欄位＋批次修改）',
     'lib-error-state、lib-empty-state、lib-status-chip、lib-toast、確認對話框',
@@ -340,6 +340,8 @@ export class TicketListPageComponent implements HasUnsavedChanges {
 
   constructor() {
     provideHeaderTitle(() => ({ title: '工單', breadcrumbs: [{ label: '頁面樣板' }] }));
+    // 從列表打開的工單，詳情頁的返回連結回到列表（從看板打開的回到看板）。
+    this.memory.origin = 'list';
     void this.restoreFromUrl();
     void this.load();
 

@@ -285,11 +285,12 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     load: () => import('../features/error-pages/error-pages-page.component').then((m) => m.ErrorPagesPageComponent),
   },
   { id: 'dashboard', title: '儀表板', group: 'templates', icon: 'dashboard', path: 'templates/dashboard', access: 'ticket:view' },
-  // 工單的列表、詳情、表單三頁串成一個流程（features/tickets，路由在 tickets.routes.ts）。
+  // 工單的列表、詳情、表單、匯入、看板串成一個流程（features/tickets，路由在 tickets.routes.ts）。
   { id: 'ticket-list', title: '列表頁', group: 'templates', icon: 'list_alt', path: 'templates/tickets', access: 'ticket:view' },
   { id: 'ticket-detail', title: '詳情頁', group: 'templates', icon: 'article', path: 'templates/tickets/TK-2048', access: 'ticket:view' },
   { id: 'ticket-form', title: '表單頁', group: 'templates', icon: 'edit_document', path: 'templates/tickets/TK-2048/edit', access: 'ticket:edit' },
   { id: 'ticket-import', title: '匯入頁', group: 'templates', icon: 'upload', path: 'templates/tickets/import', access: 'ticket:create' },
+  { id: 'ticket-board', title: '看板頁', group: 'templates', icon: 'view_kanban', path: 'templates/tickets/board', access: 'ticket:view' },
   { id: 'schedule', title: '排程', group: 'templates', icon: 'event_note', path: 'templates/schedule', access: 'ticket:view' },
   { id: 'login', title: '登入', group: 'templates', icon: 'login', path: 'login' },
   { id: 'settings-template', title: '設定頁', group: 'templates', icon: 'manage_accounts', path: 'templates/settings' },

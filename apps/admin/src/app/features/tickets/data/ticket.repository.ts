@@ -216,6 +216,25 @@ export class TicketRepository {
     return { ...ticket };
   }
 
+  /**
+   * 只給標題的快速新增（看板「待處理」欄底的新增卡片）：分類「其他」、優先順序「中」、申請人是示範資料的第一位，
+   * 負責人可以先給（看板依負責人分組時，新增在哪一道就指派給誰）。接後端時換成 POST /api/tickets。
+   */
+  async quickCreate(title: string, options: { assigneeId?: string | null }, actor: TicketActor): Promise<Ticket> {
+    return this.create(
+      {
+        title,
+        category: 'other',
+        priority: 'medium',
+        assigneeId: options.assigneeId ?? null,
+        requesterId: this.data.requesters[0].id,
+        dueDate: null,
+        description: '',
+      },
+      actor,
+    );
+  }
+
   /** 存檔；活動紀錄記一筆有哪些欄位改了。id 不存在丟 TicketNotFoundError。 */
   async update(id: string, draft: TicketDraft, actor: TicketActor): Promise<Ticket> {
     await this.delay();

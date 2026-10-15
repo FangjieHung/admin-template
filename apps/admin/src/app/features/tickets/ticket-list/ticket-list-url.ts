@@ -99,9 +99,13 @@ function sameJson(a: unknown, b: unknown): boolean {
 
 /**
  * 記住最後一次的列表網址參數：詳情頁的「返回工單列表」帶著它回去，篩選與頁碼都還在。
+ * 從看板打開的工單，詳情頁改成「返回工單看板」（`origin`），帶著看板的篩選與分組（`boardParams`）回去。
  * 只在這次開啟期間有效（重新整理詳情頁後就回到預設列表）。
  */
 @Injectable({ providedIn: 'root' })
 export class TicketListMemory {
   queryParams: Params = {};
+  /** 最後一次是從列表還是看板進到詳情。 */
+  origin: 'list' | 'board' = 'list';
+  boardParams: Params = {};
 }

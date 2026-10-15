@@ -10,7 +10,7 @@
         icon="search_off"
         [message]="'找不到工單 ' + ticketId"
         detail="這張工單可能已被刪除，或網址打錯了。"
-        actionLabel="回到工單列表"
+        [actionLabel]="back.action"
         (action)="backToList()"
       />
     </section>
@@ -22,8 +22,8 @@
   }
   @default {
     <lib-detail-layout class="ticket-detail" [loading]="state() === 'loading'" asideLabel="工單摘要" [compactTitle]="compactTitle()">
-      <a libDetailBack class="ticket-back" routerLink="/templates/tickets" [queryParams]="listParams">
-        <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>返回工單列表
+      <a libDetailBack class="ticket-back" [routerLink]="back.path" [queryParams]="back.params" data-action="back">
+        <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>{{ back.label }}
       </a>
       <h2 libDetailTitle class="ui-text-title">{{ ticket()?.title }}</h2>
       <div libDetailMeta>

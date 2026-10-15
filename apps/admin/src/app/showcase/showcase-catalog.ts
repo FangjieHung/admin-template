@@ -163,6 +163,10 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     summary: '工單匯入樣板：從列表的「匯入」進來，上傳 CSV 或 Excel、對應欄位、預覽修正後分批建立工單，完成後回到列表並提示匯入了幾筆。',
     source: 'libs/ui（import-wizard）、apps/admin/src/app/features/tickets/ticket-import',
   },
+  'ticket-board': {
+    summary: '工單看板樣板：跟工單列表同一份資料依狀態分欄，可依負責人分組（泳道）；拖曳、鍵盤或移動選單換狀態與負責人，寫回工單資料並記進活動紀錄；篩選負責人、優先順序與關鍵字，點標題打開詳情，「待處理」欄底直接新增。',
+    source: 'libs/ui（kanban-board、page-toolbar、filter）、apps/admin/src/app/features/tickets/ticket-board',
+  },
   'login': {
     summary: '登入樣板：帳號密碼、顯示密碼、記住我、送出中與錯誤訊息（帳密錯誤、帳號鎖定）；示範帳號登入後切換成對應的身分。',
     source: 'libs/access（示範身分）、apps/admin/src/app/features/auth',
