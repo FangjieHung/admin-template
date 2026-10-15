@@ -185,6 +185,11 @@
   .mat-mdc-dialog-container .mat-mdc-dialog-title + .mat-mdc-dialog-content {
     padding-top: 16px;
   }
+  // 說明段落與緊接的欄位之間留白，outlined 欄位浮在上框線上的標籤才不會壓到說明文字。
+  // 留白放在欄位上（不是段落的下邊距）：段落是最後一個時不會多出一段，跟欄位自己的 margin-top 也不會疊加。
+  .mat-mdc-dialog-content > p + .mat-mdc-form-field {
+    margin-top: 16px;
+  }
   .mat-mdc-menu-panel {
     border: 1px solid var(--mat-sys-outline);
     border-radius: var(--mat-sys-corner-large) !important;
