@@ -163,6 +163,51 @@
   inset: 0 0.5rem 0 0.125rem;
 }
 
+// 重疊的活動（--ev-col／--ev-cols／--ev-span 由元件給）：每欄寬度夠（--lib-cal-event-min-width）就並排；
+// 不夠時往右錯開、每筆至少那麼寬，後開始的疊在前面的上面（最右一筆貼齊右緣），被蓋住的露出左側與較早的時段。
+// 太窄連最小寬度都放不下時，每筆至少錯開 0.75rem，仍看得出有幾筆。
+.tg__lane > .cal-ev {
+  --_cols: var(--ev-cols, 1);
+  --_min: min(var(--lib-cal-event-min-width, 5rem), 100%);
+  --_even: calc(100% / var(--_cols));
+  --_gaps: max(var(--_cols) - 1, 1);
+  --_step: max(min(var(--_even), calc((100% - var(--_min)) / var(--_gaps))), min(0.75rem, calc((100% - 1.5rem) / var(--_gaps))));
+  --_left: calc(var(--ev-col, 0) * var(--_step));
+
+  left: var(--_left);
+  width: min(calc(100% - var(--_left)), max(calc(var(--ev-span, 1) * var(--_even) - 2px), var(--_min)));
+}
+
+// 右半邊的欄：拖曳提示靠右對齊，不會超出捲動容器。
+.tg__lane > .cal-ev.is-tip-end {
+  --cal-ev-tip-left: auto;
+  --cal-ev-tip-right: 0;
+}
+
+// 疊在別筆上面的活動多一圈底色，邊界看得清楚。
+.tg__lane > .cal-ev[data-col]:not([data-col='0']) {
+  --cal-ev-ring: 0 0 0 1px var(--lib-cal-surface, var(--mat-sys-surface));
+}
+
+// 鍵盤用的時段：平常看不見、不接指標（點的是整欄），聚焦時畫出焦點框與淡底，蓋在活動上面。
+.tg__slot {
+  position: absolute;
+  inset-inline: 0;
+  pointer-events: none;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    z-index: 3;
+    border-radius: var(--lib-cal-event-radius, var(--mat-sys-corner-small));
+    background: var(--lib-cal-slot-hover, var(--app-state-hover));
+    outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
+    outline-offset: calc(var(--app-focus-ring-width) * -1);
+  }
+}
+
 .tg__hover,
 .tg__selection {
   position: absolute;

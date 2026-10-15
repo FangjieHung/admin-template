@@ -104,6 +104,8 @@ export interface CalendarLabels {
   undo: string;
   /** 換了檢視或期間（念給報讀器），例：「{view}，{title}」。 */
   viewChanged: string;
+  /** 選填：週／日檢視時段格的操作說明（aria-description），例：「按 Enter 在這個時段新增」。 */
+  slotHint?: string;
 }
 
 export const CALENDAR_LABELS = new InjectionToken<CalendarLabels>('CALENDAR_LABELS');

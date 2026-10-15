@@ -215,10 +215,11 @@ readonly save: CalendarChangeFn = async (change, signal) => {
       title: '鍵盤與指標',
       rows: [
         { name: '方向鍵／PageUp／PageDown／Home／End', type: '月曆格', description: '在日子之間移動（只有一格在 Tab 順序裡），PageUp／PageDown 換月；Enter 選取那一天。' },
+        { name: '方向鍵／Home／End', type: '時間格（週、日）', description: '上下一個時段、左右一天，Home／End 到當天第一個／最後一個時段（只有一格在 Tab 順序裡）；Enter 或 Space 選取那個時段＝(slotSelect)，和點空白處一樣。' },
         { name: 'Tab／Enter', type: '活動', description: '活動是按鈕，Enter 打開；報讀器念出標題、日期時間、資源、類別、狀態與衝突。' },
         { name: 'Alt＋方向鍵', type: '移動', description: '時間格：上下一個時段、左右一天；資源排程：左右一格、上下換資源；月曆：左右一天、上下一週。' },
         { name: 'Alt＋Shift＋方向鍵', type: '調整長度', description: '改結束時間（下／右變長，上／左變短），最短一個時段。' },
-        { name: '拖曳／拉邊緣', type: '指標', description: '對齊時段，拖曳中跟著顯示新的時間；Esc 取消。觸控裝置不拖曳（避免和捲動衝突），請用面板編輯。' },
+        { name: '拖曳／拉邊緣', type: '指標', description: '對齊時段，拖曳中跟著顯示新的時間；Esc 取消。觸控：長按約半秒（出現預覽）再拖，拖曳中頁面不捲動；按住之前就滑動＝捲動。' },
       ],
     },
   ];

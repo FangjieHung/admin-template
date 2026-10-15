@@ -60,6 +60,7 @@ export const ZH_TW_CALENDAR_LABELS: CalendarLabels = {
   saveFailedReason: '「{title}」沒有儲存，已還原：{reason}',
   undo: '復原',
   viewChanged: '{view}，{title}',
+  slotHint: '按 Enter 在這個時段新增',
 };
 
 /** 用到 lib-calendar 的頁面在自己的 providers 加上這組。 */

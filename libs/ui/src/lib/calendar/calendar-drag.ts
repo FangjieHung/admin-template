@@ -84,35 +84,76 @@ export function sameSchedule(a: CalendarEvent, b: CalendarEvent): boolean {
 // ---- 指標拖曳 ----
 
 export interface PointerDragHandlers {
-  /** 超過門檻後每次移動：相對按下時的位移（px）與目前的指標事件。 */
+  /** 開始拖曳後每次移動：相對按下時的位移（px）與目前的指標事件。觸控長按到時也會呼叫一次（位移是按住時的小晃動）。 */
   move(dx: number, dy: number, event: PointerEvent): void;
-  /** 放開（`committed`）或取消（Esc、pointercancel）；沒有超過門檻就放開時不會呼叫，交給原生的 click。 */
+  /** 放開（`committed`）或取消（Esc、pointercancel）；還沒開始拖就放開時不會呼叫，交給原生的 click。 */
   end(committed: boolean): void;
 }
 
-/** 開始拖曳前要移動幾 px（避免手抖把點一下變成拖曳）。 */
+export interface PointerDragOptions {
+  /** 滑鼠、觸控筆：移動幾 px 才開始拖（避免手抖把點一下變成拖曳）。預設 DRAG_THRESHOLD。 */
+  threshold?: number;
+  /** 觸控：按住幾毫秒才開始拖。預設 TOUCH_DRAG_DELAY。 */
+  touchDelay?: number;
+  /** 觸控：按住期間手指移動超過幾 px 就當成在捲動，放棄這次拖曳。預設 TOUCH_SLOP。 */
+  touchSlop?: number;
+}
+
+/** 開始拖曳前要移動幾 px（滑鼠、觸控筆）。 */
 export const DRAG_THRESHOLD = 4;
+/** 觸控要按住多久才開始拖（ms）：比點一下長、比系統的長按選單短；在這之前滑動就是一般的捲動。 */
+export const TOUCH_DRAG_DELAY = 450;
+/** 觸控按住期間容許的晃動（px）。 */
+export const TOUCH_SLOP = 10;
+
+let touchDragsActive = 0;
+
+/**
+ * 觸控拖曳進行中（長按之後）。活動上的 touchmove 依這個 preventDefault，拖曳時頁面不會跟著捲動
+ * （pointermove 不能阻止捲動，只有非 passive 的 touchmove 可以）。
+ */
+export function isTouchDragActive(): boolean {
+  return touchDragsActive > 0;
+}
 
 /**
  * 從 pointerdown 開始追蹤一次拖曳。監聽掛在 window 上（指標移出元素也收得到），Esc 取消。
+ * - 滑鼠、觸控筆：移動超過 `threshold` 就開始拖。
+ * - 觸控：按住 `touchDelay` 毫秒才開始拖（先畫出預覽，表示「拿起來了」）；在這之前移動超過 `touchSlop`
+ *   或瀏覽器開始捲動（pointercancel）就放棄，讓手指照常捲動頁面。按住期間擋掉長按選單。
  * 真的拖過之後，放開時瀏覽器緊接著送出的 click 會被攔掉，不會把活動打開。回傳「中止」函式。
  */
-export function trackPointerDrag(down: PointerEvent, handlers: PointerDragHandlers, threshold = DRAG_THRESHOLD): () => void {
+export function trackPointerDrag(down: PointerEvent, handlers: PointerDragHandlers, options: PointerDragOptions = {}): () => void {
   const view = (down.target as Node | null)?.ownerDocument?.defaultView ?? window;
   const doc = view.document;
   const startX = down.clientX;
   const startY = down.clientY;
   const pointerId = down.pointerId;
+  const touch = down.pointerType === 'touch';
+  const threshold = options.threshold ?? DRAG_THRESHOLD;
+  const slop = options.touchSlop ?? TOUCH_SLOP;
   let active = false;
   let done = false;
+  let last: PointerEvent = down;
+  let timer: number | null = null;
 
+  const activate = () => {
+    active = true;
+    if (touch) touchDragsActive++;
+  };
   const onMove = (e: PointerEvent) => {
     if (e.pointerId !== pointerId) return;
+    last = e;
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
     if (!active) {
+      if (touch) {
+        // 還在等長按：手指移開就是在捲動。
+        if (Math.hypot(dx, dy) >= slop) finish(false);
+        return;
+      }
       if (Math.hypot(dx, dy) < threshold) return;
-      active = true;
+      activate();
     }
     e.preventDefault();
     handlers.move(dx, dy, e);
@@ -121,14 +162,18 @@ export function trackPointerDrag(down: PointerEvent, handlers: PointerDragHandle
     e.stopPropagation();
     e.preventDefault();
   };
+  const blockMenu = (e: Event) => e.preventDefault();
   const finish = (committed: boolean) => {
     if (done) return;
     done = true;
+    if (timer !== null) view.clearTimeout(timer);
     view.removeEventListener('pointermove', onMove);
     view.removeEventListener('pointerup', onUp);
     view.removeEventListener('pointercancel', onCancel);
+    view.removeEventListener('contextmenu', blockMenu, true);
     doc.removeEventListener('keydown', onKey, true);
     if (active) {
+      if (touch) touchDragsActive--;
       view.addEventListener('click', swallowClick, { capture: true, once: true });
       view.setTimeout(() => view.removeEventListener('click', swallowClick, { capture: true }), 0);
       handlers.end(committed);
@@ -153,5 +198,14 @@ export function trackPointerDrag(down: PointerEvent, handlers: PointerDragHandle
   view.addEventListener('pointerup', onUp);
   view.addEventListener('pointercancel', onCancel);
   doc.addEventListener('keydown', onKey, true);
+  if (touch) {
+    view.addEventListener('contextmenu', blockMenu, true);
+    timer = view.setTimeout(() => {
+      timer = null;
+      if (done) return;
+      activate();
+      handlers.move(last.clientX - startX, last.clientY - startY, last);
+    }, options.touchDelay ?? TOUCH_DRAG_DELAY);
+  }
   return () => finish(false);
 }

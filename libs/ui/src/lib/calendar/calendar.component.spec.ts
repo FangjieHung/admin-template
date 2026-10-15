@@ -5,6 +5,7 @@ import { CalendarComponent } from './calendar.component';
 import { CALENDAR_LABELS } from './calendar-labels';
 import { CALENDAR_TEST_LABELS } from './calendar-testing';
 import { ToastService } from '../toast/toast.service';
+import { TOUCH_DRAG_DELAY } from './calendar-drag';
 import {
   CalendarChangeFn,
   CalendarEvent,
@@ -109,6 +110,22 @@ function pointer(type: string, x: number, y: number, target: EventTarget = windo
   target.dispatchEvent(e);
   return e;
 }
+
+/** 觸控的指標事件（jsdom 沒有 PointerEvent，補上 pointerType／pointerId）。 */
+function touchPointer(type: string, x: number, y: number, target: EventTarget = window) {
+  const e = new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0 });
+  Object.defineProperties(e, { pointerType: { value: 'touch' }, pointerId: { value: 3 } });
+  target.dispatchEvent(e);
+  return e;
+}
+
+function touchMove(target: EventTarget): Event {
+  const e = new Event('touchmove', { bubbles: true, cancelable: true });
+  target.dispatchEvent(e);
+  return e;
+}
+
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 function rect(left: number, top: number, width: number, height: number): DOMRect {
   return { left, top, width, height, right: left + width, bottom: top + height, x: left, y: top, toJSON: () => ({}) } as DOMRect;
@@ -241,9 +258,163 @@ describe('CalendarComponent（共用日曆）', () => {
       expect(el.querySelectorAll('.tg__col')).toHaveLength(7);
       const weekly = eventButton(el, 'weekly');
       const brief = eventButton(el, 'brief');
-      expect(weekly.style.left).toBe('0%');
-      expect(brief.style.left).toBe('50%');
+      // 水平位置交給 CSS（夠寬並排、太窄錯開疊放）：元件只給欄位
+      expect([weekly.style.getPropertyValue('--ev-col'), weekly.style.getPropertyValue('--ev-cols')]).toEqual(['0', '2']);
+      expect([brief.style.getPropertyValue('--ev-col'), brief.style.getPropertyValue('--ev-cols')]).toEqual(['1', '2']);
+      expect(brief.getAttribute('data-col')).toBe('1');
       expect(el.querySelector('.tg__allday-cell [data-event-id="leave"]')).not.toBeNull();
+    });
+
+    it('三筆重疊：每筆都有自己的欄（第 0、1、2 欄，共 3 欄），不再用百分比寫死寬度', async () => {
+      const { el, host, settle } = await weekSetup();
+      host.events.set([
+        ...EVENTS,
+        { id: 'third', title: '專案檢討', start: d(2026, 10, 14, 10, 15), end: d(2026, 10, 14, 11, 15) },
+      ]);
+      await settle();
+      const cols = ['weekly', 'third', 'brief'].map((id) => {
+        const b = eventButton(el, id);
+        return [b.style.getPropertyValue('--ev-col'), b.style.getPropertyValue('--ev-cols'), b.style.left, b.style.width];
+      });
+      expect(cols).toEqual([
+        ['0', '3', '', ''],
+        ['1', '3', '', ''],
+        ['2', '3', '', ''],
+      ]);
+    });
+
+    it('時間格的活動另外帶「開始時間」：矮的活動排成一行「10:00 團隊週會」用（月曆格沒有）', async () => {
+      const { el } = await weekSetup();
+      const weekly = eventButton(el, 'weekly');
+      expect(weekly.querySelector('.cal-ev__start')?.textContent?.trim()).toBe('10:00');
+      expect(weekly.querySelector('.cal-ev__time')?.textContent?.trim()).toBe('10:00 – 11:00');
+      // 開始時間排在標題前面（矮的時候 CSS 只把它顯示出來，不用重排 DOM）
+      const body = weekly.querySelector('.cal-ev__body')!;
+      expect([...body.children].map((c) => c.className.split(' ')[0])).toEqual(['cal-ev__start', 'cal-ev__title', 'cal-ev__time']);
+    });
+
+    it('觸控：長按後拖曳移動（拖曳中擋掉捲動），放開送出和滑鼠一樣的變更', async () => {
+      const save = vi.fn<CalendarChangeFn>(() => Promise.resolve());
+      const { el, settle, host } = await weekSetup(save);
+      const weekly = eventButton(el, 'weekly');
+      touchPointer('pointerdown', 350, 610, weekly);
+      touchPointer('pointermove', 352, 612);
+      expect(touchMove(weekly).defaultPrevented).toBe(false);
+      await wait(TOUCH_DRAG_DELAY + 60);
+      await settle();
+      // 長按到時：原地出現預覽（拿起來了）
+      expect(el.querySelector<HTMLElement>('.cal-ev.is-ghost')?.textContent).toContain('10 月 14 日 星期三 10:00 到 11:00');
+      expect(touchMove(weekly).defaultPrevented).toBe(true);
+      touchPointer('pointermove', 452, 668);
+      await settle();
+      expect(el.querySelector<HTMLElement>('.cal-ev.is-ghost')!.textContent).toContain('10 月 15 日 星期四 11:00 到 12:00');
+      expect(el.querySelector('.cal-ev.is-ghost')!.classList).not.toContain('is-tip-end');
+      // 拖到右半邊的欄：提示改成靠右對齊（不超出捲動容器）
+      touchPointer('pointermove', 652, 668);
+      await settle();
+      expect(el.querySelector('.cal-ev.is-ghost')!.classList).toContain('is-tip-end');
+      touchPointer('pointermove', 452, 668);
+      await settle();
+      touchPointer('pointerup', 452, 668);
+      await settle();
+      expect(save).toHaveBeenCalledTimes(1);
+      const change = save.mock.calls[0][0];
+      expect([change.kind, change.via]).toEqual(['move', 'pointer']);
+      expect([change.event.start.getDate(), change.event.start.getHours(), change.event.end.getHours()]).toEqual([15, 11, 12]);
+      expect(host.changes).toHaveLength(1);
+      expect(touchMove(eventButton(el, 'weekly')).defaultPrevented).toBe(false);
+    });
+
+    it('觸控：還沒按住就滑動＝捲動，不拖曳也不擋捲動', async () => {
+      const save = vi.fn<CalendarChangeFn>(() => Promise.resolve());
+      const { el, settle } = await weekSetup(save);
+      const weekly = eventButton(el, 'weekly');
+      touchPointer('pointerdown', 350, 610, weekly);
+      const swipe = touchPointer('pointermove', 350, 660);
+      expect(swipe.defaultPrevented).toBe(false);
+      expect(touchMove(weekly).defaultPrevented).toBe(false);
+      await wait(TOUCH_DRAG_DELAY + 60);
+      await settle();
+      expect(el.querySelector('.cal-ev.is-ghost')).toBeNull();
+      touchPointer('pointerup', 350, 700);
+      await settle();
+      expect(save).not.toHaveBeenCalled();
+    });
+
+    describe('鍵盤選取時段', () => {
+      const active = () => document.activeElement as HTMLElement;
+      const key = (target: Element, k: string) => target.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
+
+      it('只有一格在 Tab 順序裡；方向鍵上下換時段、左右換天，名稱是日期＋時間', async () => {
+        const { el, settle } = await weekSetup();
+        const tabbable = el.querySelectorAll<HTMLElement>('.tg__slot[tabindex="0"]');
+        expect(tabbable).toHaveLength(1);
+        expect(el.querySelectorAll('.tg__slot')).toHaveLength(7 * 48);
+        const start = tabbable[0];
+        // 預設停在 scrollToHour（8:00）
+        expect(start.dataset['minute']).toBe('480');
+        expect(start.getAttribute('role')).toBe('button');
+        expect(start.getAttribute('aria-label')).toMatch(/月 \d+ 日 星期.+，8:00 到 8:30$/);
+        expect(start.getAttribute('aria-description')).toBe('按 Enter 在這個時段新增');
+
+        // 先移到星期一（Home 是當天第一格，所以用左鍵走到底）
+        start.focus();
+        for (let i = 0; i < 7; i++) {
+          key(active(), 'ArrowLeft');
+          await settle();
+        }
+        expect(active().closest('.tg__col')!.getAttribute('data-date')).toBe('2026-10-12');
+        key(active(), 'ArrowDown');
+        await settle();
+        expect(active().dataset['minute']).toBe('510');
+        expect(active().getAttribute('aria-label')).toBe('10 月 12 日 星期一，8:30 到 9:00');
+        key(active(), 'ArrowRight');
+        await settle();
+        expect(active().closest('.tg__col')!.getAttribute('data-date')).toBe('2026-10-13');
+        expect(active().getAttribute('tabindex')).toBe('0');
+        expect(el.querySelectorAll('.tg__slot[tabindex="0"]')).toHaveLength(1);
+        key(active(), 'ArrowUp');
+        await settle();
+        expect(active().getAttribute('aria-label')).toBe('10 月 13 日 星期二，8:00 到 8:30');
+        key(active(), 'End');
+        await settle();
+        expect(active().getAttribute('aria-label')).toBe('10 月 13 日 星期二，23:30 到 24:00');
+        key(active(), 'ArrowDown');
+        await settle();
+        expect(active().dataset['minute']).toBe('1410');
+        key(active(), 'Home');
+        await settle();
+        expect(active().dataset['minute']).toBe('0');
+        // 按住方向鍵連發（中間沒有重新繪製）也不漏步
+        key(active(), 'ArrowDown');
+        key(active(), 'ArrowDown');
+        key(active(), 'ArrowDown');
+        expect(active().dataset['minute']).toBe('90');
+        await settle();
+        expect(active().getAttribute('tabindex')).toBe('0');
+      });
+
+      it('Enter 或 Space＝選取那個時段（和點空白處一樣送出 slotSelect）；唯讀時沒有時段格', async () => {
+        const { el, settle, host } = await weekSetup();
+        const slot = el.querySelector<HTMLElement>('.tg__col[data-date="2026-10-16"] .tg__slot[data-minute="570"]')!;
+        slot.focus();
+        const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+        slot.dispatchEvent(enter);
+        expect(enter.defaultPrevented).toBe(true);
+        const sel = host.selected()!;
+        expect(sel).toMatchObject({ allDay: false, resourceId: null });
+        expect([sel.start.getDate(), sel.start.getHours(), sel.start.getMinutes(), sel.end.getHours(), sel.end.getMinutes()]).toEqual([16, 9, 30, 10, 0]);
+        await settle();
+        // 剛剛選的那格變成 Tab 順序裡的那一格
+        expect(el.querySelector('.tg__slot[tabindex="0"]')).toBe(slot);
+        host.selected.set(null);
+        const space = el.querySelector<HTMLElement>('.tg__col[data-date="2026-10-12"] .tg__slot[data-minute="0"]')!;
+        space.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }));
+        expect(host.selected()!.start.getDate()).toBe(12);
+        host.readonly.set(true);
+        await settle();
+        expect(el.querySelectorAll('.tg__slot')).toHaveLength(0);
+      });
     });
 
     it('拖曳移動：對齊 30 分鐘、可以換日子，拖曳中顯示新時間；放開後送出變更', async () => {

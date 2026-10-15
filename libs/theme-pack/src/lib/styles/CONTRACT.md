@@ -381,6 +381,7 @@ Material 用預設值（surface-container-high 面板、extra-large 圓角、lev
 | `--lib-cal-event-tint` / `-tint-strong` / `-tint-hover` | `16%` / `26%` / `26%` | 活動淡底的類別色濃度（整天的活動用 strong） | Brutal：34%／44%／48%；Cockpit：22%／30%／32%；Riso：20%／28%／30%；Editorial：10%／16%／18% |
 | `--lib-cal-event-base` | `var(--mat-sys-surface)` | 淡底混進去的底色 | Editorial：`surface-container-low`；Soft UI：`background`；Riso：`var(--riso-card)`；Sketch：`var(--sketch-card)` |
 | `--lib-cal-event-radius` / `-frame` / `-shadow` / `-bar-width` / `-weight` / `-size` / `-height` / `-gap` | `corner-small` / 無 / 無 / `3px` / `500` / `0.75rem` / `1.375rem` / `0.125rem` | 活動的圓角、框、陰影、色條寬、字、月曆列高、列距 | Grid、Editorial、Brutal、Ledger：直角；Brutal：2px 墨框、色條 4px、700；Ledger：11px、列高 1.125rem、色條 2px；Editorial：色條 2px；Cockpit：同色淡光；Clay：`var(--clay-shadow-small)`；Sketch：`var(--sketch-wobble-xs)`＋鋼筆框；Soft UI、Clay、Frosted、Aero：`corner-medium` |
+| `--lib-cal-event-min-width` | `5rem` | 週／日檢視重疊的活動每筆最窄多寬：每欄放得下就並排，放不下時往右錯開疊放（後開始的在上面，標題單行省略） | （無） |
 | `--lib-cal-drag-shadow` / `-drag-frame` / `-drag-source-opacity` | `level3` / 同活動 / `0.4` | 拖曳中的預覽／原位置變淡 | Grid：4px 硬影；Brutal：`var(--brutal-shadow-lg)`；Editorial：不加陰影、1px 墨框；Cockpit：`var(--cockpit-glow-2)`；Riso：錯位影；Sketch：`var(--sketch-retrace)`；Clay：`var(--clay-shadow-deep)` |
 | `--lib-cal-conflict-color` / `-conflict-width` | `error` / `2px` | 衝突的外圈與警告色 | Brutal：`3px` |
 | `--lib-cal-select-bg` / `-select-frame` / `-slot-hover` | primary 14% / 2px 主色內框 / `--app-state-hover` | 拖出的選取範圍、滑過的時段 | Brutal：`secondary-container`＋2px 墨框；Soft UI：內凹；Cockpit：主色光；Riso、Sketch、Grid、Editorial：細框 |

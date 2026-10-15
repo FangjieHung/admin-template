@@ -185,7 +185,7 @@ export class CalendarResourceComponent {
   // ---- 拖曳活動 ----
 
   protected onEventPointerDown(e: PointerEvent, event: CalendarEvent): void {
-    if (e.button !== 0 || e.pointerType === 'touch' || !this.store.canEdit(event)) return;
+    if (e.button !== 0 || !this.store.canEdit(event)) return;
     const edge = ((e.target as HTMLElement).closest<HTMLElement>('[data-edge]')?.dataset['edge'] as CalendarEdge | undefined) ?? null;
     const track = this.trackRect();
     if (!track) return;

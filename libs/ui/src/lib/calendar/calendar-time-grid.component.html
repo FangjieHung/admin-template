@@ -68,6 +68,22 @@
         @if (selectionStyle(day.key); as sel) {
           <div class="tg__selection" aria-hidden="true" [style.top.%]="sel.top" [style.height.%]="sel.height"></div>
         }
+        @if (!store.state().readonly()) {
+          @for (s of slots(); track s.minute) {
+            <div
+              class="tg__slot"
+              role="button"
+              [attr.data-minute]="s.minute"
+              [attr.tabindex]="activeSlot().key === day.key && activeSlot().minute === s.minute ? 0 : -1"
+              [attr.aria-label]="day.label + '，' + s.time"
+              [attr.aria-description]="store.labels().slotHint || null"
+              [style.top.%]="s.top"
+              [style.height.%]="s.height"
+              (keydown)="onSlotKey($event, i, s.minute)"
+              (focus)="onSlotFocus($event)"
+            ></div>
+          }
+        }
         <div class="tg__lane">
           @for (item of day.timed; track item.segment.event.id) {
             <button
@@ -76,10 +92,12 @@
               [segment]="item.segment"
               variant="grid"
               [source]="store.preview()?.event?.id === item.segment.event.id"
+              [attr.data-col]="item.column"
+              [style.--ev-col]="item.column"
+              [style.--ev-cols]="item.columns"
+              [style.--ev-span]="item.span"
               [style.top.%]="item.top"
               [style.height.%]="item.height"
-              [style.left.%]="item.left"
-              [style.width]="'calc(' + item.width + '% - 2px)'"
               (click)="open(item.segment.event)"
               (pointerdown)="onEventPointerDown($event, item.segment, i)"
               (keydown)="onEventKey($event, item.segment.event)"
@@ -96,10 +114,9 @@
                 [tip]="p.tip"
                 [previewConflict]="p.conflict"
                 [tabbable]="false"
+                [class.is-tip-end]="i >= (days().length + 1) / 2"
                 [style.top.%]="ghost.top"
                 [style.height.%]="ghost.height"
-                [style.left.%]="0"
-                [style.width.%]="100"
               ></button>
             }
           }

@@ -5,6 +5,9 @@
   @if (conflict()) {
     <span class="material-symbols-rounded cal-ev__warn" aria-hidden="true">warning</span>
   }
+  @if (startTime()) {
+    <span class="cal-ev__start ui-text-numeric" aria-hidden="true">{{ startTime() }}</span>
+  }
   @if (time() && variant() === 'month') {
     <span class="cal-ev__time ui-text-numeric" aria-hidden="true">{{ time() }}</span>
   }

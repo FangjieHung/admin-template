@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { CalendarEvent } from './calendar.types';
 import { CalendarSegment } from './calendar-layout';
 import { CalendarStore } from './calendar-store';
+import { isTouchDragActive } from './calendar-drag';
 
 /** 活動出現在哪裡：月曆格、時間格、整天列、資源排程、議程清單。 */
 export type CalendarEventVariant = 'month' | 'grid' | 'allday' | 'timeline' | 'agenda';
@@ -32,6 +33,7 @@ export type CalendarEventVariant = 'month' | 'grid' | 'allday' | 'timeline' | 'a
     '[class.is-cont-before]': 'segment()?.continuesBefore',
     '[class.is-cont-after]': 'segment()?.continuesAfter',
     '[class.is-all-day]': 'event().allDay',
+    '(touchmove)': 'onTouchMove($event)',
   },
 })
 export class CalendarEventComponent {
@@ -75,4 +77,16 @@ export class CalendarEventComponent {
     if (v === 'timeline' || v === 'agenda') return '';
     return seg ? fmt.shortTime(seg) : '';
   });
+
+  /** 時間格只有一行高（或很窄）時改顯示的開始時間：「9:00 站立會議」。前一天開始的片段不顯示。 */
+  protected readonly startTime = computed(() => {
+    const seg = this.segment();
+    if (this.variant() !== 'grid' || !seg || seg.event.allDay || seg.continuesBefore) return '';
+    return this.store.fmt().time(seg.start);
+  });
+
+  /** 觸控長按拖曳中：擋掉捲動（只有非 passive 的 touchmove 能阻止，所以掛在活動本身）。 */
+  protected onTouchMove(e: Event): void {
+    if (isTouchDragActive() && e.cancelable) e.preventDefault();
+  }
 }

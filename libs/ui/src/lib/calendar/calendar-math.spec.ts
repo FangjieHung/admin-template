@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import {
   addDays,
   addMinutes,
@@ -21,7 +21,15 @@ import {
   segmentOn,
   spanDays,
 } from './calendar-layout';
-import { clampToHours, extendEvent, moveEvent, sameSchedule, snapTo } from './calendar-drag';
+import {
+  clampToHours,
+  extendEvent,
+  isTouchDragActive,
+  moveEvent,
+  sameSchedule,
+  snapTo,
+  trackPointerDrag,
+} from './calendar-drag';
 import { CalendarFormatter } from './calendar-format';
 import { assertCalendarLabels } from './calendar-labels';
 import { CalendarEvent } from './calendar.types';
@@ -224,6 +232,85 @@ describe('calendar-drag（移動與對齊）', () => {
     const clamped = clampToHours(late, 8 * 60, 18 * 60);
     expect([clamped.start.getHours(), clamped.end.getHours()]).toEqual([17, 18]);
     expect(sameSchedule(clampToHours(base, 8 * 60, 18 * 60), base)).toBe(true);
+  });
+});
+
+describe('trackPointerDrag（指標與觸控拖曳）', () => {
+  const ptr = (type: string, x: number, y: number, pointerType = 'touch', pointerId = 7) => {
+    const e = new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0 });
+    Object.defineProperties(e, { pointerType: { value: pointerType }, pointerId: { value: pointerId } });
+    return e as PointerEvent;
+  };
+  const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  it('觸控：按住到時才開始拖（先畫一次預覽），拖曳中擋掉預設動作與長按選單，放開後攔掉 click', async () => {
+    const move = vi.fn();
+    const end = vi.fn();
+    trackPointerDrag(ptr('pointerdown', 100, 100), { move, end }, { touchDelay: 30 });
+    window.dispatchEvent(ptr('pointermove', 103, 102));
+    expect(move).not.toHaveBeenCalled();
+    expect(isTouchDragActive()).toBe(false);
+    await wait(60);
+    expect(isTouchDragActive()).toBe(true);
+    expect(move).toHaveBeenCalledTimes(1);
+    expect(move.mock.calls[0].slice(0, 2)).toEqual([3, 2]);
+    const m = ptr('pointermove', 100, 160);
+    window.dispatchEvent(m);
+    expect(move.mock.calls[1].slice(0, 2)).toEqual([0, 60]);
+    expect(m.defaultPrevented).toBe(true);
+    const menu = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+    window.dispatchEvent(menu);
+    expect(menu.defaultPrevented).toBe(true);
+    window.dispatchEvent(ptr('pointerup', 100, 160));
+    expect(end).toHaveBeenCalledWith(true);
+    expect(isTouchDragActive()).toBe(false);
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+    window.dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(true);
+  });
+
+  it('觸控：按住之前就滑動＝捲動，放棄這次拖曳；瀏覽器開始捲動（pointercancel）也放棄', async () => {
+    const move = vi.fn();
+    const end = vi.fn();
+    trackPointerDrag(ptr('pointerdown', 100, 100), { move, end }, { touchDelay: 30 });
+    const swipe = ptr('pointermove', 100, 130);
+    window.dispatchEvent(swipe);
+    expect(swipe.defaultPrevented).toBe(false);
+    await wait(60);
+    window.dispatchEvent(ptr('pointermove', 100, 200));
+    window.dispatchEvent(ptr('pointerup', 100, 200));
+    expect(move).not.toHaveBeenCalled();
+    expect(end).not.toHaveBeenCalled();
+    expect(isTouchDragActive()).toBe(false);
+
+    trackPointerDrag(ptr('pointerdown', 100, 100, 'touch', 8), { move, end }, { touchDelay: 30 });
+    window.dispatchEvent(ptr('pointercancel', 100, 100, 'touch', 8));
+    await wait(60);
+    expect(move).not.toHaveBeenCalled();
+    expect(end).not.toHaveBeenCalled();
+  });
+
+  it('觸控：按住放開沒有移動＝不拖（點一下照常打開活動）', async () => {
+    const move = vi.fn();
+    const end = vi.fn();
+    trackPointerDrag(ptr('pointerdown', 100, 100), { move, end }, { touchDelay: 30 });
+    window.dispatchEvent(ptr('pointerup', 100, 100));
+    await wait(60);
+    expect(move).not.toHaveBeenCalled();
+    expect(end).not.toHaveBeenCalled();
+  });
+
+  it('滑鼠：移動超過門檻立刻開始拖，不必按住', () => {
+    const move = vi.fn();
+    const end = vi.fn();
+    trackPointerDrag(ptr('pointerdown', 100, 100, 'mouse', 1), { move, end });
+    window.dispatchEvent(ptr('pointermove', 102, 101, 'mouse', 1));
+    expect(move).not.toHaveBeenCalled();
+    window.dispatchEvent(ptr('pointermove', 100, 120, 'mouse', 1));
+    expect(move).toHaveBeenCalledTimes(1);
+    expect(isTouchDragActive()).toBe(false);
+    window.dispatchEvent(ptr('pointerup', 100, 120, 'mouse', 1));
+    expect(end).toHaveBeenCalledWith(true);
   });
 });
 

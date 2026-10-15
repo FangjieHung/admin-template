@@ -56,4 +56,5 @@ export const CALENDAR_TEST_LABELS: CalendarLabels = {
   saveFailedReason: '「{title}」沒有儲存，已還原：{reason}',
   undo: '復原',
   viewChanged: '{view}，{title}',
+  slotHint: '按 Enter 在這個時段新增',
 };

@@ -19,6 +19,7 @@
   background: color-mix(in srgb, var(--cal-ev-color) var(--_tint), var(--lib-cal-event-base, var(--mat-sys-surface)));
   box-shadow:
     inset var(--_bar) 0 0 0 var(--cal-ev-color),
+    var(--cal-ev-ring, 0 0 transparent),
     var(--lib-cal-event-shadow, 0 0 transparent);
   color: var(--mat-sys-on-surface);
   font: inherit;
@@ -28,6 +29,7 @@
   text-align: start;
   cursor: pointer;
   user-select: none;
+  -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
   transition:
     background-color var(--app-motion-fast) var(--app-ease-standard),
@@ -67,6 +69,7 @@
   box-shadow:
     inset var(--_bar) 0 0 0 var(--cal-ev-color),
     inset 0 0 0 var(--lib-cal-conflict-width, 2px) var(--_conflict),
+    var(--cal-ev-ring, 0 0 transparent),
     var(--lib-cal-event-shadow, 0 0 transparent);
 }
 
@@ -139,10 +142,12 @@
 
 // 時間格：由外層給 top／height／left／width。內容貼齊上緣（按鈕預設把內容垂直置中，短的活動會把標題擠出上緣），
 // 標題與時間同一行放得下就同一行、放不下換行，超出高度的裁掉。
+// 活動本身是 size container（cal-ev）：依「實際」的高與寬換排法，不看分鐘數（換質地、時段高度或字級時一樣正確）。
 :host([data-variant='grid']) {
   position: absolute;
   min-height: 1.125rem;
   overflow: hidden;
+  container: cal-ev / size;
 
   .cal-ev__body {
     position: absolute;
@@ -156,6 +161,68 @@
   .cal-ev__title {
     white-space: normal;
     overflow-wrap: anywhere;
+  }
+}
+
+.cal-ev__start {
+  display: none;
+  flex: 0 0 auto;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+// 窄（並排或錯開疊放時）：標題單行省略、下一行只寫開始時間，不會一個字一行。
+@container cal-ev (width < 7em) {
+  :host([data-variant='grid']) {
+    .cal-ev__title {
+      flex: 1 0 100%;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .cal-ev__time {
+      display: none;
+    }
+
+    .cal-ev__start {
+      display: block;
+      order: 1;
+    }
+  }
+}
+
+// 矮（放不下兩行，例如 30 分鐘以內）：時間與標題排成一行「9:00 站立會議」，標題省略。
+@container cal-ev (height < 2.7em) {
+  :host([data-variant='grid']) {
+    .cal-ev__body {
+      flex-wrap: nowrap;
+    }
+
+    .cal-ev__title {
+      flex: 0 1 auto;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .cal-ev__warn {
+      order: -2;
+    }
+
+    .cal-ev__start {
+      display: block;
+      order: -1;
+    }
+
+    .cal-ev__time {
+      display: none;
+    }
+  }
+}
+
+// 窄到連「10:30」都放不下（手機三天檢視裡疊在最上面的那筆）：只留標題。
+@container cal-ev (width < 3em) {
+  :host([data-variant='grid']) .cal-ev__start {
+    display: none;
   }
 }
 
@@ -258,7 +325,9 @@
   position: absolute;
   z-index: 5;
   bottom: calc(100% + 0.25rem);
-  left: 0;
+  // 外層可以改成靠右對齊（週檢視右半邊的欄），提示不會超出捲動容器被裁掉。
+  right: var(--cal-ev-tip-right, auto);
+  left: var(--cal-ev-tip-left, 0);
   padding: 0.25rem 0.5rem;
   border: var(--lib-cal-tip-frame, 0 solid transparent);
   border-radius: var(--lib-cal-tip-radius, var(--mat-sys-corner-small));
@@ -267,7 +336,9 @@
   color: var(--lib-cal-tip-fg, var(--mat-sys-inverse-on-surface));
   font-size: 0.75rem;
   font-weight: 500;
-  white-space: nowrap;
+  // 寬度跟著文字、不被窄欄擠成一字一行；手機上最寬不到半個畫面（換成兩行），拖到中間的欄也不會被裁掉。
+  width: max-content;
+  max-width: min(18rem, 38vw);
 }
 
 @media (prefers-reduced-motion: reduce) {

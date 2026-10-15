@@ -236,7 +236,7 @@ export class CalendarMonthComponent {
 
   protected onEventPointerDown(e: PointerEvent, segment: CalendarSegment, cell: MonthCell): void {
     const event = segment.event;
-    if (e.button !== 0 || e.pointerType === 'touch' || !this.store.canEdit(event)) return;
+    if (e.button !== 0 || !this.store.canEdit(event)) return;
     const rects = this.cellRects();
     const origin = cell.date;
     trackPointerDrag(e, {

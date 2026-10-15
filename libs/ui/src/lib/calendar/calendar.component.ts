@@ -57,8 +57,9 @@ interface PendingChange {
  * 共用日曆與排程：月、週、日、議程、資源排程五種檢視，手寫、不依賴第三方日曆套件。
  *
  * - 資料：給 `[events]`（整份陣列），或給 `[source]`（依看得到的範圍分段載入，換頁時 abort 上一次）。
- * - 互動：點活動 → `(eventClick)`；點空白處或拖出一段 → `(slotSelect)`；拖曳移動、拉邊緣調整長度（對齊時段），
- *   鍵盤是聚焦活動後 Alt＋方向鍵移動、Alt＋Shift＋方向鍵調整長度，Esc 取消拖曳。變更交給 `[onEventChange]`：
+ * - 互動：點活動 → `(eventClick)`；點空白處或拖出一段（週／日檢視也可以方向鍵選時段＋Enter）→ `(slotSelect)`；
+ *   拖曳移動、拉邊緣調整長度（對齊時段；觸控是長按後拖），鍵盤是聚焦活動後 Alt＋方向鍵移動、
+ *   Alt＋Shift＋方向鍵調整長度，Esc 取消拖曳。變更交給 `[onEventChange]`：
  *   畫面先改，失敗時還原並提示原因，成功時提示可以「復原」（頁面 providers 有 ToastService 時）。
  * - 衝突：`allowOverlap=false` 時同一個資源時間重疊的活動加上警告圖示與「時間衝突」文字。
  * - 寬度：容器 ≤ 600px 預設議程（`mobileView`），≤ 900px 週檢視只顯示 3 天；資源排程在自己的容器裡橫向捲動。
