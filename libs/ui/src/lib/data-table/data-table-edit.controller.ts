@@ -115,8 +115,19 @@ export interface DataTableEditCellState {
   dirty: boolean;
   error: string | null;
   status: 'saving' | 'saved' | null;
+  /** 格子本身的 tabindex：有鍵盤接收器（sink）時是 -1，由接收器當 tab stop。 */
   tabindex: 0 | -1;
+  /**
+   * 目前格子裡放一個看不見的輸入框當鍵盤接收器（文字、數字、關聯欄）：焦點在可編輯的元素上，作業系統的輸入法才會啟動，
+   * 注音、倉頡打的第一個字就能開始組字。
+   */
+  sink: boolean;
+  /** 接收器正在組字：格子畫成編輯中的樣子，接收器顯示出來（看得到注音與組字底線）。 */
+  composing: boolean;
 }
+
+/** 用輸入法打字開始編輯的欄位型別（下拉、日期、開關不能輸入文字，維持在格子本身上）。 */
+const SINK_TYPES: ReadonlySet<string> = new Set(['text', 'number', 'relation']);
 
 /** 資料表交給控制器的東西（data-table.component.ts 組好）。 */
 export interface DataTableEditHost<T> {
@@ -176,6 +187,7 @@ const SAVED_FLASH_MS = 1500;
 const UNDO_MS = 5000;
 
 let nextFieldId = 0;
+let nextSinkId = 0;
 
 export class DataTableEditController<T> {
   private readonly toast: ToastService | null;
@@ -190,6 +202,12 @@ export class DataTableEditController<T> {
 
   readonly active = signal<ActiveCell | null>(null);
   readonly editing = signal<Editing<T> | null>(null);
+  /** 鍵盤接收器正在組字的格子。 */
+  private readonly composing = signal<ActiveCell | null>(null);
+  /** compositionend 之後同一輪的 input（Safari 在 compositionend 後才插入確定的字）不再算一次。 */
+  private justComposed = false;
+  /** 鍵盤接收器的名稱來源：目前格子的內容（那一份內容對報讀器隱藏，只念一次）。 */
+  readonly sinkLabelId = `dt-sink-label-${nextSinkId++}`;
   /** id → editKey → 修改（批次草稿或即時儲存中）。 */
   private readonly patches = signal<PatchMap>(new Map());
   /** 即時儲存回傳的那一列，rows 更新前先顯示它。 */
@@ -388,14 +406,20 @@ export class DataTableEditController<T> {
     const key = editKeyOf(col);
     const patch = key === null ? undefined : this.patches().get(id)?.get(key);
     const failure = this.failures().get(id)?.get(col.key) ?? null;
+    const editable = !this.host.formMode() && isCellEditable(col, row);
+    const isEditing = !!editing && editing.id === id && editing.colKey === col.key;
+    const sink = active && editable && !isEditing && SINK_TYPES.has(editorOf(col)?.type ?? '');
+    const composing = this.composing();
     return {
-      editable: !this.host.formMode() && isCellEditable(col, row),
+      editable,
       active,
-      editing: !!editing && editing.id === id && editing.colKey === col.key,
+      editing: isEditing,
       dirty: patch?.status === 'draft',
       error: patch?.status === 'draft' ? patch.error : failure,
       status: patch?.status === 'saving' ? 'saving' : this.flashes().get(id)?.has(col.key) ? 'saved' : null,
-      tabindex: active ? 0 : -1,
+      tabindex: active && !sink ? 0 : -1,
+      sink,
+      composing: sink && !!composing && composing.id === id && composing.key === col.key,
     };
   }
 
@@ -414,13 +438,18 @@ export class DataTableEditController<T> {
   /** 焦點進到某一格（點擊、Tab、程式聚焦）：那一格就是目前的格子。 */
   onFocusIn(event: FocusEvent): void {
     this.hasFocus = true;
-    const target = event.target as HTMLElement;
-    if (this.editing() || !target.hasAttribute?.('data-dt-col')) return;
+    const target = cellOf(event.target);
+    if (this.editing() || !target) return;
     const pos = this.positionOf(target);
     if (!pos) return;
     const id = this.host.rowId()(pos.row);
     const active = this.active();
     if (!active || active.id !== id || active.key !== pos.key) this.active.set({ id, key: pos.key });
+    // 格子本身拿到焦點（點擊、程式聚焦）而這一格有鍵盤接收器：焦點交給接收器。
+    if (event.target === target) {
+      const col = this.host.columns().find((c) => c.key === pos.key);
+      if (col && isCellEditable(col, pos.row) && SINK_TYPES.has(editorOf(col)?.type ?? '')) this.focusCurrent();
+    }
   }
 
   onFocusOut(event: FocusEvent): void {
@@ -469,8 +498,10 @@ export class DataTableEditController<T> {
   /** 表格上的 keydown：格子（td）或勾選框上才處理；編輯器自己處理 Enter／Tab／Esc。 */
   onKeydown(event: KeyboardEvent): void {
     if (this.host.formMode() || this.editing() || event.defaultPrevented) return;
-    const target = event.target as HTMLElement;
-    if (!target.hasAttribute('data-dt-col')) return;
+    // 輸入法正在處理的鍵（開始組字、選字的方向鍵、確定的 Enter）：交給輸入法，不導覽、不開始編輯。
+    if (event.isComposing || event.keyCode === 229 || event.key === 'Process') return;
+    const target = cellOf(event.target);
+    if (!target) return;
     const pos = this.positionOf(target);
     if (!pos) return;
     const { row, key } = pos;
@@ -525,11 +556,63 @@ export class DataTableEditController<T> {
     }
   }
 
+  // ---- 鍵盤接收器（輸入法）----
+
+  /** 接收器開始組字：格子畫成編輯中，接收器顯示出來；組字一直留在接收器裡（換焦點會打斷輸入法）。 */
+  onCompositionStart(event: CompositionEvent): void {
+    const target = cellOf(event.target);
+    const pos = target && this.positionOf(target);
+    if (!pos || this.host.formMode() || this.editing()) return;
+    this.composing.set({ id: this.host.rowId()(pos.row), key: pos.key });
+  }
+
+  /** 組字確定：用確定的字開啟這一格的編輯器（取代原本的內容，游標在最後），之後的打字都在編輯器裡。取消組字就留在格子上。 */
+  onCompositionEnd(event: CompositionEvent): void {
+    const input = event.target as HTMLInputElement;
+    // 只認 compositionend 的 data：取消組字（Esc）時是空字串，輸入框裡可能還留著注音。
+    const text = event.data ?? '';
+    input.value = '';
+    this.composing.set(null);
+    this.justComposed = true;
+    setTimeout(() => (this.justComposed = false));
+    if (!text) return;
+    this.startFromSink(input, text);
+  }
+
+  /** 沒有組字事件、直接插入文字的輸入（聽寫、表情符號面板、部分手機鍵盤）：一樣開始編輯。 */
+  onSinkInput(event: Event): void {
+    const e = event as InputEvent;
+    const input = e.target as HTMLInputElement;
+    if (this.composing() || e.isComposing) return;
+    const text = input.value;
+    input.value = '';
+    if (this.justComposed || e.inputType === 'insertFromComposition' || e.inputType === 'insertCompositionText') return;
+    if (text) this.startFromSink(input, text);
+  }
+
+  onSinkBlur(): void {
+    if (this.composing()) this.composing.set(null);
+  }
+
+  private startFromSink(input: HTMLElement, text: string): void {
+    if (this.host.formMode() || this.editing() || this.destroyed) return;
+    const target = cellOf(input);
+    const pos = target && this.positionOf(target);
+    const col = pos ? this.host.columns().find((c) => c.key === pos.key) : undefined;
+    if (!pos || !col) return;
+    this.startEdit(pos.row, col, text);
+  }
+
   /** 批次修改時，在目前的格子貼上從 Excel／試算表複製的一塊：往右、往下填，每格都檢查。 */
   onPaste(event: ClipboardEvent): void {
-    if (this.host.formMode() || this.editing() || this.host.mode() !== 'batch') return;
-    const target = event.target as HTMLElement;
-    if (!target.hasAttribute('data-dt-col')) return;
+    if (this.host.formMode() || this.editing()) return;
+    const target = cellOf(event.target);
+    if (!target) return;
+    if (this.host.mode() !== 'batch') {
+      // 即時儲存的格子不收貼上（跟焦點在格子本身時一樣）：別讓文字掉進看不見的接收器。
+      if (target !== event.target) event.preventDefault();
+      return;
+    }
     const text = event.clipboardData?.getData('text/plain') ?? '';
     if (!text) return;
     const pos = this.positionOf(target);
@@ -1016,7 +1099,8 @@ export class DataTableEditController<T> {
           const el = this.currentElement();
           if (!el) return;
           if (scroll) el.scrollIntoView?.({ block: 'center', inline: 'nearest' });
-          el.focus({ preventScroll: !scroll });
+          // 有鍵盤接收器的格子聚焦到接收器（輸入法才會啟動）。
+          (el.querySelector<HTMLElement>('[data-dt-sink]') ?? el).focus({ preventScroll: !scroll });
           if (!scroll) el.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
           this.hasFocus = true;
         },
@@ -1200,4 +1284,12 @@ function writeDraft(
 
 function clamp(n: number, min: number, max: number): number {
   return Math.min(Math.max(n, min), max);
+}
+
+/** 事件的目標所在的格子：格子本身，或格子裡的鍵盤接收器。 */
+function cellOf(target: EventTarget | null): HTMLElement | null {
+  const el = target as HTMLElement | null;
+  if (!el?.hasAttribute) return null;
+  if (el.hasAttribute('data-dt-col')) return el;
+  return el.hasAttribute('data-dt-sink') ? el.closest<HTMLElement>('[data-dt-col]') : null;
 }

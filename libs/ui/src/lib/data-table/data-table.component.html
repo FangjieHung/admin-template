@@ -246,7 +246,8 @@
                   [class.dt-col--editable]="grid && !!col.editor"
                   [class.dt-cell--editable]="cs?.editable"
                   [class.dt-cell--active]="cs?.active"
-                  [class.dt-cell--editing]="cs?.editing"
+                  [class.dt-cell--editing]="cs?.editing || cs?.composing"
+                  [class.dt-cell--composing]="cs?.composing"
                   [class.dt-cell--dirty]="cs?.dirty"
                   [class.dt-cell--error]="!!cs?.error"
                   [attr.tabindex]="cs ? cs.tabindex : null"
@@ -264,29 +265,28 @@
                   @if (cs?.editing) {
                     <ng-container [dtEditorHost]="ed!.editorSpec()" />
                   } @else {
-                    @if (cs?.dirty || cs?.error) {
-                      <span class="dt-cell-deco" aria-hidden="true"></span>
-                    }
-                    @if (cellTemplates().get(col.key); as tpl) {
-                      <ng-container
-                        [ngTemplateOutlet]="tpl"
-                        [ngTemplateOutletContext]="cellContext(row)"
+                    @if (cs?.sink) {
+                      <!-- 鍵盤接收器（見 data-table-edit.controller.ts 的 sink）：格子的內容對報讀器隱藏、改由接收器的名稱念一次。 -->
+                      <span class="dt-cell-body" aria-hidden="true" [id]="ed!.sinkLabelId">
+                        <ng-container [ngTemplateOutlet]="cellBody" [ngTemplateOutletContext]="{ $implicit: row, col: col, cs: cs }" />
+                      </span>
+                      <input
+                        class="dt-ime-sink"
+                        type="text"
+                        data-dt-sink
+                        autocomplete="off"
+                        autocapitalize="off"
+                        spellcheck="false"
+                        inputmode="none"
+                        [attr.aria-labelledby]="ed!.sinkLabelId"
+                        [attr.aria-invalid]="cs!.error ? 'true' : null"
+                        (compositionstart)="ed!.onCompositionStart($event)"
+                        (compositionend)="ed!.onCompositionEnd($event)"
+                        (input)="ed!.onSinkInput($event)"
+                        (blur)="ed!.onSinkBlur()"
                       />
-                    } @else if (isToggle(col)) {
-                      <span class="dt-switch" [class.is-on]="toggleOn(row, col)">
-                        <span class="dt-switch__track" aria-hidden="true"></span>
-                        {{ toggleOn(row, col) ? editingLabels().toggleOn : editingLabels().toggleOff }}
-                      </span>
                     } @else {
-                      {{ valueOf(row, col) }}
-                    }
-                    @if (cs?.dirty) {
-                      <span class="dt-sr-only">{{ editingLabels().dirty }}</span>
-                    }
-                    @if (cs?.error; as message) {
-                      <span class="dt-cell-error">
-                        <span class="material-symbols-rounded" aria-hidden="true">error</span>{{ message }}
-                      </span>
+                      <ng-container [ngTemplateOutlet]="cellBody" [ngTemplateOutletContext]="{ $implicit: row, col: col, cs: cs }" />
                     }
                     @if (cs?.status === 'saving') {
                       <span class="dt-cell-status" aria-hidden="true"><span class="dt-spinner"></span></span>
@@ -358,3 +358,31 @@
     (loadMore)="loadMore()"
   />
 }
+
+<!-- 一格的內容（不含儲存狀態與鉛筆提示）：有鍵盤接收器時包在對報讀器隱藏的 span 裡。 -->
+<ng-template #cellBody let-row let-col="col" let-cs="cs">
+  @if (cs?.dirty || cs?.error) {
+    <span class="dt-cell-deco" aria-hidden="true"></span>
+  }
+  @if (cellTemplates().get(col.key); as tpl) {
+    <ng-container
+      [ngTemplateOutlet]="tpl"
+      [ngTemplateOutletContext]="cellContext(row)"
+    />
+  } @else if (isToggle(col)) {
+    <span class="dt-switch" [class.is-on]="toggleOn(row, col)">
+      <span class="dt-switch__track" aria-hidden="true"></span>
+      {{ toggleOn(row, col) ? editingLabels().toggleOn : editingLabels().toggleOff }}
+    </span>
+  } @else {
+    {{ valueOf(row, col) }}
+  }
+  @if (cs?.dirty) {
+    <span class="dt-sr-only">{{ editingLabels().dirty }}</span>
+  }
+  @if (cs?.error; as message) {
+    <span class="dt-cell-error">
+      <span class="material-symbols-rounded" aria-hidden="true">error</span>{{ message }}
+    </span>
+  }
+</ng-template>

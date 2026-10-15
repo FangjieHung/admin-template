@@ -40,6 +40,50 @@ lib-data-table .dt-table.dt-editable {
   }
 }
 
+// 鍵盤接收器（文字、數字、關聯欄的目前格子；見 data-table-edit.controller.ts 的 sink）：
+// 平常看不見、不佔版面也不影響欄寬（絕對定位、1px 寬），游標落在格子內容的起點，輸入法的選字窗出現在格子旁邊。
+// 組字時蓋滿整格、畫成跟編輯器一樣（編輯中的底色與框線），看得到注音與組字底線；確定後換成真正的編輯器。
+lib-data-table .dt-cell-body {
+  display: contents;
+}
+
+lib-data-table .dt-ime-sink {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: var(--dt-cell-padding-inline, 1rem);
+  z-index: 1;
+  box-sizing: border-box;
+  width: 1px;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
+  font: inherit;
+  line-height: inherit;
+  text-align: inherit;
+  opacity: 0;
+  pointer-events: none;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+lib-data-table td.dt-cell--composing .dt-ime-sink {
+  inset-inline: 0;
+  width: 100%;
+  padding-block: var(--dt-cell-padding-block, 0.75rem);
+  padding-inline: var(--dt-cell-padding-inline, 1rem) max(var(--dt-cell-padding-inline, 1rem), 1.375rem);
+  background: var(--dt-editing-bg, var(--mat-sys-surface));
+  color: inherit;
+  caret-color: auto;
+  opacity: 1;
+}
+
 // 目前的格子：只在表格有焦點（或正在編輯）時出現，滑鼠點別處就消失。
 lib-data-table .dt-ring {
   position: absolute;

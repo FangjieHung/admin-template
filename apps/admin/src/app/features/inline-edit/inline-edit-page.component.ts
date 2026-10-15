@@ -345,6 +345,7 @@ async canLeave() {
       rows: [
         { name: '方向鍵／Home／End／Ctrl+Home', type: '移動', description: '移動目前的格子（只有一格在 Tab 順序裡）；PageUp／PageDown 一次 10 列。' },
         { name: 'Enter／F2／雙擊／直接打字', type: '開始編輯', description: '打字時那個字取代原本的內容；在不能改的格子按 Enter 會念「這一格不能修改」。' },
+        { name: '注音、倉頡等輸入法', type: '開始編輯', description: '文字、數字、關聯欄的目前格子裡有一個看不見的輸入框（鍵盤接收器，取代格子本身當 tab stop），輸入法才會啟動：一開始組字格子就變成編輯中、顯示注音與組字底線，確定後的字放進編輯器（游標在最後），接著打或按 Enter 存檔。報讀器念的是格子內容（內容本身對報讀器隱藏，只念一次）。下拉、日期、開關欄維持焦點在格子上。' },
         { name: 'Enter／Shift+Enter', type: '確定', description: '存檔並往下／往上一列。' },
         { name: 'Tab／Shift+Tab', type: '確定', description: '存檔並往右／往左（列尾換到下一列）。' },
         { name: 'Esc', type: '取消', description: '還原並回到格子。' },

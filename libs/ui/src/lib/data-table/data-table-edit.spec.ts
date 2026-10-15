@@ -242,6 +242,9 @@ describe('DataTable 表格內直接編輯', () => {
     await settle();
   };
   const editor = () => el.querySelector<HTMLInputElement & HTMLSelectElement>('[data-dt-editor]');
+  /** 焦點所在的格子：格子本身，或格子裡的鍵盤接收器（文字、數字、關聯欄）。 */
+  const focusedCell = () => (document.activeElement as HTMLElement | null)?.closest('td') ?? null;
+  const sink = () => el.querySelector<HTMLInputElement>('[data-dt-sink]');
   const type = async (text: string) => {
     const input = editor()!;
     input.value = text;
@@ -267,18 +270,20 @@ describe('DataTable 表格內直接編輯', () => {
     it('方向鍵移動目前的格子並移動焦點；Home／End 到列首列尾', async () => {
       cell(0, 'code').focus();
       await key(cell(0, 'code'), 'ArrowRight');
-      expect(document.activeElement).toBe(cell(0, 'title'));
-      expect(cell(0, 'title').getAttribute('tabindex')).toBe('0');
+      expect(focusedCell()).toBe(cell(0, 'title'));
+      // 唯一的 tab stop 跟著走：標題欄可以打字，是格子裡的鍵盤接收器（格子本身 -1）
+      expect(document.activeElement).toBe(sink());
+      expect(cell(0, 'title').getAttribute('tabindex')).toBe('-1');
       expect(cell(0, 'code').getAttribute('tabindex')).toBe('-1');
       await key(cell(0, 'title'), 'ArrowDown');
-      expect(document.activeElement).toBe(cell(1, 'title'));
+      expect(focusedCell()).toBe(cell(1, 'title'));
       await key(cell(1, 'title'), 'End');
-      expect(document.activeElement).toBe(cell(1, 'urgent'));
+      expect(focusedCell()).toBe(cell(1, 'urgent'));
       await key(cell(1, 'urgent'), 'Home');
-      expect(document.activeElement).toBe(cell(1, 'code'));
+      expect(focusedCell()).toBe(cell(1, 'code'));
       await key(cell(1, 'code'), 'ArrowUp');
       await key(cell(0, 'code'), 'ArrowUp');
-      expect(document.activeElement).toBe(cell(0, 'code'));
+      expect(focusedCell()).toBe(cell(0, 'code'));
     });
 
     it('Enter 開始編輯（保留原值），Esc 取消並把焦點放回格子', async () => {
@@ -290,7 +295,7 @@ describe('DataTable 表格內直接編輯', () => {
       await key(editor()!, 'Escape');
       expect(editor()).toBeNull();
       expect(cell(0, 'title').textContent).toContain('整理需求');
-      expect(document.activeElement).toBe(cell(0, 'title'));
+      expect(focusedCell()).toBe(cell(0, 'title'));
       expect(host.cellSave).not.toHaveBeenCalled();
     });
 
@@ -301,7 +306,7 @@ describe('DataTable 表格內直接編輯', () => {
       await key(editor()!, 'Enter');
       expect(host.cellSave).toHaveBeenCalledWith(expect.objectContaining({ id: 't1' }), 'title', '新標題', expect.any(AbortSignal));
       expect(cell(0, 'title').textContent).toContain('新標題');
-      expect(document.activeElement).toBe(cell(1, 'title'));
+      expect(focusedCell()).toBe(cell(1, 'title'));
     });
 
     it('F2 也開始編輯；Tab 存檔並往右、Shift+Tab 往左', async () => {
@@ -309,10 +314,10 @@ describe('DataTable 表格內直接編輯', () => {
       await type('線框稿 v2');
       await key(editor()!, 'Tab');
       expect(host.cellSave).toHaveBeenCalledTimes(1);
-      expect(document.activeElement).toBe(cell(1, 'hours'));
+      expect(focusedCell()).toBe(cell(1, 'hours'));
       await key(cell(1, 'hours'), 'Enter');
       await key(editor()!, 'Tab', { shiftKey: true });
-      expect(document.activeElement).toBe(cell(1, 'title'));
+      expect(focusedCell()).toBe(cell(1, 'title'));
     });
 
     it('雙擊開始編輯；在不能改的格子按 Enter 念「這一格不能修改」', async () => {
@@ -328,15 +333,160 @@ describe('DataTable 表格內直接編輯', () => {
     it('資料重新排序後焦點不會掉：仍在同一列同一格', async () => {
       cell(1, 'title').focus();
       await key(cell(1, 'title'), 'ArrowRight');
-      expect(document.activeElement).toBe(cell(1, 'hours'));
+      expect(focusedCell()).toBe(cell(1, 'hours'));
       host.rows.update((rows) => [...rows].reverse());
       await settle();
       // t2 還在中間；換成 t1 被移到最後
       host.rows.update((rows) => [rows[1], rows[0], rows[2]]);
       await settle();
-      const focused = document.activeElement as HTMLElement;
+      const focused = focusedCell()!;
       expect(focused.getAttribute('data-dt-col')).toBe('hours');
       expect(focused.closest('tr')?.textContent).toContain('T-2');
+    });
+  });
+
+  describe('輸入法（鍵盤接收器）', () => {
+    beforeEach(() => setup());
+
+    /** 聚焦一格：格子本身拿到焦點後，可以打字的格子會把焦點交給格子裡的接收器。 */
+    const focusCell = async (row: number, k: string) => {
+      cell(row, k).focus();
+      await settle();
+    };
+    const fire = (target: Element, event: Event) => {
+      target.dispatchEvent(event);
+      return event;
+    };
+    const ime = (target: Element, type: 'compositionstart' | 'compositionupdate' | 'compositionend', data: string) =>
+      fire(target, new CompositionEvent(type, { data, bubbles: true }));
+
+    it('文字、數字、關聯欄的目前格子放一個看不見的接收器當唯一 tab stop；名稱是格子內容（內容本身對報讀器隱藏，只念一次）', async () => {
+      await focusCell(0, 'title');
+      const s = sink()!;
+      expect(cell(0, 'title').contains(s)).toBe(true);
+      expect(document.activeElement).toBe(s);
+      expect(el.querySelectorAll('[data-dt-sink]')).toHaveLength(1);
+      expect(cell(0, 'title').getAttribute('tabindex')).toBe('-1');
+      expect(el.querySelectorAll('td[tabindex="0"]')).toHaveLength(0);
+      expect(s.getAttribute('inputmode')).toBe('none'); // 觸控裝置點格子不跳出螢幕鍵盤
+      const label = el.querySelector(`#${s.getAttribute('aria-labelledby')}`)!;
+      expect(label.getAttribute('aria-hidden')).toBe('true');
+      expect(label.textContent?.trim()).toBe('整理需求');
+      expect(cell(0, 'title').contains(label)).toBe(true);
+      // 數字、關聯欄也有；編號（不能改）、下拉、開關維持焦點在格子本身
+      await key(s, 'ArrowRight');
+      expect(cell(0, 'hours').contains(document.activeElement)).toBe(true);
+      expect(document.activeElement).toBe(sink());
+      await key(sink()!, 'ArrowRight');
+      expect(document.activeElement).toBe(cell(0, 'status'));
+      expect(sink()).toBeNull();
+      await key(cell(0, 'status'), 'ArrowRight');
+      expect(document.activeElement).toBe(sink());
+      expect(cell(0, 'owner').contains(sink())).toBe(true);
+      await key(sink()!, 'Home');
+      expect(document.activeElement).toBe(cell(0, 'code'));
+      expect(cell(0, 'code').getAttribute('tabindex')).toBe('0');
+    });
+
+    it('用注音開始編輯：組字時格子畫成編輯中、接收器顯示注音；確定「王」開啟編輯器，值是「王」（不掉第一個注音、不重複）', async () => {
+      await focusCell(0, 'title');
+      const s = sink()!;
+      // 輸入法處理中的 keydown（Process／229）不攔、不開編輯器
+      const down = fire(s, new KeyboardEvent('keydown', { key: 'Process', keyCode: 229, bubbles: true, cancelable: true }));
+      expect(down.defaultPrevented).toBe(false);
+      ime(s, 'compositionstart', '');
+      for (const text of ['ㄨ', 'ㄨㄤ', 'ㄨㄤˊ']) {
+        s.value = text;
+        ime(s, 'compositionupdate', text);
+        fire(s, new KeyboardEvent('keydown', { key: 'Process', keyCode: 229, isComposing: true, bubbles: true, cancelable: true }));
+      }
+      await settle();
+      expect(editor()).toBeNull();
+      expect(cell(0, 'title').classList).toContain('dt-cell--editing');
+      expect(cell(0, 'title').classList).toContain('dt-cell--composing');
+      expect(sink()).toBe(s); // 同一個元素：組字沒有被打斷
+      expect(document.activeElement).toBe(s);
+      // 選字用的方向鍵、確定用的 Enter 是給輸入法的
+      await key(s, 'ArrowDown', { isComposing: true, keyCode: 229 });
+      await key(s, 'Enter', { isComposing: true, keyCode: 229 });
+      expect(focusedCell()).toBe(cell(0, 'title'));
+      expect(editor()).toBeNull();
+      s.value = '王';
+      ime(s, 'compositionend', '王');
+      await settle();
+      expect(editor()?.value).toBe('王');
+      expect(document.activeElement).toBe(editor());
+      expect(editor()!.selectionStart).toBe(1); // 游標在最後，接著打
+      expect(cell(0, 'title').classList).not.toContain('dt-cell--composing');
+      await type('王小明');
+      await key(editor()!, 'Enter');
+      expect(host.cellSave).toHaveBeenCalledWith(expect.objectContaining({ id: 't1' }), 'title', '王小明', expect.any(AbortSignal));
+      expect(focusedCell()).toBe(cell(1, 'title'));
+    });
+
+    it('Safari 的順序（compositionend 之後才插入確定的字）不會變成兩個字；取消組字留在格子上', async () => {
+      await focusCell(0, 'title');
+      let s = sink()!;
+      ime(s, 'compositionstart', '');
+      ime(s, 'compositionend', '王');
+      s.value = '王';
+      fire(s, new InputEvent('input', { data: '王', inputType: 'insertFromComposition', bubbles: true }));
+      await settle();
+      expect(editor()?.value).toBe('王');
+      await key(editor()!, 'Escape');
+      expect(focusedCell()).toBe(cell(0, 'title'));
+      s = sink()!;
+      ime(s, 'compositionstart', '');
+      s.value = 'ㄨ';
+      ime(s, 'compositionend', ''); // Esc 取消組字
+      await settle();
+      expect(editor()).toBeNull();
+      expect(cell(0, 'title').classList).not.toContain('dt-cell--composing');
+      expect(cell(0, 'title').textContent).toContain('整理需求');
+    });
+
+    it('英數照舊直接取代；聽寫等沒有組字事件的輸入也開始編輯；數字欄、關聯欄用輸入法開始編輯', async () => {
+      await focusCell(0, 'title');
+      const down = fire(sink()!, new KeyboardEvent('keydown', { key: 'a', bubbles: true, cancelable: true }));
+      expect(down.defaultPrevented).toBe(true); // 字不會掉進接收器
+      await settle();
+      expect(editor()?.value).toBe('a');
+      expect(sink()).toBeNull();
+      await key(editor()!, 'Escape');
+      const s = sink()!;
+      s.value = '語音輸入';
+      fire(s, new InputEvent('input', { data: '語音輸入', inputType: 'insertText', bubbles: true }));
+      await settle();
+      expect(editor()?.value).toBe('語音輸入');
+      await key(editor()!, 'Escape');
+      await key(sink()!, 'ArrowRight');
+      ime(sink()!, 'compositionstart', '');
+      ime(sink()!, 'compositionend', '１２');
+      await settle();
+      expect(editor()?.value).toBe('１２');
+      await key(editor()!, 'Escape');
+      await key(sink()!, 'ArrowRight');
+      await key(cell(0, 'status'), 'ArrowRight');
+      ime(sink()!, 'compositionstart', '');
+      ime(sink()!, 'compositionend', '林');
+      for (let i = 0; !el.querySelector('lib-relation-select') && i < 30; i++) {
+        await new Promise((r) => setTimeout(r, 10));
+        await settle();
+      }
+      expect(el.querySelector('lib-relation-select')).not.toBeNull();
+      const context = host.table()['edit']()!.editing()!.spec.context as { text: string; seeded: boolean };
+      expect([context.text, context.seeded]).toEqual(['林', true]); // 確定的字交給關聯欄當搜尋字
+    });
+
+    it('即時儲存時在接收器上貼上：不開始編輯、字不會掉進接收器（跟焦點在格子本身時一樣）', async () => {
+      await focusCell(0, 'title');
+      const event = new Event('paste', { bubbles: true, cancelable: true });
+      Object.defineProperty(event, 'clipboardData', { value: { getData: () => '貼上的字' } });
+      sink()!.dispatchEvent(event);
+      await settle();
+      expect(event.defaultPrevented).toBe(true);
+      expect(editor()).toBeNull();
+      expect(host.cellSave).not.toHaveBeenCalled();
     });
   });
 
@@ -511,12 +661,12 @@ describe('DataTable 表格內直接編輯', () => {
       (el.querySelector('[data-action="save-all"]') as HTMLButtonElement).click();
       await settle();
       expect(host.batchSave).not.toHaveBeenCalled();
-      expect(document.activeElement).toBe(cell(0, 'hours'));
+      expect(focusedCell()).toBe(cell(0, 'hours'));
 
       cell(2, 'code').focus();
       (el.querySelector('[data-action="next-error"]') as HTMLButtonElement).click();
       await settle();
-      expect(document.activeElement).toBe(cell(0, 'hours'));
+      expect(focusedCell()).toBe(cell(0, 'hours'));
 
       // 修好再存
       await key(cell(0, 'hours'), 'Enter');
@@ -546,7 +696,9 @@ describe('DataTable 表格內直接編輯', () => {
     });
 
     it('貼上一整塊：往右往下填、每格檢查，不能改的格子略過', async () => {
-      paste(cell(0, 'title'), '新標題一\t5\n新標題二\tabc\n第三列\t1\n');
+      cell(0, 'title').focus();
+      await settle();
+      paste(sink()!, '新標題一\t5\n新標題二\tabc\n第三列\t1\n'); // 焦點在格子裡的鍵盤接收器上
       await settle();
       expect(cell(0, 'title').textContent).toContain('新標題一');
       expect(cell(0, 'hours').textContent).toContain('5');
