@@ -29,11 +29,12 @@
       >
         <g class="lib-chart__grid" aria-hidden="true">
           @for (t of L.valueTicks; track $index) {
-            @if (L.horizontal) {
-              <line [attr.x1]="t.pos" [attr.x2]="t.pos" [attr.y1]="L.top" [attr.y2]="L.bottom" />
-            } @else {
-              <line [attr.x1]="L.left" [attr.x2]="L.right" [attr.y1]="t.pos" [attr.y2]="t.pos" />
-            }
+            <line
+              [attr.x1]="L.horizontal ? t.pos : L.left"
+              [attr.x2]="L.horizontal ? t.pos : L.right"
+              [attr.y1]="L.horizontal ? L.top : t.pos"
+              [attr.y2]="L.horizontal ? L.bottom : t.pos"
+            />
           }
         </g>
         @if (active() !== null && L.bands[active()!]; as band) {
@@ -41,11 +42,13 @@
         }
         <g aria-hidden="true">
           @for (t of L.valueTicks; track $index) {
-            @if (L.horizontal) {
-              <text class="lib-chart__tick" [attr.x]="t.pos" [attr.y]="L.bottom + 16" text-anchor="middle">{{ t.text }}</text>
-            } @else {
-              <text class="lib-chart__tick" [attr.x]="L.left - 8" [attr.y]="t.pos" dy="0.32em" text-anchor="end">{{ t.text }}</text>
-            }
+            <text
+              class="lib-chart__tick"
+              [attr.x]="L.horizontal ? t.pos : L.left - 8"
+              [attr.y]="L.horizontal ? L.bottom + 16 : t.pos"
+              [attr.dy]="L.horizontal ? null : '0.32em'"
+              [attr.text-anchor]="L.horizontal ? 'middle' : 'end'"
+            >{{ t.text }}</text>
           }
           @for (c of L.categoryTexts; track $index) {
             <text
@@ -74,11 +77,14 @@
             </text>
           }
         </g>
-        @if (L.horizontal) {
-          <line class="lib-chart__baseline" aria-hidden="true" [attr.x1]="L.zero" [attr.x2]="L.zero" [attr.y1]="L.top" [attr.y2]="L.bottom" />
-        } @else {
-          <line class="lib-chart__baseline" aria-hidden="true" [attr.x1]="L.left" [attr.x2]="L.right" [attr.y1]="L.zero" [attr.y2]="L.zero" />
-        }
+        <line
+          class="lib-chart__baseline"
+          aria-hidden="true"
+          [attr.x1]="L.horizontal ? L.zero : L.left"
+          [attr.x2]="L.horizontal ? L.zero : L.right"
+          [attr.y1]="L.horizontal ? L.top : L.zero"
+          [attr.y2]="L.horizontal ? L.bottom : L.zero"
+        />
         <g>
           @for (band of L.bands; track $index) {
             <rect

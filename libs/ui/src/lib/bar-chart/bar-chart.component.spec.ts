@@ -113,6 +113,33 @@ describe('BarChartComponent', () => {
     expect(labels[0].querySelector('title')).toBeNull();
   });
 
+  it('格線、數值軸文字、基準線依方向畫：直式是橫線＋左側文字，橫式是直線＋下方文字', async () => {
+    const attrs = (node: Element, names: string[]) => names.map((n) => node.getAttribute(n));
+    const grid = () => Array.from(el.querySelectorAll('.lib-chart__grid line'));
+    const valueTicks = () => Array.from(el.querySelectorAll('text.lib-chart__tick:not([data-axis])'));
+    const baseline = () => el.querySelector('.lib-chart__baseline')!;
+    FakeResizeObserver.resizeAll(480);
+    await render();
+    expect(grid().length).toBeGreaterThan(2);
+    for (const line of grid()) {
+      const [x1, x2, y1, y2] = attrs(line, ['x1', 'x2', 'y1', 'y2']);
+      expect(y1).toBe(y2);
+      expect(x1).not.toBe(x2);
+    }
+    expect(valueTicks().map((t) => attrs(t, ['dy', 'text-anchor']))).toEqual(valueTicks().map(() => ['0.32em', 'end']));
+    expect(baseline().getAttribute('y1')).toBe(baseline().getAttribute('y2'));
+
+    host.orientation.set('horizontal');
+    await render();
+    for (const line of grid()) {
+      const [x1, x2, y1, y2] = attrs(line, ['x1', 'x2', 'y1', 'y2']);
+      expect(x1).toBe(x2);
+      expect(y1).not.toBe(y2);
+    }
+    expect(valueTicks().map((t) => attrs(t, ['dy', 'text-anchor']))).toEqual(valueTicks().map(() => [null, 'middle']));
+    expect(baseline().getAttribute('x1')).toBe(baseline().getAttribute('x2'));
+  });
+
   it('直式：類別放不下時旋轉', async () => {
     FakeResizeObserver.resizeAll(260);
     await render();
