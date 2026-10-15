@@ -282,6 +282,19 @@ describe('PrintDocumentComponent（列印版面）', () => {
     expect(own.querySelector('[libPrintFooter]')?.textContent).toContain('頁尾說明');
   });
 
+  it('keepWithSummary 預設 1：只有最後 1 列跟合計放在不切開的區段（整組換頁時前一頁的空白不超過這一組）', () => {
+    TestBed.configureTestingModule({ providers: [{ provide: PRINT_DOCUMENT_LABELS, useValue: LABELS }] });
+    const table = TestBed.createComponent(PrintTableComponent<Line>);
+    table.componentRef.setInput('columns', [{ key: 'name', label: '品項' }] satisfies PrintTableColumn<Line>[]);
+    table.componentRef.setInput('rows', Array.from({ length: 5 }, (_, i) => ({ name: `品項 ${i + 1}`, qty: 1, amount: 1 })));
+    table.componentRef.setInput('summary', [{ label: '合計', value: '5', emphasis: true }]);
+    table.detectChanges();
+    const root = table.nativeElement as HTMLElement;
+    const names = (scope: Element) => Array.from(scope.querySelectorAll('tr.lib-print-table__row td')).map((n) => n.textContent?.trim());
+    expect(names(root.querySelector('tbody.lib-print-table__tail')!)).toEqual(['品項 5']);
+    expect(names(root.querySelector('tbody:not(.lib-print-table__tail)')!)).toEqual(['品項 1', '品項 2', '品項 3', '品項 4']);
+  });
+
   it('沒有提供 PRINT_DOCUMENT_LABELS 時丟出明確的錯誤；少一句也會列出缺哪一句', async () => {
     await expect(setup(null)).rejects.toThrow('PRINT_DOCUMENT_LABELS');
     expect(() => assertPrintDocumentLabels({ ...LABELS, pageCounter: '' })).toThrow('「pageCounter」');

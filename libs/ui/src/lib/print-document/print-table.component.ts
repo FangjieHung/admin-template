@@ -118,8 +118,11 @@ export class PrintTableComponent<T = unknown> {
   readonly rows = input.required<readonly T[]>();
   /** 小計、稅額、合計：標籤跨前面所有欄、值放在最後一欄。 */
   readonly summary = input<readonly PrintSummaryRow[]>([]);
-  /** 最後幾列明細要跟合計列（與單據的結尾）印在同一頁；0 表示只有合計與結尾黏在一起。 */
-  readonly keepWithSummary = input(3);
+  /**
+   * 最後幾列明細要跟合計列（與單據的結尾）印在同一頁；0 表示只有合計與結尾黏在一起（合計可能出現在新一頁的頂端）。
+   * 預設 1：這一整組放不下時會整組換到下一頁，前一頁就空著這一整組的高度；多黏一列，前一頁最多多空一列。
+   */
+  readonly keepWithSummary = input(1);
   /** 表格的無障礙名稱。 */
   readonly label = input('');
 

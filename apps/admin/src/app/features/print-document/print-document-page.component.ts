@@ -139,7 +139,7 @@ readonly columns: PrintTableColumn<QuoteLine>[] = [
         { name: '[columns]', type: 'PrintTableColumn<T>[]', default: '必填', description: "key（預設顯示 row[key]）、label、align（'end' 靠右並用等寬數字）、width（例：'15mm'）、value(row, index) 改寫顯示文字。" },
         { name: '[rows]', type: 'T[]', default: '必填', description: '明細列。表頭每頁重印，每一列不會切在兩頁。' },
         { name: '[summary]', type: 'PrintSummaryRow[]', default: '[]', description: '小計、稅額、合計（值由使用端格式化）：標籤跨前面的欄、值在最後一欄；emphasis 是最後的總計。' },
-        { name: '[keepWithSummary]', type: 'number', default: '3', description: '最後幾列明細跟合計列、單據的結尾（備註、簽名欄、頁尾）放在同一個不切開的區段：合計與簽名欄不會單獨落到新的一頁。0 表示只有合計與結尾在一起。' },
+        { name: '[keepWithSummary]', type: 'number', default: '1', description: '最後幾列明細跟合計列、單據的結尾（備註、簽名欄、頁尾）放在同一個不切開的區段：合計與簽名欄不會單獨落到新的一頁。這一組放不下時整組換頁，前一頁會空著這一組的高度，所以列數越多、可能的空白越大。0 表示只有合計與結尾在一起（合計可能出現在新一頁的頂端）。' },
         { name: 'ng-template[libPrintCell]', type: 'PrintCellContext<T>', description: '自訂儲存格：let-row、let-i="index"；加 [libPrintCellOf]="rows" 讓 let-row 有型別。' },
         { name: 'table.lib-print-table', type: 'class', description: '想自己寫 <table> 時掛這個 class，套同一組樣式：資料列加 .lib-print-table__row、數字欄的儲存格加 data-align="end"；最後幾列與合計放進 tbody.lib-print-table__tail（整組不切開）。' },
       ],
