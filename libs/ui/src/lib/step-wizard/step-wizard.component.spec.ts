@@ -17,6 +17,7 @@ const LABELS: StepWizardLabels = {
   stepList: '步驟',
   compactStatus: '步驟 {current}／{total} · {label}',
   stepListToggle: '所有步驟',
+  stepListError: '其他步驟需要修正',
   announce: '步驟 {current}，共 {total} 步：{label}',
   stateDone: '已完成',
   stateError: '有錯誤',
@@ -316,6 +317,33 @@ describe('StepWizardComponent', () => {
     expect(host.index()).toBe(1);
     expect(el.querySelector('.sw-nav')).toBeNull();
     expect(el.querySelector('.swc-text')?.textContent).toContain('步驟 2／3 · 成員');
+  });
+
+  it('窄版：目前這一步有錯時精簡列顯示「有錯誤」；別的步驟有錯時展開按鈕帶錯誤圖示與報讀文字', async () => {
+    resize?.([{ contentRect: { width: 420 } }]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(el.querySelector('[data-compact-error]')).toBeNull();
+    expect(el.querySelector('[data-compact-list-error]')).toBeNull();
+
+    await click(button('next'));
+    expect(host.index()).toBe(0);
+    const badge = el.querySelector('.swc-text [data-compact-error]');
+    expect(badge?.textContent?.trim()).toBe('有錯誤');
+    expect(badge?.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+    expect(el.querySelector('.swc-text')?.textContent).toContain('步驟 1／3 · 基本資料');
+
+    // 非線性：帶著錯誤離開第 1 步 → 目前這一步沒錯，改在展開按鈕上標示
+    host.linear.set(false);
+    fixture.detectChanges();
+    host.index.set(2);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(el.querySelector('[data-compact-error]')).toBeNull();
+    const toggle = el.querySelector<HTMLButtonElement>('lib-step-wizard-compact button')!;
+    expect(toggle.querySelector('[data-compact-list-error]')).not.toBeNull();
+    expect(toggle.querySelector('.swc-sr-only')?.textContent?.trim()).toBe('其他步驟需要修正');
+    expect(toggle.textContent).toContain('所有步驟');
   });
 
   it('頁面改 selectedIndex（例如網址的 ?step=）會換到那一步', async () => {

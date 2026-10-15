@@ -171,6 +171,8 @@ export class StepWizardComponent extends CdkStepper implements AfterContentInit 
   });
 
   protected readonly currentView = computed(() => this.views()[this.selectedIndex] ?? null);
+  /** 目前以外的步驟有錯（窄版的展開按鈕上標示）。 */
+  protected readonly otherStepHasError = computed(() => this.views().some((v) => !v.current && v.state === 'error'));
   /** 目前這一步包成陣列：`@for` 換步驟時重建區塊，滑入動畫才會重播。 */
   protected readonly currentSteps = computed(() => {
     const view = this.currentView();

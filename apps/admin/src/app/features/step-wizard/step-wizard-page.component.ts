@@ -276,7 +276,7 @@ export class StepWizardPageComponent {
 providers: [{ provide: STEP_WIZARD_LABELS, useValue: {
   previous: '上一步', next: '下一步', finish: '完成', submitting: '送出中…', cancel: '取消',
   optional: '選填', stepList: '步驟', compactStatus: '步驟 {current}／{total} · {label}',
-  stepListToggle: '所有步驟', announce: '步驟 {current}，共 {total} 步：{label}',
+  stepListToggle: '所有步驟', stepListError: '其他步驟需要修正', announce: '步驟 {current}，共 {total} 步：{label}',
   stateDone: '已完成', stateError: '有錯誤', stateLocked: '尚未開放', stateUpcoming: '未完成',
   errorSummary: '這一步有 {count} 個欄位需要修正', stepInvalid: '這一步還有內容需要修正',
 } }]
@@ -339,7 +339,7 @@ readonly save = () => this.api.createProject(this.form.getRawValue()).then(() =>
     {
       title: '注入',
       rows: [
-        { name: 'STEP_WIZARD_LABELS', type: 'StepWizardLabels', default: '必填', description: '16 句畫面文字；少一句會在建立元件時丟出錯誤，列出缺的名稱。' },
+        { name: 'STEP_WIZARD_LABELS', type: 'StepWizardLabels', default: '必填', description: '17 句畫面文字；少一句會在建立元件時丟出錯誤，列出缺的名稱。' },
       ],
     },
   ];

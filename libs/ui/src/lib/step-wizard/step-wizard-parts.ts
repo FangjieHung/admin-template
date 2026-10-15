@@ -75,13 +75,33 @@ export class StepWizardSummaryComponent {
   readonly focusField = output<string>();
 }
 
-/** 窄版精簡列：「步驟 2／4 · 成員」、展開完整清單的按鈕、細進度條（裝飾）。 */
+/** 錯誤圖示（圓形驚嘆號，同錯誤摘要）。 */
+const ERROR_ICON = 'M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm-1 5v7h2V7zm1 9a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6z';
+
+/**
+ * 窄版精簡列：「步驟 2／4 · 成員」、展開完整清單的按鈕、細進度條（裝飾）。
+ * 目前這一步有錯時，狀態文字後面接「有錯誤」（圖示＋文字）；別的步驟有錯時，展開按鈕上加錯誤圖示，報讀器另外念「其他步驟需要修正」（stepListError）。
+ */
 @Component({
   selector: 'lib-step-wizard-compact',
   template: `
-    <p class="swc-text">{{ text() }}</p>
+    <p class="swc-text">
+      <span class="swc-status">{{ text() }}</span>
+      @if (error()) {
+        <span class="swc-error" data-compact-error>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="errorIcon" /></svg>
+          {{ error() }}
+        </span>
+      }
+    </p>
     <button type="button" [attr.aria-expanded]="expanded()" [attr.aria-controls]="controls()" (click)="toggle.emit()">
       <span>{{ toggleLabel() }}</span>
+      @if (listError()) {
+        <svg class="swc-error" viewBox="0 0 24 24" aria-hidden="true" focusable="false" data-compact-list-error>
+          <path [attr.d]="errorIcon" />
+        </svg>
+        <span class="swc-sr-only">{{ listError() }}</span>
+      }
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.4 9.3 12 13.9l4.6-4.6L18 10.7l-6 6-6-6z" /></svg>
     </button>
     <div class="swc-progress" aria-hidden="true"><span [style.inline-size.%]="progress()"></span></div>
@@ -97,5 +117,10 @@ export class StepWizardCompactComponent {
   readonly expanded = input(false);
   /** 完整步驟清單的 id（aria-controls）。 */
   readonly controls = input('');
+  /** 目前這一步有錯時顯示的文字（例：「有錯誤」）；空字串不顯示。 */
+  readonly error = input('');
+  /** 其他步驟有錯時，展開按鈕上給報讀器的文字；空字串不顯示圖示。 */
+  readonly listError = input('');
   readonly toggle = output<void>();
+  protected readonly errorIcon = ERROR_ICON;
 }

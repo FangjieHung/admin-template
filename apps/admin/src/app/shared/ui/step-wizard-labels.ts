@@ -6,7 +6,7 @@ import { STEP_WIZARD_LABELS, StepWizardLabels } from '@admin-template/ui';
  * 不放 app.config 根層，理由同 component-label-providers.ts。
  *
  * 文字直接寫在這裡、不放 core/i18n/zh-tw.ts：那份字典被殼層 import，整份在 Initial bundle 裡
- * （esbuild 把每個中文字輸出成 6 bytes 的跳脫序列），這 16 句只有用到精靈的頁面（lazy chunk）需要。
+ * （esbuild 把每個中文字輸出成 6 bytes 的跳脫序列），這 17 句只有用到精靈的頁面（lazy chunk）需要。
  */
 export const ZH_TW_STEP_WIZARD: StepWizardLabels = {
   previous: '上一步',
@@ -18,6 +18,7 @@ export const ZH_TW_STEP_WIZARD: StepWizardLabels = {
   stepList: '步驟',
   compactStatus: '步驟 {current}／{total} · {label}',
   stepListToggle: '所有步驟',
+  stepListError: '其他步驟需要修正',
   announce: '步驟 {current}，共 {total} 步：{label}',
   stateDone: '已完成',
   stateError: '有錯誤',

@@ -23,6 +23,8 @@ export interface StepWizardLabels {
   compactStatus: string;
   /** 窄版展開完整步驟清單的按鈕，例：「所有步驟」（展開與否由 aria-expanded 表達）。 */
   stepListToggle: string;
+  /** 窄版：目前以外的步驟有錯時，展開按鈕上給報讀器的補充（畫面上是錯誤圖示），例：「其他步驟需要修正」。 */
+  stepListError: string;
   /** 換步驟時報讀器念的字，例：「步驟 {current}，共 {total} 步：{label}」。 */
   announce: string;
   /** 只給報讀器的步驟狀態（不只靠顏色），例：「已完成」。 */
@@ -51,6 +53,7 @@ const KEYS: readonly (keyof StepWizardLabels)[] = [
   'stepList',
   'compactStatus',
   'stepListToggle',
+  'stepListError',
   'announce',
   'stateDone',
   'stateError',

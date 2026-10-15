@@ -307,6 +307,7 @@ const STEP_LABELS: StepWizardLabels = {
   stepList: '步驟',
   compactStatus: '步驟 {current}／{total} · {label}',
   stepListToggle: '所有步驟',
+  stepListError: '其他步驟需要修正',
   announce: '步驟 {current}，共 {total} 步：{label}',
   stateDone: '已完成',
   stateError: '有錯誤',

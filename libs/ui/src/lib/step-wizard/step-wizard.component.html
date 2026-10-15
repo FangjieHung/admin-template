@@ -9,6 +9,8 @@
       [progress]="progress()"
       [expanded]="listOpen()"
       [controls]="uid + '-list'"
+      [error]="currentView()?.state === 'error' ? labels.stateError : ''"
+      [listError]="otherStepHasError() ? labels.stepListError : ''"
       (toggle)="toggleList()"
     />
   }

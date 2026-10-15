@@ -238,6 +238,7 @@ Material、Linen、Soft UI、Clay、Frosted、Aero 用預設值（陰影、紙�
 
 - 步驟名稱：未開始、鎖住 `--mat-sys-on-surface-variant`，目前與完成 `--mat-sys-on-surface`，錯誤 `--mat-sys-error`；「選填」小字 `--mat-sys-on-surface-variant`；步驟按鈕滑過 `--app-state-hover`、按下 `--app-state-pressed`、焦點 `--app-focus-ring`（`-width`／`-offset`）、圓角 `--mat-sys-corner-small`。
 - 步驟標題用 `.ui-text-subtitle`，數字標記掛 `.ui-text-numeric`（Grid、Ledger、Cockpit、Riso、Sketch 自動換等寬字）；底部按鈕是 Material 的 `matButton`（outlined／filled，吃各質地的按鈕 recipe），上方一條 `--mat-sys-outline-variant` 分隔線。
+- 窄版精簡列：目前這一步有錯時，狀態文字後面接錯誤圖示＋「有錯誤」（`stateError`），別的步驟有錯時展開按鈕上加錯誤圖示（報讀器念 `stepListError`）；顏色同寬版的步驟名稱 `--mat-sys-error`，沒有另外的變數。
 - 錯誤摘要：`--mat-sys-error-container` 底、`--mat-sys-on-error-container` 字、圓角 `--mat-sys-corner-medium`（同工單表單樣板）；換步驟的滑入動畫 `--app-motion-base`，送出中的轉圈 `--app-motion-loop / 8`，減少動態時都不動。
 - 標記、連接線、進度條是元件暴露的變數：質地只在 `.lib-step-wizard` 上設，不覆寫屬性。標記的框、底、陰影畫在不含文字的 `::before` 上，連接線也是不含文字的偽元素（線畫在正中間），所以可以加 filter 而數字不變形。標記與圖示的顏色要對旁邊的底色 ≥ 3:1、數字 ≥ 4.5:1。
 
