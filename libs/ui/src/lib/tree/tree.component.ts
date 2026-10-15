@@ -13,10 +13,12 @@ import {
   output,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { TREE_LABELS, assertTreeLabels, formatTreeLabel } from './tree-labels';
 import { TreeController, TreeViewNode, defaultTreeChildren, findTypeahead, settleFirst } from './tree-model';
+import { TreeKeySink } from './tree-key-sink';
 import { TreeCheckAccess, checkedKeysInOrder, computeCheckStates, toggleCheckedKeys } from './tree-check';
 import { TreeNodeContext, TreeNodeDirective } from './tree-node.directive';
 import { TreeHighlightComponent } from './tree-highlight.component';
@@ -32,11 +34,10 @@ import type {
   TreeServerSearch,
 } from './tree.types';
 
-/** 預輸入的字串在停手多久之後清空。 */
-const TYPEAHEAD_RESET_MS = 500;
 /** 搜尋字停手多久才呼叫伺服器端搜尋。 */
 const SERVER_SEARCH_DELAY_MS = 250;
 const NO_KEYS: ReadonlySet<TreeKey> = new Set();
+let nextTreeId = 0;
 
 /**
  * 樹狀選單（WAI-ARIA Tree View）：分類、組織架構這類有上下層的清單。
@@ -56,9 +57,10 @@ const NO_KEYS: ReadonlySet<TreeKey> = new Set();
  *  （搜尋中不能收合），比對到的字用 `<mark>` 標出。沒有結果時顯示 `noResults`。
  *   本機的比對只看得到已知的節點；延遲載入的樹可以給 `[serverSearch]`（使用端實作，回傳符合的鍵與祖先路徑），
  *   元件照路徑一層一層載入，讓伺服器找到的節點也出現（並保留）。沒給時，搜尋結果下方顯示 `searchLoadedOnly`（有提供這句時）。
- * - 鍵盤：↑↓ 移動、→ 展開或進入第一個子節點、← 收合或回到父節點、Home／End、打字跳到開頭相符的節點（單一按鍵字元；
- *   輸入法組字時 keydown 是 `Process`，中文名稱沒辦法這樣跳）、
- *   Space 勾選（single 時選為目前項目）、Enter 送出 activate、`*` 展開同一層。整棵樹只有一個 tab stop（roving tabindex）。
+ * - 鍵盤：↑↓ 移動、→ 展開或進入第一個子節點、← 收合或回到父節點、Home／End、打字跳到開頭相符的節點、
+ *   Space 勾選（single 時選為目前項目）、Enter 送出 activate、`*` 展開同一層。
+ *   打字跳轉也支援注音、倉頡等輸入法：鍵盤焦點實際在一個看不見的輸入框上（整棵樹唯一的 tab stop），
+ *   用 `aria-activedescendant` 指向目前的節點；組字時輸入框在目前節點那一列的右側顯示成小框，確定後用確定的字比對（例：打「財」跳到「財務部」）。
  */
 @Component({
   selector: 'lib-tree',
@@ -66,7 +68,7 @@ const NO_KEYS: ReadonlySet<TreeKey> = new Set();
   templateUrl: './tree.component.html',
   styleUrl: './tree.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'lib-tree' },
+  host: { class: 'lib-tree', '[class.tr--focus-visible]': 'sink.focusVisible()' },
 })
 export class TreeComponent<T> {
   /** 第一層節點。 */
@@ -93,7 +95,6 @@ export class TreeComponent<T> {
    * 元件照路徑載入祖先，找到的節點即使名稱不含搜尋字也保留。
    */
   readonly serverSearch = input<TreeServerSearch | null>(null);
-
 
   /** 展開中的節點鍵（雙向綁定＝受控；不綁定＝元件自己記）。 */
   readonly expandedKeys = model<readonly TreeKey[]>([]);
@@ -169,6 +170,12 @@ export class TreeComponent<T> {
     return view.flat[0]?.key ?? null;
   });
   protected readonly noResultsText = computed(() => formatTreeLabel(this.labels.noResults, { query: this.query() }));
+  /** 目前節點的 DOM id：鍵盤接收器的 aria-activedescendant。 */
+  protected readonly activeDomId = computed(() => {
+    const key = this.tabKey();
+    return key === null ? null : (this.view().byKey.get(key)?.domId ?? null);
+  });
+  protected readonly treeId = `lib-tree-${nextTreeId++}`;
   /** 搜尋結果下方的說明：伺服器端搜尋中／失敗，或「只搜尋已載入的項目」。 */
   protected readonly searchNote = computed<{ text: string; busy: boolean } | null>(() => {
     if (!this.filtering() || !this.query()) return null;
@@ -184,19 +191,19 @@ export class TreeComponent<T> {
   /** 全部展開進行中的進度（延遲載入的樹；沒在跑時是 null）。 */
   readonly expandAllProgress = this.ctrl.expandAllProgress;
 
-
+  protected readonly sink = new TreeKeySink((query) => this.onTypeahead(query), inject(DestroyRef));
+  private readonly sinkRef = viewChild<ElementRef<HTMLInputElement>>('sinkInput');
   private pendingFocus: TreeKey | null = null;
-  private typeahead = '';
-  private typeaheadTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
-    // 鍵盤移動到剛展開才畫出來的節點時，等畫面更新再聚焦。
+    // 鍵盤移動到剛展開才畫出來的節點時，等畫面更新再聚焦；接收器跟著目前節點換位置（輸入法的選字窗出現在那一列旁邊）。
     afterRenderEffect(() => {
       this.view();
-      untracked(() => this.flushFocus());
-    });
-    inject(DestroyRef).onDestroy(() => {
-      if (this.typeaheadTimer) clearTimeout(this.typeaheadTimer);
+      this.activeDomId();
+      untracked(() => {
+        this.flushFocus();
+        this.placeSink();
+      });
     });
     // 伺服器端搜尋：搜尋字停手後呼叫，照回傳的路徑載入祖先。搜尋字換了就丟掉上一次的結果。
     effect((onCleanup) => {
@@ -316,16 +323,20 @@ export class TreeComponent<T> {
     this.ctrl.retry(vn.key);
   }
 
+  /** 節點本身拿到焦點（報讀器的「移到這個項目」、點擊）：焦點交回鍵盤接收器，這個節點成為目前節點。 */
   protected onFocusIn(event: FocusEvent): void {
     const vn = this.nodeFromEvent(event);
-    if (vn) this.focusedKey.set(vn.key);
+    if (vn && event.target === this.host.nativeElement.ownerDocument.getElementById(vn.domId)) this.focusNode(vn.key);
   }
 
-  // ---- 鍵盤 ----
+  // ---- 鍵盤（都在鍵盤接收器上）----
 
   protected onKeydown(event: KeyboardEvent): void {
-    const vn = this.nodeFromEvent(event);
+    // 輸入法正在組字或選字：方向鍵、Enter 是給輸入法的。
+    if (TreeKeySink.isImeKey(event)) return;
+    const vn = this.activeNode();
     if (!vn || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.key !== 'Tab' && event.key !== 'Shift') this.sink.keyboard();
     const target = this.ctrl.navigate(vn, event.key);
     if (target !== undefined) {
       event.preventDefault();
@@ -343,21 +354,21 @@ export class TreeComponent<T> {
         else if (this.selection() === 'single') this.activateNode(vn);
         return;
     }
-    if (event.key.length === 1 && event.key.trim()) {
+    if (TreeKeySink.isPrintable(event)) {
       event.preventDefault();
-      this.onTypeahead(vn, event.key);
+      this.sink.type(event.key);
     }
   }
 
-  private onTypeahead(from: TreeViewNode<T>, char: string): void {
-    this.typeahead += char;
-    if (this.typeaheadTimer) clearTimeout(this.typeaheadTimer);
-    this.typeaheadTimer = setTimeout(() => {
-      this.typeahead = '';
-      this.typeaheadTimer = null;
-    }, TYPEAHEAD_RESET_MS);
-    const hit = findTypeahead(this.view().flat, from, this.typeahead, this.nodeLabel());
+  /** 預輸入（英數或輸入法確定的字）：跳到名稱開頭相符的節點。 */
+  private onTypeahead(query: string): void {
+    const hit = findTypeahead(this.view().flat, this.activeNode(), query, this.nodeLabel());
     if (hit) this.focusNode(hit.key);
+  }
+
+  private activeNode(): TreeViewNode<T> | null {
+    const key = this.tabKey();
+    return key === null ? null : (this.view().byKey.get(key) ?? null);
   }
 
   // ---- 共用 ----
@@ -392,14 +403,29 @@ export class TreeComponent<T> {
     this.flushFocus();
   }
 
+  /** 焦點放到鍵盤接收器（aria-activedescendant 指向目前節點），並把目前節點捲進畫面。 */
   private flushFocus(): void {
     const key = this.pendingFocus;
     if (key === null) return;
     const vn = this.view().byKey.get(key);
-    if (!vn) return;
+    const sink = this.sinkRef()?.nativeElement;
+    if (!vn || !sink) return;
     const el = this.host.nativeElement.ownerDocument.getElementById(vn.domId);
-    if (!el) return;
+    // aria-activedescendant 要等畫面更新才換成這個節點：還沒換就下一輪再來。
+    if (!el || sink.getAttribute('aria-activedescendant') !== vn.domId) return;
     this.pendingFocus = null;
-    if (el.ownerDocument.activeElement !== el) el.focus();
+    if (sink.ownerDocument.activeElement !== sink) sink.focus({ preventScroll: true });
+    el.querySelector<HTMLElement>(':scope > .tr-row')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+  }
+
+  /** 接收器放在目前節點那一列的高度：組字時的小框與輸入法的選字窗出現在那一列旁邊。 */
+  private placeSink(): void {
+    const sink = this.sinkRef()?.nativeElement;
+    const id = this.activeDomId();
+    const row = id ? this.host.nativeElement.ownerDocument.getElementById(id)?.querySelector<HTMLElement>(':scope > .tr-row') : null;
+    if (!sink || !row) return;
+    const top = row.getBoundingClientRect().top - this.host.nativeElement.getBoundingClientRect().top;
+    sink.style.top = `${Math.round(top)}px`;
+    sink.style.height = `${row.offsetHeight}px`;
   }
 }

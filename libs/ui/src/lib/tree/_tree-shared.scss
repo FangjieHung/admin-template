@@ -77,3 +77,43 @@
     background: var(--app-state-hover);
   }
 }
+
+// 鍵盤接收器（tree-key-sink.ts）：平常看不見、不佔版面，位置跟著目前那一列（輸入法的選字窗出現在旁邊）；
+// 組字時在那一列右側顯示成小框，看得到注音與組字底線。host 要是定位基準（position: relative）。
+@mixin key-sink {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 1px;
+  height: var(--lib-tree-row-height, 2.5rem);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
+  font: inherit;
+  opacity: 0;
+  pointer-events: none;
+
+  &:focus {
+    outline: none;
+  }
+
+  &.is-composing {
+    inset-inline: auto var(--lib-tree-row-padding-inline, 0.5rem);
+    width: auto;
+    min-width: 6rem;
+    max-width: 50%;
+    padding-inline: 0.5rem;
+    border: 1px solid var(--mat-sys-outline);
+    border-radius: var(--mat-sys-corner-small);
+    background: var(--mat-sys-surface-container-high);
+    color: var(--mat-sys-on-surface);
+    caret-color: auto;
+    box-shadow: var(--mat-sys-level2);
+    opacity: 1;
+  }
+}

@@ -295,7 +295,6 @@ const result = await tree.expandAll({ maxLoads: 20 });   // { loaded, failed, li
 tree.expandAllProgress();   // 進行中：{ loaded, failed, pending, limitReached }
 tree.cancelExpandAll();
 
-
 // 樹狀表：欄位寫法同 data-table，第一欄自動縮排與展開鈕
 readonly columns: TreeTableColumn<PlanRow>[] = [
   { key: 'name', label: '名稱' },
@@ -337,7 +336,8 @@ readonly columns: TreeTableColumn<PlanRow>[] = [
         { name: 'ng-template[libTreeNode]', type: 'TreeNodeContext<T>', description: '節點內容：let-node，另有 let-level、let-expanded、let-query。加 [libTreeNodeOf]="nodes" 讓 let-node 有型別。' },
         { name: 'lib-tree-highlight', type: '[text]、[query]', description: '把比對到的字包成 <mark>；自訂範本時用它標字。' },
         { name: '勾選規則', type: '—', description: '勾父節點＝連帶勾所有已知子孫；子孫全勾時父節點自動全勾，部分勾時半勾。還沒載入的延遲節點算一個葉節點：勾了它，載入後子節點全部算勾。' },
-        { name: '鍵盤', type: '—', description: '↑↓ 移動、→ 展開或進入第一個子節點、← 收合或回到父節點、Home／End、打字跳到開頭相符的節點（英數字；輸入法組字不會觸發）、Space 勾選、Enter 啟用、* 展開同一層。整棵樹只有一個 tab stop。' },
+        { name: '鍵盤', type: '—', description: '↑↓ 移動、→ 展開或進入第一個子節點、← 收合或回到父節點、Home／End、打字跳到開頭相符的節點、Space 勾選、Enter 啟用、* 展開同一層。整棵樹只有一個 tab stop。' },
+        { name: '輸入法（注音、倉頡…）', type: '—', description: '鍵盤焦點實際在一個看不見的輸入框上（aria-activedescendant 指向目前節點，報讀器念的是節點），作業系統的輸入法才會啟動。組字時那一列右側出現小框顯示注音與底線，確定後用確定的字比對開頭（打「財」跳到「財務部」）；組字中的方向鍵、Enter 留給輸入法選字。' },
       ],
     },
     {
@@ -347,7 +347,7 @@ readonly columns: TreeTableColumn<PlanRow>[] = [
         { name: '[rowChildren]／[hasChildren]／[loadChildren]／[(expandedKeys)]', type: '同 lib-tree', description: '展開、延遲載入、受控與非受控的規則和 lib-tree 一樣；載入失敗時那一列下面多一列錯誤與「重試」。' },
         { name: 'expandAll(options?)／cancelExpandAll()／expandAllProgress()／collapseAll()', type: '同 lib-tree', description: '全部展開（延遲載入的列逐層載入，有上限、可停止）／收合。' },
         { name: '(activate)', type: 'T', description: '點擊一列或按 Enter。' },
-        { name: '鍵盤（列模式）', type: '—', description: '↑↓ 換列、→ 展開或到第一個子列、← 收合或回到父列、Home／End、Enter、*。只有一個 tab stop；儲存格範本裡不要放按鈕。' },
+        { name: '鍵盤（列模式）', type: '—', description: '↑↓ 換列、→ 展開或到第一個子列、← 收合或回到父列、Home／End、Enter、*、打字跳到第一欄開頭相符的列（輸入法也可以，同 lib-tree）。只有一個 tab stop（看不見的輸入框，aria-activedescendant 指向目前的列）；儲存格範本裡不要放按鈕。' },
         { name: '外觀', type: '—', description: '表格掛 .dt-table，跟資料表吃同一組 --dt-* 變數；窄螢幕橫向捲動、第一欄固定在左側。' },
         { name: '不支援', type: '—', description: '排序、分頁、凍結欄設定、欄位選擇、勾選、表格內編輯、手機卡片版——要這些請用 lib-data-table。' },
         { name: 'TREE_LABELS', type: 'TreeLabels', default: '必填', description: '6 句必填的畫面文字（載入中、載入失敗、重試、重試提示、搜尋沒有結果、沒有資料），兩個元件共用；少一句會在建立元件時丟出錯誤。另有 3 句選填：searchLoadedOnly（延遲載入的樹沒有伺服器端搜尋時，結果下方的說明）、searching（伺服器端搜尋中）、searchFailed（伺服器端搜尋失敗）。' },

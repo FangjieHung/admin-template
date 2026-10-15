@@ -99,11 +99,16 @@ describe('TreeTableComponent（樹狀表）', () => {
   const rows = () => Array.from(el.querySelectorAll<HTMLElement>('tr[data-tree-row]'));
   const row = (name: string) => rows().find((tr) => tr.querySelector('.tt-name')?.textContent?.trim() === name)!;
   const names = () => rows().map((tr) => tr.querySelector('.tt-name')?.textContent?.trim());
+  /** 鍵盤接收器：整張表唯一的 tab stop（aria-activedescendant 指向目前的列）。 */
+  const sink = () => el.querySelector<HTMLInputElement>('.tt-sink')!;
   const press = async (key: string, init: KeyboardEventInit = {}) => {
-    document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init }));
+    sink().dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init }));
     await settle();
   };
-  const focusedName = () => (document.activeElement as HTMLElement).querySelector('.tt-name')?.textContent?.trim();
+  const focusedName = () =>
+    document.activeElement === sink()
+      ? el.querySelector(`#${sink().getAttribute('aria-activedescendant')}`)?.querySelector('.tt-name')?.textContent?.trim()
+      : `(${document.activeElement?.tagName})`;
 
   afterEach(() => fixture?.destroy());
 
@@ -147,15 +152,19 @@ describe('TreeTableComponent（樹狀表）', () => {
 
   it('treegrid 鍵盤（列模式）：↑↓ 換列、→ 展開再到第一個子列、← 收合再回到父列、Home／End、Enter；只有一個 tab stop', async () => {
     await setup();
-    const zeros = () => rows().filter((tr) => tr.getAttribute('tabindex') === '0');
-    expect(zeros()).toEqual([row('官網改版')]);
+    const tabStops = () => Array.from(el.querySelectorAll<HTMLElement>('input, button, tr')).filter((n) => n.tabIndex >= 0);
+    expect(tabStops()).toEqual([sink()]);
+    expect(sink().getAttribute('aria-activedescendant')).toBe(row('官網改版').id);
+    expect(sink().getAttribute('aria-controls')).toBe(el.querySelector('table')!.id);
     row('官網改版').focus();
+    await settle();
+    expect(document.activeElement).toBe(sink());
     await press('ArrowRight');
     expect(row('官網改版').getAttribute('aria-expanded')).toBe('true');
     expect(focusedName()).toBe('官網改版');
     await press('ArrowRight');
     expect(focusedName()).toBe('需求訪談');
-    expect(zeros()).toEqual([row('需求訪談')]);
+    expect(row('需求訪談').classList).toContain('is-active');
     await press('ArrowDown');
     expect(focusedName()).toBe('視覺設計');
     await press('ArrowUp');
@@ -178,7 +187,29 @@ describe('TreeTableComponent（樹狀表）', () => {
     row('帳務整併').click();
     await settle();
     expect(host.activated).toEqual(['p1', 'p2']);
-    expect(document.activeElement).toBe(row('帳務整併'));
+    expect(focusedName()).toBe('帳務整併');
+  });
+
+  it('預輸入：英數與輸入法確定的字都比對第一欄開頭；組字中的鍵不導覽', async () => {
+    await setup((h) => h.expanded.set(['p1']));
+    row('官網改版').focus();
+    await settle();
+    await press('v'); // 沒有英文名稱：不動
+    expect(focusedName()).toBe('官網改版');
+    await new Promise((r) => setTimeout(r, 550)); // 停手後重新開始
+    sink().dispatchEvent(new CompositionEvent('compositionstart', { data: '', bubbles: true }));
+    await settle();
+    expect(sink().classList).toContain('is-composing');
+    await press('ArrowDown', { isComposing: true, keyCode: 229 });
+    expect(focusedName()).toBe('官網改版');
+    sink().dispatchEvent(new CompositionEvent('compositionend', { data: '帳', bubbles: true }));
+    await settle();
+    expect(focusedName()).toBe('帳務整併');
+    await new Promise((r) => setTimeout(r, 550));
+    sink().dispatchEvent(new CompositionEvent('compositionstart', { data: '', bubbles: true }));
+    sink().dispatchEvent(new CompositionEvent('compositionend', { data: '視覺', bubbles: true }));
+    await settle();
+    expect(focusedName()).toBe('視覺設計');
   });
 
   it('延遲載入：轉圈、失敗時下一列顯示錯誤與重試，重試成功後顯示子列', async () => {
@@ -192,6 +223,7 @@ describe('TreeTableComponent（樹狀表）', () => {
       });
     });
     row('新專案').focus();
+    await settle();
     await press('ArrowRight');
     const status = el.querySelector('.tt-status-row')!;
     expect(status.textContent).toContain('無法載入「新專案」的內容');

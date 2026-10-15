@@ -67,7 +67,10 @@ describe('TreePageComponent（樹狀選單與樹狀表展示頁）', () => {
     expect(item(cat, '採購單據').querySelector('mark')?.textContent).toBe('採購');
     search.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
     await settle();
-    expect(document.activeElement).toBe(item(cat, '財務'));
+    // 焦點在樹的鍵盤接收器上，aria-activedescendant 指向「財務」
+    const sink = cat.querySelector<HTMLInputElement>('.tr-sink')!;
+    expect(document.activeElement).toBe(sink);
+    expect(sink.getAttribute('aria-activedescendant')).toBe(item(cat, '財務').id);
     search.value = '找不到的字';
     search.dispatchEvent(new Event('input'));
     await settle();
@@ -103,6 +106,19 @@ describe('TreePageComponent（樹狀選單與樹狀表展示頁）', () => {
     await sleep(800);
     await settle();
     expect(item(lazy, '設計稿').querySelector('.tr-error')).not.toBeNull();
+  });
+
+  it('組織架構：用注音打「財」跳到「財務部」', async () => {
+    const org = demo('org');
+    item(org, '總公司').focus();
+    await settle();
+    const sink = org.querySelector<HTMLInputElement>('.tr-sink')!;
+    expect(document.activeElement).toBe(sink);
+    sink.dispatchEvent(new CompositionEvent('compositionstart', { data: '', bubbles: true }));
+    sink.value = 'ㄘㄞˊ';
+    sink.dispatchEvent(new CompositionEvent('compositionend', { data: '財', bubbles: true }));
+    await settle();
+    expect(sink.getAttribute('aria-activedescendant')).toBe(item(org, '財務部').id);
   });
 
   it('大量延遲載入：全部展開顯示進度並可停止；伺服器端搜尋照路徑載入並展開；關掉時說明只搜尋已載入的項目', async () => {

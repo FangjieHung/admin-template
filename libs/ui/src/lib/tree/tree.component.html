@@ -5,13 +5,34 @@
     <p class="tr-empty" role="status">{{ noResultsText() }}</p>
   }
 } @else {
+  <!-- 鍵盤接收器：整棵樹唯一的 tab stop。可編輯，作業系統的輸入法才會啟動；aria-activedescendant 指向目前節點。 -->
+  <input
+    #sinkInput
+    class="tr-sink"
+    type="text"
+    autocomplete="off"
+    autocapitalize="off"
+    spellcheck="false"
+    inputmode="none"
+    [class.is-composing]="sink.composing()"
+    [attr.aria-label]="label() || null"
+    [attr.aria-controls]="treeId"
+    [attr.aria-activedescendant]="activeDomId()"
+    (keydown)="onKeydown($event)"
+    (focus)="sink.focus()"
+    (blur)="sink.blur($any($event.target))"
+    (compositionstart)="sink.compositionStart()"
+    (compositionend)="sink.compositionEnd($event, $any($event.target))"
+    (input)="sink.input($event, $any($event.target))"
+  />
   <ul
     class="tr-tree"
     role="tree"
+    [id]="treeId"
     [attr.aria-label]="label() || null"
     [attr.aria-busy]="expandAllProgress() ? 'true' : null"
-    (keydown)="onKeydown($event)"
     (focusin)="onFocusIn($event)"
+    (pointerdown)="sink.pointerDown()"
   >
     <ng-container [ngTemplateOutlet]="branch" [ngTemplateOutletContext]="{ $implicit: v.roots }" />
   </ul>
@@ -25,7 +46,6 @@
   </p>
 }
 
-
 <ng-template #branch let-nodes>
   @for (vn of nodes; track vn.key) {
     @let mode = selection();
@@ -34,7 +54,8 @@
       class="tr-item"
       role="treeitem"
       [id]="vn.domId"
-      [attr.tabindex]="vn.key === tabKey() ? 0 : -1"
+      tabindex="-1"
+      [class.is-active]="vn.key === tabKey()"
       [attr.aria-level]="vn.level"
       [attr.aria-setsize]="vn.setsize"
       [attr.aria-posinset]="vn.posinset"

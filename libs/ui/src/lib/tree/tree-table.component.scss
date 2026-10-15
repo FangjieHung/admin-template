@@ -73,10 +73,15 @@
     background-color: var(--dt-row-tint);
   }
 
-  &:focus-visible {
+  &:focus-visible,
+  :host(.tt--focus-visible) &.is-active {
     outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
     outline-offset: calc(-1 * var(--app-focus-ring-width));
   }
+}
+
+.tt-sink {
+  @include shared.key-sink;
 }
 
 .dt-align-start {

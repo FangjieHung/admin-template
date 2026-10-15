@@ -559,12 +559,14 @@ export function findTypeahead<T>(
   buffer: string,
   labelOf: (node: T) => string,
 ): TreeViewNode<T> | null {
-  if (!buffer || flat.length === 0) return null;
-  const query = [...buffer].every((ch) => ch === buffer[0]) ? buffer[0] : buffer;
+  const chars = [...buffer.trim()];
+  if (chars.length === 0 || flat.length === 0) return null;
+  // 以字元（code point）比較：中日韓的罕用字、表情符號是兩個 UTF-16 單位。
+  const query = chars.every((ch) => ch === chars[0]) ? chars[0] : chars.join('');
   const lower = query.toLocaleLowerCase();
   const start = from ? flat.indexOf(from) : -1;
   // 多字的查詢先比目前節點本身（打字途中不要跳走），單字則從下一個開始。
-  const offset = query.length > 1 ? 0 : 1;
+  const offset = [...query].length > 1 ? 0 : 1;
   for (let i = 0; i < flat.length; i++) {
     const vn = flat[(start + offset + i + flat.length) % flat.length];
     if (labelOf(vn.node).trim().toLocaleLowerCase().startsWith(lower)) return vn;

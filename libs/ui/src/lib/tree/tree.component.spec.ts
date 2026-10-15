@@ -137,15 +137,34 @@ describe('TreeComponent（樹狀選單）', () => {
   const row = (name: string) => item(name).querySelector<HTMLElement>(':scope > .tr-row')!;
   const toggle = (name: string) => item(name).querySelector<HTMLElement>(':scope > .tr-row > .tr-toggle')!;
   const check = (name: string) => item(name).querySelector<HTMLInputElement>(':scope > .tr-row > .tr-check')!;
-  const press = async (key: string, target: Element | null = document.activeElement) => {
-    target!.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+  /** 鍵盤接收器：整棵樹唯一的 tab stop（看不見的輸入框，aria-activedescendant 指向目前節點）。 */
+  const sink = () => el.querySelector<HTMLInputElement>('.tr-sink')!;
+  const press = async (key: string, target: Element | null = sink(), init: KeyboardEventInit = {}) => {
+    target!.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init }));
     await settle();
   };
+  /** 焦點在接收器上時，目前節點（aria-activedescendant）的名稱。 */
   const focusedName = () => {
     const active = document.activeElement as HTMLElement | null;
-    return active?.getAttribute('role') === 'treeitem'
-      ? el.querySelector(`#${active.getAttribute('aria-labelledby')}`)?.querySelector('.t-name, lib-tree-highlight')?.textContent?.trim()
-      : `(${active?.tagName})`;
+    if (active !== sink()) return `(${active?.tagName})`;
+    const li = el.querySelector(`#${active.getAttribute('aria-activedescendant')}`);
+    return el.querySelector(`#${li?.getAttribute('aria-labelledby')}`)?.querySelector('.t-name, lib-tree-highlight')?.textContent?.trim();
+  };
+  /** 模擬輸入法組字：compositionstart → 每一段 compositionupdate（輸入框的值跟著變）→ compositionend（確定的字）。 */
+  const compose = async (steps: string[], committed: string) => {
+    const input = sink();
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Process', keyCode: 229, bubbles: true, cancelable: true }));
+    input.dispatchEvent(new CompositionEvent('compositionstart', { data: '', bubbles: true }));
+    for (const text of steps) {
+      input.value = text;
+      input.dispatchEvent(new CompositionEvent('compositionupdate', { data: text, bubbles: true }));
+      input.dispatchEvent(new InputEvent('input', { data: text, inputType: 'insertCompositionText', isComposing: true, bubbles: true }));
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Process', keyCode: 229, isComposing: true, bubbles: true, cancelable: true }));
+      await settle();
+    }
+    // 輸入框裡留著最後一段組字（取消組字時 data 是空字串，不能拿輸入框的值來比對）
+    input.dispatchEvent(new CompositionEvent('compositionend', { data: committed, bubbles: true }));
+    await settle();
   };
 
   afterEach(() => fixture?.destroy());
@@ -180,17 +199,22 @@ describe('TreeComponent（樹狀選單）', () => {
     expect(fin.querySelector('.t-level')?.textContent).toBe('2');
   });
 
-  it('roving tabindex：整棵樹只有一個 tabindex=0，跟著焦點移動', async () => {
+  it('單一 tab stop：鍵盤接收器（aria-activedescendant 指向目前節點）；節點本身拿到焦點時交回接收器', async () => {
     await setup((h) => h.expanded.set(['co']));
-    const zeros = () => items().filter((li) => li.getAttribute('tabindex') === '0');
-    expect(zeros().length).toBe(1);
-    expect(zeros()[0]).toBe(item('總公司'));
-    expect(items().filter((li) => li.getAttribute('tabindex') === '-1').length).toBe(4);
-    item('總公司').focus();
+    const tabStops = () => Array.from(el.querySelectorAll<HTMLElement>('input, button, li')).filter((n) => n.tabIndex >= 0);
+    expect(tabStops()).toEqual([sink()]);
+    expect(sink().getAttribute('aria-activedescendant')).toBe(item('總公司').id);
+    expect(sink().getAttribute('aria-controls')).toBe(el.querySelector('[role="tree"]')!.id);
+    expect(sink().getAttribute('aria-label')).toBe('組織架構');
+    expect(sink().getAttribute('inputmode')).toBe('none'); // 觸控裝置點節點不會跳出螢幕鍵盤
+    expect(items().every((li) => li.getAttribute('tabindex') === '-1')).toBe(true);
+    item('總公司').focus(); // 例：報讀器把焦點移到這個項目
+    await settle();
+    expect(document.activeElement).toBe(sink());
     await press('ArrowDown');
-    expect(zeros().length).toBe(1);
-    expect(zeros()[0]).toBe(item('研發部'));
-    expect(document.activeElement).toBe(item('研發部'));
+    expect(sink().getAttribute('aria-activedescendant')).toBe(item('研發部').id);
+    expect(item('研發部').classList).toContain('is-active');
+    expect(focusedName()).toBe('研發部');
     // 除了 treeitem，樹裡沒有其他 tab stop（勾選框、重試鈕都是 -1）
     host.selection.set('multiple');
     await settle();
@@ -307,6 +331,53 @@ describe('TreeComponent（樹狀選單）', () => {
     expect(focusedName()).toBe('Apple');
     await press('z'); // 「az」沒有符合：不動
     expect(focusedName()).toBe('Apple');
+  });
+
+  it('輸入法預輸入：組字中不跳、方向鍵與 Enter 留給輸入法；確定「財」跳到「財務部」，確定兩個字比對開頭兩個字', async () => {
+    await setup((h) => h.expanded.set(['co']));
+    item('總公司').focus();
+    await settle();
+    const process = new KeyboardEvent('keydown', { key: 'Process', keyCode: 229, bubbles: true, cancelable: true });
+    sink().dispatchEvent(process);
+    expect(process.defaultPrevented).toBe(false); // 不攔：讓輸入法開始組字
+    sink().dispatchEvent(new CompositionEvent('compositionstart', { data: '', bubbles: true }));
+    sink().value = 'ㄘㄞˊ';
+    await settle();
+    expect(sink().classList).toContain('is-composing'); // 組字時看得到小框
+    await press('ArrowDown', sink(), { isComposing: true, keyCode: 229 }); // 選字用的方向鍵
+    expect(focusedName()).toBe('總公司');
+    await press('Enter', sink(), { isComposing: true, keyCode: 229 }); // 確定組字的 Enter 不是 activate
+    expect(host.activated).toEqual([]);
+    sink().dispatchEvent(new CompositionEvent('compositionend', { data: '財', bubbles: true }));
+    await settle();
+    expect(sink().classList).not.toContain('is-composing');
+    expect(sink().value).toBe('');
+    expect(focusedName()).toBe('財務部');
+    await sleep(550);
+    await compose(['ㄧ', 'ㄧㄥˊ', '營', '營ㄩ', '營運'], '營運');
+    expect(focusedName()).toBe('營運部');
+    await sleep(550);
+    await compose(['ㄕ', '實'], ''); // 取消組字（Esc）：輸入框還留著候選字也不跳
+    expect(focusedName()).toBe('營運部');
+    // 英數照舊；中途插入的文字（聽寫、表情符號面板）也算
+    await sleep(550);
+    sink().value = '實驗';
+    sink().dispatchEvent(new InputEvent('input', { data: '實驗', inputType: 'insertText', bubbles: true }));
+    await settle();
+    expect(focusedName()).toBe('實驗室');
+    expect(sink().value).toBe('');
+  });
+
+  it('輸入法預輸入：compositionend 之後同一輪的 input（Safari）不會再算一次', async () => {
+    await setup((h) => h.nodes.set([{ id: 'x1', name: '財務部' }, { id: 'x2', name: '財產' }, { id: 'x3', name: '人資' }]));
+    item('人資').focus();
+    await settle();
+    sink().dispatchEvent(new CompositionEvent('compositionstart', { data: '', bubbles: true }));
+    sink().dispatchEvent(new CompositionEvent('compositionend', { data: '財', bubbles: true }));
+    sink().value = '財';
+    sink().dispatchEvent(new InputEvent('input', { data: '財', inputType: 'insertFromComposition', bubbles: true }));
+    await settle();
+    expect(focusedName()).toBe('財務部'); // 不是「財財」→ 輪流跳到「財產」
   });
 
   describe('延遲載入的全部展開與伺服器端搜尋', () => {
@@ -484,7 +555,7 @@ describe('TreeComponent（樹狀選單）', () => {
     expect(host.current()).toBe('rd');
     expect(item('研發部').getAttribute('aria-selected')).toBe('true');
     expect(row('研發部').classList).toContain('is-current');
-    expect(document.activeElement).toBe(item('研發部'));
+    expect(focusedName()).toBe('研發部');
     expect(host.activated).toEqual(['rd']);
     await press('ArrowDown');
     expect(host.current()).toBe('rd'); // 選取不跟著焦點走
@@ -615,7 +686,7 @@ describe('TreeComponent（樹狀選單）', () => {
     expect(attempts).toBe(2);
     expect(li.querySelector('.tr-error')).toBeNull();
     expect(names()).toEqual(['專案群組', '子專案甲']);
-    expect(document.activeElement).toBe(li);
+    expect(focusedName()).toBe('專案群組');
   });
 
   it('延遲載入失敗：按 → 也會重試；收合後再展開會重新載入（Observable 也可以）', async () => {

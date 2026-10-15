@@ -3,15 +3,36 @@
 @if (v.roots.length === 0) {
   <p class="tt-empty">{{ labels.noRows }}</p>
 } @else {
+  <!-- 鍵盤接收器：整張表唯一的 tab stop（同 lib-tree，見 tree-key-sink.ts）。 -->
+  <input
+    #sinkInput
+    class="tt-sink"
+    type="text"
+    autocomplete="off"
+    autocapitalize="off"
+    spellcheck="false"
+    inputmode="none"
+    [class.is-composing]="sink.composing()"
+    [attr.aria-label]="label() || null"
+    [attr.aria-controls]="tableId"
+    [attr.aria-activedescendant]="activeDomId()"
+    (keydown)="onKeydown($event)"
+    (focus)="sink.focus()"
+    (blur)="sink.blur($any($event.target))"
+    (compositionstart)="sink.compositionStart()"
+    (compositionend)="sink.compositionEnd($event, $any($event.target))"
+    (input)="sink.input($event, $any($event.target))"
+  />
   <div class="tt-wrap" [class.tt-wrap--scrolled]="scrolledX()" (scroll)="onScroll($event)">
     <table
       class="dt-table tt-table"
       role="treegrid"
+      [id]="tableId"
       [attr.aria-label]="label() || null"
       [attr.aria-busy]="expandAllProgress() ? 'true' : null"
       [style.--tt-first-min]="firstColumnMinWidth()"
-      (keydown)="onKeydown($event)"
       (focusin)="onFocusIn($event)"
+      (pointerdown)="sink.pointerDown()"
     >
       <thead>
         <tr>
@@ -34,7 +55,8 @@
             class="tt-row"
             data-tree-row
             [id]="vn.domId"
-            [attr.tabindex]="vn.key === tabKey() ? 0 : -1"
+            tabindex="-1"
+            [class.is-active]="vn.key === tabKey()"
             [attr.aria-level]="vn.level"
             [attr.aria-setsize]="vn.setsize"
             [attr.aria-posinset]="vn.posinset"

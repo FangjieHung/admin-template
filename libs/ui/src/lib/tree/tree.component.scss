@@ -66,9 +66,15 @@
   }
 }
 
-.tr-item:focus-visible > .tr-row {
+.tr-item:focus-visible > .tr-row,
+:host(.tr--focus-visible) .tr-item.is-active > .tr-row {
   outline: var(--app-focus-ring-width) solid var(--app-focus-ring);
   outline-offset: calc(-1 * var(--app-focus-ring-width));
+}
+
+// 鍵盤接收器（見 tree-key-sink.ts）：平常看不見、組字時在目前那一列右側顯示成小框。
+.tr-sink {
+  @include shared.key-sink;
 }
 
 .tr-toggle {
