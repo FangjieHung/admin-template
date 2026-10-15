@@ -18,6 +18,7 @@ import { FEEDBACK_STATE_LABEL_PROVIDERS } from '../../shared/ui/component-label-
 import { TemplateInfo, TemplateInfoComponent } from '../../shared/ui/template-info.component';
 import { TICKET_ASSIGNEES } from '../tickets/data/ticket-demo-data';
 import { formatDueDate, isOverdue } from '../tickets/data/ticket-format';
+import { UserPreferencesStore } from '../../core/user-preferences';
 import { TICKET_STATUS_LABELS, TICKET_STATUS_TONES, Ticket } from '../tickets/data/ticket.model';
 import { TICKET_DEMO_TODAY, TicketRepository } from '../tickets/data/ticket.repository';
 import {
@@ -87,7 +88,9 @@ export class DashboardPageComponent {
   protected readonly integer: Intl.NumberFormatOptions = { maximumFractionDigits: 0 };
   protected readonly statusLabels = TICKET_STATUS_LABELS;
   protected readonly statusTones = TICKET_STATUS_TONES;
-  protected readonly formatDueDate = formatDueDate;
+  /** 期限跟著設定頁「偏好」的日期格式。 */
+  private readonly prefs = inject(UserPreferencesStore);
+  protected readonly formatDueDate = (value: string | null) => formatDueDate(value, this.prefs.dateFormat());
 
   protected readonly loadState = signal<LoadState>('loading');
   private readonly tickets = signal<readonly Ticket[]>([]);

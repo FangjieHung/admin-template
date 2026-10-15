@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { fmtDate, fmtDateTime, fmtIsoDate } from './date-utils';
+import { fmtDate, fmtDateAs, fmtDateTime, fmtDateTimeAs, fmtIsoDate } from './date-utils';
 
 describe('fmtDate', () => {
   it('格式為 YYYY/MM/DD', () => {
@@ -45,5 +45,27 @@ describe('fmtIsoDate', () => {
   it('即使是同年，也一律印出完整年份（與 fmtDateTime 不同）', () => {
     const thisYear = new Date().getFullYear();
     expect(fmtIsoDate(`${thisYear}-01-01`)).toBe(`${thisYear}/01/01`);
+  });
+});
+
+describe('fmtDateAs／fmtDateTimeAs（設定頁「偏好」的日期格式）', () => {
+  const d = new Date(2026, 8, 5);
+  const now = new Date(2026, 8, 23, 12, 0);
+
+  it('四種格式排列年、月、日；ymd-slash 等於全站預設的 fmtDate', () => {
+    expect(fmtDateAs('ymd-slash', d)).toBe(fmtDate(d));
+    expect(fmtDateAs('ymd-dash', d)).toBe('2026-09-05');
+    expect(fmtDateAs('dmy-slash', d)).toBe('05/09/2026');
+    expect(fmtDateAs('mdy-slash', d)).toBe('09/05/2026');
+  });
+
+  it('日期時間：同年省略年份、跨年加上年份，月日順序跟著格式；ymd-slash 等於 fmtDateTime', () => {
+    const sameYear = new Date(2026, 8, 20, 9, 0).toISOString();
+    const lastYear = new Date(2025, 8, 20, 9, 0).toISOString();
+    expect(fmtDateTimeAs('ymd-slash', sameYear, now)).toBe(fmtDateTime(sameYear, now));
+    expect(fmtDateTimeAs('dmy-slash', sameYear, now)).toBe('20/09 09:00');
+    expect(fmtDateTimeAs('ymd-dash', sameYear, now)).toBe('09-20 09:00');
+    expect(fmtDateTimeAs('dmy-slash', lastYear, now)).toBe('20/09/2025 09:00');
+    expect(fmtDateTimeAs('mdy-slash', lastYear, now)).toBe('09/20/2025 09:00');
   });
 });

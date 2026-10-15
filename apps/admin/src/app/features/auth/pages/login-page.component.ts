@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AccessService } from '@admin-template/access';
 import { ToastService } from '@admin-template/ui';
 import { AuthService } from '../../../core/auth/auth.service';
+import { UserPreferencesStore } from '../../../core/user-preferences';
 import { ZH_TW } from '../../../core/i18n/zh-tw';
 import { TOAST_PROVIDERS } from '../../../shared/ui/component-label-providers';
 import { TemplateInfo, TemplateInfoComponent } from '../../../shared/ui/template-info.component';
@@ -79,6 +80,7 @@ export class LoginPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(ToastService);
   private readonly delayMs = inject(LOGIN_DEMO_DELAY);
+  private readonly prefs = inject(UserPreferencesStore);
 
   private readonly usernameInput = viewChild.required<ElementRef<HTMLInputElement>>('usernameInput');
   private readonly passwordInput = viewChild.required<ElementRef<HTMLInputElement>>('passwordInput');
@@ -148,7 +150,8 @@ export class LoginPageComponent {
     writeRemembered(remember ? username.trim() : null);
     this.auth.login(result.userId);
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-    void this.router.navigateByUrl(returnUrl?.startsWith('/') ? returnUrl : '/');
+    // 沒有要回去的頁面時，打開設定頁「偏好」選的預設首頁。
+    void this.router.navigateByUrl(returnUrl?.startsWith('/') ? returnUrl : `/${this.prefs.homePage()}`);
   }
 }
 

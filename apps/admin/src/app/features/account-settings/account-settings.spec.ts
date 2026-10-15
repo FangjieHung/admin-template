@@ -12,6 +12,7 @@ import { ACCOUNT_SETTINGS_ROUTES } from './account-settings.routes';
 import { ACCOUNT_SETTINGS_DELAY, AccountSettingsRepository } from './data/account-settings.repository';
 import { checkPasswordRules, passwordStrength } from './sections/password-rules';
 import { ProfileSectionComponent, avatarInitials } from './sections/profile-section.component';
+import { UserPreferencesStore } from '../../core/user-preferences';
 
 @Component({
   selector: 'app-settings-test-host',
@@ -393,6 +394,8 @@ describe('設定頁樣板（/templates/settings）', () => {
     await h.settle();
     expect((await h.repo.preferences()).pageSize).toBe(100);
     expect(toastText()).toContain('已儲存偏好設定');
+    // 存檔就寫進目前生效的偏好：用到的頁面（工單列表、詳情、儀表板、登入頁）不必重新整理
+    expect(TestBed.inject(UserPreferencesStore).pageSize()).toBe(100);
   });
 
   it('刪除帳號：確認對話框用危險色，要求輸入帳號的 Email 才能按（輸入框的行為見 confirm-dialog 的測試）', async () => {

@@ -10,6 +10,7 @@ import {
   SettingsSaveError,
   WrongPasswordError,
 } from './account-settings.model';
+import { UserPreferencesStore } from '../../../core/user-preferences';
 
 /**
  * 設定頁的資料存取層。畫面只透過這個類別讀寫，介面全部是非同步的：新專案換成 HTTP 時只改這一個檔案
@@ -54,7 +55,8 @@ export class AccountSettingsRepository {
     timeZone: 'Asia/Taipei',
   };
 
-  private preferencesData: AccountPreferences = { dateFormat: 'ymd-slash', pageSize: 25, homePage: '' };
+  /** 偏好直接讀寫目前生效的那一份：存完，工單列表、詳情、儀表板與登入頁不必重新整理就套用。 */
+  private readonly preferenceStore = inject(UserPreferencesStore);
 
   private notificationData: NotificationSettings = {
     paused: false,
@@ -92,13 +94,13 @@ export class AccountSettingsRepository {
 
   async preferences(): Promise<AccountPreferences> {
     await this.delay();
-    return { ...this.preferencesData };
+    return { ...this.preferenceStore.value() };
   }
 
   async savePreferences(preferences: AccountPreferences): Promise<AccountPreferences> {
     await this.delay();
-    this.preferencesData = { ...preferences };
-    return { ...this.preferencesData };
+    this.preferenceStore.set(preferences);
+    return { ...this.preferenceStore.value() };
   }
 
   // ---- 通知（即時儲存） ----

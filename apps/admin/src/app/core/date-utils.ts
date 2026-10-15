@@ -63,3 +63,35 @@ export function fmtDateTime(iso: string, now: Date = new Date()): string {
     : `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())}`;
   return `${datePart} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
+
+/** 使用者可選的日期格式（設定頁「偏好」）。`ymd-slash` 就是上面 fmtDate 的全站預設。 */
+export type DateFormatId = 'ymd-slash' | 'ymd-dash' | 'dmy-slash' | 'mdy-slash';
+
+/** 依格式排列年、月、日；`withYear: false` 時只排月、日（同年的日期時間用）。 */
+function arrange(format: DateFormatId, d: Date, withYear = true): string {
+  const y = String(d.getFullYear());
+  const m = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  switch (format) {
+    case 'ymd-dash':
+      return withYear ? `${y}-${m}-${day}` : `${m}-${day}`;
+    case 'dmy-slash':
+      return withYear ? `${day}/${m}/${y}` : `${day}/${m}`;
+    case 'mdy-slash':
+      return withYear ? `${m}/${day}/${y}` : `${m}/${day}`;
+    default:
+      return withYear ? `${y}/${m}/${day}` : `${m}/${day}`;
+  }
+}
+
+/** 用選擇的日期格式顯示日期；`ymd-slash` 等於 fmtDate。 */
+export function fmtDateAs(format: DateFormatId, d: Date): string {
+  return arrange(format, d);
+}
+
+/** 用選擇的日期格式顯示日期時間；同年省略年份的規則同 fmtDateTime（`ymd-slash` 等於 fmtDateTime）。 */
+export function fmtDateTimeAs(format: DateFormatId, iso: string, now: Date = new Date()): string {
+  const d = new Date(iso);
+  const datePart = arrange(format, d, d.getFullYear() !== now.getFullYear());
+  return `${datePart} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}

@@ -4,6 +4,7 @@ import { provideRouter, Router } from '@angular/router';
 import { provideAccess } from '@admin-template/access';
 import { DEMO_ACCESS_CONFIG } from '../../../core/access/demo-access';
 import { AuthService } from '../../../core/auth/auth.service';
+import { DEFAULT_USER_PREFERENCES, UserPreferencesStore } from '../../../core/user-preferences';
 import { LOGIN_DEMO_DELAY, REMEMBERED_USERNAME_KEY, demoSignIn } from '../login-demo';
 import { LoginPageComponent } from './login-page.component';
 
@@ -108,6 +109,16 @@ describe('LoginPageComponent（登入樣板）', () => {
     expect(vi.mocked(TestBed.inject(AuthService).login)).toHaveBeenCalledWith('u-member');
     expect(localStorage.getItem(REMEMBERED_USERNAME_KEY)).toBe('member');
     expect(navigateSpy).toHaveBeenCalledWith('/');
+  });
+
+  it('設定頁「偏好」選了預設首頁：沒有 returnUrl 時登入後打開那一頁', async () => {
+    TestBed.inject(UserPreferencesStore).set({ ...DEFAULT_USER_PREFERENCES, homePage: 'templates/tickets' });
+    const { el, fixture, submit } = setup();
+    const navigateSpy = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    el.querySelector<HTMLButtonElement>('button[data-username="member"]')?.click();
+    fixture.detectChanges();
+    await submit();
+    expect(navigateSpy).toHaveBeenCalledWith('/templates/tickets');
   });
 
   it('顯示／隱藏密碼：切換輸入框的 type 與按鈕的 aria-pressed', () => {

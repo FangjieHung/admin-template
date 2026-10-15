@@ -45,6 +45,7 @@ import { ADMIN_FILTER_LABELS, ADMIN_SAVED_VIEWS_LABELS } from '../../../shared/u
 import { TemplateInfo, TemplateInfoComponent } from '../../../shared/ui/template-info.component';
 import { TICKET_ASSIGNEES } from '../data/ticket-demo-data';
 import { formatCreatedAt, formatDueDate, isOverdue, parseDueDate } from '../data/ticket-format';
+import { UserPreferencesStore } from '../../../core/user-preferences';
 import {
   TICKET_CATEGORY_LABELS,
   TICKET_PRIORITIES,
@@ -149,6 +150,8 @@ export class TicketListPageComponent implements HasUnsavedChanges {
   private readonly toast = inject(ToastService);
   private readonly access = inject(AccessService);
   private readonly memory = inject(TicketListMemory);
+  /** 設定頁「偏好」：日期格式、每頁預設筆數。 */
+  private readonly prefs = inject(UserPreferencesStore);
 
   protected readonly info = INFO;
   protected readonly tableLabels = ADMIN_DATA_TABLE_LABELS;
@@ -157,8 +160,8 @@ export class TicketListPageComponent implements HasUnsavedChanges {
   protected readonly pageSizes = PAGE_SIZES;
   protected readonly statuses = TICKET_STATUSES;
   protected readonly statusLabels = TICKET_STATUS_LABELS;
-  protected readonly formatCreatedAt = formatCreatedAt;
-  protected readonly formatDueDate = formatDueDate;
+  protected readonly formatCreatedAt = (iso: string) => formatCreatedAt(iso, new Date(), this.prefs.dateFormat());
+  protected readonly formatDueDate = (value: string | null) => formatDueDate(value, this.prefs.dateFormat());
   protected readonly isOverdue = isOverdue;
 
   protected readonly loadState = signal<LoadState>('loading');
@@ -174,7 +177,8 @@ export class TicketListPageComponent implements HasUnsavedChanges {
 
   readonly view = new ListViewController({
     listId: 'template-tickets',
-    defaults: { sort: null, filters: [], columns: null, pageSize: 25 },
+    // 每頁筆數的預設跟著設定頁「偏好」；在列表上改過、存成檢視或寫在網址上的以那邊為準。
+    defaults: { sort: null, filters: [], columns: null, pageSize: this.prefs.pageSize() },
     repository: inject(SAVED_VIEW_REPOSITORY),
   });
 
@@ -214,8 +218,8 @@ export class TicketListPageComponent implements HasUnsavedChanges {
       value: (r) => this.repo.personName(r.requesterId),
       sortValue: (r) => this.repo.personName(r.requesterId),
     },
-    { key: 'createdAt', label: '建立時間', exportValue: (r) => formatCreatedAt(r.createdAt) },
-    { key: 'dueDate', label: '期限', exportValue: (r) => formatDueDate(r.dueDate) },
+    { key: 'createdAt', label: '建立時間', exportValue: (r) => this.formatCreatedAt(r.createdAt) },
+    { key: 'dueDate', label: '期限', exportValue: (r) => this.formatDueDate(r.dueDate) },
   ];
 
   protected readonly fields: FilterField<Ticket>[] = [
@@ -350,7 +354,7 @@ export class TicketListPageComponent implements HasUnsavedChanges {
           pageSize: this.view.pageSize(),
           page: this.view.page(),
         },
-        this.view.selectedView()?.state ?? { filters: [], sort: null, pageSize: 25 },
+        this.view.selectedView()?.state ?? { filters: [], sort: null, pageSize: this.prefs.pageSize() },
       );
       untracked(() => this.writeUrl(params));
     });

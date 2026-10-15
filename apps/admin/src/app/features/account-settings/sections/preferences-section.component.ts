@@ -16,7 +16,10 @@ import { AccountSettingsRepository } from '../data/account-settings.repository';
 import { FormSnapshot, UnsavedChangesSection } from './settings-form';
 import { UnsavedBarComponent } from './unsaved-bar.component';
 
-/** 偏好（明確存檔）：日期格式、每頁預設筆數、開啟時的預設首頁。都是選項，沒有會出錯的欄位。 */
+/**
+ * 偏好（明確存檔）：日期格式、每頁預設筆數、開啟時的預設首頁。都是選項，沒有會出錯的欄位。
+ * 存檔後寫進 UserPreferencesStore（core/user-preferences.ts），工單列表、詳情、儀表板與登入頁讀它，不必重新整理就套用。
+ */
 @Component({
   selector: 'app-preferences-section',
   imports: [ReactiveFormsModule, MatFormFieldModule, MatRadioModule, MatSelectModule, SkeletonComponent, UnsavedBarComponent],
@@ -27,7 +30,8 @@ import { UnsavedBarComponent } from './unsaved-bar.component';
       <form id="preferences-form" class="ui-card acs-card p-4 sm:p-6" [formGroup]="form" (ngSubmit)="save()" novalidate aria-labelledby="pref-title">
         <div class="acs-card__head">
           <h2 id="pref-title" class="ui-text-subtitle">偏好</h2>
-          <p class="acs-lede">只影響你自己看到的畫面。改完按底部的「儲存」。</p>
+          <p class="acs-lede">只影響你自己看到的畫面。改完按底部的「儲存」，不必重新整理就會套用。</p>
+          <p class="acs-hint" data-pref-demo-note>示範版存在這個分頁的記憶體裡，重新整理頁面就恢復預設；實際專案要接到後端的使用者設定（改 AccountSettingsRepository）。</p>
         </div>
 
         <div class="acs-grid">
@@ -38,7 +42,7 @@ import { UnsavedBarComponent } from './unsaved-bar.component';
                 <mat-option [value]="f.id">{{ f.label }}（{{ example(f.id) }}）</mat-option>
               }
             </mat-select>
-            <mat-hint>今天會顯示成 <span class="ui-text-numeric">{{ example(form.controls.dateFormat.value) }}</span></mat-hint>
+            <mat-hint>今天會顯示成 <span class="ui-text-numeric">{{ example(form.controls.dateFormat.value) }}</span>。套用到工單列表、工單詳情與儀表板；列印的單據維持年/月/日。</mat-hint>
           </mat-form-field>
 
           <mat-form-field appearance="outline" data-field="homePage">
@@ -48,7 +52,7 @@ import { UnsavedBarComponent } from './unsaved-bar.component';
                 <mat-option [value]="p.route">{{ p.label }}</mat-option>
               }
             </mat-select>
-            <mat-hint>登入後先打開這一頁。</mat-hint>
+            <mat-hint>從登入頁樣板登入後先打開這一頁（網址帶著要回去的頁面時，以那一頁為準）。</mat-hint>
           </mat-form-field>
 
           <div class="acs-wide pref-choice" data-field="pageSize">
@@ -58,7 +62,7 @@ import { UnsavedBarComponent } from './unsaved-bar.component';
                 <mat-radio-button [value]="size"><span class="ui-text-numeric">{{ size }}</span> 筆</mat-radio-button>
               }
             </mat-radio-group>
-            <span class="acs-hint">列表頁第一次打開時每頁顯示幾筆；在列表上改過的會以列表上的為準。</span>
+            <span class="acs-hint">工單列表第一次打開時每頁顯示幾筆；在列表上改過、存成檢視或網址上帶著的，以列表上的為準。</span>
           </div>
         </div>
       </form>

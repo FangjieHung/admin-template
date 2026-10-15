@@ -1,3 +1,8 @@
+import { fmtDateAs } from '../../../core/date-utils';
+import type { DateFormatId, PageSize, UserPreferences } from '../../../core/user-preferences';
+
+export type { DateFormatId, PageSize } from '../../../core/user-preferences';
+
 /**
  * 設定頁樣板的資料型別與選項清單。示範資料一律中性；新專案換成自己的欄位與選項。
  */
@@ -110,9 +115,6 @@ export interface SecuritySettings {
 
 // ---- 偏好（明確存檔） ----
 
-export type DateFormatId = 'ymd-slash' | 'ymd-dash' | 'dmy-slash' | 'mdy-slash';
-export type PageSize = 25 | 50 | 100;
-
 export interface DateFormatOption {
   id: DateFormatId;
   label: string;
@@ -140,27 +142,12 @@ export const HOME_PAGES: readonly HomePageOption[] = [
   { route: 'templates/tickets', label: '工單列表' },
 ];
 
-export interface AccountPreferences {
-  dateFormat: DateFormatId;
-  pageSize: PageSize;
-  homePage: string;
-}
+/** 偏好分組的值；存檔後由 repository 寫進 UserPreferencesStore（core/user-preferences.ts），用到的頁面立刻套用。 */
+export type AccountPreferences = UserPreferences;
 
-/** 用選擇的日期格式顯示一個日期（偏好頁的「範例」）。 */
+/** 用選擇的日期格式顯示一個日期（偏好頁的「範例」；跟套用到頁面的是同一個函式）。 */
 export function formatDateWith(format: DateFormatId, date: Date): string {
-  const y = String(date.getFullYear());
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  switch (format) {
-    case 'ymd-dash':
-      return `${y}-${m}-${d}`;
-    case 'dmy-slash':
-      return `${d}/${m}/${y}`;
-    case 'mdy-slash':
-      return `${m}/${d}/${y}`;
-    default:
-      return `${y}/${m}/${d}`;
-  }
+  return fmtDateAs(format, date);
 }
 
 /** 即時儲存失敗（示範）。 */

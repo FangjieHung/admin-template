@@ -7,6 +7,7 @@ import { TICKET_COUNT } from '../data/ticket-demo-data';
 import { setupTicketPage } from '../testing/ticket-page-host';
 import { TicketListMemory } from './ticket-list-url';
 import { TicketListPageComponent } from './ticket-list-page.component';
+import { DEFAULT_USER_PREFERENCES, UserPreferencesStore } from '../../../core/user-preferences';
 
 function rowIds(el: HTMLElement): string[] {
   return Array.from(el.querySelectorAll('.dt-table tbody tr td .ticket-id')).map((n) => n.textContent?.trim() ?? '');
@@ -31,6 +32,24 @@ describe('TicketListPageComponent（列表頁樣板）', () => {
     expect(h.el.querySelector('[data-ticket-count]')?.textContent).toContain(`共 ${TICKET_COUNT} 筆`);
     expect(h.el.querySelector('app-header [data-action="create"]')?.textContent).toContain('新增工單');
     expect(h.el.querySelector('app-header app-template-info')).not.toBeNull();
+  });
+
+  it('設定頁「偏好」：每頁預設筆數與日期格式套用到列表（網址沒有帶 size 時）', async () => {
+    const h = await setupTicketPage();
+    TestBed.inject(UserPreferencesStore).set({ ...DEFAULT_USER_PREFERENCES, pageSize: 50, dateFormat: 'dmy-slash' });
+    await h.router.navigateByUrl('/templates/tickets');
+    await h.settle();
+    expect(rowIds(h.el)).toHaveLength(50);
+    const dates = Array.from(h.el.querySelectorAll('.dt-table tbody .ticket-nowrap')).map((n) => n.textContent?.trim() ?? '');
+    const due = dates.filter((t) => /^\d{2}\/\d{2}\/\d{4}$/.test(t));
+    const created = dates.filter((t) => / \d{2}:\d{2}$/.test(t));
+    expect(due.length).toBeGreaterThan(0);
+    // 日/月/年：第一段是日（≤ 31）、第二段是月（≤ 12）
+    expect(due.every((t) => Number(t.slice(3, 5)) <= 12)).toBe(true);
+    expect(created.length).toBeGreaterThan(0);
+    expect(dates.some((t) => /^\d{4}\//.test(t))).toBe(false);
+    // 每頁筆數等於偏好的預設（50），不寫進網址
+    expect(queryOf(h.router.url).get('size')).toBeNull();
   });
 
   it('網址還原：搜尋、篩選、排序、頁碼從 query params 讀回來（重新整理、從詳情返回）', async () => {

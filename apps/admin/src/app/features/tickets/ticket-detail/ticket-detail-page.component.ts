@@ -47,6 +47,7 @@ import { TemplateInfo, TemplateInfoComponent } from '../../../shared/ui/template
 import { TICKET_MENTION_PEOPLE } from '../data/ticket-comment-demo-data';
 import { TICKET_ACTIVITY_KINDS } from '../data/ticket-demo-data';
 import { formatCreatedAt, formatDueDate, isOverdue } from '../data/ticket-format';
+import { UserPreferencesStore } from '../../../core/user-preferences';
 import {
   TICKET_CATEGORY_LABELS,
   TICKET_PRIORITY_LABELS,
@@ -142,7 +143,10 @@ export class TicketDetailPageComponent {
   protected readonly kinds = TICKET_ACTIVITY_KINDS;
   protected readonly statusLabels = TICKET_STATUS_LABELS;
   protected readonly statusTones = TICKET_STATUS_TONES;
-  protected readonly formatCreatedAt = formatCreatedAt;
+  /** 日期跟著設定頁「偏好」的日期格式。 */
+  private readonly prefs = inject(UserPreferencesStore);
+  protected readonly formatCreatedAt = (iso: string) => formatCreatedAt(iso, new Date(), this.prefs.dateFormat());
+  private readonly dueText = (value: string | null) => formatDueDate(value, this.prefs.dateFormat());
 
   protected readonly state = signal<LoadState>('loading');
   protected readonly ticket = signal<Ticket | null>(null);
@@ -182,7 +186,7 @@ export class TicketDetailPageComponent {
       { label: '申請人', value: requester?.name ?? t.requesterId, hint: requester?.team },
       {
         label: '期限',
-        value: formatDueDate(t.dueDate) || null,
+        value: this.dueText(t.dueDate) || null,
         hint: isOverdue(t.dueDate, t.status) ? '已逾期' : undefined,
       },
     ];
@@ -196,8 +200,8 @@ export class TicketDetailPageComponent {
       { label: '優先順序', value: TICKET_PRIORITY_LABELS[t.priority] },
       { label: '負責人', value: this.repo.personName(t.assigneeId) || null },
       { label: '申請人', value: this.requesterName() },
-      { label: '建立時間', value: formatCreatedAt(t.createdAt) },
-      { label: '期限', value: formatDueDate(t.dueDate) || null },
+      { label: '建立時間', value: this.formatCreatedAt(t.createdAt) },
+      { label: '期限', value: this.dueText(t.dueDate) || null },
       { label: '附件', value: t.attachmentCount ? `${t.attachmentCount} 個` : null },
     ];
   });
