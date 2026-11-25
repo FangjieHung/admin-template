@@ -39,9 +39,9 @@
   min-width: 0;
 }
 
+// 標題的字體、字級、字重交給質地的 .ui-text-subtitle（Editorial 是襯線字、Grid 是粗體內文字…），這裡只管位置。
 .responsive-panel__heading {
   margin: 0;
-  font-weight: 700;
 }
 
 .responsive-panel__header-tabs {

@@ -187,7 +187,7 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 
 #### 分割檢視（`libs/ui` split-panel）
 
-- 左欄是使用端投影的清單，右欄是 `lib-responsive-panel`（標題、關閉鈕、Esc、焦點都沿用它）。寬螢幕時右欄掛 `.ui-card`，框線、圓角、陰影、底色全部交給各質地的卡片 recipe；面板本身的底色在這裡設成 `transparent`（`--lib-responsive-panel-bg`），讓 Editorial 的 container-low、Clay／Frosted 的半透明玻璃透上來。窄螢幕（≤ 1280px）面板移到浮層、蓋滿畫面（`narrowLayout="fullscreen"`），底色 `--mat-sys-surface`、遮罩 `--app-scrim`、滑入動畫 `--app-motion-base`。
+- 左欄是使用端投影的清單，右欄是 `lib-responsive-panel`（標題、關閉鈕、Esc、焦點都沿用它）。寬螢幕時右欄掛 `.ui-card`，框線、圓角、陰影、底色全部交給各質地的卡片 recipe；面板標題（responsive-panel 的 h2）掛 `.ui-text-subtitle`，字體、字級、字重交給質地；面板本身的底色在這裡設成 `transparent`（`--lib-responsive-panel-bg`），讓 Editorial 的 container-low、Clay／Frosted 的半透明玻璃透上來。窄螢幕（≤ 1280px）面板移到浮層、蓋滿畫面（`narrowLayout="fullscreen"`），底色 `--mat-sys-surface`、遮罩 `--app-scrim`、滑入動畫 `--app-motion-base`。
 - 右欄用 `overflow: clip`（不是 hidden），Riso、Sketch 畫在框外的卡片框照常露出。正在編輯的那一列由 data-table 的 `--dt-row-active-*` 標示（上表）。
 - 版面變數（在 `lib-split-panel` 上設，不是質地變數）：`--lib-split-panel-width`（預設 `clamp(20rem, 30vw, 28rem)`）、`--lib-split-panel-sticky-top`（`0px`）、`--lib-split-panel-max-height`（`calc(100dvh - 8rem)`）。父層到捲動容器為止不可以是 `overflow: hidden`（同詳情頁版型的精簡頁首）。沒有質地要設的變數。
 

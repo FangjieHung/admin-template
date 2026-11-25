@@ -92,6 +92,13 @@ describe('ResponsivePanelComponent', () => {
     expect(closeButton.getAttribute('aria-label')).toBe('關閉面板');
   });
 
+  it('標題掛 .ui-text-subtitle，字體層級交給質地', () => {
+    fixture.componentInstance.open.set(true);
+    fixture.detectChanges();
+    const heading: HTMLElement = fixture.nativeElement.querySelector('h2.responsive-panel__heading');
+    expect(heading.classList.contains('ui-text-subtitle')).toBe(true);
+  });
+
   it('heading 有值時，panel 的 aria-labelledby 對應到標題元素的 id', () => {
     fixture.componentInstance.open.set(true);
     fixture.detectChanges();
