@@ -172,7 +172,7 @@ export class DetailLayoutPageComponent {
   protected readonly avoid = [
     '只是一張卡片的小資訊：直接用卡片＋描述清單（lib-description-list）。',
     '編輯表單本身：用表單頁；詳情頁的「編輯」按鈕再導過去或開對話框。',
-    '並排看清單與內容：用分割檢視（lib-responsive-panel）。',
+    '並排看清單與內容：用分割檢視（lib-split-panel）。',
   ];
 
   protected readonly usage = `// 頁面的 providers：畫面文字

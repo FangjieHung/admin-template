@@ -116,8 +116,12 @@ export const SHOWCASE_DETAILS: Readonly<Record<string, ShowcaseDetail>> = {
     source: 'libs/ui/src/lib/confirm-dialog',
   },
   'responsive-panel': {
-    summary: '寬螢幕是貼在內容旁的側板，窄螢幕自動變成全螢幕對話框；用來看詳情或編輯一筆資料。',
+    summary: '寬螢幕是貼在內容旁的側板，窄螢幕自動變成從底部升起（或蓋滿畫面）的對話框；用來看詳情或編輯一筆資料。',
     source: 'libs/ui/src/lib/responsive-panel',
+  },
+  'split-panel': {
+    summary: '清單在左、編輯面板在右：點一列就在旁邊打開那一筆，表格標出正在編輯的列，網址記住開的是哪一筆；窄螢幕時面板蓋滿整個畫面。',
+    source: 'libs/ui/src/lib/split-panel（面板沿用 responsive-panel；資料表的 activeRowId）',
   },
   'command-palette': {
     summary: '⌘K（Windows 是 Ctrl+K）或 / 打開的全域搜尋：跳到任何頁面、依編號或標題找資料、執行動作（新增、切換外觀、切換身分）；結果依來源分組，非同步來源各自載入與失敗，記得最近使用。',

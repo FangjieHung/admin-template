@@ -1,0 +1,63 @@
+<app-showcase-page [summary]="entry.summary" [whenToUse]="whenToUse" [avoid]="avoid" [source]="entry.source" [usage]="usage" [api]="api">
+  <app-demo-block
+    heading="清單＋編輯面板"
+    description="點一位聯絡人，右側打開編輯面板，表格裡標出正在編輯的那一列；網址會帶上 ?edit=<id>，重新整理或按上一頁都回得來。把視窗縮到 1280px 以下，面板改成蓋滿整個畫面。"
+    [stickyContent]="true"
+  >
+    <lib-split-panel
+      [open]="!!editing()"
+      [heading]="editing() ? '編輯 ' + editing()!.name : ''"
+      [closeLabel]="closeLabel"
+      (closed)="close()"
+    >
+      <div class="ui-card !p-0">
+        <lib-data-table
+          [columns]="columns"
+          [rows]="contacts()"
+          [labels]="tableLabels"
+          [showExport]="false"
+          [rowClickable]="true"
+          [activeRowId]="editing()?.id ?? null"
+          (rowClick)="openRow($event)"
+        />
+      </div>
+
+      @if (editing()) {
+        <form splitPanelContent class="sp-form" [formGroup]="form" (submit)="save(); $event.preventDefault()" data-demo="edit-form">
+          <mat-form-field>
+            <mat-label>姓名</mat-label>
+            <input matInput formControlName="name" autocomplete="off" />
+            @if (form.controls.name.hasError('required')) {
+              <mat-error>請輸入姓名</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>部門</mat-label>
+            <input matInput formControlName="team" autocomplete="off" />
+            @if (form.controls.team.hasError('required')) {
+              <mat-error>請輸入部門</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>電子郵件</mat-label>
+            <input matInput type="email" formControlName="email" autocomplete="off" />
+            @if (form.controls.email.hasError('required')) {
+              <mat-error>請輸入電子郵件</mat-error>
+            } @else if (form.controls.email.hasError('email')) {
+              <mat-error>電子郵件格式不正確</mat-error>
+            }
+          </mat-form-field>
+          <div class="sp-form__actions">
+            <button type="button" matButton="outlined" (click)="close()">取消</button>
+            <button type="submit" matButton="filled">儲存</button>
+          </div>
+        </form>
+      }
+    </lib-split-panel>
+
+    <dl class="demo-state sp-state">
+      <div><dt>網址參數</dt><dd data-state="edit-param">{{ editId() ? '?edit=' + editId() : '（無）' }}</dd></div>
+      <div><dt>最後儲存</dt><dd data-state="last-saved" aria-live="polite">{{ lastSaved() ?? '（尚未儲存）' }}</dd></div>
+    </dl>
+  </app-demo-block>
+</app-showcase-page>

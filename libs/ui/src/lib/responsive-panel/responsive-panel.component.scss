@@ -6,10 +6,12 @@
   display: contents;
 }
 
+// 寬螢幕的底色可以由放它的容器換掉（例如 lib-split-panel 把面板放在 .ui-card 裡，底色交給卡片的質地 recipe）；
+// 窄螢幕時面板被移到 body 下的浮層，吃不到容器設的值，一律是 surface。
 .responsive-panel {
   display: flex;
   flex-direction: column;
-  background: var(--mat-sys-surface);
+  background: var(--lib-responsive-panel-bg, var(--mat-sys-surface));
   color: var(--mat-sys-on-surface);
   overflow: hidden;
 }
@@ -110,6 +112,14 @@
   animation: responsive-panel-slide-up var(--app-motion-base) var(--app-ease-standard);
 }
 
+// narrowLayout="fullscreen"：蓋滿整個畫面、從右側滑入（寫在 --narrow 之後，同權重時蓋過它的位置與圓角）。
+.responsive-panel--fullscreen {
+  inset: 0;
+  max-height: none;
+  border-radius: 0;
+  animation-name: responsive-panel-slide-in;
+}
+
 .responsive-panel__backdrop {
   position: fixed;
   inset: 0;
@@ -126,5 +136,14 @@
   }
   to {
     transform: translateY(0);
+  }
+}
+
+@keyframes responsive-panel-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
   }
 }

@@ -1,0 +1,43 @@
+// 分割檢視的兩欄版面。面板的外框是 .ui-card（各質地的卡片 recipe：Material 陰影、Grid 實框硬影、Editorial 髮絲框…），
+// 這裡只排版面，不寫顏色、圓角、陰影。可在 lib-split-panel 上設的變數：
+//   --lib-split-panel-width       面板寬度          預設 clamp(20rem, 30vw, 28rem)
+//   --lib-split-panel-sticky-top  面板黏住時離捲動容器頂端的距離  預設 0px
+//   --lib-split-panel-max-height  面板最高多高（超過時面板內容自己捲動）  預設 calc(100dvh - 8rem)
+// 父層（到捲動容器為止）不可以是 overflow: hidden，否則面板黏不住（同 detail-layout 的精簡頁首）。
+:host {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+:host(.lib-split-panel--open) {
+  grid-template-columns: minmax(0, 1fr) var(--lib-split-panel-width, clamp(20rem, 30vw, 28rem));
+}
+
+.sp-main {
+  min-width: 0;
+}
+
+.sp-side {
+  display: none;
+}
+
+.sp-side--open {
+  position: sticky;
+  top: var(--lib-split-panel-sticky-top, 0px);
+  display: grid;
+  // 面板（.responsive-panel）填滿這一格；超過最高高度時由面板的內容區自己捲動，標題列不動。
+  grid-template-rows: minmax(0, 1fr);
+  min-width: 0;
+  max-height: var(--lib-split-panel-max-height, calc(100dvh - 8rem));
+  // 不用 hidden：Riso、Sketch 的卡片框畫在框外，質地已替 clip 放寬裁切邊。
+  overflow: clip;
+  // 面板底色交給卡片（Editorial 的卡片是 container-low、Clay／Frosted 是半透明玻璃）。
+  --lib-responsive-panel-bg: transparent;
+}
+
+// 窄螢幕：面板在浮層裡，這一格沒有自己的框。
+.sp-side--narrow {
+  display: contents;
+}

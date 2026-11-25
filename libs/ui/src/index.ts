@@ -3,6 +3,7 @@ export * from './lib/data-table/data-table-cell.directive';
 export * from './lib/data-table/data-table-slot.directives';
 export * from './lib/data-table/data-table.component';
 export * from './lib/responsive-panel/responsive-panel.component';
+export * from './lib/split-panel/split-panel.component';
 export * from './lib/dual-month-range-picker/dual-month-range-picker-labels';
 export * from './lib/dual-month-range-picker/dual-month-range-picker.component';
 export * from './lib/data-table/data-table-query';

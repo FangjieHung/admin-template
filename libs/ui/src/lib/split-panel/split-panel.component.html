@@ -1,0 +1,16 @@
+<div class="sp-main">
+  <ng-content />
+</div>
+<!-- 面板一直留在 DOM 裡（關著時 responsive-panel 不渲染內容），關閉時焦點才回得到點開它的那一列。
+     窄螢幕時面板被移到浮層，這一格不畫卡片也不占版面。 -->
+<div class="sp-side" [class.ui-card]="open() && !narrow()" [class.sp-side--open]="open()" [class.sp-side--narrow]="narrow()">
+  <lib-responsive-panel
+    [open]="open()"
+    [heading]="heading()"
+    [closeLabel]="closeLabel()"
+    narrowLayout="fullscreen"
+    (closed)="closed.emit()"
+  >
+    <ng-content select="[splitPanelContent]" />
+  </lib-responsive-panel>
+</div>

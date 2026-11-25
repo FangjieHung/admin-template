@@ -603,6 +603,7 @@ class ExportCustomHostComponent {
       [selectable]="true"
       [rowClickable]="rowClickable()"
       [rowClass]="rowClassFn"
+      [activeRowId]="activeId()"
       (rowClick)="onRowClick($event)"
     >
       <ng-template dtCell="mileage" let-row>
@@ -620,6 +621,7 @@ class ExportCustomHostComponent {
 class RowClickHostComponent {
   readonly labels = LABELS;
   readonly rowClickable = signal(true);
+  readonly activeId = signal<string | null>(null);
   readonly columns = signal<DataTableColumn<Row>[]>([
     { key: 'name', label: '單號', primary: true },
     { key: 'status', label: '狀態', primary: true },
@@ -730,6 +732,41 @@ describe('DataTableComponent 整列可點擊導航', () => {
     const row = el.querySelector('tbody tr') as HTMLElement;
     expect(row.getAttribute('tabindex')).toBe('0');
     expect(row.classList.contains('dt-row--clickable')).toBe(true);
+  });
+
+  it('activeRowId 沒給（null）時沒有任何列標成目前列', () => {
+    expect(el.querySelectorAll('tbody tr.dt-row--active')).toHaveLength(0);
+    expect(el.querySelectorAll('tbody tr[aria-current]')).toHaveLength(0);
+  });
+
+  it('activeRowId 對到的那一列加上 dt-row--active 與 aria-current="true"；換一列時標記跟著換', async () => {
+    fixture.componentInstance.activeId.set('v2');
+    await fixture.whenStable();
+    let rows = el.querySelectorAll('tbody tr');
+    expect(rows[0].classList.contains('dt-row--active')).toBe(false);
+    expect(rows[0].hasAttribute('aria-current')).toBe(false);
+    expect(rows[1].classList.contains('dt-row--active')).toBe(true);
+    expect(rows[1].getAttribute('aria-current')).toBe('true');
+
+    fixture.componentInstance.activeId.set('v1');
+    await fixture.whenStable();
+    rows = el.querySelectorAll('tbody tr');
+    expect(rows[0].getAttribute('aria-current')).toBe('true');
+    expect(rows[1].hasAttribute('aria-current')).toBe(false);
+  });
+
+  it('activeRowId 對不到任何列時不標記；與 rowClickable、rowClass 互不影響', async () => {
+    fixture.componentInstance.activeId.set('不存在');
+    await fixture.whenStable();
+    expect(el.querySelectorAll('tbody tr.dt-row--active')).toHaveLength(0);
+
+    fixture.componentInstance.rowClickable.set(false);
+    fixture.componentInstance.activeId.set('v2');
+    await fixture.whenStable();
+    const row = el.querySelectorAll('tbody tr')[1] as HTMLElement;
+    expect(row.classList.contains('dt-row--active')).toBe(true);
+    expect(row.classList.contains('danger-row')).toBe(true);
+    expect(row.classList.contains('dt-row--clickable')).toBe(false);
   });
 
   it('rowClass 回傳值套用到對應的 tr', () => {

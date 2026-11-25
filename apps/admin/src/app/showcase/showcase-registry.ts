@@ -226,6 +226,13 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
       import('../features/responsive-panel/responsive-panel-page.component').then((m) => m.ResponsivePanelPageComponent),
   },
   {
+    id: 'split-panel',
+    title: '分割檢視',
+    group: 'layout',
+    icon: 'vertical_split',
+    load: () => import('../features/split-panel/split-panel-page.component').then((m) => m.SplitPanelPageComponent),
+  },
+  {
     id: 'detail-layout',
     title: '詳情頁版型',
     group: 'layout',

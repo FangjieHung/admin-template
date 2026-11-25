@@ -130,6 +130,8 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 | `--dt-selection-padding-block` | 同 `--dt-cell-padding-block` | 勾選欄上下留白（熱區已夠高時歸零，避免撐高列） | Ledger `0` |
 | `--dt-frozen-bg` | `var(--mat-sys-surface)` | 固定欄（columns 的 `frozen`）與勾選欄在**橫向捲過時**的底色，要等於卡片底色才看不出接縫；沒捲時固定欄照常透明 | Editorial：`var(--mat-sys-surface-container-low)`；Soft UI：`var(--mat-sys-background)`（兩者的卡片底色）。Clay／Frosted／Aero 的卡片是半透明，維持預設（捲動時固定欄是不透明 surface） |
 | `--dt-frozen-edge` | `1px 0 0 0 var(--mat-sys-outline-variant)` | 固定欄右緣的分界（box-shadow 值，套在固定格右緣 1px 寬的偽元素上；border-collapse 的儲存格本身畫不出 box-shadow），同樣只在橫向捲過時出現 | （無） |
+| `--dt-row-active-bg` | `var(--app-state-selected)` | 目前列（`[activeRowId]`，例如分割檢視正在編輯的那一列）的底色，滑過時不變；列另有 `aria-current="true"` | （無；Brutal、Riso 已在質地層改了 `--app-state-selected`，目前列跟著變） |
+| `--dt-row-active-mark` | `var(--mat-sys-primary)` | 目前列第一格左緣 3px 的標記（畫成 background-image）；手機卡片版改成卡片外框色 | （無） |
 
 `--dt-frozen-offset` 是元件內部用的（量勾選欄實際寬度後寫在 `.dt-table` 上，讓固定欄貼在勾選欄右邊），質地不要設。
 
@@ -182,6 +184,12 @@ ticket：`docs/plans/2026-09-27-semantic-tokens.md`；分層決策見 `docs/adr/
 
 - 描述清單：標籤 `--mat-sys-on-surface-variant`、值 `--mat-sys-on-surface`、列與列之間 `--mat-sys-outline-variant`（最後一列不畫）、空值 `--mat-sys-on-surface-variant`；複製鈕滑過 `--app-state-hover`、按下 `--app-state-pressed`、焦點 `--app-focus-ring`、複製完成的勾號 `--mat-sys-primary`。沒有質地要設的變數。
 - 版型的父層（到捲動容器為止）不可以是 `overflow: hidden`，否則精簡頁首的 sticky 失效；展示頁的 `app-demo-block` 用 `[stickyContent]="true"` 把卡片改成 `overflow: visible`（Aero、Clay、Editorial、Frosted 的 `.ui-card` 是 hidden）。
+
+#### 分割檢視（`libs/ui` split-panel）
+
+- 左欄是使用端投影的清單，右欄是 `lib-responsive-panel`（標題、關閉鈕、Esc、焦點都沿用它）。寬螢幕時右欄掛 `.ui-card`，框線、圓角、陰影、底色全部交給各質地的卡片 recipe；面板本身的底色在這裡設成 `transparent`（`--lib-responsive-panel-bg`），讓 Editorial 的 container-low、Clay／Frosted 的半透明玻璃透上來。窄螢幕（≤ 1280px）面板移到浮層、蓋滿畫面（`narrowLayout="fullscreen"`），底色 `--mat-sys-surface`、遮罩 `--app-scrim`、滑入動畫 `--app-motion-base`。
+- 右欄用 `overflow: clip`（不是 hidden），Riso、Sketch 畫在框外的卡片框照常露出。正在編輯的那一列由 data-table 的 `--dt-row-active-*` 標示（上表）。
+- 版面變數（在 `lib-split-panel` 上設，不是質地變數）：`--lib-split-panel-width`（預設 `clamp(20rem, 30vw, 28rem)`）、`--lib-split-panel-sticky-top`（`0px`）、`--lib-split-panel-max-height`（`calc(100dvh - 8rem)`）。父層到捲動容器為止不可以是 `overflow: hidden`（同詳情頁版型的精簡頁首）。沒有質地要設的變數。
 
 #### 活動紀錄（`libs/ui` activity-timeline）
 

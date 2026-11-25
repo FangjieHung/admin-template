@@ -16,7 +16,11 @@ import { DomPortal } from '@angular/cdk/portal';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 
-const NARROW_QUERY = '(max-width: 1280px)';
+export type ResponsivePanelNarrowLayout = 'sheet' | 'fullscreen';
+
+/** 面板改成浮層的斷點（lib-split-panel 用同一個值決定兩欄版面何時收掉）。 */
+export const RESPONSIVE_PANEL_NARROW_QUERY = '(max-width: 1280px)';
+const NARROW_QUERY = RESPONSIVE_PANEL_NARROW_QUERY;
 const FOCUSABLE_SELECTOR =
   'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
@@ -31,6 +35,11 @@ export class ResponsivePanelComponent {
   readonly closeLabel = input.required<string>();
   readonly showCloseButton = input(true);
   readonly showHeaderDivider = input(true);
+  /**
+   * 窄螢幕的樣子：`sheet` 從底部升起、最高 70vh（預設）；`fullscreen` 蓋滿整個畫面、從右側滑入
+   * （面板裡是整份編輯表單時用，例如 lib-split-panel）。
+   */
+  readonly narrowLayout = input<ResponsivePanelNarrowLayout>('sheet');
   readonly closed = output<void>();
 
   private static nextId = 0;

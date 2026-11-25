@@ -14,6 +14,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
       [heading]="heading()"
       closeLabel="關閉面板"
       [showHeaderDivider]="showHeaderDivider()"
+      [narrowLayout]="narrowLayout()"
       (closed)="onClosed()"
     >
       <p class="content">內容</p>
@@ -25,6 +26,7 @@ class HostComponent {
   readonly open = signal(false);
   readonly heading = signal('標題');
   readonly showHeaderDivider = signal(true);
+  readonly narrowLayout = signal<'sheet' | 'fullscreen'>('sheet');
   closedCount = 0;
   onClosed(): void {
     this.closedCount++;
@@ -214,6 +216,34 @@ describe('ResponsivePanelComponent 響應式行為', () => {
     fx.detectChanges();
 
     expect(fx.componentInstance.closedCount).toBe(1);
+  });
+
+  it('窄螢幕：narrowLayout 預設 sheet，不帶 fullscreen class', () => {
+    createFixture(true);
+    const panel: HTMLElement = document.body.querySelector('.responsive-panel')!;
+    expect(panel.classList.contains('responsive-panel--narrow')).toBe(true);
+    expect(panel.classList.contains('responsive-panel--fullscreen')).toBe(false);
+  });
+
+  it('窄螢幕＋narrowLayout="fullscreen"：帶 fullscreen class，仍是 role=dialog', () => {
+    TestBed.configureTestingModule({ imports: [HostComponent], providers: [provideBreakpoint(true)] });
+    fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.narrowLayout.set('fullscreen');
+    fixture.componentInstance.open.set(true);
+    fixture.detectChanges();
+    const panel: HTMLElement = document.body.querySelector('.responsive-panel')!;
+    expect(panel.classList.contains('responsive-panel--fullscreen')).toBe(true);
+    expect(panel.getAttribute('role')).toBe('dialog');
+  });
+
+  it('寬螢幕：narrowLayout="fullscreen" 不影響並排的樣子', () => {
+    TestBed.configureTestingModule({ imports: [HostComponent], providers: [provideBreakpoint(false)] });
+    fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.narrowLayout.set('fullscreen');
+    fixture.componentInstance.open.set(true);
+    fixture.detectChanges();
+    const panel: HTMLElement = fixture.nativeElement.querySelector('.responsive-panel');
+    expect(panel.classList.contains('responsive-panel--fullscreen')).toBe(false);
   });
 
   it('寬螢幕：無 role/aria-modal，無遮罩', () => {

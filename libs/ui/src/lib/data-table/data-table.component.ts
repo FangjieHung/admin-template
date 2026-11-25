@@ -114,6 +114,11 @@ export class DataTableComponent<T> {
   readonly showBatchDelete = input(true);
   readonly selection = input<readonly T[]>([]);
   readonly rowClickable = input(false);
+  /**
+   * 目前開著的那一列（rowId 的值；null＝沒有）：例如旁邊面板正在編輯的那一列。
+   * 這一列加上 `dt-row--active` 與 `aria-current="true"`，底色吃 `--dt-row-active-bg`。跟多選（selection）無關。
+   */
+  readonly activeRowId = input<unknown>(null);
   readonly rowClass = input<(row: T) => string>(() => '');
 
   // ---- 進階功能（全部預設關閉：沒開的清單畫面與行為與以前完全相同）----
@@ -366,6 +371,11 @@ export class DataTableComponent<T> {
 
   protected isExpanded(row: T): boolean {
     return this.expandedIds().has(this.rowId()(row));
+  }
+
+  protected isActive(row: T): boolean {
+    const active = this.activeRowId();
+    return active !== null && active !== undefined && this.rowId()(row) === active;
   }
 
   protected isSelected(row: T): boolean {

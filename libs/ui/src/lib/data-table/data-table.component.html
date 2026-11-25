@@ -209,6 +209,8 @@
               [class]="rowClass()(row)"
               [class.is-expanded]="isExpanded(row)"
               [class.dt-row--clickable]="rowClickable()"
+              [class.dt-row--active]="isActive(row)"
+              [attr.aria-current]="isActive(row) ? 'true' : null"
               [attr.tabindex]="rowClickable() ? 0 : null"
               (click)="onRowClick(row)"
               (keydown.enter)="onRowKeydown(row, $event)"

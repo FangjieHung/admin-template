@@ -59,6 +59,8 @@
 //   --dt-cell-padding-block  儲存格上下留白（決定列高）       預設 0.75rem；手機卡片版 0.3125rem
 //   --dt-header-bg           表頭列底色                       預設 transparent
 //   --dt-row-hover-bg        可點列滑過／按下時的底色         預設 surface-container-high
+//   --dt-row-active-bg       目前列（activeRowId）的底色       預設 --app-state-selected
+//   --dt-row-active-mark     目前列第一格左緣 3px 標記的顏色（手機卡片版是卡片外框）  預設 primary
 //   --dt-frozen-bg           固定欄在橫向捲動時的底色         預設 surface（= 多數質地的卡片底色）
 //   --dt-frozen-edge         固定欄右緣的分界（box-shadow）    預設 1px 0 0 0 outline-variant（畫在固定格右緣的 1px 偽元素上）
 //   --dt-font-size           表格字級                         預設 0.875rem
@@ -268,6 +270,33 @@
   background: var(--dt-row-tint);
 }
 
+// 目前開著的那一列（[activeRowId]，例如旁邊面板正在編輯的那一列）。底色預設是語意的「目前項目」
+// （--app-state-selected；Brutal、Riso 已在質地層換掉），第一格左緣多一條 3px 標記，不只靠顏色分辨。
+// 寫在提醒列之後：同權重時後寫的贏，目前列蓋過提醒底色；滑過時維持目前列的底色。
+// 標記畫成第一格的 background-image（border-collapse 的儲存格畫不出 box-shadow，::before 留給手機卡片的 data-label）。
+.dt-row--active,
+.dt-row--active:hover {
+  --dt-row-tint: var(--dt-row-active-bg, var(--app-state-selected));
+  background: var(--dt-row-tint);
+}
+
+.dt-table .dt-row--active > td:first-child {
+  background-image: linear-gradient(
+    to right,
+    var(--dt-row-active-mark, var(--mat-sys-primary)) 3px,
+    transparent 3px
+  );
+}
+
+// 橫向捲過時固定格有自己的底色（見上方 .dt-wrap--scrolled）：標記疊在最上層，其餘照固定格的原樣。
+.dt-wrap--scrolled .dt-table .dt-row--active > .dt-frozen:first-child,
+.dt-wrap--scrolled .dt-table .dt-row--active > .dt-frozen-select:first-child {
+  background:
+    linear-gradient(to right, var(--dt-row-active-mark, var(--mat-sys-primary)) 3px, transparent 3px),
+    linear-gradient(var(--dt-row-tint, transparent), var(--dt-row-tint, transparent)),
+    var(--dt-frozen-bg, var(--mat-sys-surface));
+}
+
 .dt-align-start {
   text-align: left;
 }
@@ -361,6 +390,15 @@
 
     .dt-table tbody tr:last-child {
       margin-bottom: 0;
+    }
+
+    // 目前列：卡片外框換成標記色，不畫第一格的左緣標記。
+    .dt-table tbody tr.dt-row--active {
+      border-color: var(--dt-row-active-mark, var(--mat-sys-primary));
+    }
+
+    .dt-table .dt-row--active > td:first-child {
+      background-image: none;
     }
 
     // 標籤與值並排而非上下堆疊：短值（單號、數量）本來就佔不滿一行，

@@ -15,6 +15,7 @@
       #panel
       class="responsive-panel"
       [class.responsive-panel--narrow]="isNarrow()"
+      [class.responsive-panel--fullscreen]="isNarrow() && narrowLayout() === 'fullscreen'"
       [attr.tabindex]="isNarrow() ? '0' : null"
       [attr.role]="isNarrow() ? 'dialog' : null"
       [attr.aria-modal]="isNarrow() ? 'true' : null"

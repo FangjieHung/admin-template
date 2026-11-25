@@ -1,0 +1,19 @@
+// 面板裡的編輯表單：內距由內容自己給（lib-split-panel 不加內距），欄位一欄排下去，按鈕靠右。
+.sp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+}
+
+.sp-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.sp-state {
+  margin: 1rem 0 0;
+}

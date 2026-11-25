@@ -26,7 +26,7 @@ export class ResponsivePanelPageComponent {
     '清單＋詳情：點一筆資料，在旁邊看詳情或編輯，不離開清單。',
     '同一份內容在桌機要並排、在手機要全螢幕。',
   ];
-  protected readonly avoid = ['需要使用者先處理完才能繼續的內容：用對話框。', '整頁的詳情：做成詳情頁（頁面樣板規劃中）。'];
+  protected readonly avoid = ['清單＋編輯、要標出清單裡正在開的那一列：用分割檢視（lib-split-panel，已排好兩欄版面）。', '需要使用者先處理完才能繼續的內容：用對話框。', '整頁的詳情：做成詳情頁（頁面樣板規劃中）。'];
 
   protected readonly usage = `<div class="split">
   <section class="split__list">…清單…</section>
@@ -46,6 +46,7 @@ export class ResponsivePanelPageComponent {
         { name: 'closeLabel', type: 'string', default: '必填', description: '關閉鈕與窄螢幕遮罩的無障礙名稱。' },
         { name: '[showCloseButton]', type: 'boolean', default: 'true', description: '寬螢幕時常設 false（面板一直都在）。' },
         { name: '[showHeaderDivider]', type: 'boolean', default: 'true', description: '標題下方的分隔線；內容是分頁標籤時可關掉。' },
+        { name: '[narrowLayout]', type: "'sheet' | 'fullscreen'", default: "'sheet'", description: '窄螢幕的樣子：從底部升起（最高 70vh），或蓋滿整個畫面、從右側滑入（整份編輯表單用；lib-split-panel 用這個）。' },
         { name: '(closed)', type: 'void', description: '按關閉、按 Esc 或點遮罩。' },
         { name: '[panelHeaderExtra]（內容投影）', type: '—', description: '放在標題旁的額外內容（例如狀態標籤）。' },
       ],
@@ -53,7 +54,7 @@ export class ResponsivePanelPageComponent {
     {
       title: '行為',
       rows: [
-        { name: '≤ 1280px', type: '—', description: '移到全螢幕浮層（role=dialog、aria-modal），焦點鎖在面板內，關閉後回到原本的元素。' },
+        { name: '≤ 1280px', type: '—', description: '移到浮層（role=dialog、aria-modal）：預設從底部升起，narrowLayout="fullscreen" 時蓋滿畫面；焦點鎖在面板內，關閉後回到原本的元素。' },
         { name: '> 1280px', type: '—', description: '留在原位，寬度由放它的容器決定。' },
       ],
     },
