@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { expectExportMatchesDisplay } from '@admin-template/ui/testing';
 import { DataTablePageComponent } from './data-table-page.component';
 import { makeDemoItems } from '../../showcase/demo-data';
 
@@ -41,5 +42,20 @@ describe('DataTablePageComponent（資料表展示頁）', () => {
     expect(page.view.modified()).toBe(true);
     page.setQuickStatus(null);
     expect(page.view.filters()).toEqual([]);
+  });
+
+  it('匯出 Excel 的每一格＝畫面上的每一格（兩張表；dtCell 與 exportValue 沒有各說各話）', async () => {
+    const fixture = TestBed.createComponent(DataTablePageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const page = fixture.componentInstance;
+
+    // 完整功能：分頁、未排序，畫面是篩選後的第一頁。
+    expectExportMatchesDisplay(el.querySelector('.wide-table')!, page.columns, page.filteredItems().slice(0, 25));
+    // 少量資料：沒有 dtCell，全部是預設文字。
+    const small = el.querySelectorAll('lib-data-table')[1];
+    expectExportMatchesDisplay(small, page.smallColumns, page.smallRows);
   });
 });

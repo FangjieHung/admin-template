@@ -2,9 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { By } from '@angular/platform-browser';
+import { DataTableComponent } from '@admin-template/ui';
+import { expectExportMatchesDisplay } from '@admin-template/ui/testing';
 import { TICKET_REPOSITORY_DELAY } from '../data/ticket.repository';
 import { TICKET_COUNT } from '../data/ticket-demo-data';
 import { setupTicketPage } from '../testing/ticket-page-host';
+import { Ticket } from '../data/ticket.model';
 import { TicketListMemory } from './ticket-list-url';
 import { TicketListPageComponent } from './ticket-list-page.component';
 import { DEFAULT_USER_PREFERENCES, UserPreferencesStore } from '../../../core/user-preferences';
@@ -81,6 +84,29 @@ describe('TicketListPageComponent（列表頁樣板）', () => {
     // 換篩選回到第 1 頁。
     expect(params.get('page')).toBeNull();
     expect(TestBed.inject(TicketListMemory).queryParams).toEqual({ f: params.get('f') });
+  });
+
+  it('匯出 Excel 的每一格＝畫面上的每一格（狀態、優先順序、負責人等 dtCell 與 exportValue 一致）', async () => {
+    const h = await setupTicketPage();
+    await h.navigate('/templates/tickets');
+    const table: DataTableComponent<Ticket> = h.fixture.debugElement.query(By.directive(DataTableComponent)).componentInstance;
+    // 沒有排序：畫面是 rows 的第一頁，順序不變。
+    expect(table.sort()).toBeNull();
+    const size = table.pageSize();
+    const shown = table.rows().slice(table.page() * size, (table.page() + 1) * size);
+    expect(shown).toHaveLength(25);
+    // 期限欄刻意不同的兩種列：沒有期限（畫面「—」）、已逾期（畫面日期後面多一個「已逾期」標記）。
+    const overdue = new Set(
+      Array.from(h.el.querySelectorAll('.ticket-table tbody tr')).flatMap((tr, i) => (tr.querySelector('.ticket-overdue') ? [i] : [])),
+    );
+    expect(shown.some((t) => !t.dueDate)).toBe(true);
+    expect(overdue.size).toBeGreaterThan(0);
+    expectExportMatchesDisplay(h.el.querySelector('.ticket-table')!, table.columns(), shown, {
+      dueDate: {
+        reason: '沒有期限時畫面顯示「—」、逾期時多一個「已逾期」標記；Excel 只存日期（沒有期限是空白格，篩選排序比較方便）',
+        when: (t, i) => !t.dueDate || overdue.has(i),
+      },
+    });
   });
 
   it('點一列（或按 Enter）進詳情', async () => {

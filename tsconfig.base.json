@@ -16,6 +16,9 @@
       "@admin-template/ui": [
         "./libs/ui/src/index.ts"
       ],
+      "@admin-template/ui/testing": [
+        "./libs/ui/src/testing.ts"
+      ],
       "@admin-template/access": [
         "./libs/access/src/index.ts"
       ],

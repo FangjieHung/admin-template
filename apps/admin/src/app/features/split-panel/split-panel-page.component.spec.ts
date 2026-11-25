@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { expectExportMatchesDisplay } from '@admin-template/ui/testing';
 import { SplitPanelPageComponent } from './split-panel-page.component';
 
 describe('SplitPanelPageComponent（分割檢視展示頁）', () => {
@@ -84,6 +85,18 @@ describe('SplitPanelPageComponent（分割檢視展示頁）', () => {
     expect(url()).not.toContain('edit=');
     expect(url()).toContain('tab=x');
     expect(el.querySelector('[data-demo="edit-form"]')).toBeNull();
+  });
+
+  it('儲存後清單的畫面值與匯出值仍然一致', async () => {
+    await open('/components/split-panel?edit=c3');
+    const name = field('name');
+    name.value = '林美惠（主管）';
+    name.dispatchEvent(new Event('input'));
+    el.querySelector<HTMLFormElement>('[data-demo="edit-form"]')!.dispatchEvent(new Event('submit'));
+    await settle();
+    const page = harness.routeDebugElement!.componentInstance as SplitPanelPageComponent;
+    expectExportMatchesDisplay(el.querySelector('lib-data-table')!, page.columns, page.contacts());
+    expect(rows()[2].textContent).toContain('林美惠（主管）');
   });
 
   it('?edit 找不到那一筆：自動拿掉參數，面板不開', async () => {
