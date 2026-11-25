@@ -1,14 +1,14 @@
 <app-showcase-page [summary]="entry.summary" [whenToUse]="whenToUse" [avoid]="avoid" [source]="entry.source" [usage]="usage" [api]="api">
   <app-demo-block
     heading="清單＋編輯面板"
-    description="點一位聯絡人，右側打開編輯面板，表格裡標出正在編輯的那一列；網址會帶上 ?edit=<id>，重新整理或按上一頁都回得來。把視窗縮到 1280px 以下，面板改成蓋滿整個畫面。"
+    description="點一位聯絡人，右側打開編輯面板，表格裡標出正在編輯的那一列；網址會帶上 ?edit=<id>，重新整理或按上一頁都回得來。改了表單沒儲存就點別列或關閉，會先問要不要放棄變更。把視窗縮到 1280px 以下，面板改成蓋滿整個畫面。"
     [stickyContent]="true"
   >
     <lib-split-panel
       [open]="!!editing()"
       [heading]="editing() ? '編輯 ' + editing()!.name : ''"
       [closeLabel]="closeLabel"
-      (closed)="close()"
+      (closed)="requestClose()"
     >
       <div class="ui-card !p-0">
         <lib-data-table

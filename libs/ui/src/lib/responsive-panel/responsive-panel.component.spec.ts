@@ -271,6 +271,17 @@ describe('ResponsivePanelComponent 響應式行為', () => {
     expect(fx.componentInstance.closedCount).toBe(1);
   });
 
+  it('Esc 已經被別的東西處理過（preventDefault，例如開著的對話框）時不關面板', () => {
+    const fx = createFixture(false);
+    const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+    document.body.addEventListener('keydown', (e) => e.preventDefault(), { once: true });
+    document.body.dispatchEvent(event);
+    fx.detectChanges();
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(fx.componentInstance.closedCount).toBe(0);
+  });
+
   it('關閉時按 Esc 不動作', () => {
     TestBed.configureTestingModule({
       imports: [HostComponent],

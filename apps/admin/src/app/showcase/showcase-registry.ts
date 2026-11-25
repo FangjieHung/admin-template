@@ -231,6 +231,7 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     group: 'layout',
     icon: 'vertical_split',
     load: () => import('../features/split-panel/split-panel-page.component').then((m) => m.SplitPanelPageComponent),
+    guardUnsaved: true,
   },
   {
     id: 'detail-layout',

@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { OverlayContainer } from '@angular/cdk/overlay';
 import { expectExportMatchesDisplay } from '@admin-template/ui/testing';
 import { SplitPanelPageComponent } from './split-panel-page.component';
 
@@ -123,4 +124,104 @@ describe('SplitPanelPageComponent（分割檢視展示頁）', () => {
     expect(url()).not.toContain('edit=');
     expect(el.querySelector('[data-demo="edit-form"]')).toBeNull();
   });
+
+  describe('未儲存的變更', () => {
+    const dialog = () => document.querySelector<HTMLElement>('lib-confirm-dialog');
+    const dialogButton = (text: string) =>
+      Array.from(document.querySelectorAll<HTMLButtonElement>('lib-confirm-dialog button')).find((b) => b.textContent?.trim() === text)!;
+    const answer = async (text: string) => {
+      dialogButton(text).click();
+      // 對話框關閉（afterClosed）之後頁面才繼續。
+      await vi.waitFor(() => expect(dialog()).toBeNull());
+      await new Promise((resolve) => setTimeout(resolve));
+      await settle();
+    };
+    const typeName = (value: string) => {
+      const name = field('name');
+      name.value = value;
+      name.dispatchEvent(new Event('input'));
+    };
+
+    afterEach(() => TestBed.inject(OverlayContainer).ngOnDestroy());
+
+    it('沒有修改：點別列直接換，不問', async () => {
+      await open('/components/split-panel?edit=c2');
+      rows()[3].click();
+      await settle();
+      expect(dialog()).toBeNull();
+      expect(url()).toContain('edit=c4');
+    });
+
+    it('改到一半點別列：先問；「繼續編輯」維持原狀（網址、目前列、表單內容都不變）', async () => {
+      await open('/components/split-panel?edit=c2');
+      typeName('陳大同（改到一半）');
+      rows()[3].click();
+      await settle();
+      expect(dialog()?.textContent).toContain('放棄未儲存的變更？');
+      expect(dialog()?.textContent).toContain('陳大同');
+
+      await answer('繼續編輯');
+      expect(url()).toContain('edit=c2');
+      expect(rows()[1].getAttribute('aria-current')).toBe('true');
+      expect(field('name').value).toBe('陳大同（改到一半）');
+    });
+
+    it('改到一半點別列，選「放棄變更」：換成那一筆，原本的修改不保留', async () => {
+      await open('/components/split-panel?edit=c2');
+      typeName('陳大同（改到一半）');
+      rows()[3].click();
+      await settle();
+      await answer('放棄變更');
+      expect(url()).toContain('edit=c4');
+      expect(field('name').value).toBe('張家豪');
+      expect(rows()[1].textContent).toContain('陳大同');
+      expect(rows()[1].textContent).not.toContain('改到一半');
+    });
+
+    it('改到一半按關閉鈕或 Esc：先問；放棄才關', async () => {
+      await open('/components/split-panel?edit=c2');
+      typeName('改過');
+      el.querySelector<HTMLButtonElement>('.responsive-panel__close')!.click();
+      await settle();
+      expect(dialog()).not.toBeNull();
+      await answer('繼續編輯');
+      expect(url()).toContain('edit=c2');
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      await settle();
+      expect(dialog()).not.toBeNull();
+      await answer('放棄變更');
+      expect(url()).not.toContain('edit=');
+      expect(el.querySelector('[data-demo="edit-form"]')).toBeNull();
+    });
+
+    it('改了又改回原值不算未儲存；「取消」鈕是明確放棄，不問', async () => {
+      await open('/components/split-panel?edit=c2');
+      typeName('改過');
+      typeName('陳大同');
+      rows()[3].click();
+      await settle();
+      expect(dialog()).toBeNull();
+      expect(url()).toContain('edit=c4');
+
+      typeName('張家豪（改過）');
+      Array.from(el.querySelectorAll<HTMLButtonElement>('[data-demo="edit-form"] button')).find((b) => b.textContent?.trim() === '取消')!.click();
+      await settle();
+      expect(dialog()).toBeNull();
+      expect(url()).not.toContain('edit=');
+    });
+
+    it('離開這一頁（路由的 canLeave）：有修改時問，沒有修改直接放行', async () => {
+      await open('/components/split-panel?edit=c2');
+      const page = harness.routeDebugElement!.componentInstance as SplitPanelPageComponent;
+      await expect(page.canLeave()).resolves.toBe(true);
+      typeName('改過');
+      const leaving = page.canLeave();
+      await settle();
+      expect(dialog()).not.toBeNull();
+      await answer('繼續編輯');
+      await expect(leaving).resolves.toBe(false);
+    });
+  });
 });
+

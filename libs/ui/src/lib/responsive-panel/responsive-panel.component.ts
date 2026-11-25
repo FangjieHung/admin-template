@@ -148,8 +148,13 @@ export class ResponsivePanelComponent {
     });
   }
 
-  @HostListener('document:keydown.escape')
-  protected onEscape(): void {
+  /**
+   * Esc 關面板。別的東西已經處理過這次 Esc（preventDefault）時不動作：例如面板上開著的確認對話框、下拉選單，
+   * Esc 只該關掉它們，不該連面板一起關（否則「放棄變更？」的對話框按 Esc 會再要求關一次面板）。
+   */
+  @HostListener('document:keydown.escape', ['$event'])
+  protected onEscape(event?: Event): void {
+    if (event?.defaultPrevented) return;
     if (this.open()) this.closed.emit();
   }
 

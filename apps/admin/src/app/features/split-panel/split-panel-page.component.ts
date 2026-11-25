@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -6,9 +6,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
-import { DataTableColumn, DataTableComponent, SplitPanelComponent } from '@admin-template/ui';
+import { HasUnsavedChanges } from '@admin-template/access';
+import { DataTableColumn, DataTableComponent, SplitPanelComponent, openConfirmDialog } from '@admin-template/ui';
 import { ZH_TW } from '../../core/i18n/zh-tw';
 import { ADMIN_DATA_TABLE_LABELS } from '../../shared/ui/data-table-labels';
+import { CONFIRM_DIALOG_LABEL_PROVIDERS } from '../../shared/ui/component-label-providers';
 import { DEMO_CONTACTS, DemoContact } from '../../showcase/demo-data';
 import { DemoBlockComponent } from '../../showcase/demo-block.component';
 import { ApiSection, ShowcasePageComponent } from '../../showcase/showcase-page.component';
@@ -38,14 +40,16 @@ export const SPLIT_PANEL_EDIT_PARAM = 'edit';
   templateUrl: './split-panel-page.component.html',
   styleUrls: ['../../showcase/demo-shared.scss', './split-panel-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [...CONFIRM_DIALOG_LABEL_PROVIDERS],
 })
-export class SplitPanelPageComponent {
+export class SplitPanelPageComponent implements HasUnsavedChanges {
   protected readonly entry = ENTRY;
   protected readonly closeLabel = ZH_TW.common.closePanel;
   protected readonly tableLabels = ADMIN_DATA_TABLE_LABELS;
 
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly injector = inject(Injector);
 
   readonly contacts = signal<readonly DemoContact[]>(DEMO_CONTACTS);
 
@@ -87,13 +91,64 @@ export class SplitPanelPageComponent {
     });
   }
 
-  /** 點一列：面板已經開著時換一筆不新增歷史紀錄（上一頁直接回到關著的清單）。 */
-  openRow(contact: DemoContact): void {
-    this.navigate(contact.id, this.editing() !== null);
+  /** 表單跟開啟時那一筆的資料不一樣（改了又改回去不算）。 */
+  hasUnsavedChanges(): boolean {
+    const contact = this.editing();
+    if (!contact) return false;
+    const value = this.form.getRawValue();
+    return value.name !== contact.name || value.team !== contact.team || value.email !== contact.email;
   }
 
+  /**
+   * 點一列：有未儲存的變更先問；面板已經開著時換一筆不新增歷史紀錄（上一頁直接回到關著的清單）。
+   * 點的是正在編輯的那一列就什麼都不做。
+   */
+  openRow(contact: DemoContact): void {
+    if (contact.id === this.editing()?.id) return;
+    this.afterDiscardCheck(() => this.navigate(contact.id, this.editing() !== null));
+  }
+
+  /** 關閉鈕、Esc、窄螢幕的遮罩（lib-split-panel 的 closed）：有未儲存的變更先問。 */
+  requestClose(): void {
+    this.afterDiscardCheck(() => this.close());
+  }
+
+  /** 直接關閉：表單的「取消」鈕（明確放棄，不再問）與儲存之後。 */
   close(): void {
     this.navigate(null, false);
+  }
+
+  /** 離開這一頁（側欄、上一頁到別頁）前：路由的 unsavedChangesGuard 呼叫它。 */
+  canLeave(): Promise<boolean> {
+    return this.confirmDiscard();
+  }
+
+  private confirming: Promise<boolean> | null = null;
+
+  /** 沒有未儲存的變更就馬上做；有的話等使用者選「放棄變更」才做，選「繼續編輯」什麼都不變。 */
+  private afterDiscardCheck(action: () => void): void {
+    if (!this.hasUnsavedChanges()) {
+      action();
+      return;
+    }
+    void this.confirmDiscard().then((discard) => {
+      if (discard) action();
+    });
+  }
+
+  /** 沒有未儲存的變更直接放行；有的話問一次（同時又被要求時共用同一個對話框，不疊兩個）。 */
+  private confirmDiscard(): Promise<boolean> {
+    if (!this.hasUnsavedChanges()) return Promise.resolve(true);
+    if (!this.confirming) {
+      const name = this.editing()?.name ?? '';
+      this.confirming = openConfirmDialog(this.injector, {
+        title: '放棄未儲存的變更？',
+        message: `「${name}」的修改還沒儲存，換一筆或關閉面板的話，這些修改不會保留。`,
+        confirmLabel: '放棄變更',
+        cancelLabel: '繼續編輯',
+      }).finally(() => (this.confirming = null));
+    }
+    return this.confirming;
   }
 
   save(): void {
@@ -133,14 +188,16 @@ export class SplitPanelPageComponent {
 readonly editId = toSignal(this.route.queryParamMap.pipe(map((p) => p.get('edit'))), { initialValue: null });
 readonly editing = computed(() => this.contacts().find((c) => c.id === this.editId()) ?? null);
 
-openRow(c: Contact) {
-  this.router.navigate([], { relativeTo: this.route, queryParams: { edit: c.id },
-    queryParamsHandling: 'merge', replaceUrl: this.editing() !== null });
+openRow(c: Contact) {          // 點一列；有未儲存的變更先問（openConfirmDialog）
+  this.afterDiscardCheck(() => this.router.navigate([], { relativeTo: this.route,
+    queryParams: { edit: c.id }, queryParamsHandling: 'merge', replaceUrl: this.editing() !== null }));
 }
+requestClose() { this.afterDiscardCheck(() => this.close()); }  // 關閉鈕、Esc、遮罩
+canLeave() { return this.confirmDiscard(); }  // 側欄換頁：路由的 unsavedChangesGuard
 
 <!-- 模板 -->
 <lib-split-panel [open]="!!editing()" [heading]="'編輯 ' + editing()?.name"
-                 closeLabel="關閉面板" (closed)="close()">
+                 closeLabel="關閉面板" (closed)="requestClose()">
   <div class="ui-card !p-0">
     <lib-data-table [columns]="columns" [rows]="contacts()" [labels]="labels"
       [rowClickable]="true" [activeRowId]="editing()?.id ?? null" (rowClick)="openRow($event)" />
@@ -155,7 +212,7 @@ openRow(c: Contact) {
         { name: '[open]', type: 'boolean', default: 'false', description: '面板是否開著；關著時清單占滿整個寬度。' },
         { name: '[heading]', type: 'string', default: "''", description: '面板標題（h2）；空字串時用 closeLabel 當無障礙名稱。' },
         { name: 'closeLabel', type: 'string', default: '必填', description: '關閉鈕與窄螢幕遮罩的無障礙名稱（元件不內建文字）。' },
-        { name: '(closed)', type: 'void', description: '按關閉鈕、按 Esc 或點窄螢幕的遮罩。由頁面決定要不要真的關（例如有未儲存的修改先問）。' },
+        { name: '(closed)', type: 'void', description: '關閉的「請求」：按關閉鈕、按 Esc 或點窄螢幕的遮罩。元件不會自己關，由頁面決定——本頁有未儲存的變更時先問「放棄未儲存的變更？」，選「繼續編輯」就什麼都不變。Esc 已經被開著的對話框或下拉選單處理掉時不發出。' },
         { name: '預設內容投影', type: '—', description: '左欄：清單（通常是放在 .ui-card 裡的 lib-data-table）。' },
         { name: '[splitPanelContent]（內容投影）', type: '—', description: '右側面板的內容：詳情或編輯表單；內距由內容自己給。' },
         { name: '--lib-split-panel-width', type: 'CSS 變數', default: 'clamp(20rem, 30vw, 28rem)', description: '面板寬度。' },
@@ -175,6 +232,7 @@ openRow(c: Contact) {
         { name: '> 1280px', type: '—', description: '兩欄並排：面板是一張 .ui-card（外觀跟著質地），捲動清單時黏在上方；清單仍可操作，點別列直接換內容。' },
         { name: '≤ 1280px', type: '—', description: '面板蓋滿整個畫面、從右側滑入（role=dialog、aria-modal），焦點鎖在面板內，關閉後回到原本點的那一列。' },
         { name: '焦點', type: '—', description: '點一列打開時焦點移進面板、關閉後回到那一列；直接開帶 ?edit= 的網址時不搶焦點（沿用 responsive-panel）。' },
+        { name: '未儲存的變更', type: '頁面', description: '本頁的作法（守門放在頁面，不是元件功能：換列是清單的事件，不經過面板）：表單跟那一筆不同時，點別列、關閉鈕、Esc、側欄換頁都先用 openConfirmDialog 問一次；表單的「取消」是明確放棄，不問。瀏覽器上一頁只改 ?edit 時不會問（同一個路由的 query 變化不跑 canDeactivate）。' },
         { name: '?edit=<id>', type: '網址', description: '本頁的作法（不是元件功能）：開第一筆新增一筆歷史紀錄、換一筆取代、關閉再新增一筆；id 找不到時自動拿掉參數。' },
       ],
     },

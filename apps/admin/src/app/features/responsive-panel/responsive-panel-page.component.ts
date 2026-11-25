@@ -47,7 +47,7 @@ export class ResponsivePanelPageComponent {
         { name: '[showCloseButton]', type: 'boolean', default: 'true', description: '寬螢幕時常設 false（面板一直都在）。' },
         { name: '[showHeaderDivider]', type: 'boolean', default: 'true', description: '標題下方的分隔線；內容是分頁標籤時可關掉。' },
         { name: '[narrowLayout]', type: "'sheet' | 'fullscreen'", default: "'sheet'", description: '窄螢幕的樣子：從底部升起（最高 70vh），或蓋滿整個畫面、從右側滑入（整份編輯表單用；lib-split-panel 用這個）。' },
-        { name: '(closed)', type: 'void', description: '按關閉、按 Esc 或點遮罩。' },
+        { name: '(closed)', type: 'void', description: '按關閉、按 Esc 或點遮罩。Esc 已經被開著的對話框、下拉選單處理掉（preventDefault）時不發出。' },
         { name: '[panelHeaderExtra]（內容投影）', type: '—', description: '放在標題旁的額外內容（例如狀態標籤）。' },
       ],
     },
