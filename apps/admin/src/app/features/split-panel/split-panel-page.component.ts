@@ -174,6 +174,7 @@ openRow(c: Contact) {
       rows: [
         { name: '> 1280px', type: '—', description: '兩欄並排：面板是一張 .ui-card（外觀跟著質地），捲動清單時黏在上方；清單仍可操作，點別列直接換內容。' },
         { name: '≤ 1280px', type: '—', description: '面板蓋滿整個畫面、從右側滑入（role=dialog、aria-modal），焦點鎖在面板內，關閉後回到原本點的那一列。' },
+        { name: '焦點', type: '—', description: '點一列打開時焦點移進面板、關閉後回到那一列；直接開帶 ?edit= 的網址時不搶焦點（沿用 responsive-panel）。' },
         { name: '?edit=<id>', type: '網址', description: '本頁的作法（不是元件功能）：開第一筆新增一筆歷史紀錄、換一筆取代、關閉再新增一筆；id 找不到時自動拿掉參數。' },
       ],
     },

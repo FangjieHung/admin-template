@@ -56,6 +56,7 @@ export class ResponsivePanelPageComponent {
       rows: [
         { name: '≤ 1280px', type: '—', description: '移到浮層（role=dialog、aria-modal）：預設從底部升起，narrowLayout="fullscreen" 時蓋滿畫面；焦點鎖在面板內，關閉後回到原本的元素。' },
         { name: '> 1280px', type: '—', description: '留在原位，寬度由放它的容器決定。' },
+        { name: '焦點', type: '—', description: '使用者打開（焦點在觸發的按鈕或列上）時移到面板第一個可聚焦元素，關閉或被 @if 拿掉後還給觸發元素；頁面一載入就開著時不搶焦點（窄螢幕對話框則把焦點放在面板本身、不畫焦點框）。觸發元素要能取得焦點。' },
       ],
     },
   ];

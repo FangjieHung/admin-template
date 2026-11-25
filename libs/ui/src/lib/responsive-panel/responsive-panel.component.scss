@@ -120,6 +120,11 @@
   animation-name: responsive-panel-slide-in;
 }
 
+// 頁面一載入就是開著的窄螢幕對話框：焦點放在面板本身（見元件的焦點說明），面板是容器不是控制項，不畫焦點框。
+.responsive-panel:focus {
+  outline: none;
+}
+
 .responsive-panel__backdrop {
   position: fixed;
   inset: 0;

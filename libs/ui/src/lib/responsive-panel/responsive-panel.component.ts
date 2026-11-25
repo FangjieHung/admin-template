@@ -8,6 +8,7 @@ import {
   input,
   output,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
@@ -64,6 +65,8 @@ export class ResponsivePanelComponent {
   protected readonly renderContent = signal(false);
 
   private lastFocused: HTMLElement | null = null;
+  /** 打開了、還沒處理焦點（等面板畫出來）。 */
+  private pendingFocus = false;
   private overlayRef: OverlayRef | null = null;
   private domPortal: DomPortal | null = null;
   private portaledWrapper: HTMLElement | null = null;
@@ -95,16 +98,36 @@ export class ResponsivePanelComponent {
       }
     });
 
-    // Focus lifecycle (only depends on open() transitions, not isNarrow — so resizing mid-open
-    // never re-steals or re-releases focus).
+    // 焦點：只在「使用者打開」時把焦點移進面板。判斷方式是打開那一刻焦點停在頁面上的某個元素（點的那一列、
+    // 按的按鈕；觸發元素要能取得焦點）——關閉後焦點還給它。頁面一載入就是開著的（例如網址帶著要編輯的 id），
+    // 焦點還在 body 上：寬螢幕不搶焦點（不會出現焦點框）；窄螢幕是對話框，焦點放在面板本身（不畫焦點框），
+    // Tab 從面板內開始。只看 open() 的轉換，不看 isNarrow，所以開著時縮放視窗不會重搶或歸還焦點。
     effect(() => {
-      if (this.open()) {
-        this.lastFocused = document.activeElement as HTMLElement | null;
-        this.focusableElements()[0]?.focus();
-      } else {
-        this.lastFocused?.focus?.();
-        this.lastFocused = null;
-      }
+      const open = this.open();
+      untracked(() => {
+        if (open) {
+          const active = document.activeElement;
+          this.lastFocused = active instanceof HTMLElement && active !== document.body ? active : null;
+          this.pendingFocus = true;
+        } else {
+          this.pendingFocus = false;
+          const target = this.lastFocused;
+          this.lastFocused = null;
+          if (target?.isConnected) target.focus();
+        }
+      });
+    });
+
+    // 面板畫出來之後才移焦點（每次打開都重建面板，panelRef 會換一個）。
+    effect(() => {
+      const panel = this.panelRef()?.nativeElement;
+      if (!panel || !this.pendingFocus) return;
+      this.pendingFocus = false;
+      untracked(() => {
+        if (panel.contains(document.activeElement)) return;
+        if (this.lastFocused) this.focusableElements()[0]?.focus();
+        else if (this.isNarrow()) panel.focus({ preventScroll: true });
+      });
     });
 
     // Scroll lock (always reflects current open && isNarrow state)
@@ -112,7 +135,17 @@ export class ResponsivePanelComponent {
       document.body.style.overflow = this.open() && this.isNarrow() ? 'hidden' : '';
     });
 
-    inject(DestroyRef).onDestroy(() => this.detachOverlay());
+    inject(DestroyRef).onDestroy(() => {
+      this.detachOverlay();
+      // 使用端用 @if 直接拿掉開著的面板（日曆頁、排程頁的作法）：open 沒有變回 false，上面的歸還不會發生。
+      // 等 DOM 拿掉之後，焦點若掉回 body（原本在面板裡），還給打開面板的元素。
+      const target = this.lastFocused;
+      if (!target) return;
+      queueMicrotask(() => {
+        const active = document.activeElement;
+        if (target.isConnected && (!active || active === document.body)) target.focus();
+      });
+    });
   }
 
   @HostListener('document:keydown.escape')

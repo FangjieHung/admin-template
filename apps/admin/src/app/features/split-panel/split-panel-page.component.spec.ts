@@ -48,6 +48,24 @@ describe('SplitPanelPageComponent（分割檢視展示頁）', () => {
     expect(active[0].textContent).toContain('陳大同');
   });
 
+  it('焦點：直接開 ?edit= 不搶焦點；點一列時移進面板，關閉後回到那一列', async () => {
+    (document.activeElement as HTMLElement | null)?.blur();
+    await open('/components/split-panel?edit=c2');
+    expect(document.activeElement).toBe(document.body);
+
+    el.querySelector<HTMLButtonElement>('.responsive-panel__close')!.click();
+    await settle();
+    const row = rows()[3];
+    row.focus();
+    row.click();
+    await settle();
+    expect(document.activeElement).toBe(el.querySelector('.responsive-panel__close'));
+
+    el.querySelector<HTMLButtonElement>('.responsive-panel__close')!.click();
+    await settle();
+    expect(document.activeElement).toBe(rows()[3]);
+  });
+
   it('點一列：網址改成那一筆、面板換內容、目前列跟著換', async () => {
     await open('/components/split-panel?edit=c2');
     rows()[2].click();

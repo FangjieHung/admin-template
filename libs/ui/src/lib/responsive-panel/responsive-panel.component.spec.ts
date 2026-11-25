@@ -298,13 +298,52 @@ describe('ResponsivePanelComponent 焦點與捲動', () => {
     fixture = undefined;
   });
 
-  it('開啟時焦點移入面板內第一個可聚焦元素', () => {
+  it('使用者打開（焦點在觸發元素上）時，焦點移入面板內第一個可聚焦元素', () => {
     const fx = createFixture(false);
+    (fx.nativeElement.querySelector('.trigger') as HTMLButtonElement).focus();
     fx.componentInstance.open.set(true);
     fx.detectChanges();
 
     const closeButton = fx.nativeElement.querySelector('.responsive-panel__close');
     expect(document.activeElement).toBe(closeButton);
+  });
+
+  it('窄螢幕：使用者打開時焦點一樣移到第一個可聚焦元素（關閉鈕）', () => {
+    const fx = createFixture(true);
+    (fx.nativeElement.querySelector('.trigger') as HTMLButtonElement).focus();
+    fx.componentInstance.open.set(true);
+    fx.detectChanges();
+
+    expect(document.activeElement).toBe(document.body.querySelector('.responsive-panel__close'));
+  });
+
+  it('寬螢幕：一載入就是開著的（焦點還在 body）不搶焦點', () => {
+    (document.activeElement as HTMLElement | null)?.blur();
+    const fx = createFixture(false);
+    fx.componentInstance.open.set(true);
+    fx.detectChanges();
+
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it('窄螢幕：一載入就是開著的對話框，焦點放在面板本身（不是關閉鈕）', () => {
+    (document.activeElement as HTMLElement | null)?.blur();
+    const fx = createFixture(true);
+    fx.componentInstance.open.set(true);
+    fx.detectChanges();
+
+    expect(document.activeElement).toBe(document.body.querySelector('.responsive-panel'));
+  });
+
+  it('一載入就開著、之後關閉：焦點不跳到任何地方', () => {
+    (document.activeElement as HTMLElement | null)?.blur();
+    const fx = createFixture(false);
+    fx.componentInstance.open.set(true);
+    fx.detectChanges();
+    fx.componentInstance.open.set(false);
+    fx.detectChanges();
+
+    expect(document.activeElement).toBe(document.body);
   });
 
   it('關閉後焦點還原到觸發元素', () => {
@@ -391,5 +430,41 @@ describe('ResponsivePanelComponent 焦點與捲動', () => {
     expect(document.activeElement).toBe(actionButton); // same DOM node, focus not stolen back
     expect(fixture.nativeElement.contains(actionButton)).toBe(true); // moved back inline, not recreated
     expect(document.body.style.overflow).toBe(''); // scroll lock released now that it's wide
+  });
+});
+
+@Component({
+  imports: [ResponsivePanelComponent],
+  template: `
+    <button type="button" class="trigger" (click)="shown.set(true)">開啟</button>
+    @if (shown()) {
+      <lib-responsive-panel [open]="true" heading="詳情" closeLabel="關閉" (closed)="shown.set(false)">
+        <p>內容</p>
+      </lib-responsive-panel>
+    }
+  `,
+})
+class ConditionalHostComponent {
+  readonly shown = signal(false);
+}
+
+describe('ResponsivePanelComponent 使用端用 @if 拿掉面板', () => {
+  it('開著的面板被拿掉時，焦點還給打開它的元素', async () => {
+    TestBed.configureTestingModule({ imports: [ConditionalHostComponent], providers: [provideBreakpoint(false)] });
+    const fx = TestBed.createComponent(ConditionalHostComponent);
+    fx.detectChanges();
+    const trigger: HTMLButtonElement = fx.nativeElement.querySelector('.trigger');
+    trigger.focus();
+    trigger.click();
+    fx.detectChanges();
+    const close: HTMLButtonElement = fx.nativeElement.querySelector('.responsive-panel__close');
+    expect(document.activeElement).toBe(close);
+
+    close.click();
+    fx.detectChanges();
+    await Promise.resolve();
+    expect(fx.nativeElement.querySelector('.responsive-panel')).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+    fx.destroy();
   });
 });

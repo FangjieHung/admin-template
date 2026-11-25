@@ -90,6 +90,21 @@ describe('SchedulePageComponent（排程樣板）', () => {
     expect(panel.querySelector('[data-action="open-ticket"]')?.getAttribute('href')).toMatch(/^\/templates\/tickets\/TK-\d+$/);
   });
 
+  it('焦點：點工單時移進側邊面板（關閉鈕），關閉後回到那張工單', async () => {
+    await open();
+    const ev = el.querySelector<HTMLElement>('.cal-ev')!;
+    ev.focus();
+    ev.click();
+    await settle();
+    const close = el.querySelector<HTMLButtonElement>('.schedule-panel .responsive-panel__close')!;
+    expect(document.activeElement).toBe(close);
+
+    close.click();
+    await settle();
+    expect(el.querySelector('.schedule-panel')).toBeNull();
+    expect(document.activeElement).toBe(ev);
+  });
+
   it('檢視者唯讀：顯示說明，活動不能拖、沒有鍵盤移動的說明', async () => {
     await open('u-viewer');
     expect(el.querySelector('[data-readonly-note]')).not.toBeNull();
