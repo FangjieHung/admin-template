@@ -1,0 +1,50 @@
+# 展示站：main 有新 commit 就建置 admin 並發布到 GitHub Pages（https://<帳號>.github.io/<repo 名>/）。
+# 複製範本開新專案、不需要展示站時，刪掉這個檔即可。
+# 第一次使用：repo Settings → Pages → Source 選「GitHub Actions」。
+name: Deploy showcase to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # 網站放在 /<repo 名>/ 底下；用自訂網域或 <帳號>.github.io 這種 repo 時改成 --base-href=/
+      - run: npx nx build admin --base-href=/${{ github.event.repository.name }}/
+        env:
+          NX_NO_CLOUD: 'true'
+      # 直接開深層網址（例如 /components/split-panel）時，Pages 找不到檔案會回 404.html；讓它就是 app 本身，交給 Angular 路由。
+      - run: |
+          cp dist/admin-template/browser/index.html dist/admin-template/browser/404.html
+          touch dist/admin-template/browser/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/admin-template/browser
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -44,7 +44,8 @@ npm start          # nx serve admin → http://localhost:4200/
 | `npm run lint:theme` | 擋寫死的顏色、轉場時間與底層色階變數（掃 `libs/theme-pack`、`libs/*/src`、有套主題的 app） |
 | `npx vitest run scripts --exclude '.claude/**' --exclude '**/node_modules/**'` | 主題工具本身的測試（含質地登錄四處一致的檢查） |
 | `npm run contrast:theme -- --base-url=http://localhost:4200` | 每個「質地 × 配色」在 Material 元件總覽等頁的 WCAG 對比報告 |
-| `npm run deploy` | 建置並發布到 GitHub Pages |
+
+展示站：main 有新 commit 時，GitHub Actions（`.github/workflows/deploy-pages.yml`）會自動建置並發布到 GitHub Pages，網址是 `https://<帳號>.github.io/<repo 名>/`。第一次要到 repo 的 Settings → Pages 把 Source 設成「GitHub Actions」；開新專案不需要展示站時，刪掉那個檔即可。
 
 ## 展示 app
 
